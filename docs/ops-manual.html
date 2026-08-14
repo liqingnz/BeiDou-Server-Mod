@@ -510,19 +510,32 @@
       <h2><span class="n">05</span>监控与预警</h2>
       <p class="lede">这台机器内存很紧，2 GiB 标称、系统可见 1.6 GiB。只需要盯一个指标。</p>
 
-      <h3>唯一的核心指标：Swap</h3>
-      <p>系统设了 <code>vm.swappiness=0</code>，意思是内核只在濒临 OOM 时才动 swap。所以 <strong>Swap used 不为 0 就是明确预警</strong>，而不是常态波动。</p>
+      <div class="note danger">
+        <span class="h">2026-08-15 事故 · 待修复项未执行</span>
+        <p>部署当天打开管理后台后整机失去响应，SSH 无法进入，需要从控制台重启。下方的 <code>swappiness</code> 与 <code>-Xmx</code> 修复<strong>尚未执行</strong>——重新拿到服务器后先做第 05 节末尾的《恢复后必做》。</p>
+      </div>
+
+      <h3>核心指标：load average（不是 Swap）</h3>
+      <p>直觉上该看内存，但这台机器上 <strong>Swap 会给出虚假的安全感</strong>：系统设了 <code>vm.swappiness=0</code>，濒死时 Swap used 依然是 0。事故当时的实测就是 <code>Swap used = 0B</code> 而 load 已经 18.5。</p>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">最该常看的一条</span><span class="cwd any">任意目录</span></div>
+        <pre><span class="p">$ </span>uptime</pre>
+      </div>
 
       <div class="tw">
         <table>
-          <thead><tr><th>观察值</th><th>状态</th><th>处理</th></tr></thead>
+          <thead><tr><th>load average（2 核机器）</th><th>状态</th><th>处理</th></tr></thead>
           <tbody>
-            <tr><td><code>Swap used = 0B</code></td><td><span class="pill ok">正常</span></td><td>不用管</td></tr>
-            <tr><td><code>Swap used</code> 几十 MB</td><td><span class="pill warn">注意</span></td><td>内存到临界了。观察是否持续增长，考虑减少频道数或升配</td></tr>
-            <tr><td><code>Swap used</code> 数百 MB 且持续涨</td><td><span class="pill danger">危险</span></td><td>玩家会明显卡顿。升内存，或把数据库迁到别处</td></tr>
+            <tr><td>低于 <code>1.0</code></td><td><span class="pill ok">正常</span></td><td>不用管。实测 1 玩家在线时为 0.50</td></tr>
+            <tr><td><code>2.0</code> 上下</td><td><span class="pill warn">满载</span></td><td>两个核都跑满了。看看是不是玩家变多，或后台开着</td></tr>
+            <tr><td>两位数</td><td><span class="pill danger">雪崩</span></td><td>进程堆积在等 I/O，很快会连不上 SSH。立刻 <code>docker stop beidou-server</code></td></tr>
           </tbody>
         </table>
       </div>
+
+      <h3>辅助指标：Swap</h3>
+      <p>把 <code>swappiness</code> 调到 30 之后，Swap used 才重新具有预警价值——那时它不为 0 表示内核开始换出冷的 JVM 堆页，是正常的减压行为；持续增长到数百 MB 才需要处理。</p>
 
       <h3>基线数据（2026-08-15 首次部署实测）</h3>
       <div class="tw">
@@ -539,14 +552,46 @@
       </div>
       <p>CPU 完全不是瓶颈。内存是唯一约束。已知有人在同样 2 GiB 的机器上跑到 20 人同时在线正常。</p>
 
+      <div class="cmd">
+        <div class="bar"><span class="what">一次看全：负载 + 内存 + 容器</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="p">$ </span>uptime &amp;&amp; free -h &amp;&amp; docker compose ps</pre>
+      </div>
+
+      <h3>恢复后必做</h3>
+      <p>这三步针对 08-15 事故的根因，重新拿到服务器后按序执行。</p>
+
       <div class="note warn">
-        <span class="h">不要盲目下调 -Xmx</span>
-        <p>看到 Swap 被动用之前不要动 JVM 参数。<code>-Xmx</code> 调太小会触发 JVM 内部 OOM，那比换页严重得多——换页只是卡，OOM 是直接崩。</p>
+        <span class="h">先抢在 JVM 之前</span>
+        <p><code>restart: unless-stopped</code> 意味着开机后容器会自动拉起，用的仍是旧参数。SSH 一通就先停掉它，否则内存又会被吃满、重新失去控制权。</p>
       </div>
 
       <div class="cmd">
-        <div class="bar"><span class="what">一次看全：内存 + 负载 + 容器</span><span class="cwd dir">/opt/beidou</span></div>
-        <pre><span class="p">$ </span>free -h &amp;&amp; uptime &amp;&amp; docker compose ps</pre>
+        <div class="bar"><span class="what">1 · 抢回控制权</span><span class="cwd any">任意目录</span></div>
+        <pre><span class="p">$ </span>docker stop beidou-server</pre>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">2 · 让内核肯用 swap（根因修复）</span><span class="cwd any">任意目录</span></div>
+        <pre><span class="p">$ </span>sysctl -w vm.swappiness=30
+<span class="p">$ </span>echo 'vm.swappiness=30' &gt; /etc/sysctl.d/99-beidou.conf</pre>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">3 · 降低 JVM 堆上限后重启</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="c"># 把 .env 里的 JAVA_OPTS 改成：</span>
+<span class="c"># JAVA_OPTS=-Xms384m -Xmx768m -XX:MaxMetaspaceSize=160m</span>
+<span class="p">$ </span>docker compose up -d</pre>
+      </div>
+
+      <div class="note">
+        <span class="h">为什么 swappiness 是根因</span>
+        <p><code>swappiness=0</code> 让内核拒绝换出匿名内存（JVM 堆），可用内存只剩 90 MiB 时它只能反复回收<strong>页缓存</strong>，于是 JVM 和 MySQL 需要的可执行页被不断驱逐又从磁盘读回——这叫页缓存抖动。经济型实例的云盘 IOPS 基线低，进一步放大成雪崩。</p>
+        <p>换出冷页只损失一点性能，反复重读可执行页是灾难性的。配了 2 GB swap 却设 swappiness=0，等于白配。</p>
+      </div>
+
+      <div class="note warn">
+        <span class="h">不要盲目下调 -Xmx</span>
+        <p>上面第 3 步是针对已发生事故的定向修复。除此之外，没有明确信号时不要动 JVM 参数——<code>-Xmx</code> 调太小会触发 JVM 内部 OOM，那比换页严重得多：换页只是卡，OOM 是直接崩。</p>
       </div>
     </section>
 
@@ -629,8 +674,13 @@
             </tr>
             <tr>
               <td>游戏卡顿、延迟高</td>
-              <td>内存吃到 swap</td>
-              <td><code>free -h</code> 看 Swap used，见第 05 节</td>
+              <td>内存压力</td>
+              <td><code>uptime</code> 看 load average，见第 05 节</td>
+            </tr>
+            <tr>
+              <td><strong>能 ping 通、端口能连，但 SSH 卡在握手</strong></td>
+              <td>用户态被内存压力饿死（<strong>不是网络问题</strong>）</td>
+              <td>ICMP 和 TCP 握手都在内核里完成，所以网络看着正常。走阿里云控制台 Workbench 执行 <code>docker stop beidou-server</code>；进不去就重启实例，然后立刻做第 05 节《恢复后必做》</td>
             </tr>
             <tr>
               <td>磁盘告警</td>
@@ -713,7 +763,8 @@
         <li><strong>不要用不带 <code>-d</code> 的 <code>docker compose up</code>。</strong>那是前台附着模式，SSH 断开会把容器一起停掉。</li>
         <li><strong>不要把密码写进 <code>docker-compose.yml</code>。</strong>那个文件在 git 里。密钥只放 <code>.env</code>，它已被 gitignore。</li>
         <li><strong>不要手动改容器里的文件。</strong>容器重建就没了。改动要走「改代码 → push → 重新构建」。</li>
-        <li><strong>不要在 Swap 还是 0 的时候调 JVM 参数。</strong>没有基线数据的调优是瞎猜，而且调小 <code>-Xmx</code> 的后果比换页严重。</li>
+        <li><strong>不要长时间挂着管理后台。</strong>它不是静态页面，前端一加载就并发打一批 API。在只剩百 MiB 余量的机器上这就是尖峰——08-15 的卡死就是这么触发的。看完就 <code>exit</code> 掉隧道。</li>
+        <li><strong>不要把 Swap used = 0 当成健康。</strong>在 <code>swappiness=0</code> 下它濒死时也是 0。看 load average。</li>
       </ul>
     </section>
 
