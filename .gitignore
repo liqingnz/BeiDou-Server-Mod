@@ -26,6 +26,10 @@
 database/docker-db-data
 database/docker-pg-db-data
 
+# Docker 本地部署产生的数据（见 deploy/docker-compose.yml）
+deploy/beidou-server-release/
+deploy/docker-db-data/
+
 # macOS files
 .DS_Store
 

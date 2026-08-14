@@ -1,0 +1,94 @@
+# BeiDou 本地部署 compose
+#
+# 改编自上游 BeiDou-docker/docker-compose-release.yml。
+# 放在本仓库是为了不弄脏 ../BeiDou-docker 那个上游克隆。
+#
+# 用法（在本目录下执行）：
+#   docker compose up -d          启动
+#   docker compose logs -f        跟日志
+#   docker compose down           停止并删容器（数据不丢，在下面两个目录里）
+#
+# 完整说明和踩坑记录见 ../docs/docker-deploy.md
+#
+# 数据落盘位置（都已加进 .gitignore）：
+#   ./beidou-server-release/   服务端目录：application.yml、wz、scripts、jar
+#   ./docker-db-data/          MySQL 全部数据
+# 备份这两个目录即可，镜像随时能重新拉。
+
+services:
+  beidou-server-all:
+    container_name: beidou-server-all
+    image: ghcr.io/beidoums/beidou-server-all:v1.11
+    environment:
+      TZ: Asia/Shanghai
+      # entrypoint 是 `exec java ${JAVA_OPTS} -jar ...`，所以这里能直接注入 JVM 参数。
+      # 不给的话 JVM 按容器可见内存的 1/4 取堆上限，wz 全量加载容易 OOM。
+      # 本机 32G，给 6G 上限足够；内存紧张时调小。
+      JAVA_OPTS: "-Xms2g -Xmx6g"
+    ports:
+      # 管理后台 + REST API
+      - "8686:8686"
+      # 登录服（客户端连这个）
+      - "8484:8484"
+      # 频道服。端口 = WWCC，WW = 75 + 世界号，CC = 75 + 频道号（都从 0 起）。
+      # 当前 = world 0 的 ch0/ch1/ch2。想开 5 个频道改成 "7575-7579:7575-7579"。
+      - "7575-7577:7575-7577"
+    volumes:
+      - ./beidou-server-release:/opt/server
+    # 注意：命令行参数优先级高于 application.yml
+    command:
+      - --mybatis-flex.datasource.mysql.url=jdbc:mysql://beidou-db:3306/beidou?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      - --mybatis-flex.datasource.mysql.username=root
+      - --mybatis-flex.datasource.mysql.password=root
+      # 这三个不是"监听地址"，而是登录服发给客户端、让它去连频道服的地址。
+      # 本机自己玩填 127.0.0.1；局域网填内网 IP；公网填公网 IP/域名。
+      - --gms.service.wan-host=127.0.0.1
+      - --gms.service.lan-host=127.0.0.1
+      - --gms.service.localhost=127.0.0.1
+      # !!! 一旦对外开放，以下三项必须启用 !!!
+      # Swagger 开着时可用字面量 swagger 当 token 越权访问所有 API，等于后台无密码。
+      # 生成密钥：openssl rand -hex 10
+      #   或 powershell: -join ((1..10) | ForEach { '{0:x2}' -f (Get-Random -Maximum 256) })
+      # - --jwt.secret=<your secret key here>
+      # - --springdoc.api-docs.enabled=false
+      # - --springdoc.swagger-ui.enabled=false
+    depends_on:
+      beidou-db:
+        condition: service_healthy
+    networks:
+      - beidou-network
+
+  beidou-db:
+    container_name: beidou-db
+    image: mysql:8.4.0
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      TZ: Asia/Shanghai
+    # 默认不映射端口，MySQL 只在 beidou-network 内部可达。
+    # 想用 Navicat / DataGrip 从宿主机连，取消下面两行注释后重启。
+    # ports:
+    #   - "3306:3306"
+    volumes:
+      - ./docker-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - beidou-network
+
+  # 网页版数据库管理界面，取消注释后访问 http://localhost:8080
+  # 比装 Navicat 省事。服务器填 beidou-db，用户 root，密码 root。
+  # adminer:
+  #   image: adminer
+  #   container_name: beidou-db-adminer
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - beidou-network
+
+networks:
+  beidou-network:
+    driver: bridge
