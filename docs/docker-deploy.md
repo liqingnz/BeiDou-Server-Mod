@@ -52,7 +52,7 @@
 容器只打包上面那层，内核借宿主机的。这与虚拟机不同 —— 虚拟机连内核带硬件全虚拟一套，
 所以又大又慢；容器只是一组被 namespace + cgroup 隔离的普通进程，启动是秒级的。
 
-**这条推论出两个重要结论**，见 1.2 和 10.6。
+**这条推论出两个重要结论**，见 1.2 和 10.7。
 
 ### 1.2 Windows 上为什么需要 WSL2
 
@@ -87,7 +87,7 @@ wsl -d docker-desktop
 ```
 
 **到了真正的 Linux 服务器上，WSL 这一层完全不存在** ——
-`dockerd` 直接用宿主机内核，没有任何虚拟化开销（见 10.5）。
+`dockerd` 直接用宿主机内核，没有任何虚拟化开销（见 10.6）。
 
 #### 装 WSL 时踩的坑
 
@@ -405,57 +405,108 @@ bind mount 跨 WSL2 边界读写有开销，wz 数据加载会明显比原生慢
 
 ## 9. 部署自己改过的服务端
 
-三条路，按投入从低到高：
+**这条链路本仓库已经建好了**，涉及四个文件：
 
-### 路子 A：官方镜像当运行时，只替换产物（门槛最低）
+| 文件 | 作用 |
+|---|---|
+| `.dockerignore` | 挡掉 `deploy/beidou-server-release/`（872 MB）、`node_modules`、`.git`。缺它构建慢到没法用 |
+| `deploy/Dockerfile` | 三阶段构建，宿主机不需要 JDK/Maven/Node |
+| `deploy/docker-compose.prod.yml` | 生产编排，含 2G 内存调优与安全加固 |
+| `deploy/.env.example` | 密钥与公网地址模板；真实的 `deploy/.env` 已 gitignore |
+| `.github/workflows/build-image.yml` | 推 master 自动构建并推送到 ghcr.io |
 
-因为 `/opt/server` 已经 bind mount 到宿主机，直接覆盖文件即可：
+### 9.1 流水线
 
 ```
-BeiDou.jar               ← mvn clean package -DskipTests 的产物
-wz/ wz-zh-CN/            ← 仅当改过
-scripts/ scripts-zh-CN/  ← 仅当改过
+IDEA 改代码 → git push master
+                  ↓
+       GitHub Actions 自动触发
+                  ↓
+  ┌─────────────────────────────────────┐
+  │ 阶段 1  node:20    → yarn build      │ 出前端 dist/
+  │ 阶段 2  maven:21   → mvn package     │ dist 塞进 static/ 再打 jar
+  │ 阶段 3  temurin:21-jre-alpine        │ 只留运行时
+  └─────────────────────────────────────┘
+                  ↓
+        ghcr.io/<用户名>/<仓库名>:latest
+                  ↓
+        服务器 docker compose pull && up -d
 ```
 
-覆盖进 `./beidou-server-release/`，然后 restart。
-部署 = 一次 rsync/复制 + 一次 restart。
+前端产物被塞进 `src/main/resources/static/` **再**打 jar，所以出来的是单镜像、
+8686 同源提供后台，不需要额外的 nginx 容器（与官方 release 版形态一致）。
 
-⚠️ 如果改了 wz 数据，**必须连 wz 一起同步**。只换 jar 会出现"服务端行为和数据对不上"
-的诡异 bug，很难查。建议直接整体同步这一组，别挑着来。
+### 9.2 层顺序是最关键的设计
 
-### 路子 B：自建镜像（推荐的稳定形态）
+Docker 层缓存以层为单位失效：某层变了，它**之后**的所有层全部重建重传。
+本项目各成分的变化频率极不均衡：
 
-把 `nightly/docker/backend.Dockerfile` 抄进本仓库，删掉 `codestage`（git clone）阶段，
-改成从本地 build context `COPY`：
+| 内容 | 体积 | 变化频率 |
+|---|---|---|
+| `wz/` | 561 MB | 几乎永不变 |
+| `wz-zh-CN/` | 34 MB | 汉化时才动 |
+| `scripts/` + `scripts-zh-CN/` | 9 MB | 偶尔改 |
+| `BeiDou.jar` | 113 MB | 每次改 Java 代码都变 |
 
-```dockerfile
-FROM maven:3.9.6-amazoncorretto-21 AS builder
-WORKDIR /opt/build
-COPY pom.xml ./pom.xml
-COPY gms-server/pom.xml ./gms-server/pom.xml
-RUN mvn dependency:resolve -B --no-transfer-progress
-COPY gms-server/src ./gms-server/src
-RUN mvn package -B -DskipTests --no-transfer-progress
-RUN mkdir result && mv ./gms-server/target/BeiDou.jar ./result/BeiDou.jar
-COPY gms-server/src/main/resources/application.yml ./result/application.yml
-COPY gms-server/wz          ./result/wz
-COPY gms-server/wz-zh-CN    ./result/wz-zh-CN
-COPY gms-server/scripts     ./result/scripts
-COPY gms-server/scripts-zh-CN ./result/scripts-zh-CN
-# ...后续 runtime 阶段照抄 backend.Dockerfile
+所以 `Dockerfile` 里 **jar 必须 COPY 在最后**。日常迭代只有 113 MB 的层需要
+重新构建和传输，561 MB 的 wz 层原封不动 —— 这是用镜像仓库而非 `docker save`
+的最大收益（后者每次都是全量约 900 MB）。改这个文件时别打乱顺序。
+
+### 9.3 首次部署
+
+服务器上（只需要装 Docker，不需要 JDK/Maven/Node）：
+
+```
+git clone <你的仓库> && cd deploy
+cp .env.example .env && vi .env
+docker compose -f docker-compose.prod.yml up -d
 ```
 
-好处：一条命令从源码到跑起来，**宿主机连 JDK 和 Maven 都不用装**。
-代价是每次改代码要重新 build 镜像。
+`.env` 要填四个值：`BEIDOU_IMAGE`、`DB_PASSWORD`、`WAN_HOST`（公网 IP）、
+`JWT_SECRET`（`openssl rand -hex 10` 生成）。compose 里用了 `${VAR:?}` 语法，
+漏填会直接报错而不是带着默认值跑起来。
 
-`docker-bake.hcl` + `.github/workflows/nightly.yaml` 是现成的 CI 模板，
-改镜像名和 clone 源即可推到自己的 ghcr.io 私有 package。
+### 9.4 日常升级
 
-### 路子 C：混合（只用 Docker 跑 MySQL）
+```
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
+```
 
-服务端用 systemd 跑 jar，MySQL 交给 Docker。
-保留了 Docker 最有价值的部分（数据库环境隔离），丢掉了最麻烦的部分。
-如果最终稳定在这个形态，不算失败，很多人就这么用。
+**没有第三步**。本文件刻意不使用官方镜像那套"首次拷贝到卷 + `.initialized` 标记"
+的模式，代码和 wz 全部烤在镜像里，卷只挂日志 —— 因此不存在 6.2 那个
+"换了新镜像但卷里还是旧 jar"的陷阱。
+
+代价是服务器上不能直接改 `.js` 脚本或 wz。但那些本来就在 git 里，
+正确流程就该是「改 → 提交 → 重新构建」。
+
+### 9.5 不要在小内存服务器上构建
+
+阶段 1 的 `yarn build` 光 Node 就要 1.5-2G 堆，Maven 编译也要 1G+。
+**2G 内存的机器上 `docker compose build` 必然 OOM**。
+构建放 GitHub Actions（免费额度够用）或你本机，服务器只负责 `pull`。
+
+### 9.6 备选：不用镜像仓库
+
+不想用 ghcr.io 的话，本机构建后直传：
+
+```
+docker build -f deploy/Dockerfile -t beidou:v1 .
+docker save beidou:v1 | gzip | ssh user@服务器 "gunzip | docker load"
+```
+
+缺点是每次全量（约 900 MB，gzip 后 wz 是 XML 能压到 150-250 MB），
+且没有分层增量的好处。适合服务器无法访问 ghcr.io 的情况。
+
+### 9.7 只想快速验证一次改动
+
+不走镜像也行：本地 `mvn clean package -DskipTests` 出 jar，
+覆盖进 `deploy/beidou-server-release/` 再 `docker compose restart`
+（那套本地环境的 `/opt/server` 是 bind mount 到宿主机的）。
+
+⚠️ 如果改了 wz 数据，**必须连 wz 一起同步**。只换 jar 会出现
+"服务端行为和数据对不上"的诡异 bug，很难查。这条路只适合临时验证，
+正式部署走 9.1。
 
 ---
 
@@ -502,23 +553,61 @@ entrypoint 是 `exec java ${JAVA_OPTS} -jar ...`，compose 里加环境变量即
 ```yaml
 environment:
   TZ: Asia/Shanghai
-  JAVA_OPTS: "-Xms2g -Xmx4g"
+  JAVA_OPTS: "-Xms512m -Xmx1g -XX:MaxMetaspaceSize=192m"
 ```
 
 不给的话 JVM 按容器可见内存的 1/4 取堆上限，wz 全量加载进内存很容易 OOM。
+具体给多少见 10.4。
 
-### 10.4 CPU 架构
+### 10.4 2G 内存服务器的调优
+
+**实测数据**（本机运行，空服零玩家）：
+
+```
+工作集（实际物理内存）: 960 MB
+G1 堆: total 698 MB, used 442 MB
+Metaspace: used 112 MB
+```
+
+内存账（Linux，2G 机器）：
+
+| 组件 | 默认占用 | 调优后 |
+|---|---|---|
+| BeiDou JVM | ~960 MB | ~700-800 MB（`-Xmx1g`，堆实测只用 442 MB，有余量）|
+| MySQL 8 | ~400 MB | ~200 MB（见下）|
+| Linux 系统 | ~150-250 MB | 同 |
+
+**已知可行**：有人在 2G 机器上跑到 20 人同时在线正常。所以 2G 能用，
+但没有太多余量，人数上来要盯着。建议加 2G swap 当保险丝防 OOM killer ——
+但只是保险丝，真吃到 swap 会有肉眼可见卡顿。
+
+MySQL 侧的调优（已写进 `deploy/docker-compose.prod.yml`）：
+
+```yaml
+command:
+  - --innodb-buffer-pool-size=64M
+  - --performance-schema=OFF     # 省 200-400 MB，最大的一块
+  - --max-connections=64
+```
+
+⚠️ `performance-schema=OFF` **需要实测验证**。`gms-server/README.md` 提到
+非 root 用户需要 `performance_schema.user_variables_by_thread` 的 select 权限。
+grep 过 `gms-server/src`，BeiDou 自己的代码不查它，那条要求应该来自
+MyBatis-Flex 或 Druid 读会话变量 —— 大概率关掉没事，但若登录或建表异常，
+第一个要回滚的就是这行。
+
+### 10.5 CPU 架构
 
 官方 release / nightly 镜像都有 `linux/amd64` + `linux/arm64`，ARM 服务器没问题。
 但自建镜像时注意：Windows 上 `docker build` 默认出 amd64，
 推到 ARM 服务器跑不起来，需要 `docker buildx build --platform linux/arm64`。
 
-### 10.5 Linux 上 Docker 的开销可以忽略
+### 10.6 Linux 上 Docker 的开销可以忽略
 
 是 namespace 不是虚拟机，和 Windows 上 WSL2 那种损耗完全不是一回事。
 "Docker 慢"这个顾虑在 Linux 生产环境不成立。
 
-### 10.6 服务器装什么发行版无所谓
+### 10.7 服务器装什么发行版无所谓
 
 Dockerfile 里的 `FROM ubuntu:20.04` 指的是**容器内部的用户态**，
 和宿主机装什么发行版**毫无关系**（原理见 1.1）。
@@ -545,7 +634,7 @@ Dockerfile 里作者的注释是「alpine好像缺点东西」，真实原因是
 **服务器真正需要满足的只有三条**：
 
 1. 能装 Docker（主流发行版都行，内核别太古老）
-2. CPU 架构对得上（amd64 / arm64，见 10.4）
+2. CPU 架构对得上（amd64 / arm64，见 10.5）
 3. 内存够（MySQL + JVM 堆，建议 ≥ 4G）
 
 非要推荐发行版的话选 Ubuntu LTS 或 Debian，纯粹因为出问题时资料最多，与 BeiDou 无关。

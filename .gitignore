@@ -29,6 +29,9 @@ database/docker-pg-db-data
 # Docker 本地部署产生的数据（见 deploy/docker-compose.yml）
 deploy/beidou-server-release/
 deploy/docker-db-data/
+deploy/logs/
+# 生产环境的密钥与公网地址，只保留 .env.example
+deploy/.env
 
 # macOS files
 .DS_Store

@@ -1,0 +1,84 @@
+# BeiDou 生产编排 —— 按 2G 内存服务器调优。
+#
+# 用法（在服务器的 deploy/ 目录下）：
+#   cp .env.example .env && vi .env      # 填公网 IP、密码、JWT 密钥
+#   docker compose -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# 升级 = pull + up -d。本文件刻意不使用官方镜像那套“首次拷贝到卷”的模式
+# （即 .initialized 标记），所有代码和资源都烤在镜像里，
+# 因此不存在“换了新镜像但卷里还是旧 jar”的陷阱（见 docs/docker-deploy.md §6.2）。
+#
+# 完整说明见 ../docs/docker-deploy.md
+
+services:
+  beidou-server:
+    container_name: beidou-server
+    image: ${BEIDOU_IMAGE:?请在 .env 中设置 BEIDOU_IMAGE}
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      JAVA_OPTS: ${JAVA_OPTS:--Xms512m -Xmx1g -XX:MaxMetaspaceSize=192m}
+    ports:
+      # ⚠️ 8686 只绑回环！Docker 的端口发布直接写 iptables 的 DOCKER 链，
+      #    优先级高于 ufw —— 写成 "8686:8686" 的话，就算 ufw deny 8686
+      #    管理后台照样全世界可访问。
+      #    自己访问走 SSH 隧道：ssh -L 8686:127.0.0.1:8686 user@服务器
+      - "127.0.0.1:8686:8686"
+      # 登录服和频道服必须公网可达
+      - "8484:8484"
+      - "7575-7577:7575-7577"
+    volumes:
+      # 只挂日志。代码和 wz 都在镜像里，不需要卷。
+      - ./logs:/opt/server/logs
+    command:
+      - --mybatis-flex.datasource.mysql.url=jdbc:mysql://beidou-db:3306/beidou?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+      - --mybatis-flex.datasource.mysql.username=root
+      - --mybatis-flex.datasource.mysql.password=${DB_PASSWORD:?请在 .env 中设置 DB_PASSWORD}
+      - --gms.service.wan-host=${WAN_HOST:?请在 .env 中设置 WAN_HOST}
+      - --gms.service.lan-host=${WAN_HOST}
+      - --gms.service.localhost=127.0.0.1
+      # 安全加固：Swagger 开着时可用字面量 swagger 当 token 越权访问所有 API
+      - --jwt.secret=${JWT_SECRET:?请在 .env 中设置 JWT_SECRET}
+      - --springdoc.api-docs.enabled=false
+      - --springdoc.swagger-ui.enabled=false
+    depends_on:
+      beidou-db:
+        condition: service_healthy
+    networks:
+      - beidou-network
+
+  beidou-db:
+    container_name: beidou-db
+    image: mysql:8.4.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?请在 .env 中设置 DB_PASSWORD}
+      TZ: Asia/Shanghai
+    # 2G 内存调优：默认配置下 mysqld 常驻 ~400 MB，其中 performance_schema
+    # 独占 200-400 MB。下面这组能压到 ~200 MB。
+    #
+    # ⚠️ performance-schema=OFF 需要实测验证：gms-server/README.md 提到非 root
+    #    用户需要 performance_schema.user_variables_by_thread 的 select 权限。
+    #    我 grep 过 gms-server/src，BeiDou 自己的代码不查它，那条要求应该来自
+    #    MyBatis-Flex 或 Druid 读会话变量。若登录或建表异常，先删掉这一行再试。
+    command:
+      - --innodb-buffer-pool-size=64M
+      - --performance-schema=OFF
+      - --max-connections=64
+    # 默认不映射端口，只在 beidou-network 内部可达。
+    # 要用客户端远程连，走 SSH 隧道，不要直接暴露 3306。
+    volumes:
+      - ./docker-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - beidou-network
+
+networks:
+  beidou-network:
+    driver: bridge
