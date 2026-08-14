@@ -593,6 +593,35 @@ Metaspace: used 112 MB
 但没有太多余量，人数上来要盯着。建议加 2G swap 当保险丝防 OOM killer ——
 但只是保险丝，真吃到 swap 会有肉眼可见卡顿。
 
+#### 生产实测（2026-08-15 首次部署，零玩家在线）
+
+```
+Mem:   1.6Gi 总 / 1.4Gi 已用 / 可用 145Mi     ← 标称 2GiB，系统可见只有 1.6Gi
+Swap:  2.0Gi 总 / 0B 已用                     ← 未被动用
+
+beidou-server   732.2 MiB   （-Xmx1g，堆上限尚未摸到）
+beidou-db       270.5 MiB
+系统 + 阿里云安骑士等  ~400 MiB
+```
+
+启动耗时对比（同一份代码）：
+
+| | 本地 Windows（24 核 / WSL2） | 服务器（2 核 / Linux 原生） |
+|---|---|---|
+| Spring 含 Flyway | 235 s | **42.7 s** |
+| 北斗自身 | 16.3 s | 30.0 s |
+
+Flyway 从 4 分钟降到几十秒，印证 1.2 的说法：本地慢在跨 WSL 边界的文件 I/O，
+Linux 原生没这个税。北斗自身反而慢一倍，那是 2 核与 24 核的 CPU 差距。
+
+**监控要点**：`vm.swappiness=0` 意味着内核只在濒临 OOM 时才换出。
+因此 **`free -h` 里 Swap used 不为 0 就是明确预警**，而不是常态波动。
+在看到这个信号之前不要盲目下调 `-Xmx` —— 调太小会触发 JVM 内部 OOM，
+比换页严重得多。
+
+`jcmd` 在 alpine JRE 镜像里不存在，拿不到堆细节。需要深入分析时，
+可临时把运行阶段基础镜像换成 `eclipse-temurin:21-jdk-alpine`。
+
 MySQL 侧的调优（已写进 `deploy/docker-compose.prod.yml`）：
 
 ```yaml
@@ -602,11 +631,11 @@ command:
   - --max-connections=64
 ```
 
-⚠️ `performance-schema=OFF` **需要实测验证**。`gms-server/README.md` 提到
-非 root 用户需要 `performance_schema.user_variables_by_thread` 的 select 权限。
-grep 过 `gms-server/src`，BeiDou 自己的代码不查它，那条要求应该来自
-MyBatis-Flex 或 Druid 读会话变量 —— 大概率关掉没事，但若登录或建表异常，
-第一个要回滚的就是这行。
+✅ `performance-schema=OFF` **已实测通过**（2026-08-15 首次生产部署）。
+Flyway 99 个迁移脚本全部成功执行到 `1.11.5`，MyBatis-Flex 建连接正常，
+MySQL healthcheck 通过。`gms-server/README.md` 里那条
+`performance_schema.user_variables_by_thread` 权限要求不影响 root 用户使用。
+省下的 200-400 MB 是实打实的。
 
 #### GC 的取舍（2 vCPU 特有）
 
