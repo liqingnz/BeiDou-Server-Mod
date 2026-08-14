@@ -1,0 +1,726 @@
+<title>北斗服务端运维手册</title>
+<style>
+  /* ── 令牌：浅色为基准 ───────────────────────────────── */
+  :root {
+    --bg:        #F3F6F4;
+    --surface:   #FFFFFF;
+    --surface-2: #E9EEEB;
+    --ink:       #13201C;
+    --ink-2:     #55635D;
+    --ink-3:     #7C8A84;
+    --line:      #D6E0DA;
+    --line-soft: #E6ECE8;
+    --accent:    #1B6B5C;
+    --accent-so: #E2F0EC;
+    --ok:        #2C7A4B;
+    --warn:      #94570F;
+    --danger:    #9E2A33;
+    /* 命令板在两种主题下都是终端色，这是刻意的 */
+    --slab:      #0C1815;
+    --slab-ink:  #D8E7E1;
+    --slab-line: #21332D;
+    --slab-dim:  #7F958D;
+
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", "PingFang SC",
+            "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SFMono-Regular",
+            Consolas, "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:        #0D1412;
+      --surface:   #141D19;
+      --surface-2: #1A2521;
+      --ink:       #E3EDE8;
+      --ink-2:     #9AAAA3;
+      --ink-3:     #74847D;
+      --line:      #243330;
+      --line-soft: #1C2723;
+      --accent:    #55B7A3;
+      --accent-so: #17302B;
+      --ok:        #55AC72;
+      --warn:      #CE8B2E;
+      --danger:    #D2646B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:        #0D1412;
+    --surface:   #141D19;
+    --surface-2: #1A2521;
+    --ink:       #E3EDE8;
+    --ink-2:     #9AAAA3;
+    --ink-3:     #74847D;
+    --line:      #243330;
+    --line-soft: #1C2723;
+    --accent:    #55B7A3;
+    --accent-so: #17302B;
+    --ok:        #55AC72;
+    --warn:      #CE8B2E;
+    --danger:    #D2646B;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 28px 96px;
+    display: grid;
+    grid-template-columns: 208px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  /* ── 页眉 ───────────────────────────────────────────── */
+  header.masthead {
+    grid-column: 1 / -1;
+    padding: 64px 0 36px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 44px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .masthead h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4.4vw, 3rem);
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+    text-wrap: balance;
+  }
+  .masthead .sub {
+    margin: 10px 0 0;
+    color: var(--ink-2);
+    font-size: 0.95rem;
+    max-width: 54ch;
+  }
+  .stamp {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    line-height: 1.9;
+    color: var(--ink-3);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .stamp b { color: var(--accent); font-weight: 600; }
+
+  /* ── 侧边目录 ───────────────────────────────────────── */
+  nav.toc {
+    position: sticky;
+    top: 24px;
+    font-size: 0.85rem;
+  }
+  nav.toc .lbl {
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  nav.toc a {
+    display: block;
+    padding: 5px 10px;
+    color: var(--ink-2);
+    text-decoration: none;
+    border-left: 2px solid var(--line);
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  nav.toc a:hover, nav.toc a:focus-visible {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: var(--accent-so);
+  }
+
+  /* ── 章节 ───────────────────────────────────────────── */
+  section { margin-bottom: 58px; scroll-margin-top: 20px; }
+  section > h2 {
+    margin: 0 0 6px;
+    font-size: 1.45rem;
+    letter-spacing: -0.015em;
+    font-weight: 750;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  section > h2 .n {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  section > .lede {
+    margin: 0 0 24px;
+    color: var(--ink-2);
+    max-width: 66ch;
+  }
+  h3 {
+    margin: 32px 0 12px;
+    font-size: 0.96rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  p { max-width: 66ch; }
+  a { color: var(--accent); }
+
+  /* ── 命令板 ─────────────────────────────────────────── */
+  .cmd {
+    background: var(--slab);
+    border: 1px solid var(--slab-line);
+    border-radius: 3px;
+    margin: 14px 0 20px;
+    overflow: hidden;
+  }
+  .cmd .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--slab-line);
+    font-size: 0.72rem;
+    color: var(--slab-dim);
+    font-family: var(--mono);
+  }
+  .cmd .bar .what { color: var(--slab-ink); opacity: .8; }
+  .cwd {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  .cwd::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .cwd.any  { color: #6FA894; }
+  .cwd.dir  { color: #C89442; }
+  .cmd pre {
+    margin: 0;
+    padding: 14px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 0.86rem;
+    line-height: 1.65;
+    color: var(--slab-ink);
+  }
+  .cmd pre .p { color: var(--slab-dim); user-select: none; }
+  .cmd pre .c { color: #7FA896; }
+
+  /* ── 表格 ───────────────────────────────────────────── */
+  .tw { overflow-x: auto; margin: 16px 0 22px; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 480px;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 14px 9px 0;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+  }
+  th {
+    font-size: 0.68rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  td code, p code, li code, td kbd {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+  .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ── 状态标记 ───────────────────────────────────────── */
+  .pill {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+    border: 1px solid currentColor;
+  }
+  .pill.ok     { color: var(--ok); }
+  .pill.warn   { color: var(--warn); }
+  .pill.danger { color: var(--danger); }
+
+  /* ── 提示块 ─────────────────────────────────────────── */
+  .note {
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 0.92rem;
+  }
+  .note.warn   { border-left-color: var(--warn); }
+  .note.danger { border-left-color: var(--danger); }
+  .note p { margin: 0; max-width: 62ch; }
+  .note p + p { margin-top: 8px; }
+  .note .h {
+    display: block;
+    font-weight: 700;
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    color: var(--accent);
+  }
+  .note.warn   .h { color: var(--warn); }
+  .note.danger .h { color: var(--danger); }
+
+  /* ── 速查卡 ─────────────────────────────────────────── */
+  .quick {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin: 4px 0 8px;
+  }
+  .quick > div { background: var(--surface); padding: 15px 17px; }
+  .quick .k {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 700;
+  }
+  .quick .v {
+    font-family: var(--mono);
+    font-size: 0.88rem;
+    margin-top: 6px;
+    color: var(--ink);
+    word-break: break-all;
+  }
+  .quick .n { font-size: 0.78rem; color: var(--ink-2); margin-top: 4px; line-height: 1.5; }
+
+  ul.tight { max-width: 66ch; padding-left: 20px; }
+  ul.tight li { margin-bottom: 6px; }
+
+  footer {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+    color: var(--ink-3);
+    font-size: 0.8rem;
+    font-family: var(--mono);
+  }
+
+  @media (max-width: 900px) {
+    .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 20px 72px; }
+    nav.toc { display: none; }
+    header.masthead { padding-top: 40px; }
+    .stamp { text-align: left; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>北斗服务端运维手册</h1>
+      <p class="sub">生产环境日常操作、监控指标与故障排查。每条命令都标注了必须在哪个目录执行。</p>
+    </div>
+    <div class="stamp">
+      生产机 <b>121.41.227.208</b><br>
+      阿里云 ecs.e-c1m1.large · 2 vCPU / 2 GiB<br>
+      Ubuntu 24.04 · Docker 29.7.2<br>
+      建立于 2026-08-15
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="lbl">目录</div>
+    <ol>
+      <li><a href="#connect">连接服务器</a></li>
+      <li><a href="#cwd">命令与工作目录</a></li>
+      <li><a href="#daily">日常查看</a></li>
+      <li><a href="#release">发布更新</a></li>
+      <li><a href="#watch">监控与预警</a></li>
+      <li><a href="#backup">备份与恢复</a></li>
+      <li><a href="#trouble">故障排查</a></li>
+      <li><a href="#facts">环境速查</a></li>
+      <li><a href="#dont">不要做的事</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- 1 ─────────────────────────────────────────────── -->
+    <section id="connect">
+      <h2><span class="n">01</span>连接服务器</h2>
+      <p class="lede">两个别名指向同一台机器，区别只在要不要开管理后台隧道。配置在本机 <code>C:\Users\liqin\.ssh\config</code>。</p>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">普通登录 · 可同时开多个</span><span class="cwd any">任意目录</span></div>
+        <pre><span class="p">$ </span>ssh beidou</pre>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">带管理后台隧道 · 同时只能开一个</span><span class="cwd any">任意目录</span></div>
+        <pre><span class="p">$ </span>ssh beidou-tunnel
+<span class="c"># 保持这个窗口不关，浏览器访问 http://localhost:18686</span></pre>
+      </div>
+
+      <p>隧道把本机 <code>18686</code> 转发到服务器上只绑回环的 <code>8686</code>。管理后台<strong>没有暴露在公网</strong>，这是唯一的访问途径。</p>
+
+      <div class="note">
+        <span class="h">为什么本地端口是 18686 而不是 8686</span>
+        <p>本机开发环境自己占着 8686。用不同端口既避免冲突，也让你一眼分清：<code>localhost:8686</code> 是本地开发，<code>localhost:18686</code> 是生产。</p>
+      </div>
+
+      <div class="note warn">
+        <span class="h">隧道只能开一个</span>
+        <p>已经开着 <code>beidou-tunnel</code> 时再开第二个会失败（本地端口被占）。日常操作用 <code>ssh beidou</code>，需要看后台时才用带隧道的那个。</p>
+      </div>
+    </section>
+
+    <!-- 2 ─────────────────────────────────────────────── -->
+    <section id="cwd">
+      <h2><span class="n">02</span>命令与工作目录</h2>
+      <p class="lede">这是最容易踩的坑。命令分两类，本手册每个命令板右上角都标了它属于哪一类。</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>命令</th><th>工作目录</th><th>原因</th></tr></thead>
+          <tbody>
+            <tr><td><code>free -h</code> <code>uptime</code> <code>df -h</code> <code>ss -tln</code></td><td><span class="cwd any" style="color:var(--ok)">任意目录</span></td><td>读 <code>/proc</code> 的系统级信息，与路径无关</td></tr>
+            <tr><td><code>docker ps</code> <code>docker stats</code> <code>docker logs 容器名</code></td><td><span class="cwd any" style="color:var(--ok)">任意目录</span></td><td>直接与 dockerd 通信，不读配置文件</td></tr>
+            <tr><td><code>docker compose 任何子命令</code></td><td><span class="cwd dir" style="color:var(--warn)">/opt/beidou</span></td><td>要读当前目录的 <code>docker-compose.yml</code> 和 <code>.env</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>在错误目录敲 <code>docker compose</code> 会报 <code>no configuration file provided</code>。养成习惯：登录后先切过去。</p>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">登录后的第一条命令</span><span class="cwd any">任意目录</span></div>
+        <pre><span class="p">$ </span>cd /opt/beidou</pre>
+      </div>
+    </section>
+
+    <!-- 3 ─────────────────────────────────────────────── -->
+    <section id="daily">
+      <h2><span class="n">03</span>日常查看</h2>
+      <p class="lede">按使用频率排列。看日志是排查一切问题的起点。</p>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">容器状态 · 最先看这个</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="p">$ </span>docker compose ps</pre>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">实时日志 · Ctrl+C 只退出查看，不停服</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="p">$ </span>docker compose logs -f beidou-server</pre>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">只看最近 100 行</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="p">$ </span>docker compose logs --tail 100 beidou-server</pre>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">内存 · 重点看 Swap 那一行</span><span class="cwd any">任意目录</span></div>
+        <pre><span class="p">$ </span>free -h</pre>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">各容器内存与 CPU</span><span class="cwd any">任意目录</span></div>
+        <pre><span class="p">$ </span>docker stats --no-stream</pre>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">重启服务端 · 数据库不动</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="p">$ </span>docker compose restart beidou-server</pre>
+      </div>
+
+      <div class="note">
+        <span class="h">断开 SSH 不影响服务</span>
+        <p>容器是 dockerd 的子孙进程，不属于你的登录会话。关终端、关电脑、断网都不影响服务器上的运行。<code>restart: unless-stopped</code> 还保证了崩溃后自动重启、服务器重启后自动拉起。</p>
+      </div>
+    </section>
+
+    <!-- 4 ─────────────────────────────────────────────── -->
+    <section id="release">
+      <h2><span class="n">04</span>发布更新</h2>
+      <p class="lede">改完代码到上线，本机只需要 push，编译由 GitHub Actions 完成。服务器永远不参与构建。</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th class="num">步骤</th><th>在哪</th><th>做什么</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td>本机 IDEA</td><td>改代码，提交到 <code>master</code> 并 push</td></tr>
+            <tr><td class="num">2</td><td>GitHub</td><td>Actions 自动构建并推送镜像到 ghcr.io（约 10–20 分钟，等绿灯）</td></tr>
+            <tr><td class="num">3</td><td>服务器</td><td><code>docker compose pull</code> 再 <code>up -d</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">拉取新镜像并替换容器</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="p">$ </span>docker compose pull
+<span class="p">$ </span>docker compose up -d</pre>
+      </div>
+
+      <p><strong>没有第三步。</strong>代码、wz、脚本全部烤在镜像里，不使用「首次拷贝到卷」那套机制，所以不存在「换了新镜像但跑的还是旧 jar」的陷阱。</p>
+
+      <div class="note">
+        <span class="h">镜像分层的好处</span>
+        <p>Dockerfile 里 wz（561 MB，几乎不变）在前、jar（113 MB，每次都变）在最后。日常改 Java 代码只有最后那一层需要重新传输，wz 层直接复用缓存。<strong>改 Dockerfile 时不要打乱这个顺序。</strong></p>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">清理旧镜像 · 磁盘紧张时执行</span><span class="cwd any">任意目录</span></div>
+        <pre><span class="p">$ </span>docker image prune -a -f</pre>
+      </div>
+    </section>
+
+    <!-- 5 ─────────────────────────────────────────────── -->
+    <section id="watch">
+      <h2><span class="n">05</span>监控与预警</h2>
+      <p class="lede">这台机器内存很紧，2 GiB 标称、系统可见 1.6 GiB。只需要盯一个指标。</p>
+
+      <h3>唯一的核心指标：Swap</h3>
+      <p>系统设了 <code>vm.swappiness=0</code>，意思是内核只在濒临 OOM 时才动 swap。所以 <strong>Swap used 不为 0 就是明确预警</strong>，而不是常态波动。</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>观察值</th><th>状态</th><th>处理</th></tr></thead>
+          <tbody>
+            <tr><td><code>Swap used = 0B</code></td><td><span class="pill ok">正常</span></td><td>不用管</td></tr>
+            <tr><td><code>Swap used</code> 几十 MB</td><td><span class="pill warn">注意</span></td><td>内存到临界了。观察是否持续增长，考虑减少频道数或升配</td></tr>
+            <tr><td><code>Swap used</code> 数百 MB 且持续涨</td><td><span class="pill danger">危险</span></td><td>玩家会明显卡顿。升内存，或把数据库迁到别处</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>基线数据（2026-08-15 首次部署实测）</h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>项目</th><th class="num">零玩家</th><th class="num">1 玩家在线</th></tr></thead>
+          <tbody>
+            <tr><td>beidou-server</td><td class="num">732.2 MiB</td><td class="num">752.5 MiB</td></tr>
+            <tr><td>beidou-db</td><td class="num">270.5 MiB</td><td class="num">293.0 MiB</td></tr>
+            <tr><td>系统可用内存</td><td class="num">145 MiB</td><td class="num">100 MiB</td></tr>
+            <tr><td>Swap 已用</td><td class="num">0 B</td><td class="num">0 B</td></tr>
+            <tr><td>负载均值（2 核）</td><td class="num">—</td><td class="num">0.50 / 0.64 / 0.45</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>CPU 完全不是瓶颈。内存是唯一约束。已知有人在同样 2 GiB 的机器上跑到 20 人同时在线正常。</p>
+
+      <div class="note warn">
+        <span class="h">不要盲目下调 -Xmx</span>
+        <p>看到 Swap 被动用之前不要动 JVM 参数。<code>-Xmx</code> 调太小会触发 JVM 内部 OOM，那比换页严重得多——换页只是卡，OOM 是直接崩。</p>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">一次看全：内存 + 负载 + 容器</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="p">$ </span>free -h &amp;&amp; uptime &amp;&amp; docker compose ps</pre>
+      </div>
+    </section>
+
+    <!-- 6 ─────────────────────────────────────────────── -->
+    <section id="backup">
+      <h2><span class="n">06</span>备份与恢复</h2>
+      <p class="lede">只有一个目录装着不可重建的东西：玩家数据。镜像和配置随时能从 git 与 ghcr.io 重建。</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>路径</th><th>内容</th><th>要不要备份</th></tr></thead>
+          <tbody>
+            <tr><td><code>/opt/beidou/docker-db-data</code></td><td>MySQL 全部数据：账号、角色、装备、仓库</td><td><span class="pill danger">必须</span></td></tr>
+            <tr><td><code>/opt/beidou/.env</code></td><td>数据库密码、JWT 密钥</td><td><span class="pill warn">建议</span></td></tr>
+            <tr><td><code>/opt/beidou/logs</code></td><td>运行日志</td><td><span class="pill ok">不需要</span></td></tr>
+            <tr><td>镜像</td><td>代码、wz、脚本</td><td><span class="pill ok">不需要</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>热备份（不停服，推荐）</h3>
+      <div class="cmd">
+        <div class="bar"><span class="what">导出 SQL 到 /root，带日期戳</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="p">$ </span>docker compose exec -T beidou-db \
+    sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction \
+    --routines --events --databases beidou' \
+    | gzip &gt; /root/beidou-$(date +%Y%m%d-%H%M).sql.gz</pre>
+      </div>
+      <p><code>--single-transaction</code> 是 InnoDB 一致性快照，导出期间玩家可以照常在线。</p>
+
+      <h3>下载到本机</h3>
+      <div class="cmd">
+        <div class="bar"><span class="what">在本机 PowerShell 执行</span><span class="cwd any">任意目录</span></div>
+        <pre><span class="p">&gt; </span>scp beidou:/root/beidou-*.sql.gz E:\备份\</pre>
+      </div>
+
+      <h3>恢复</h3>
+      <div class="cmd">
+        <div class="bar"><span class="what">先停服务端，只留数据库</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="p">$ </span>docker compose stop beidou-server
+<span class="p">$ </span>gunzip &lt; /root/备份文件.sql.gz | docker compose exec -T beidou-db \
+    sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD"'
+<span class="p">$ </span>docker compose start beidou-server</pre>
+      </div>
+
+      <div class="note danger">
+        <span class="h">备份要放到别的地方</span>
+        <p>和数据库在同一块云盘上的备份，盘挂了就一起没了。定期 <code>scp</code> 下载到本机或对象存储。</p>
+      </div>
+    </section>
+
+    <!-- 7 ─────────────────────────────────────────────── -->
+    <section id="trouble">
+      <h2><span class="n">07</span>故障排查</h2>
+      <p class="lede">按症状查。绝大多数问题第一步都是看日志。</p>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th>症状</th><th>最可能的原因</th><th>怎么办</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>玩家连不上登录服</td>
+              <td>阿里云安全组没放行，或容器没跑</td>
+              <td>先 <code>docker compose ps</code>；容器正常就去控制台查安全组 8484 / 7575-7577</td>
+            </tr>
+            <tr>
+              <td>能登录，卡在选频道</td>
+              <td><code>WAN_HOST</code> 填错</td>
+              <td>它是发给客户端去连频道服的地址，必须是公网 IP。改 <code>.env</code> 后 <code>up -d</code></td>
+            </tr>
+            <tr>
+              <td>管理后台打不开</td>
+              <td>没开隧道，或访问了 8686</td>
+              <td>要 <code>ssh beidou-tunnel</code> 且窗口保持打开，浏览器访问 <strong>18686</strong></td>
+            </tr>
+            <tr>
+              <td>服务端反复重启</td>
+              <td>数据库连不上，或内存 OOM</td>
+              <td><code>docker compose logs --tail 200 beidou-server</code> 找 <code>Caused by</code></td>
+            </tr>
+            <tr>
+              <td>游戏卡顿、延迟高</td>
+              <td>内存吃到 swap</td>
+              <td><code>free -h</code> 看 Swap used，见第 05 节</td>
+            </tr>
+            <tr>
+              <td>磁盘告警</td>
+              <td>旧镜像堆积</td>
+              <td><code>docker image prune -a -f</code>；日志已配轮转（10 MB × 3），不会无限涨</td>
+            </tr>
+            <tr>
+              <td><code>no configuration file provided</code></td>
+              <td>不在 <code>/opt/beidou</code></td>
+              <td><code>cd /opt/beidou</code>，见第 02 节</td>
+            </tr>
+            <tr>
+              <td>拉镜像超时</td>
+              <td>Docker Hub 在国内不通</td>
+              <td>已配 daocloud 加速器。自己的镜像走 ghcr.io，直连正常</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cmd">
+        <div class="bar"><span class="what">排查起手式：只看错误行</span><span class="cwd dir">/opt/beidou</span></div>
+        <pre><span class="p">$ </span>docker compose logs --tail 300 beidou-server | grep -E 'ERROR|Caused by|OutOfMemory'</pre>
+      </div>
+
+      <div class="note">
+        <span class="h">日志里的 Exception 不一定是错误</span>
+        <p>Spring Security 的过滤器链里有个类叫 <code>ExceptionTranslationFilter</code>，正常启动日志里就会出现。搜错误要认准日志级别 <code>[ERROR]</code> 或 <code>Caused by:</code>。</p>
+      </div>
+    </section>
+
+    <!-- 8 ─────────────────────────────────────────────── -->
+    <section id="facts">
+      <h2><span class="n">08</span>环境速查</h2>
+
+      <div class="quick">
+        <div><div class="k">客户端连接</div><div class="v">121.41.227.208:8484</div><div class="n">登录服</div></div>
+        <div><div class="k">频道服</div><div class="v">7575 / 7576 / 7577</div><div class="n">端口 = 75+世界号，75+频道号</div></div>
+        <div><div class="k">管理后台</div><div class="v">localhost:18686</div><div class="n">需先 ssh beidou-tunnel</div></div>
+        <div><div class="k">部署目录</div><div class="v">/opt/beidou</div><div class="n">compose 与 .env 所在</div></div>
+        <div><div class="k">镜像</div><div class="v">ghcr.io/liqingnz/<br>beidou-server-mod:latest</div><div class="n">公开，无需登录</div></div>
+        <div><div class="k">数据目录</div><div class="v">/opt/beidou/docker-db-data</div><div class="n">唯一不可重建的东西</div></div>
+      </div>
+
+      <h3>端口对外暴露情况</h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>端口</th><th>绑定</th><th>安全组</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td class="num">8484</td><td><code>0.0.0.0</code></td><td><span class="pill ok">已放行</span></td><td>登录服</td></tr>
+            <tr><td class="num">7575-7577</td><td><code>0.0.0.0</code></td><td><span class="pill ok">已放行</span></td><td>频道服 1/2/3</td></tr>
+            <tr><td class="num">8686</td><td><code>127.0.0.1</code></td><td><span class="pill danger">禁止放行</span></td><td>管理后台，只走 SSH 隧道</td></tr>
+            <tr><td class="num">3306</td><td>容器网络内部</td><td><span class="pill danger">禁止放行</span></td><td>数据库，宿主机都不映射</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>配置改在哪</h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>要改什么</th><th>改哪里</th><th>生效方式</th></tr></thead>
+          <tbody>
+            <tr><td>经验 / 金币 / 掉落倍率</td><td>管理后台界面（存在数据库 <code>game_config</code> 表）</td><td><strong>热生效，不用重启</strong></td></tr>
+            <tr><td>公网 IP、密码、JVM 参数</td><td><code>/opt/beidou/.env</code></td><td><code>docker compose up -d</code></td></tr>
+            <tr><td>端口、频道数、MySQL 参数</td><td><code>/opt/beidou/docker-compose.yml</code></td><td><code>docker compose up -d</code></td></tr>
+            <tr><td>Java 代码、wz、脚本</td><td>本机仓库 → push master</td><td>等 Actions → <code>pull</code> + <code>up -d</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 9 ─────────────────────────────────────────────── -->
+    <section id="dont">
+      <h2><span class="n">09</span>不要做的事</h2>
+      <p class="lede">这些约束都有具体理由，不是洁癖。</p>
+
+      <ul class="tight">
+        <li><strong>不要在安全组放行 8686。</strong>Docker 的端口发布直接写 iptables 的 DOCKER 链，优先级高于 ufw——服务器内部的防火墙拦不住它。放行等于管理后台裸奔。</li>
+        <li><strong>不要在服务器上 <code>docker compose build</code>。</strong>前端构建光 Node 就要 1.5–2 GB 堆，2 GiB 的机器必然 OOM。构建交给 GitHub Actions。</li>
+        <li><strong>不要用不带 <code>-d</code> 的 <code>docker compose up</code>。</strong>那是前台附着模式，SSH 断开会把容器一起停掉。</li>
+        <li><strong>不要把密码写进 <code>docker-compose.yml</code>。</strong>那个文件在 git 里。密钥只放 <code>.env</code>，它已被 gitignore。</li>
+        <li><strong>不要手动改容器里的文件。</strong>容器重建就没了。改动要走「改代码 → push → 重新构建」。</li>
+        <li><strong>不要在 Swap 还是 0 的时候调 JVM 参数。</strong>没有基线数据的调优是瞎猜，而且调小 <code>-Xmx</code> 的后果比换页严重。</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer>
+    北斗服务端运维手册 · 源文件 docs/ops-manual.html · 配套 docs/docker-deploy.md 记录了这套架构的设计原理与踩坑过程
+  </footer>
+
+</div>
