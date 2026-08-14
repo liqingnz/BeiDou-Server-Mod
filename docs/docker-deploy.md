@@ -561,6 +561,18 @@ environment:
 
 ### 10.4 2G 内存服务器的调优
 
+**目标机器**：阿里云 `ecs.e-c1m1.large` —— 经济型 e 系列，**2 vCPU / 2 GiB / amd64**。
+
+命名拆解：`e` = 经济型实例族（x86），`c1m1` = CPU:内存 1:1，`large` = 2 vCPU。
+阿里云的 ARM 实例是倚天 710 那几个族（`g8y`/`c8y`/`r8y`，带 `y` 后缀），
+命名上区分明显。拿到机器后仍应确认一次：
+
+```
+uname -m        # x86_64 = amd64，aarch64 = arm64
+```
+
+架构决定 `.github/workflows/build-image.yml` 里的 `platforms:` 值，目前是 `linux/amd64`。
+
 **实测数据**（本机运行，空服零玩家）：
 
 ```
@@ -595,6 +607,25 @@ command:
 grep 过 `gms-server/src`，BeiDou 自己的代码不查它，那条要求应该来自
 MyBatis-Flex 或 Druid 读会话变量 —— 大概率关掉没事，但若登录或建表异常，
 第一个要回滚的就是这行。
+
+#### GC 的取舍（2 vCPU 特有）
+
+JVM 在「≥2 核 且 ≥1792MB 内存」时自动选 G1，这台机器正好卡在门槛上，会选 G1。
+但 G1 要开并发标记线程、维护 remembered set，在 2 核 / 1G 堆的场景下开销占比不低。
+备选是串行 GC：
+
+```
+JAVA_OPTS=-Xms512m -Xmx1g -XX:MaxMetaspaceSize=192m -XX:+UseSerialGC
+```
+
+| | G1（默认） | SerialGC |
+|---|---|---|
+| 内存开销 | 高几十 MB | 低 |
+| CPU 开销 | 常态占用并发线程 | 低 |
+| 停顿 | 短，可控 | Full GC 完全停顿，1G 堆约几百毫秒~1 秒 |
+
+游戏服对停顿敏感，所以**先用默认的 G1 跑，攒一段时间的基线数据再决定**。
+没有基线的调优是瞎猜。只有在观察到内存吃紧或 CPU 长期跑满时才换 SerialGC 对比。
 
 ### 10.5 CPU 架构
 
