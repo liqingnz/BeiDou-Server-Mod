@@ -5,12 +5,17 @@
 # 刻意不写生成时间戳：重跑后 git diff 为空 == 分母没变，这个信号比时间戳有用。
 # 上次再生成的时间去 git log 查。
 #
-# disposition 只能是以下五种，收工判据是 pending 归零：
+# disposition 只能是以下六种：
 #   ported        已移植      —— evidence 必须填 BeiDou 侧文件路径
 #   already-fixed BeiDou 已有 —— evidence 必须填 文件:行号（不填就是垃圾桶）
-#   rejected      明确不搬    —— evidence 必须填一句理由
+#   rejected      明确不搬    —— evidence 必须填一句理由。这是终局决定
+#   deferred      暂缓        —— evidence 必须填「为什么缓」+「什么条件下重启」
 #   noise         格式化/汉化/垃圾
 #   pending       还没看
+#
+# 收工判据是 pending 归零 且 deferred 清单被逐条复核过。
+# deferred 不等于做完：它是一笔记在账上的待办，跟 rejected（终局不做）是两回事，
+# 不给它单独一档的话，暂缓项会混进 rejected 里再也没人翻出来。
 path	area	added	deleted	disposition	evidence
 config.yaml	config	70	46	pending	真配置：倍率/开关/投票回调/召回限制等，须落成 game_config 记录（批次 0）
 configServer.yaml	config	70	46	pending	真配置：倍率/开关/投票回调/召回限制等，须落成 game_config 记录（批次 0）
@@ -700,27 +705,27 @@ src/tools/exceptions/EmptyMovementException.java	java	0	1	pending
 src/tools/exceptions/EventInstanceInProgressException.java	java	0	1	pending	
 src/tools/packets/Fishing.java	java	3	4	pending	
 src/tools/packets/Wedding.java	java	21	8	pending	
-src/client/command/commands/CommandManager.java	java-new	89	6	pending	
+src/client/command/commands/CommandManager.java	java-new	89	6	ported	org/gms/client/command/commands/CommandManager.java；改并发容器，未移植三个 setWorldXxxRate（留给批次4的 RateEventCommand）
 src/client/command/commands/gm0/BossDmgAnalysisCommand.java	java-new	75	0	pending	
-src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	pending	
+src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	deferred	缓：LK 版的安全闸门就是邮箱验证码（脚本第一步的算术码是自显自验，无鉴权作用），去掉邮箱等于任何人在已登录客户端上都能改账号密码。BeiDou 已有网页端改密码（AccountService.updateAccountByUser:101，闸门为旧密码）。重启条件：邮箱验证方案定案，或决定改用旧密码闸门做游戏内入口
 src/client/command/commands/gm0/DetectCommand.java	java-new	78	0	pending	
-src/client/command/commands/gm0/MapDropsCommand.java	java-new	88	0	pending	
+src/client/command/commands/gm0/MapDropsCommand.java	java-new	88	0	ported	org/gms/client/command/commands/gm0/MapDropsCommand.java；退化为入口，逻辑复用 scripts-zh-CN/BeiDouSpecial/当前地图掉落_当前地图.js
 src/client/command/commands/gm0/QianDaoCommand.java	java-new	86	0	pending	
 src/client/command/commands/gm0/RedeemCommand.java	java-new	90	0	pending	
 src/client/command/commands/gm0/RetrieveCommand.java	java-new	84	0	pending	
-src/client/command/commands/gm0/RollCommand.java	java-new	51	0	pending	
-src/client/command/commands/gm0/SellInvCommand.java	java-new	101	9	pending	
-src/client/command/commands/gm0/VerifyEmailCommand.java	java-new	45	0	pending	
-src/client/command/commands/gm1/WhoDrops2Command.java	java-new	103	0	pending	
-src/client/command/commands/gm2/CosPreviewCommand.java	java-new	119	0	pending	
+src/client/command/commands/gm0/RollCommand.java	java-new	51	0	ported	org/gms/client/command/commands/gm0/RollCommand.java
+src/client/command/commands/gm0/SellInvCommand.java	java-new	101	9	ported	org/gms/client/command/commands/gm0/SellInvCommand.java；三分支合并，格数上限改用 Inventory.getSlotLimit()
+src/client/command/commands/gm0/VerifyEmailCommand.java	java-new	45	0	deferred	缓：依赖 MailManager。重启条件：邮箱验证方案定案后
+src/client/command/commands/gm1/WhoDrops2Command.java	java-new	103	0	already-fixed	scripts-zh-CN/BeiDouSpecial/当前地图掉落_物品查询.js 已实现且更完善；既有 WhoDropsCommand.java:45 改为指向该脚本
+src/client/command/commands/gm2/CosPreviewCommand.java	java-new	119	0	ported	org/gms/client/command/commands/gm2/CosPreviewCommand.java；默认走 Salon.js，LK 遍历分支保留需显式传参
 src/client/command/commands/gm2/ItemDropTimedCommand.java	java-new	111	0	pending	
-src/client/command/commands/gm2/PatrolCommand.java	java-new	118	0	pending	
+src/client/command/commands/gm2/PatrolCommand.java	java-new	118	0	ported	org/gms/client/command/commands/gm2/PatrolCommand.java；巡逻队列挪进 CommandManager 修多GM互抢，递归改循环
 src/client/command/commands/gm2/RecallCommand.java	java-new	85	0	pending	
 src/client/command/commands/gm4/DeleteAccountCommand.java	java-new	108	0	pending	
 src/client/command/commands/gm4/DeleteCharacterCommand.java	java-new	95	0	pending	
 src/client/command/commands/gm4/DropProEquipCommand.java	java-new	90	0	pending	
 src/client/command/commands/gm4/GMBotCommand.java	java-new	123	9	pending	
-src/client/command/commands/gm4/LichDebugCommand.java	java-new	58	7	pending	
+src/client/command/commands/gm4/LichDebugCommand.java	java-new	58	7	rejected	作者自用的 public static int debugVar，LK 全仓库无消费方；BeiDou 已有 gm5 DebugCommand
 src/client/command/commands/gm4/MobRateCommand.java	java-new	52	0	pending	
 src/client/command/commands/gm4/ProEquipCommand.java	java-new	89	0	pending	
 src/client/command/commands/gm4/RateEventCommand.java	java-new	88	0	pending	
@@ -728,11 +733,11 @@ src/client/command/commands/gm4/SendMailCommand.java	java-new	51	0	pending
 src/client/command/commands/gm4/UpdateVoteCommand.java	java-new	49	0	pending	
 src/client/command/commands/gm5/ReloadConfigCommand.java	java-new	40	0	pending	
 src/client/command/commands/gm5/RoyalCommand.java	java-new	114	0	pending	
-src/client/command/commands/gm5/TestScriptCommand.java	java-new	58	0	pending	
+src/client/command/commands/gm5/TestScriptCommand.java	java-new	58	0	ported	org/gms/client/command/commands/gm5/TestScriptCommand.java
 src/constants/string/CNLanguageConstants.java	java-new	41	0	pending	
-src/net/mailing/MailConst.java	java-new	15	0	pending	
-src/net/mailing/MailManager.java	java-new	131	0	pending	
-src/net/mailing/Verifier.java	java-new	30	0	pending	
+src/net/mailing/MailConst.java	java-new	15	0	deferred	同 MailManager，随邮箱验证方案一并决定
+src/net/mailing/MailManager.java	java-new	131	0	deferred	缓：需先定邮箱验证与 BeiDou 既有 JWT/AuthTokenFilter 鉴权体系如何协调。重启条件：确定邮箱验证的定位（仅游戏内绑定 or 参与登录鉴权）后
+src/net/mailing/Verifier.java	java-new	30	0	deferred	同 MailManager，随邮箱验证方案一并决定
 src/net/server/handlers/VotePingBackHandler.java	java-new	52	0	pending	
 src/net/server/task/UpdateVotePointTask.java	java-new	143	0	pending	
 src/server/MessageBoard.java	java-new	91	0	pending	
@@ -1715,13 +1720,13 @@ scripts/npc/2140000.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/9000036_accessory.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/9270045.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/9800001.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/changePassword.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/changePassword.js	script-new	0	0	deferred	随 ChangePasswordCommand 一并暂缓
 scripts/npc/detectMap.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/detected.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/npcTemplate.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/testScript.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/under_maintenance.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/verifyEmail.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/verifyEmail.js	script-new	0	0	deferred	随 VerifyEmailCommand 一并暂缓
 scripts/portal/mahavira_enter.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/portal/treeboss00.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/reactor/5411001.js	script-new	0	0	pending	BeiDou 两个语言层都没有

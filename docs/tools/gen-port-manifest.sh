@@ -240,12 +240,17 @@ fi
   echo "# 刻意不写生成时间戳：重跑后 git diff 为空 == 分母没变，这个信号比时间戳有用。"
   echo "# 上次再生成的时间去 git log 查。"
   echo "#"
-  echo "# disposition 只能是以下五种，收工判据是 pending 归零："
+  echo "# disposition 只能是以下六种："
   echo "#   ported        已移植      —— evidence 必须填 BeiDou 侧文件路径"
   echo "#   already-fixed BeiDou 已有 —— evidence 必须填 文件:行号（不填就是垃圾桶）"
-  echo "#   rejected      明确不搬    —— evidence 必须填一句理由"
+  echo "#   rejected      明确不搬    —— evidence 必须填一句理由。这是终局决定"
+  echo "#   deferred      暂缓        —— evidence 必须填「为什么缓」+「什么条件下重启」"
   echo "#   noise         格式化/汉化/垃圾"
   echo "#   pending       还没看"
+  echo "#"
+  echo "# 收工判据是 pending 归零 且 deferred 清单被逐条复核过。"
+  echo "# deferred 不等于做完：它是一笔记在账上的待办，跟 rejected（终局不做）是两回事，"
+  echo "# 不给它单独一档的话，暂缓项会混进 rejected 里再也没人翻出来。"
   printf 'path\tarea\tadded\tdeleted\tdisposition\tevidence\n'
   cat "$TMP/merged"
 } > "$OUT"
@@ -257,13 +262,22 @@ awk -F'\t' '
   /^#/      { next }   # 注释头
   $1=="path"{ next }   # 表头
   {
-    tot[$2]++; if ($5 == "pending") pend[$2]++
-    all++;     if ($5 == "pending") allpend++
+    tot[$2]++
+    if ($5 == "pending")  { pend[$2]++;  allpend++ }
+    if ($5 == "deferred") { defer[$2]++; alldefer++ }
+    all++
   }
   END {
-    printf "\n%-14s %8s %8s\n", "区域", "总行数", "pending"
+    printf "\n%-14s %8s %8s %8s\n", "区域", "总行数", "pending", "deferred"
     n = asorti(tot, idx)
-    for (i = 1; i <= n; i++) { a = idx[i]; printf "%-14s %8d %8d\n", a, tot[a], (a in pend ? pend[a] : 0) }
-    printf "%-14s %8d %8d\n", "合计", all, allpend
-    printf "\n覆盖率: %.1f%%  (pending 归零即为全部处理完毕)\n", (all ? (all-allpend)*100.0/all : 0)
+    for (i = 1; i <= n; i++) {
+      a = idx[i]
+      printf "%-14s %8d %8d %8d\n", a, tot[a], (a in pend ? pend[a] : 0), (a in defer ? defer[a] : 0)
+    }
+    printf "%-14s %8d %8d %8d\n", "合计", all, allpend, alldefer
+    printf "\n覆盖率: %.1f%%  (pending 归零 且 deferred 逐条复核过，才算全部处理完毕)\n",
+           (all ? (all-allpend)*100.0/all : 0)
+    if (alldefer > 0) {
+      printf "注意: 有 %d 行 deferred，收工前必须逐条复核（grep deferred 清单文件即可列出）\n", alldefer
+    }
   }' "$OUT" >&2

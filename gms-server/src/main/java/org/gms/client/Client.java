@@ -26,6 +26,11 @@ import org.gms.client.inventory.InventoryType;
 import org.gms.config.GameConfig;
 import org.gms.constants.game.GameConstants;
 import org.gms.constants.id.MapId;
+import org.gms.dao.entity.AccountsDO;
+import org.gms.dao.entity.LoginHistoryDO;
+import org.gms.dao.mapper.LoginHistoryMapper;
+import org.gms.manager.ServerManager;
+import org.gms.service.AccountService;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -101,6 +106,10 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class Client extends ChannelInboundHandlerAdapter {
     private static final Logger log = LoggerFactory.getLogger(Client.class);
+
+    // Client 是 Netty 侧的遗留对象、不是 Spring bean，按仓库惯例反向从容器取依赖（同 Character）
+    private static final AccountService accountService = ServerManager.getApplicationContext().getBean(AccountService.class);
+    private static final LoginHistoryMapper loginHistoryMapper = ServerManager.getApplicationContext().getBean(LoginHistoryMapper.class);
 
     public static final int LOGIN_NOTLOGGEDIN = 0;
     public static final int LOGIN_SERVER_TRANSITION = 1;
@@ -716,6 +725,7 @@ public class Client extends ChannelInboundHandlerAdapter {
                 case SUCCESS -> {
                     if (loginok == 0) {
                         loginattempt = 0;
+                        recordLoginIp();
                     }
                     yield loginok;
                 }
@@ -727,6 +737,31 @@ public class Client extends ChannelInboundHandlerAdapter {
             };
         } else {
             return loginok;
+        }
+    }
+
+    /**
+     * 记录本次登录成功的来源 IP。
+     * <p>
+     * accounts.ip 每次覆盖，保存最近一次；login_history 按 (账号, IP) 唯一，
+     * 只在该 IP 首次出现时落一行，用于查这个账号用过哪些 IP。
+     * 记录失败不影响登录本身。
+     */
+    private void recordLoginIp() {
+        String ipAddress = getRemoteAddress();
+        // getRemoteAddress 取不到地址时会返回字符串 "null"
+        if (ipAddress == null || ipAddress.isEmpty() || "null".equals(ipAddress)) {
+            return;
+        }
+        try {
+            accountService.update(AccountsDO.builder().id(accId).ip(ipAddress).build());
+            loginHistoryMapper.insertIgnore(LoginHistoryDO.builder()
+                    .accountId(accId)
+                    .ip(ipAddress)
+                    .firstLoginTime(new Date())
+                    .build());
+        } catch (Exception e) {
+            log.warn(I18nUtil.getLogMessage("Client.recordLoginIp.warn1"), accId, e);
         }
     }
 

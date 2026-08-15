@@ -249,12 +249,11 @@ LK 的 29 个新指令**全是硬编码中文**，还有一个 `constants/string
 
 批次6 游戏性 triage ── 批次7 数据类
 ```
-
 | 批次 | 内容 | 依赖 |
 |---|---|---|
 | 0 | Flyway 建 login_history / message_board 两张表 + DO/Mapper | — |
 | 1 | CommandManager + 6 个指令；3 个功能复用 BeiDou 现成脚本 | 0 |
-| 2 | 邮箱验证 / 改密码 / 登录 IP 记录 | 0 |
+| 2 | 登录 IP 记录（邮箱验证与改密码已 deferred） | 0 |
 | 3 | 投票奖励系统 | 0 |
 | 4 | 留言板 / 站内邮件 / 签到 / 账号角色删除（`@redeem` 已移出，见批次 8） | 0 |
 | 5 | `AbstractPlayerInteraction` +338 行 + 21 个独有脚本 | 0 |
@@ -501,17 +500,74 @@ key 跟着各批次的代码一起进。命名沿用现有约定：`<类名>.mes
 > BeiDou 的 gm0 已有 `ChangeLanguage/DropLimit/EnableAuth/EquipLv/Gacha/MapOwnerClaim/ReadPoints/ShowRates/ToggleExp` 等——
 > 这些是 HeavenMS 上游就有的，不是 LK 新增，别重复移植。
 
-### 批次 2 — 账号安全
+### 批次 2 — 账号安全 ✅ 已完成（缩到只做登录 IP 记录）
 
-- `net/mailing/{MailManager, MailConst, Verifier}`（+131 行主体）
-- `VerifyEmailCommand`、`ChangePasswordCommand`
-- 登录 IP/时间记录 → `login_history` 表
-- `tools/LogHelper` 的扩展（+64/-14）
-- 配套脚本 `npc/verifyEmail.js`、`npc/changePassword.js`
+**邮箱验证与改密码整批 `deferred`**，本批只做登录 IP 记录。
 
-> 注意：BeiDou 已有自己的鉴权体系（JWT + `AuthTokenFilter`），邮箱验证要与之协调。
-> SMTP 配置走 GameConfig，不要硬编码。
-> LK 还改过 `tools/BCrypt`（+73/-57，SHA512 密码），BeiDou 的密码方案要先确认再决定动不动。
+| 项 | 处置 |
+|---|---|
+| 登录 IP 记录 → `login_history` | ✅ 做了 |
+| `net/mailing/{MailManager, MailConst, Verifier}` | ⏸ deferred |
+| `VerifyEmailCommand` + `npc/verifyEmail.js` | ⏸ deferred |
+| `ChangePasswordCommand` + `npc/changePassword.js` | ⏸ deferred |
+| `tools/LogHelper` 扩展 | 随投票系统走批次 3 |
+
+#### 为什么改密码不能脱离邮箱单独做
+
+LK 的 `ChangePasswordCommand` 本体只有 4 行，全部逻辑在 `scripts/npc/changePassword.js` 里，
+而那个脚本的安全闸门就是邮箱验证码：
+
+```js
+var c = a + b;                                 // 脚本自己算出来的数字
+status 0: cm.sendGetText("填写验证码：#b" + c);  // 又自己显示给玩家 —— 纯防误触，无鉴权作用
+status 2: cm.sendVerificationCode();           // ← 真正的闸门：发邮件
+status 3: if (cm.verifyChangePassword(newPassword, cm.getText())) → 改密码
+```
+
+去掉邮箱环节，剩下的就只有一个自显自验的算术码，等于**任何人在一台已登录的客户端上
+都能改掉账号密码**。所以这两项必须一起做或一起缓。
+
+补充：BeiDou 本来就有改密码，闸门是「输入旧密码」
+（`AccountService.updateAccountByUser:101`），只是入口在 gms-ui 网页而不是游戏内。
+将来重启这项时，「游戏内改密码 + 旧密码闸门」是比照搬 LK 更合理的形态。
+
+#### 登录 IP 记录的实现要点
+
+LK 的两句 SQL 分工不同，容易看混：
+
+| 语句 | 每次登录都执行 | 每次登录都改数据 |
+|---|---|---|
+| `UPDATE accounts SET ip = ?` | ✅ | ✅ 覆盖，保存**最近一次** |
+| `INSERT IGNORE INTO loginHistroy` | ✅ | ❌ 只有该 (账号, IP) **首次**出现时才真的落行 |
+
+`INSERT IGNORE` 撞上 `UNIQUE(accountId, ip)` 会把重复键错误降级成警告并跳过整行，
+不更新任何字段。所以 LK 那个叫 `lastLoginTime` 的字段，存的其实是该 IP 的**首次**登录时间。
+**字段已按实际行为改名 `first_login_time`**，两张表的分工是自洽的：
+`accounts.ip` 管「最近一次」，`login_history` 管「用过哪些 IP」。
+
+查证结果：BeiDou 的 `accounts.ip` 列存在但**从来没人写过也没人读过**
+（`AccountsDO.ip` 是 CodeGen 生成的，全仓库只有 `IpbansDO.ip` 在用），所以 LK 那句
+`UPDATE accounts SET ip` 是有意义的，一并搬了。
+
+#### 与 LK 的差异
+
+| # | 差异 | 原因 |
+|---|---|---|
+| 1 | 裸 JDBC → MyBatis-Flex | 仓库规范；LK 那坨手动 `try/finally` 关连接全部消失 |
+| 2 | `INSERT ignore ... VALUES(?,?,?)` → 显式列名 | 本表比 LK 原表多了自增主键，按列位置插入会错位 |
+| 3 | **只在 `loginok == 0` 时记录** | LK 放在 `case SUCCESS` 里无条件执行，而该分支的进入条件是 `loginok == 0 \|\| loginok == 4`，**`4` 是密码错误**——LK 会用失败尝试的 IP 覆盖 `accounts.ip` |
+| 4 | `split(":")[0]` 不搬 | BeiDou 的 `Client.getRemoteAddress()` 已是纯 IP（`getHostAddress()`） |
+| 5 | `printStackTrace()` → `log.warn` + i18n | CLAUDE.md 规则 2、5 |
+| 6 | 加 IP 空值 / 字符串 `"null"` 保护 | `getRemoteAddress()` 取不到时返回字符串 `"null"` |
+
+`Client` 是本仓库第一个引 Spring bean 的 Netty 侧遗留类，取法照抄 `Character.java:500-505`
+的 `ServerManager.getApplicationContext().getBean(...)`。
+
+`INSERT IGNORE` 用 Mapper 上的 `@Insert` 注解手写——MyBatis-Flex 1.8.9 的 `BaseMapper`
+只有 `insertOrUpdate`（UPDATE 语义），**没有 IGNORE 语义的方法**。仓库里 `AccountsMapper`
+已有同样的自定义 SQL 写法。
+
+> `MapleClient.java` 在清单里仍是 `pending`：它还含角色删除重构（批次 4）与投票日志改动（批次 3）。
 
 ### 批次 3 — 投票奖励
 
