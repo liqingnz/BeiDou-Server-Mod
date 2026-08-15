@@ -267,7 +267,7 @@ LK 的 29 个新指令**全是硬编码中文**，还有一个 `constants/string
 | 1 | CommandManager + 6 个指令；3 个功能复用 BeiDou 现成脚本 | 0 |
 | 2 | 登录 IP 记录（邮箱验证与改密码已 deferred） | 0 |
 | 3 | ⏸ 投票奖励系统 —— **整批暂缓**，见 §7 | 0 |
-| 4 | 留言板 / 站内邮件 / 签到 / 账号角色删除（`@redeem` 已移出，见批次 8） | 0 |
+| 4 | ✅ `@retrieve` / `@drop` 有效期 / `@gmbot`；留言板与站外邮件暂缓，见 §7 | 0 |
 | 5 | `AbstractPlayerInteraction` +338 行 + 21 个独有脚本 | 0 |
 | 6 | C 类游戏性/平衡逐条 triage | — |
 | 7 | 掉落/商店 SQL + 262 个含代码改动的脚本 + 41 个缺失 wz + 276 个待 diff wz | 6 |
@@ -672,7 +672,7 @@ BeiDou 要改接现有调度方式。
 
 #### 重启条件
 
-确定是否接入外部投票站（并拿到回调密钥）+ 衰减策略定案 + 邮箱验证方案定案。
+确定是否接入外部投票站（并拿到自己的 `siteid`/`pass`）+ 衰减策略定案 + 邮箱验证方案定案。
 连带的 `check_for_vote_point` / `gtop_ping_back_url` / `nx_decline_factor` /
 `nx_reward_per_vote` 四个 `game_config` 键**一并不插**——按批次 0 的原则，
 提前塞进没有消费代码的运营旋钮对运维是误导。
@@ -683,17 +683,80 @@ BeiDou 要改接现有调度方式。
 > `logRedeemRoyalReward`（属批次 8）。清单里这行**仍是 `pending`**，
 > 需要时作为独立的「审计日志」项处理。
 
-### 批次 4 — 留言板 / 邮件 / 签到 / 兑换
+### 批次 4 — 留言板 / 邮件 / 签到 / 兑换 ✅ 已完成（只写了 3 项）
 
-`server/MessageBoard`（+91）、`SendMailCommand`、`QianDaoCommand`（签到）、
-`RedeemCommand`（月卡领取）、`RetrieveCommand`、`ItemDropTimedCommand`、
-`RateEventCommand`、`ReloadConfigCommand`、`DeleteAccountCommand`、
-`DeleteCharacterCommand`、`ProEquipCommand`、`DropProEquipCommand`、`GMBotCommand`。
+原定 13 项。`RedeemCommand` 批次 0 就已挪到批次 8，剩 12 项逐个查 BeiDou 现状后：
+**3 项写了代码，2 项暂缓，2 项挪批次 6，5 项终局不做**。
 
-> - `DeleteAccount`/`DeleteCharacter` 要踩 CLAUDE.md 提到的级联删除坑：
->   `deleteCharacterEntry` 有 NPE 风险，`ExtendValue` 表会被复用，鉴权与删除逻辑分离。
-> - `ReloadConfigCommand` 在 BeiDou 已被 GameConfig 热重载覆盖，评估是否还需要。
-> - 部分 GM 指令（`@mobrate` `@rateevent` `@deleteaccount`）在 BeiDou 更适合做成 gms-ui 后台接口。
+| LK | 处置 | 依据 |
+|---|---|---|
+| `gm0/RetrieveCommand` | ✅ gm0 `@retrieve` | 批次 1 `@sellinv` 的收尾 |
+| `gm2/ItemDropTimedCommand` | ✅ **并进既有 `@drop`** | 见下 |
+| `gm4/GMBotCommand` | ✅ gm4 `@gmbot` | 见下 |
+| `server/MessageBoard` + `npc/9800001.js` | ⏸ deferred | 本轮决定跳过；前置（表、DO、Mapper）批次 0 已就绪 |
+| `gm4/SendMailCommand` | ⏸ deferred | 双重依赖：`MailManager`（批次 2 缓）+ `UpdateVotePointTask`（批次 3 缓） |
+| `gm4/ProEquipCommand`、`gm4/DropProEquipCommand` | ⏭ 挪批次 6 | 依赖 Godly 系统的 `EQUIP_STAT_RANDOMIZE_RANGE` |
+| `gm0/QianDaoCommand` | ❌ already-fixed | `每日签到.js` 已有 |
+| `gm4/DeleteAccountCommand`、`gm4/DeleteCharacterCommand` | ❌ already-fixed | `CharacterService` 已有且更完整 |
+| `gm4/RateEventCommand` | ❌ rejected | 应走 GameConfig，不该由内存态定时器控制 |
+| `gm5/ReloadConfigCommand` | ❌ rejected | GameConfig 本身热重载 |
+
+#### 关键发现一：计划书原先记的「级联删除坑」BeiDou 早就填好了
+
+§7 原文写着 `DeleteAccount`/`DeleteCharacter` 要踩 CLAUDE.md 说的那个坑。查下来**反了**：
+
+- CLAUDE.md 点名的 `deleteCharacterEntry` NPE，`CharacterService.java:535` 的
+  `safeDeleteCharacterEntry` 已经兜住了，**LK 版没有这个兜底**
+- `CharacterService.java:548` 的 `deleteAccount` 是 `@Transactional`，清 8 张账号级关联表
+  加 `ExtendValue` 的三种账号类型；**LK 版无事务，只删 4 张**，照搬会留孤儿数据
+- 两个能力都已经挂在 gms-ui 后台（`AccountController:79`、`CharacterController:68`）
+
+所以问题不是「怎么移植」，是「还需不需要游戏内 GM 入口」——结论是不需要。
+
+#### 关键发现二：三个「新指令」里有两个不该是新指令
+
+| LK | 实际增量 |
+|---|---|
+| `ItemDropTimedCommand`（+111） | 是 `ItemDropCommand` 的整份复制，**逐行比对后唯一功能增量就是给非宠物道具 `setExpiration`**。做成 `@drop` 的可选第三参，加了 3 行 |
+| `RateEventCommand`（+88） | BeiDou 已有五个倍率指令，它只是套了个「改完定时改回」。而 GameConfig 改 world 倍率会即时写回 `World` 对象——限时活动走 GameConfig + 后台才对，内存态定时器在活动期间重启就丢状态、后台显示的还是旧值 |
+
+`RateEvent` 被否决连带敲定了批次 1 的一个遗留：`CommandManager` 那三个
+`setWorldExpRate/QuestRate/DropRate` **确定不补**，它们唯一的消费方就是这个指令。
+（`World` 确实没有 `setQuestRate`，那个缺口也就不用补了。）
+
+#### 移植时修掉的 LK 问题
+
+| 文件 | 问题 | 处理 |
+|---|---|---|
+| `RetrieveCommand` | **末尾 `set...(id, null)` 会直接抛异常**——批次 1 已把 `CommandManager` 的 map 换成 `ConcurrentHashMap`，不接受 null 值 | 加 `clearItemSold(characterId)` 成对移除 |
+| `RetrieveCommand` | **物品凭空销毁**：先扣钱 → `addFromDrop` → 无条件清记录，而 `addFromDrop` 的返回值被忽略。背包满时钱扣了、物品没进包、记录也没了 | 改成整批预检 → 扣钱 → 发放 |
+| `RetrieveCommand` | 扫到任意一件装备就把**全部**物品当装备处理 | 逐件按自身背包类型分支 |
+| `GMBotCommand` | 提示写 `<playername>`，实际却是裸 `parseInt`，传名字直接崩；`0`/`1`/`2` 是魔法选择器，`1`/`2` 硬编码作者自己的角色 id `2768`/`2971` | 改收角色 id，加解析保护 |
+| `GMBotCommand` | **检测到目标掉线后 `cancel` 完没有 `return`**，继续对已下线角色调 `getMap()` | 加 `return` |
+| `GMBotCommand` | 手工比对 `getOwnerId()` 与 `partyId` 做拾取过滤 | 整段删掉，见下 |
+| `GMBotCommand` | 闭包持有 `Character` 引用，目标下线后回收不掉 | 任务体内按 id 重新取 |
+| `ItemDropTimedCommand` | 宠物分支把同一个「分钟」参数当天数用 | 不跟，BeiDou 宠物分支保持现状 |
+
+#### 因 BeiDou API 差异做的调整
+
+- **`@retrieve` 的空间预检不能用 `checkSpace`**。它对装备只判断「还有没有一格」
+  （`!inv.isFull()`），循环里逐件问会得出「一格空位放得下五件装备」的错误结论。
+  改用 `checkSpaceProgressively`，并**按背包类型分别累加 `usedSlots`**——
+  仓库里 `Inventory.java:506` 和 `ItemAction.java:234` 两个现有调用方都是这么做的。
+- **`@gmbot` 的手工 owner 过滤整段删掉**。`Character.pickupItem` 内部已经在 `itemLock` 下
+  调 `canBePickedBy()` 做完整校验（`Character.java:2019`）；而且 LK 那个判断本身就是错的——
+  队伍归属在 `MapItem` 里是独立的 `party_ownerid` 字段，拿 `getOwnerId()` 去比 `partyId`
+  比不上，`MapItem.java:116` 的注释还明确要求这类字段必须持锁读。现在与
+  gm4 `ItemVacCommand.java:46` 的写法一致。
+- `@gmbot` 改用 `getWorldServer().getPlayerStorage()` 而非 LK 的频道级查找，
+  省得 GM 为了开机器人先跳频道。
+- 魔法数字 `8810010..8810018` → `MobId.isDeadHorntailPart()` + `MobId.HORNTAIL`。
+
+#### 已知未验证
+
+只做了 `mvn -pl gms-server compile`，**没有运行验证**。`V1000.0.4` 的 `command_info`
+插入是否生效需启动服务端跑 Flyway，情况同批次 1。`@gmbot` 的定时任务行为
+（取消、目标掉线、跨频道查找）没有实跑确认。
 
 ### 批次 5 — 脚本 API + 独有脚本
 
@@ -724,6 +787,14 @@ BeiDou 要改接现有调度方式。
 > **最大风险点。** Cosmic 相对 2022 HeavenMS 修了很多 bug，LK 那些「修复 XX 的 BUG」
 > 有相当比例 BeiDou 已经修过甚至修得更好。**每条都要先读 BeiDou 当前实现再决定，
 > 不可无脑覆盖，否则造成功能回退。**
+
+批次 4 挪进来的两项（都依赖 Godly 系统的 `EQUIP_STAT_RANDOMIZE_RANGE`，
+跟着 `client/inventory/Equip` 一起决策）：
+
+| LK | 说明 |
+|---|---|
+| `gm4/ProEquipCommand` | BeiDou 已有 gm4 `ProItemCommand`，但语义不同：BeiDou 把全属性**设为**定值，LK 是在原属性上**加**值且原本为 0 的属性保持 0（保留装备特性）。要连同 Godly 一起取舍 |
+| `gm4/DropProEquipCommand` | 与上一个互为 90% 复制，唯一区别是 `spawnItemDrop` 而非 `addFromDrop`。**移植时合并成一个带 drop 开关的指令**，不要两个类 |
 
 ### 批次 7 — 数据类
 

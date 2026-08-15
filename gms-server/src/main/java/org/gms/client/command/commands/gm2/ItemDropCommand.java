@@ -35,8 +35,14 @@ import org.gms.server.ItemInformationProvider;
 import org.gms.util.I18nUtil;
 
 import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 public class ItemDropCommand extends Command {
+    /**
+     * 有效期参数的上限，1 天。沿用 LichKingMod 的取值。
+     */
+    private static final int MAX_EXPIRATION_MINUTES = 1440;
+
     {
         setDescription(I18nUtil.getMessage("ItemDropCommand.message1"));
     }
@@ -103,6 +109,19 @@ public class ItemDropCommand extends Command {
             toDrop = ii.getEquipById(itemId);
         } else {
             toDrop = new Item(itemId, (short) 0, quantity);
+        }
+
+        // 可选的有效期参数：给非宠物道具设过期时间。宠物的时效走上面的分支，单位是天，别混用。
+        if (params.length >= 3) {
+            int minutes;
+            try {
+                minutes = Integer.parseInt(params[2]);
+            } catch (NumberFormatException e) {
+                player.yellowMessage(I18nUtil.getMessage("ItemDropCommand.message4"));
+                return;
+            }
+            minutes = Math.min(Math.max(minutes, 1), MAX_EXPIRATION_MINUTES);
+            toDrop.setExpiration(System.currentTimeMillis() + MINUTES.toMillis(minutes));
         }
 
         toDrop.setOwner(player.getName());

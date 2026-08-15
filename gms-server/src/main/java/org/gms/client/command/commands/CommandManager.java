@@ -117,4 +117,15 @@ public class CommandManager {
     public void setItemSoldThroughCommand(Integer characterId, Map<Item, Short> itemList) {
         itemSoldThroughCommand.put(characterId, itemList);
     }
+
+    /**
+     * 清空某角色的出售记录。
+     * <p>
+     * 原实现在回收后用 {@code set...(id, null)} 清空，而并发容器不接受 null 值会直接抛异常，
+     * 此处改为成对移除，语义一致。两张表必须一起清，否则会出现「有清单没金额」的半截状态。
+     */
+    public void clearItemSold(Integer characterId) {
+        itemSoldMeso.remove(characterId);
+        itemSoldThroughCommand.remove(characterId);
+    }
 }

@@ -705,33 +705,33 @@ src/tools/exceptions/EmptyMovementException.java	java	0	1	pending
 src/tools/exceptions/EventInstanceInProgressException.java	java	0	1	pending	
 src/tools/packets/Fishing.java	java	3	4	pending	
 src/tools/packets/Wedding.java	java	21	8	pending	
-src/client/command/commands/CommandManager.java	java-new	89	6	ported	org/gms/client/command/commands/CommandManager.java；改并发容器，未移植三个 setWorldXxxRate（留给批次4的 RateEventCommand）
+src/client/command/commands/CommandManager.java	java-new	89	6	ported	org/gms/client/command/commands/CommandManager.java；改并发容器。三个 setWorldXxxRate 确定不补 —— 唯一的消费方 RateEventCommand 已 rejected。批次4 追加 clearItemSold，供 RetrieveCommand 清空出售记录（并发容器不接受 null 值，用不了原实现的 set(id, null)）
 src/client/command/commands/gm0/BossDmgAnalysisCommand.java	java-new	75	0	pending	
 src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	deferred	缓：LK 版的安全闸门就是邮箱验证码（脚本第一步的算术码是自显自验，无鉴权作用），去掉邮箱等于任何人在已登录客户端上都能改账号密码。BeiDou 已有网页端改密码（AccountService.updateAccountByUser:101，闸门为旧密码）。重启条件：邮箱验证方案定案，或决定改用旧密码闸门做游戏内入口
 src/client/command/commands/gm0/DetectCommand.java	java-new	78	0	pending	
 src/client/command/commands/gm0/MapDropsCommand.java	java-new	88	0	ported	org/gms/client/command/commands/gm0/MapDropsCommand.java；退化为入口，逻辑复用 scripts-zh-CN/BeiDouSpecial/当前地图掉落_当前地图.js
-src/client/command/commands/gm0/QianDaoCommand.java	java-new	86	0	pending	
+src/client/command/commands/gm0/QianDaoCommand.java	java-new	86	0	already-fixed	gms-server/scripts-zh-CN/BeiDouSpecial/每日签到.js:26 已实现每日签到（角色级，走 ExtendValue 的 daily 类型自动重置，发道具 2430033）。LK 版是账号级发点券，粒度不同但功能重叠，且其实现是坏的：oneDay 被写成 10000 毫秒（真正的 24 小时被注释掉）、两行调试用 dropMessage 残留会直接打给玩家、并把签到时间存进 accounts.lastVoteTime 与投票系统抢同一列，而 BeiDou 的 AccountsDO 根本没有这一列。如需账号级签到应走 ExtendValue 的 ACCOUNT_EXTEND_DAILY 另立新需求，不是移植
 src/client/command/commands/gm0/RedeemCommand.java	java-new	90	0	pending	
-src/client/command/commands/gm0/RetrieveCommand.java	java-new	84	0	pending	
+src/client/command/commands/gm0/RetrieveCommand.java	java-new	84	0	ported	org/gms/client/command/commands/gm0/RetrieveCommand.java；配套给 CommandManager 加 clearItemSold —— 原实现用 set(id, null) 清空，而批次1 已把那些 map 换成 ConcurrentHashMap，put 空值会直接抛异常。另修两处：改为整批预检背包空间再扣钱（原实现先扣钱、忽略 addFromDrop 返回值，背包满时钱扣了物品没进包、记录还被清空）；逐件按自身背包类型分支（原实现只要清单里有一件装备就把全部当装备处理）。预检用 checkSpaceProgressively 并按背包类型分别累加 usedSlots，checkSpace 对装备只判断还有没有一格，逐件问会得出一格能放五件的错误结论
 src/client/command/commands/gm0/RollCommand.java	java-new	51	0	ported	org/gms/client/command/commands/gm0/RollCommand.java
 src/client/command/commands/gm0/SellInvCommand.java	java-new	101	9	ported	org/gms/client/command/commands/gm0/SellInvCommand.java；三分支合并，格数上限改用 Inventory.getSlotLimit()
 src/client/command/commands/gm0/VerifyEmailCommand.java	java-new	45	0	deferred	缓：依赖 MailManager。重启条件：邮箱验证方案定案后
 src/client/command/commands/gm1/WhoDrops2Command.java	java-new	103	0	already-fixed	scripts-zh-CN/BeiDouSpecial/当前地图掉落_物品查询.js 已实现且更完善；既有 WhoDropsCommand.java:45 改为指向该脚本
 src/client/command/commands/gm2/CosPreviewCommand.java	java-new	119	0	ported	org/gms/client/command/commands/gm2/CosPreviewCommand.java；默认走 Salon.js，LK 遍历分支保留需显式传参
-src/client/command/commands/gm2/ItemDropTimedCommand.java	java-new	111	0	pending	
+src/client/command/commands/gm2/ItemDropTimedCommand.java	java-new	111	0	ported	org/gms/client/command/commands/gm2/ItemDropCommand.java；不新开指令。LK 版是 HeavenMS ItemDropCommand 的整份复制，逐行比对后唯一的功能增量就是给非宠物道具 setExpiration，因此改为既有 @drop 的可选第三参（有效期分钟数，沿用 LK 的 1440 上限），加解析保护。LK 宠物分支把同一个「分钟」参数当天数用，语义自相矛盾，未跟；LK 注释掉的 setOwner 与 gmLevel 判据由 4 改 3 也未跟，保留 BeiDou 现状
 src/client/command/commands/gm2/PatrolCommand.java	java-new	118	0	ported	org/gms/client/command/commands/gm2/PatrolCommand.java；巡逻队列挪进 CommandManager 修多GM互抢，递归改循环
 src/client/command/commands/gm2/RecallCommand.java	java-new	85	0	pending	
-src/client/command/commands/gm4/DeleteAccountCommand.java	java-new	108	0	pending	
-src/client/command/commands/gm4/DeleteCharacterCommand.java	java-new	95	0	pending	
-src/client/command/commands/gm4/DropProEquipCommand.java	java-new	90	0	pending	
-src/client/command/commands/gm4/GMBotCommand.java	java-new	123	9	pending	
+src/client/command/commands/gm4/DeleteAccountCommand.java	java-new	108	0	already-fixed	org/gms/service/CharacterService.java:548 deleteAccount 已实现且严格优于 LK 版：@Transactional、逐个角色先下线再删、清 8 张账号级关联表以及 ExtendValue 的三种账号级类型；LK 版无事务，只删 hwidaccounts/quickslotkeymapped/storages/accounts 四张，照搬会留孤儿数据。入口已挂在 org/gms/controller/AccountController.java:79，不再另做游戏内 GM 指令
+src/client/command/commands/gm4/DeleteCharacterCommand.java	java-new	95	0	already-fixed	org/gms/service/CharacterService.java:524 deleteCharacterWithOnlineCheck 已实现（在线先下线再删，离线直接删）。CLAUDE.md 点名的 deleteCharacterEntry NPE 风险由同文件:535 safeDeleteCharacterEntry 兜住，LK 版没有这个兜底。入口已挂在 org/gms/controller/CharacterController.java:68，不再另做游戏内 GM 指令
+src/client/command/commands/gm4/DropProEquipCommand.java	java-new	90	0	deferred	缓，挪至批次6：与 ProEquipCommand 互为 90% 复制，唯一区别是 spawnItemDrop 而非 addFromDrop，移植时应合并成一个带 drop 开关的指令而不是两个类。依赖同为 EQUIP_STAT_RANDOMIZE_RANGE。重启条件同 ProEquipCommand
+src/client/command/commands/gm4/GMBotCommand.java	java-new	123	9	ported	org/gms/client/command/commands/gm4/GMBotCommand.java；参数由 LK 的 0/1/2 魔法选择器（其中 1、2 硬编码成作者自己的角色id 2768/2971，且提示写 playername 实际却裸 parseInt，传名字直接抛异常）改为角色id并加解析保护；查找改用全区在线列表，不再限 GM 自己所在频道；修原实现检测到目标掉线后 cancel 完没有 return、继续对已下线角色调 getMap()；任务体按id重新取角色不再由闭包持有 Character 引用；删掉手工 owner 过滤 —— Character.pickupItem 内部已在 itemLock 下用 canBePickedBy 校验，且 LK 拿 getOwnerId() 去比 partyId 本就是错的（队伍归属在 MapItem 里是独立的 party_ownerid），锁外读该字段也不安全；魔法数字 8810010..8810018 改用 MobId.isDeadHorntailPart/HORNTAIL
 src/client/command/commands/gm4/LichDebugCommand.java	java-new	58	7	rejected	作者自用的 public static int debugVar，LK 全仓库无消费方；BeiDou 已有 gm5 DebugCommand
 src/client/command/commands/gm4/MobRateCommand.java	java-new	52	0	pending	
-src/client/command/commands/gm4/ProEquipCommand.java	java-new	89	0	pending	
-src/client/command/commands/gm4/RateEventCommand.java	java-new	88	0	pending	
-src/client/command/commands/gm4/SendMailCommand.java	java-new	51	0	pending	
+src/client/command/commands/gm4/ProEquipCommand.java	java-new	89	0	deferred	缓，挪至批次6：依赖 EQUIP_STAT_RANDOMIZE_RANGE，那是 Godly 装备属性系统的配置键，提前引入会污染批次边界。另 BeiDou 已有 gm4/ProItemCommand，但语义不同 —— BeiDou 把全属性设为定值，LK 是在原属性上加值且原本为 0 的属性保持 0（保留装备特性），孰优要连同 Godly 一起取舍。重启条件：批次6 client/inventory/Equip 的 Godly 系统定案
+src/client/command/commands/gm4/RateEventCommand.java	java-new	88	0	rejected	不搬。BeiDou 已有 gm4 的 ExpRate/DropRate/MesoRate/QuestRate/BossDropRate 五个倍率指令，LK 版只是给它们套了「改完起个定时器改回去」；而 BeiDou 的 GameConfig 本身热重载、改 world 倍率会即时写回 World 对象，限时活动应走 GameConfig + gms-ui 后台，靠内存态定时器控制的话活动期间重启就丢状态、后台看到的还是旧值。连带结论：批次1 遗留未移植的 CommandManager.setWorldExpRate/QuestRate/DropRate 三个方法确定不补（World 也确实没有 setQuestRate）
+src/client/command/commands/gm4/SendMailCommand.java	java-new	51	0	deferred	缓：函数体只有 3 行有效代码，全部逻辑在 MailManager.sendMapleLandMailTOSingleUser，而 net/mailing/MailManager 已在批次2 deferred；它还 import 了 net/server/task/UpdateVotePointTask（批次3 deferred）。注意这是站外电子邮件，不是游戏内站内信。重启条件：邮箱验证方案定案后随 MailManager 一并
 src/client/command/commands/gm4/UpdateVoteCommand.java	java-new	49	0	deferred	缓：整个投票奖励系统暂缓。BeiDou 已有 gm0/ReadPointsCommand 与 gm3/GiveVpCommand 管点数读写，Client.votePoints/voteTime 是 HeavenMS 上游就有（LK 侧该段只被格式化提交触碰，无逻辑改动）；LK 真正新增的是三条运营策略——衰减因子 NX_DECLINE_FACTOR、进商城领取豁免衰减、未绑定邮箱投票无效，最后一条依赖已 deferred 的 net/mailing/MailManager。重启条件：确定是否接入外部投票站 + 衰减策略定案 + 邮箱验证方案定案
-src/client/command/commands/gm5/ReloadConfigCommand.java	java-new	40	0	pending	
+src/client/command/commands/gm5/ReloadConfigCommand.java	java-new	40	0	rejected	不搬。函数体只有一句 YamlConfig.fromFile("config.yaml")，而 BeiDou 没有 YamlConfig，配置走 GameConfig 单例 + game_config 表，GameConfig 的 update/remove/add 本身就是热重载，gms-ui 后台改完即时生效，不需要一个重载指令
 src/client/command/commands/gm5/RoyalCommand.java	java-new	114	0	pending	
 src/client/command/commands/gm5/TestScriptCommand.java	java-new	58	0	ported	org/gms/client/command/commands/gm5/TestScriptCommand.java
 src/constants/string/CNLanguageConstants.java	java-new	41	0	pending	
@@ -740,7 +740,7 @@ src/net/mailing/MailManager.java	java-new	131	0	deferred	缓：需先定邮箱�
 src/net/mailing/Verifier.java	java-new	30	0	deferred	同 MailManager，随邮箱验证方案一并决定
 src/net/server/handlers/VotePingBackHandler.java	java-new	52	0	rejected	LK 全仓库零引用的死代码：extends javax.xml.ws.spi.http.HttpHandler（JAX-WS SPI，JDK11+ 已从 JDK 移除，Java 21 下需额外依赖才编译得过），handle() 里 JSON 解析与 sendResponseHeaders 全被注释掉，只剩一句 System.out.println。真正记票的 UpdateVotePointTask 并不消费它。与 LichDebugCommand 同档
 src/net/server/task/UpdateVotePointTask.java	java-new	143	0	deferred	缓：它不消费 VotePingBackHandler，而是每 5 分钟主动 GET GTOP_PING_BACK_URL 拉 gtop100 的 XML 并解析 entry/pingusername 记票（LK 侧在 Server.java:932 注册）。三个阻塞：需真实 gtop100 站点注册（url 内含 siteid 与 pass）；其 SQL 的 and email is not null 就是「未绑定邮箱投票无效」这条规则，依赖已 deferred 的 MailManager；读写 accounts.lastVoteTime，BeiDou 无此列。另 LK 用 HeavenMS 的 TimerManager 自建调度，移植要改接 BeiDou 现有调度方式，属重写而非搬运。重启条件：确定接入投票站并拿到 siteid/pass + 邮箱验证方案定案
-src/server/MessageBoard.java	java-new	91	0	pending	
+src/server/MessageBoard.java	java-new	91	0	deferred	缓：本批决定跳过留言板，代码没写。前置已就绪（批次0 建的 message_board 表与 MessageBoardDO/MessageBoardMapper），BeiDou 两个语言层都无任何留言板实现。移植时要修的 LK 问题已查明：单例上的 LinkedList 非线程安全却被多频道并发读写；getMessages 的 SELECT 无 ORDER BY 却用 addFirst 装填，冷启动后顺序与内存态不一致；表名 messageboard 与 messageBoard 大小写混用，Linux MySQL 上会炸；淘汰旧留言的 DELETE 分支里 ps 在循环中反复赋值且未关闭；颜色控制码被拼进持久化内容且与 characterName 列重复。重启条件：决定要做留言板时
 src/server/gachapon/Leafre.java	java-new	74	0	pending	
 src/server/ultils/RoyalAccount.java	java-new	69	0	pending	
 HeavenMS_LichKingMod.iml	other	22	0	noise	IDE 工程文件
@@ -1719,7 +1719,7 @@ scripts/npc/2081004.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/2140000.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/9000036_accessory.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/9270045.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/9800001.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/9800001.js	script-new	0	0	deferred	缓：留言板的唯一入口脚本（留言收 50 万金币），随 src/server/MessageBoard.java 一并暂缓。BeiDou 两个语言层都没有。重启条件同 MessageBoard；届时要按 §3.5 同时落到 scripts/ 与 scripts-zh-CN/ 两套
 scripts/npc/changePassword.js	script-new	0	0	deferred	随 ChangePasswordCommand 一并暂缓
 scripts/npc/detectMap.js	script-new	0	0	pending	BeiDou 两个语言层都没有
 scripts/npc/detected.js	script-new	0	0	pending	BeiDou 两个语言层都没有
