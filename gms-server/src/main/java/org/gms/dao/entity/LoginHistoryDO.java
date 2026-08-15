@@ -45,7 +45,7 @@ public class LoginHistoryDO implements Serializable {
     private String ip;
 
     /**
-     * 该账号首次从此IP登录成功的时间
+     * 该账号最近一次从此IP登录成功的时间
      */
-    private Date firstLoginTime;
+    private Date lastLoginTime;
 }

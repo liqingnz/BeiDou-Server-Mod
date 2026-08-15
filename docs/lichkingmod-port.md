@@ -166,7 +166,19 @@ LK 的 29 个新指令**全是硬编码中文**，还有一个 `constants/string
 > **坑**：`patch` 的 ADD 是**合并/追加**，不是覆盖。客户端已存在同名子树时 ADD 会产生重复节点脏数据。
 > 打补丁前一律先 `--dry-run` 确认变更类型，ADD 整个子树的要确认客户端确实缺该子树。
 
-### 3.7 其他
+### 3.7 工作方式（约定，别跳过）
+
+**每个文件动手前，先把「LK 原文」和「拟写入 BeiDou 的版本」并排发给仓库主人确认。**
+对比里要点明：
+
+1. 逐条列出差异及其原因（类名映射 / 持久层 / i18n / API 不存在 / 修 LK 的问题）
+2. **发现 LK 代码有问题就修，但必须在对比里标出来**，不要默默改
+3. 阻塞项（依赖的 API 或数据在 BeiDou 不存在）要在对比里点名，不要写一半才发现
+
+已经这样跑完批次 0–2，效果是：批次 1 原定 12 个指令，对比过程中发现 4 个依赖没到位、
+2 个功能 BeiDou 已有更好实现，实际只写了 6 个。**这些都是在动手前发现的，没有返工。**
+
+### 3.8 其他
 
 - 遗留 OdinMS/Cosmic 文件保留 AGPL 版权头
 - `import` 规范：禁止「包名+类名」内联写法，只有同名类冲突才允许全限定名
@@ -540,10 +552,15 @@ LK 的两句 SQL 分工不同，容易看混：
 | `UPDATE accounts SET ip = ?` | ✅ | ✅ 覆盖，保存**最近一次** |
 | `INSERT IGNORE INTO loginHistroy` | ✅ | ❌ 只有该 (账号, IP) **首次**出现时才真的落行 |
 
+> 这是 LK 的行为。本次移植把第二句改成了 upsert，见下。
+
 `INSERT IGNORE` 撞上 `UNIQUE(accountId, ip)` 会把重复键错误降级成警告并跳过整行，
-不更新任何字段。所以 LK 那个叫 `lastLoginTime` 的字段，存的其实是该 IP 的**首次**登录时间。
-**字段已按实际行为改名 `first_login_time`**，两张表的分工是自洽的：
-`accounts.ip` 管「最近一次」，`login_history` 管「用过哪些 IP」。
+不更新任何字段。所以 LK 那个叫 `lastLoginTime` 的字段，**存的其实是该 IP 的首次登录时间**，
+名实不符：一个 IP 天天登半年，字段值也一直停在第一天。
+
+**本次改成 `INSERT ... ON DUPLICATE KEY UPDATE last_login_time = ?`**，
+每次登录成功都刷新时间，让 `last_login_time` 名副其实。两张表分工：
+`accounts.ip` 管「最近一次登录用的哪个 IP」，`login_history` 管「用过哪些 IP，各自最近一次什么时候」。
 
 查证结果：BeiDou 的 `accounts.ip` 列存在但**从来没人写过也没人读过**
 （`AccountsDO.ip` 是 CodeGen 生成的，全仓库只有 `IpbansDO.ip` 在用），所以 LK 那句
@@ -554,7 +571,7 @@ LK 的两句 SQL 分工不同，容易看混：
 | # | 差异 | 原因 |
 |---|---|---|
 | 1 | 裸 JDBC → MyBatis-Flex | 仓库规范；LK 那坨手动 `try/finally` 关连接全部消失 |
-| 2 | `INSERT ignore ... VALUES(?,?,?)` → 显式列名 | 本表比 LK 原表多了自增主键，按列位置插入会错位 |
+| 2 | `INSERT ignore ... VALUES(?,?,?)` → 显式列名 + `ON DUPLICATE KEY UPDATE` | 本表比 LK 原表多了自增主键，按列位置插入会错位；改 upsert 让 `last_login_time` 名副其实 |
 | 3 | **只在 `loginok == 0` 时记录** | LK 放在 `case SUCCESS` 里无条件执行，而该分支的进入条件是 `loginok == 0 \|\| loginok == 4`，**`4` 是密码错误**——LK 会用失败尝试的 IP 覆盖 `accounts.ip` |
 | 4 | `split(":")[0]` 不搬 | BeiDou 的 `Client.getRemoteAddress()` 已是纯 IP（`getHostAddress()`） |
 | 5 | `printStackTrace()` → `log.warn` + i18n | CLAUDE.md 规则 2、5 |
@@ -563,9 +580,9 @@ LK 的两句 SQL 分工不同，容易看混：
 `Client` 是本仓库第一个引 Spring bean 的 Netty 侧遗留类，取法照抄 `Character.java:500-505`
 的 `ServerManager.getApplicationContext().getBean(...)`。
 
-`INSERT IGNORE` 用 Mapper 上的 `@Insert` 注解手写——MyBatis-Flex 1.8.9 的 `BaseMapper`
-只有 `insertOrUpdate`（UPDATE 语义），**没有 IGNORE 语义的方法**。仓库里 `AccountsMapper`
-已有同样的自定义 SQL 写法。
+upsert 用 Mapper 上的 `@Insert` 注解手写——MyBatis-Flex 1.8.9 的 `BaseMapper.insertOrUpdate`
+是按主键判断的，而这里要按 `uk_account_ip` 这个业务唯一键 upsert，用不上。仓库里
+`AccountsMapper` 已有同样的自定义 SQL 写法。
 
 > `MapleClient.java` 在清单里仍是 `pending`：它还含角色删除重构（批次 4）与投票日志改动（批次 3）。
 

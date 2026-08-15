@@ -743,8 +743,8 @@ public class Client extends ChannelInboundHandlerAdapter {
     /**
      * 记录本次登录成功的来源 IP。
      * <p>
-     * accounts.ip 每次覆盖，保存最近一次；login_history 按 (账号, IP) 唯一，
-     * 只在该 IP 首次出现时落一行，用于查这个账号用过哪些 IP。
+     * accounts.ip 保存最近一次登录用的 IP，每次覆盖；
+     * login_history 按 (账号, IP) 唯一，记这个账号用过哪些 IP 以及每个 IP 最近一次使用时间。
      * 记录失败不影响登录本身。
      */
     private void recordLoginIp() {
@@ -755,10 +755,10 @@ public class Client extends ChannelInboundHandlerAdapter {
         }
         try {
             accountService.update(AccountsDO.builder().id(accId).ip(ipAddress).build());
-            loginHistoryMapper.insertIgnore(LoginHistoryDO.builder()
+            loginHistoryMapper.upsertLastLogin(LoginHistoryDO.builder()
                     .accountId(accId)
                     .ip(ipAddress)
-                    .firstLoginTime(new Date())
+                    .lastLoginTime(new Date())
                     .build());
         } catch (Exception e) {
             log.warn(I18nUtil.getLogMessage("Client.recordLoginIp.warn1"), accId, e);
