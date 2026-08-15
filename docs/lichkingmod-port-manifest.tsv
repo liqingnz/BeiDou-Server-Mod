@@ -730,7 +730,7 @@ src/client/command/commands/gm4/MobRateCommand.java	java-new	52	0	pending
 src/client/command/commands/gm4/ProEquipCommand.java	java-new	89	0	pending	
 src/client/command/commands/gm4/RateEventCommand.java	java-new	88	0	pending	
 src/client/command/commands/gm4/SendMailCommand.java	java-new	51	0	pending	
-src/client/command/commands/gm4/UpdateVoteCommand.java	java-new	49	0	pending	
+src/client/command/commands/gm4/UpdateVoteCommand.java	java-new	49	0	deferred	缓：整个投票奖励系统暂缓。BeiDou 已有 gm0/ReadPointsCommand 与 gm3/GiveVpCommand 管点数读写，Client.votePoints/voteTime 是 HeavenMS 上游就有（LK 侧该段只被格式化提交触碰，无逻辑改动）；LK 真正新增的是三条运营策略——衰减因子 NX_DECLINE_FACTOR、进商城领取豁免衰减、未绑定邮箱投票无效，最后一条依赖已 deferred 的 net/mailing/MailManager。重启条件：确定是否接入外部投票站 + 衰减策略定案 + 邮箱验证方案定案
 src/client/command/commands/gm5/ReloadConfigCommand.java	java-new	40	0	pending	
 src/client/command/commands/gm5/RoyalCommand.java	java-new	114	0	pending	
 src/client/command/commands/gm5/TestScriptCommand.java	java-new	58	0	ported	org/gms/client/command/commands/gm5/TestScriptCommand.java
@@ -738,8 +738,8 @@ src/constants/string/CNLanguageConstants.java	java-new	41	0	pending
 src/net/mailing/MailConst.java	java-new	15	0	deferred	同 MailManager，随邮箱验证方案一并决定
 src/net/mailing/MailManager.java	java-new	131	0	deferred	缓：需先定邮箱验证与 BeiDou 既有 JWT/AuthTokenFilter 鉴权体系如何协调。重启条件：确定邮箱验证的定位（仅游戏内绑定 or 参与登录鉴权）后
 src/net/mailing/Verifier.java	java-new	30	0	deferred	同 MailManager，随邮箱验证方案一并决定
-src/net/server/handlers/VotePingBackHandler.java	java-new	52	0	pending	
-src/net/server/task/UpdateVotePointTask.java	java-new	143	0	pending	
+src/net/server/handlers/VotePingBackHandler.java	java-new	52	0	rejected	LK 全仓库零引用的死代码：extends javax.xml.ws.spi.http.HttpHandler（JAX-WS SPI，JDK11+ 已从 JDK 移除，Java 21 下需额外依赖才编译得过），handle() 里 JSON 解析与 sendResponseHeaders 全被注释掉，只剩一句 System.out.println。真正记票的 UpdateVotePointTask 并不消费它。与 LichDebugCommand 同档
+src/net/server/task/UpdateVotePointTask.java	java-new	143	0	deferred	缓：它不消费 VotePingBackHandler，而是每 5 分钟主动 GET GTOP_PING_BACK_URL 拉 gtop100 的 XML 并解析 entry/pingusername 记票（LK 侧在 Server.java:932 注册）。三个阻塞：需真实 gtop100 站点注册（url 内含 siteid 与 pass）；其 SQL 的 and email is not null 就是「未绑定邮箱投票无效」这条规则，依赖已 deferred 的 MailManager；读写 accounts.lastVoteTime，BeiDou 无此列。另 LK 用 HeavenMS 的 TimerManager 自建调度，移植要改接 BeiDou 现有调度方式，属重写而非搬运。重启条件：确定接入投票站并拿到 siteid/pass + 邮箱验证方案定案
 src/server/MessageBoard.java	java-new	91	0	pending	
 src/server/gachapon/Leafre.java	java-new	74	0	pending	
 src/server/ultils/RoyalAccount.java	java-new	69	0	pending	

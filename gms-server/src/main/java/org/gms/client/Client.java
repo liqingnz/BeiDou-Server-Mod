@@ -590,6 +590,11 @@ public class Client extends ChannelInboundHandlerAdapter {
             encoderLock.unlock();
         }
 
+        // 这里才是登录成功的唯一边界。放在 login() 里记录有两个问题：
+        // 一是 bcrypt 迁移(-10)与首次接受服务条款(23) 两条真实的成功路径根本不经过那里；
+        // 二是那时 IP封禁/MAC封禁/临时封禁/抢登竞态 都还没判，会把随后被拒的尝试也记进去。
+        // 写在锁外，避免把库操作拖进 encoderLock 的临界区。
+        recordLoginIp();
         return 0;
     }
 
@@ -725,7 +730,6 @@ public class Client extends ChannelInboundHandlerAdapter {
                 case SUCCESS -> {
                     if (loginok == 0) {
                         loginattempt = 0;
-                        recordLoginIp();
                     }
                     yield loginok;
                 }
@@ -741,7 +745,9 @@ public class Client extends ChannelInboundHandlerAdapter {
     }
 
     /**
-     * 记录本次登录成功的来源 IP。
+     * 记录本次登录成功的来源 IP。只能由 {@link #finishLogin()} 在确认登录成功后调用，
+     * 别挪回 {@link #login(String, String, Hwid)}：那里既漏掉 bcrypt 迁移与首次接受服务条款
+     * 两条成功路径，又会把随后被封禁拦下的尝试记成功。
      * <p>
      * accounts.ip 保存最近一次登录用的 IP，每次覆盖；
      * login_history 按 (账号, IP) 唯一，记这个账号用过哪些 IP 以及每个 IP 最近一次使用时间。

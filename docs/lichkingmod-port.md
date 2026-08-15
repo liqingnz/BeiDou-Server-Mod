@@ -266,7 +266,7 @@ LK 的 29 个新指令**全是硬编码中文**，还有一个 `constants/string
 | 0 | Flyway 建 login_history / message_board 两张表 + DO/Mapper | — |
 | 1 | CommandManager + 6 个指令；3 个功能复用 BeiDou 现成脚本 | 0 |
 | 2 | 登录 IP 记录（邮箱验证与改密码已 deferred） | 0 |
-| 3 | 投票奖励系统 | 0 |
+| 3 | ⏸ 投票奖励系统 —— **整批暂缓**，见 §7 | 0 |
 | 4 | 留言板 / 站内邮件 / 签到 / 账号角色删除（`@redeem` 已移出，见批次 8） | 0 |
 | 5 | `AbstractPlayerInteraction` +338 行 + 21 个独有脚本 | 0 |
 | 6 | C 类游戏性/平衡逐条 triage | — |
@@ -572,7 +572,7 @@ LK 的两句 SQL 分工不同，容易看混：
 |---|---|---|
 | 1 | 裸 JDBC → MyBatis-Flex | 仓库规范；LK 那坨手动 `try/finally` 关连接全部消失 |
 | 2 | `INSERT ignore ... VALUES(?,?,?)` → 显式列名 + `ON DUPLICATE KEY UPDATE` | 本表比 LK 原表多了自增主键，按列位置插入会错位；改 upsert 让 `last_login_time` 名副其实 |
-| 3 | **只在 `loginok == 0` 时记录** | LK 放在 `case SUCCESS` 里无条件执行，而该分支的进入条件是 `loginok == 0 \|\| loginok == 4`，**`4` 是密码错误**——LK 会用失败尝试的 IP 覆盖 `accounts.ip` |
+| 3 | **记录点放在 `finishLogin()` 返回 0 之后**（见下「记录点的两次修正」） | LK 放在 `case SUCCESS` 里无条件执行，而该分支的进入条件是 `loginok == 0 \|\| loginok == 4`，**`4` 是密码错误**——LK 会用失败尝试的 IP 覆盖 `accounts.ip` |
 | 4 | `split(":")[0]` 不搬 | BeiDou 的 `Client.getRemoteAddress()` 已是纯 IP（`getHostAddress()`） |
 | 5 | `printStackTrace()` → `log.warn` + i18n | CLAUDE.md 规则 2、5 |
 | 6 | 加 IP 空值 / 字符串 `"null"` 保护 | `getRemoteAddress()` 取不到时返回字符串 `"null"` |
@@ -584,18 +584,104 @@ upsert 用 Mapper 上的 `@Insert` 注解手写——MyBatis-Flex 1.8.9 的 `Bas
 是按主键判断的，而这里要按 `uk_account_ip` 这个业务唯一键 upsert，用不上。仓库里
 `AccountsMapper` 已有同样的自定义 SQL 写法。
 
-> `MapleClient.java` 在清单里仍是 `pending`：它还含角色删除重构（批次 4）与投票日志改动（批次 3）。
+#### 记录点的两次修正
 
-### 批次 3 — 投票奖励
+这条踩了两遍，值得记下来——**「登录成功」在 BeiDou 里不是一个点，是一条链**。
 
-- `net/server/handlers/VotePingBackHandler`（+52）
-- `net/server/task/UpdateVotePointTask`（+143）
-- `UpdateVoteCommand`
-- `Character` 里的投票点数逻辑：每账号每日 1 票、12 点刷新、进商城领取无衰减、
-  未绑定邮箱投票无效、衰减因子 `NX_DECLINE_FACTOR`
+| 版本 | 记录点 | 问题 |
+|---|---|---|
+| LK 原版 | `login()` 的 `case SUCCESS` 无条件执行 | `loginok == 4`（密码错误）也会进这个分支 |
+| 本批初版 | `login()` 里 `loginok == 0` 时 | 见下，两类错误 |
+| **现版** | `finishLogin()` 返回 0 之前 | — |
 
-> BeiDou 已有 `ReadPointsCommand` 和 `gm3/GiveVpCommand`，**要对齐而不是并存重复实现**。
-> 定时任务接入 Spring 调度或 BeiDou 现有的 TimerManager，别照搬 HeavenMS 写法。
+初版只挡住了密码错误，仍然两头不准：
+
+**记了但其实没登进去（假阳性）**。`login()` 返回 0 之后还有三道关卡，
+全在 `LoginPasswordHandler` 里：`hasBannedIP() || hasBannedMac()`（:98）、
+临时封禁未过期（:103）、`finishLogin() != 0` 的抢登竞态（:119）。任何一道拒掉，
+`accounts.ip` 和 `login_history` 都已经被污染了。
+
+**登进去了却没记（假阴性）**，两条真实成功路径压根不经过 `loginok == 0`：
+
+- **bcrypt 迁移**。`bcrypt_migration` 默认为 `true`（`V1.7.0__create_game_config.sql:226`），
+  旧哈希密码 + 已接受条款时 `login()` 返回 **-10**，连
+  `if (loginok == 0 || loginok == 4)` 这个外层判断都进不去就 return 了。
+  Handler 随后把密码重写成 bcrypt 并把 `loginok` 改成 0，登录正常完成。
+- **首次接受服务条款**。`tos == 0` 时返回 23 / -23，同样不进那个分支；
+  实际登录是客户端确认条款后由 **`AcceptToSHandler`** 调 `finishLogin()` 完成的，
+  而那条路径上根本没有记录调用。
+
+修法是把记录挪进 `finishLogin()`：它是唯一的成功边界，且全仓库只有
+`LoginPasswordHandler:116` 和 `AcceptToSHandler:24` 两个调用点，两个都是「成功才继续」。
+一处覆盖两条路径，handler 不用改。写在 `encoderLock` 释放之后，
+避免把库操作拖进临界区。`RelogRequestHandler` 不走 `finishLogin()`，
+那是频道重连不是新登录，不记是对的。
+
+> `MapleClient.java` 在清单里仍是 `pending`：它还含角色删除重构（批次 4）。
+> 原先以为还有投票日志改动，查证后那部分只是格式化提交的位移，无逻辑变更。
+
+### 批次 3 — 投票奖励 ⏸ 整批不做
+
+一行代码没写。**两个 `deferred` + 一个 `rejected`**。
+
+| 文件 | 规模 | 档 |
+|---|---|---|
+| `net/server/task/UpdateVotePointTask` | +143 | `deferred` |
+| `gm4/UpdateVoteCommand` | +49 | `deferred` |
+| `net/server/handlers/VotePingBackHandler` | +52 | **`rejected`**，死代码 |
+
+#### 先厘清这三个文件的关系（初版写反了）
+
+初版把 `UpdateVotePointTask` 写成「`VotePingBackHandler` 的消费方」，**是错的**。实际是：
+
+- **`UpdateVotePointTask` 是主动出站轮询**，不是被动回调的消费方。它每 5 分钟
+  `GET GTOP_PING_BACK_URL`，把 gtop100 返回的 XML 按 `<entry><pingusername>` 解析、
+  给对应账号加 1 点投票点数，LK 侧在 `Server.java:932` 注册。
+- **`VotePingBackHandler` 从头到尾没被用过。** 全仓库零引用，
+  `extends javax.xml.ws.spi.http.HttpHandler`（JAX-WS SPI，JDK 11+ 已从 JDK 移除，
+  Java 21 下要额外加依赖才编译得过），`handle()` 里 JSON 解析和 `sendResponseHeaders`
+  全被注释掉，只剩一句 `System.out.println`。
+
+所以它归 `rejected` 而不是 `deferred` —— 和 `LichDebugCommand` 一个性质，
+是作者留在仓库里的半成品，不存在「将来条件成熟了再搬」这回事。
+
+#### 为什么缓
+
+**1. 投票点数的读写 BeiDou 已经有了，LK 没有增量。**
+`Client.votePoints` / `voteTime` / `getVotePoints` / `addVotePoints` / `useVotePoints`
+是 HeavenMS 上游就有的，两边都有。查 LK 的 `MapleClient.java` diff，这一整段
+**只被 `91235cf0` 那次全局格式化触碰过，没有任何逻辑改动**。BeiDou 侧对应的入口是
+gm0 `ReadPointsCommand`（查点数）和 gm3 `GiveVpCommand`（发点数）。
+
+**2. LK 真正新增的是三条运营策略，每条都卡在外部决策上。**
+
+| 策略 | 卡在哪 |
+|---|---|
+| 衰减因子 `NX_DECLINE_FACTOR`（每票 -20%，最低 80 点券） | 纯运营参数，要先定发放曲线 |
+| 进商城领取豁免衰减 | 同上 |
+| 未绑定邮箱投票无效 | 就是 `UpdateVotePointTask` 那句 SQL 里的 `and email is not null`，依赖 `net/mailing/MailManager`，**批次 2 已 deferred** |
+
+**3. `UpdateVotePointTask` 需要一个真实的投票站。**
+它 GET 的 URL 里带着 gtop100 的 `siteid` 与 `pass`（LK 硬编码了自己的
+`siteid=101331` / `siteid=103015`）。没有自己的站点注册，这个任务拉回来的是别人的票。
+
+**4. 它还读写 `accounts.lastVoteTime`，BeiDou 没有这一列**（`AccountsDO` 只有 `votepoints`）。
+
+**5. 调度属重写而非搬运。** LK 用 HeavenMS 的 `TimerManager` 自建调度，
+BeiDou 要改接现有调度方式。
+
+#### 重启条件
+
+确定是否接入外部投票站（并拿到回调密钥）+ 衰减策略定案 + 邮箱验证方案定案。
+连带的 `check_for_vote_point` / `gtop_ping_back_url` / `nx_decline_factor` /
+`nx_reward_per_vote` 四个 `game_config` 键**一并不插**——按批次 0 的原则，
+提前塞进没有消费代码的运营旋钮对运维是误导。
+
+> **`tools/LogHelper` 不属于本批。** 原计划把它归在批次 3，读 diff 后发现里面
+> **没有任何投票相关代码**：新增的是 `logDropItem` / `logPickupItem` /
+> `logQuestItemGain` / `logMerchantListing` 这批审计日志，外加 `logRoyal` /
+> `logRedeemRoyalReward`（属批次 8）。清单里这行**仍是 `pending`**，
+> 需要时作为独立的「审计日志」项处理。
 
 ### 批次 4 — 留言板 / 邮件 / 签到 / 兑换
 
