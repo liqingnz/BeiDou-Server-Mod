@@ -1,0 +1,2049 @@
+# LichKingMod → BeiDou 移植清单（由 docs/tools/gen-port-manifest.sh 生成，勿手工增删行）
+# 源仓库: /e/Programming/MapleStoryPS/HeavenMS_LichKingMod
+# base=b0671161  head=ac7830b5  跳过的格式化提交=91235cf0
+#
+# 刻意不写生成时间戳：重跑后 git diff 为空 == 分母没变，这个信号比时间戳有用。
+# 上次再生成的时间去 git log 查。
+#
+# disposition 只能是以下五种，收工判据是 pending 归零：
+#   ported        已移植      —— evidence 必须填 BeiDou 侧文件路径
+#   already-fixed BeiDou 已有 —— evidence 必须填 文件:行号（不填就是垃圾桶）
+#   rejected      明确不搬    —— evidence 必须填一句理由
+#   noise         格式化/汉化/垃圾
+#   pending       还没看
+path	area	added	deleted	disposition	evidence
+config.yaml	config	70	46	pending	真配置：倍率/开关/投票回调/召回限制等，须落成 game_config 记录（批次 0）
+configServer.yaml	config	70	46	pending	真配置：倍率/开关/投票回调/召回限制等，须落成 game_config 记录（批次 0）
+configServer2.yaml	config	483	0	pending	真配置：倍率/开关/投票回调/召回限制等，须落成 game_config 记录（批次 0）
+handbook/Cash.txt	handbook	15	5	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Equip/Accessory.txt	handbook	5	5	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Equip/Cape.txt	handbook	4	4	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Equip/Ring.txt	handbook	1	0	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Equip/Weapon.txt	handbook	5	1	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Etc.txt	handbook	19	15	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Map.txt	handbook	31	7	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Mob.txt	handbook	12	0	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/NPC.txt	handbook	3	0	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Quest.txt	handbook	26	2	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Setup.txt	handbook	156	37	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Skill.txt	handbook	1	1	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Use.txt	handbook	245	229	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+src/client/AbstractCharacterListener.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/AbstractMapleCharacterObject.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/BuddyList.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/BuddylistEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/MapleBuffStat.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/MapleCharacter.java	java	277	198	pending	
+src/client/MapleClient.java	java	47	12	pending	
+src/client/MapleDisease.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/MapleDiseaseValueHolder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/MapleFamily.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/MapleFamilyEntitlement.java	java	11	11	pending	
+src/client/MapleFamilyEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/MapleJob.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/MapleMount.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/MapleQuestStatus.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/MapleRing.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/MonsterBook.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/Skill.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/SkillFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/SkillMacro.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/autoban/AutobanFactory.java	java	8	1	pending	
+src/client/autoban/AutobanManager.java	java	67	2	pending	
+src/client/command/Command.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/CommandsExecutor.java	java	220	187	pending	
+src/client/command/commands/gm0/BuyBackCommand.java	java	2	2	pending	
+src/client/command/commands/gm0/DisposeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm0/DropLimitCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm0/GachaCommand.java	java	10	6	pending	
+src/client/command/commands/gm0/HelpCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/JoinEventCommand.java	java	5	5	pending	
+src/client/command/commands/gm0/LeaveEventCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/MapOwnerClaimCommand.java	java	22	15	pending	
+src/client/command/commands/gm0/OnlineCommand.java	java	51	3	pending	
+src/client/command/commands/gm0/RanksCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/RatesCommand.java	java	1	0	pending	
+src/client/command/commands/gm0/ShowRatesCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/StatDexCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/StatIntCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/StatLukCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/StatStrCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/TimeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm0/UptimeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm1/BossHpCommand.java	java	1	1	pending	
+src/client/command/commands/gm1/GotoCommand.java	java	12	5	pending	
+src/client/command/commands/gm1/MobHpCommand.java	java	1	1	pending	
+src/client/command/commands/gm1/WhatDropsFromCommand.java	java	33	16	pending	
+src/client/command/commands/gm1/WhoDropsCommand.java	java	28	17	pending	
+src/client/command/commands/gm2/BuffMapCommand.java	java	5	3	pending	
+src/client/command/commands/gm2/ClearSavedLocationsCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/DcCommand.java	java	4	1	pending	
+src/client/command/commands/gm2/EmpowerMeCommand.java	java	1	1	pending	
+src/client/command/commands/gm2/GachaListCommand.java	java	1	1	pending	
+src/client/command/commands/gm2/IdCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/ItemCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/ItemDropCommand.java	java	1	1	pending	
+src/client/command/commands/gm2/JailCommand.java	java	3	1	pending	
+src/client/command/commands/gm2/LootCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/MaxSkillCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/ReachCommand.java	java	2	1	pending	
+src/client/command/commands/gm2/RechargeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/SearchCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/SetSlotCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/SetStatCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/SummonCommand.java	java	25	22	pending	
+src/client/command/commands/gm2/UnJailCommand.java	java	3	1	pending	
+src/client/command/commands/gm2/WarpAreaCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/WarpCommand.java	java	1	1	pending	
+src/client/command/commands/gm2/WarpMapCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm2/WhereaMiCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm3/BanCommand.java	java	10	8	pending	
+src/client/command/commands/gm3/DebuffCommand.java	java	2	1	pending	
+src/client/command/commands/gm3/FlyCommand.java	java	4	1	pending	
+src/client/command/commands/gm3/GiveMesosCommand.java	java	6	4	pending	
+src/client/command/commands/gm3/GiveNxCommand.java	java	14	8	pending	
+src/client/command/commands/gm3/GiveRpCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm3/GiveVpCommand.java	java	3	2	pending	
+src/client/command/commands/gm3/MaxHpMpCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm3/MusicCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm3/NoticeCommand.java	java	1	1	pending	
+src/client/command/commands/gm3/OnlineTwoCommand.java	java	8	8	pending	
+src/client/command/commands/gm3/QuestCompleteCommand.java	java	1	0	pending	
+src/client/command/commands/gm3/QuestResetCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm3/QuestStartCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm3/ReloadMapCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm3/StartEventCommand.java	java	6	7	pending	
+src/client/command/commands/gm3/TimerMapCommand.java	java	4	3	pending	
+src/client/command/commands/gm4/BossDropRateCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm4/PapCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm4/PmobCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm4/PmobRemoveCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm4/PnpcCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm4/PnpcRemoveCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm4/ProItemCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm4/SetEqStatCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm5/DebugCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm5/IpListCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm5/ShowSessionsCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm6/ServerAddChannelCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm6/ServerAddWorldCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm6/ServerRemoveChannelCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm6/ServerRemoveWorldCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/command/commands/gm6/ShutdownCommand.java	java	9	7	pending	
+src/client/command/commands/gm6/SupplyRateCouponCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/creator/CharacterFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/creator/CharacterFactoryRecipe.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/creator/novice/BeginnerCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/creator/novice/LegendCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/creator/novice/NoblesseCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/creator/veteran/BowmanCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/creator/veteran/MagicianCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/creator/veteran/PirateCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/creator/veteran/ThiefCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/creator/veteran/WarriorCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/inventory/Equip.java	java	31	24	pending	
+src/client/inventory/Item.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/inventory/ItemFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/inventory/MapleInventory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/inventory/MapleInventoryProof.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/inventory/MaplePet.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/inventory/ModifyInventory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/inventory/PetDataFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/inventory/manipulator/MapleCashidGenerator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/inventory/manipulator/MapleInventoryManipulator.java	java	19	1	pending	
+src/client/inventory/manipulator/MapleKarmaManipulator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/keybind/MapleQuickslotBinding.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/newyear/NewYearCardRecord.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/processor/action/BuybackProcessor.java	java	1	1	pending	
+src/client/processor/action/MakerProcessor.java	java	8	8	pending	
+src/client/processor/action/PetAutopotProcessor.java	java	2	2	pending	
+src/client/processor/action/SpawnPetProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/processor/npc/DueyProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/processor/npc/FredrickProcessor.java	java	2	2	pending	
+src/client/processor/npc/StorageProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/processor/stat/AssignAPProcessor.java	java	3	3	pending	
+src/client/processor/stat/AssignSPProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/status/MonsterStatus.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/client/status/MonsterStatusEffect.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/config/ServerConfig.java	java	20	8	pending	
+src/config/WorldConfig.java	java	3	1	pending	
+src/config/YamlConfig.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/game/ExpTable.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/game/GameConstants.java	java	19	3	pending	
+src/constants/game/ScriptableNPCConstants.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/inventory/EquipSlot.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/inventory/EquipType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/inventory/ItemConstants.java	java	6	2	pending	
+src/constants/net/OpcodeConstants.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/net/ServerConstants.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Aran.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Archer.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Assassin.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Bandit.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Beginner.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Bishop.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/BlazeWizard.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Bowmaster.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Brawler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Buccaneer.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/ChiefBandit.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Corsair.java	java	1	1	pending	
+src/constants/skills/Crossbowman.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Crusader.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/DarkKnight.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/DawnWarrior.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/DragonKnight.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Evan.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/FPArchMage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/FPMage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/FPWizard.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Fighter.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/GM.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Gunslinger.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Hermit.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Hero.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Hunter.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/ILArchMage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/ILMage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/ILWizard.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Legend.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Magician.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Marauder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Marksman.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/NightLord.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/NightWalker.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Noblesse.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Outlaw.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Page.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Paladin.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Pirate.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Priest.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Ranger.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Rogue.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Shadower.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Sniper.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Spearman.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/SuperGM.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/ThunderBreaker.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/Warrior.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/WhiteKnight.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/skills/WindArcher.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/string/CharsetConstants.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/constants/string/LanguageConstants.java	java	28	13	pending	
+src/net/AbstractMaplePacketHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/MaplePacketHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/MapleServerHandler.java	java	9	2	pending	
+src/net/mina/MaplePacketDecoder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/mina/MaplePacketEncoder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/opcodes/RecvOpcode.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/opcodes/SendOpcode.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/PlayerBuffStorage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/PlayerBuffValueHolder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/PlayerCoolDownValueHolder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/PlayerDiseaseValueHolder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/PlayerStorage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/Server.java	java	39	67	pending	
+src/net/server/audit/LockCollector.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/ThreadTracker.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/MonitoredLockType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/MonitoredReadLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/MonitoredReentrantLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/MonitoredReentrantReadWriteLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/MonitoredWriteLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/active/TrackerReadLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/active/TrackerReentrantLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/active/TrackerWriteLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/empty/AbstractEmptyLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/empty/EmptyReadLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/empty/EmptyReentrantLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/empty/EmptyWriteLock.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/factory/MonitoredReadLockFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/factory/MonitoredReentrantLockFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/audit/locks/factory/MonitoredWriteLockFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/Channel.java	java	6	6	pending	
+src/net/server/channel/CharacterIdChannelPair.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/AbstractDealDamageHandler.java	java	18	12	pending	
+src/net/server/channel/handlers/AbstractMovementPacketHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/AcceptFamilyHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/AdminChatHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/AdminCommandHandler.java	java	1	1	pending	
+src/net/server/channel/handlers/AllianceOperationHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/AranComboHandler.java	java	12	1	pending	
+src/net/server/channel/handlers/AutoAggroHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/AutoAssignHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/BBSOperationHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/BeholderHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/BuddylistModifyHandler.java	java	4	4	pending	
+src/net/server/channel/handlers/CancelBuffHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/CancelChairHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/CashOperationHandler.java	java	30	5	pending	
+src/net/server/channel/handlers/CashShopSurpriseHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/ChangeChannelHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/ChangeMapHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/ChangeMapSpecialHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/CharInfoRequestHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/ClickGuideHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/CloseChalkboardHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/CloseRangeDamageHandler.java	java	6	4	pending	
+src/net/server/channel/handlers/CoconutHandler.java	java	2	2	pending	
+src/net/server/channel/handlers/CouponCodeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/DamageSummonHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/DenyAllianceRequestHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/DenyGuildRequestHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/DenyPartyRequestHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/DistributeAPHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/DistributeSPHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/DoorHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/DueyHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/EnterCashShopHandler.java	java	20	2	pending	
+src/net/server/channel/handlers/EnterMTSHandler.java	java	21	6	pending	
+src/net/server/channel/handlers/FaceExpressionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/FamilyAddHandler.java	java	1	1	pending	
+src/net/server/channel/handlers/FamilyPreceptsHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/FamilySeparateHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/FamilySummonResponseHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/FamilyUseHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/FieldDamageMobHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/FredrickHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/GeneralChatHandler.java	java	2	2	pending	
+src/net/server/channel/handlers/GiveFameHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/GrenadeEffectHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/GuildOperationHandler.java	java	13	10	pending	
+src/net/server/channel/handlers/HealOvertimeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/HiredMerchantRequest.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/InnerPortalHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/InventoryMergeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/InventorySortHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/ItemMoveHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/ItemPickupHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/ItemRewardHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/KeymapChangeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/LeftKnockbackHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MTSHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MagicDamageHandler.java	java	6	3	pending	
+src/net/server/channel/handlers/MakerSkillHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MesoDropHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MobBanishPlayerHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MobDamageMobFriendlyHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MobDamageMobHandler.java	java	3	2	pending	
+src/net/server/channel/handlers/MonsterCarnivalHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MoveDragonHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MoveLifeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MovePetHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MovePlayerHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MoveSummonHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/MultiChatHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/NPCAnimationHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/NPCMoreTalkHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/NPCShopHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/NPCTalkHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/NewYearCardHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/NoteActionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/OpenFamilyHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/OpenFamilyPedigreeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/OwlWarpHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/PartyOperationHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/PartySearchRegisterHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/PartySearchStartHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/PartySearchUpdateHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/PetAutoPotHandler.java	java	1	1	pending	
+src/net/server/channel/handlers/PetChatHandler.java	java	3	3	pending	
+src/net/server/channel/handlers/PetCommandHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/PetExcludeItemsHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/PetFoodHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/PetLootHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/PlayerInteractionHandler.java	java	16	13	pending	
+src/net/server/channel/handlers/PlayerLoggedinHandler.java	java	8	3	pending	
+src/net/server/channel/handlers/PlayerMapTransitionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/QuestActionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/QuickslotKeyMappedModifiedHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/RPSActionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/RaiseIncExpHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/RaiseUIStateHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/RangedAttackHandler.java	java	12	8	pending	
+src/net/server/channel/handlers/ReactorHitHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/RemoteGachaponHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/RemoteStoreHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/ReportHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/RingActionHandler.java	java	3	3	pending	
+src/net/server/channel/handlers/ScriptedItemHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/ScrollHandler.java	java	1	0	pending	
+src/net/server/channel/handlers/SkillBookHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/SkillMacroHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/SnowballHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/SpawnPetHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/SpecialMoveHandler.java	java	8	2	pending	
+src/net/server/channel/handlers/SpouseChatHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/StorageHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/SummonDamageHandler.java	java	1	1	pending	
+src/net/server/channel/handlers/TakeDamageHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/TouchReactorHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/TouchingCashShopHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/TransferNameHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/TransferNameResultHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/TransferWorldHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/TrockAddMapHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/UseCashItemHandler.java	java	5	5	pending	
+src/net/server/channel/handlers/UseCatchItemHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/UseChairHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/UseGachaExpHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/UseHammerHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/UseItemHandler.java	java	18	0	pending	
+src/net/server/channel/handlers/UseMapleLifeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/UseMountFoodHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/UseOwlOfMinervaHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/UseSolomonHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/UseSummonBagHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/WeddingHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/WeddingTalkHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/WeddingTalkMoreHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/channel/handlers/WhisperHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/login/LoginStorage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/login/MapleLoginBypassCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/matchchecker/AbstractMatchCheckerListener.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/matchchecker/MapleMatchCheckerCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/matchchecker/MatchCheckerListenerFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/matchchecker/MatchCheckerListenerRecipe.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/matchchecker/listener/MatchCheckerCPQChallenge.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/matchchecker/listener/MatchCheckerGuildCreation.java	java	3	3	pending	
+src/net/server/coordinator/partysearch/MaplePartySearchCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/partysearch/PartySearchCharacter.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/partysearch/PartySearchEchelon.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/partysearch/PartySearchStorage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/session/MapleSessionCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/world/MapleEventRecallCoordinator.java	java	9	2	pending	
+src/net/server/coordinator/world/MapleInviteCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/coordinator/world/MapleMonsterAggroCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/guild/MapleAlliance.java	java	1	1	pending	
+src/net/server/guild/MapleGuild.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/guild/MapleGuildCharacter.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/guild/MapleGuildResponse.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/AcceptToSHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/CharSelectedHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/CharSelectedWithPicHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/CharlistRequestHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/CreateCharHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/DeleteCharHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/LoginPasswordHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/RegisterPicHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/RegisterPinHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/ServerStatusRequestHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/ServerlistRequestHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/SetGenderHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/ViewAllCharHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/ViewAllCharRegisterPicHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/ViewAllCharSelectedHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/handlers/login/ViewAllCharSelectedWithPicHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/BaseScheduler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/BaseService.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/SchedulerListener.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/Service.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/ServiceType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/ServicesManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/task/channel/EventService.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/task/channel/FaceExpressionService.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/task/channel/MobAnimationService.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/task/channel/MobClearSkillService.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/task/channel/MobMistService.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/task/channel/MobStatusService.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/task/channel/OverallService.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/task/world/CharacterSaveService.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/type/ChannelServices.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/services/type/WorldServices.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/BaseTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/BossLogTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/CharacterAutosaverTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/CharacterDiseaseTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/CouponTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/DueyFredrickTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/EventRecallCoordinatorTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/FamilyDailyResetTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/FishingTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/HiredMerchantTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/InvitationTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/LoginCoordinatorTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/LoginStorageTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/MapOwnershipTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/MountTirednessTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/PartySearchTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/PetFullnessTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/RankingCommandTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/RankingLoginTask.java	java	6	3	pending	
+src/net/server/task/ReleaseLockTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/RespawnTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/ServerMessageTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/TimedMapObjectTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/TimeoutTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/task/WeddingReservationTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/world/MapleMessenger.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/world/MapleParty.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/net/server/world/MaplePartyCharacter.java	java	5	0	pending	
+src/net/server/world/World.java	java	17	6	pending	
+src/provider/MapleCanvas.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/MapleData.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/MapleDataDirectoryEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/MapleDataEntity.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/MapleDataEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/MapleDataFileEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/MapleDataProvider.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/MapleDataProviderFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/MapleDataTool.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/wz/FileStoredPngMapleCanvas.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/wz/ListWZFile.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/wz/PNGMapleCanvas.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/wz/WZDirectoryEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/wz/WZFile.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/wz/WZIMGEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/wz/WZIMGFile.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/wz/WZTool.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/wz/XMLDomMapleData.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/provider/wz/XMLWZFile.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/AbstractPlayerInteraction.java	java	338	15	pending	
+src/scripting/AbstractScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/event/EventInstanceManager.java	java	30	0	pending	
+src/scripting/event/EventManager.java	java	12	9	pending	
+src/scripting/event/EventScheduledFuture.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/event/EventScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/event/scheduler/EventScriptScheduler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/item/ItemScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/item/ItemScriptMethods.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/map/MapScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/map/MapScriptMethods.java	java	10	10	pending	
+src/scripting/npc/NPCConversationManager.java	java	30	13	pending	
+src/scripting/npc/NPCScriptManager.java	java	9	0	pending	
+src/scripting/portal/PortalPlayerInteraction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/portal/PortalScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/quest/QuestActionManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/quest/QuestScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/scripting/reactor/ReactorActionManager.java	java	1	1	pending	
+src/scripting/reactor/ReactorScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/CashShop.java	java	3	2	pending	
+src/server/DueyPackage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/MTSItemInfo.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/MakerItemFactory.java	java	2	1	pending	
+src/server/MapleItemInformationProvider.java	java	154	28	pending	
+src/server/MapleMarriage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/MapleShop.java	java	4	2	pending	
+src/server/MapleShopFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/MapleShopItem.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/MapleSkillbookInformationProvider.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/MapleStatEffect.java	java	20	5	pending	
+src/server/MapleStorage.java	java	1	1	pending	
+src/server/MapleStorageInventory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/MapleTrade.java	java	22	22	pending	
+src/server/ThreadManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/TimerManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/TimerManagerMBean.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/events/MapleEvents.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/events/RescueGaga.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/events/gm/MapleCoconut.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/events/gm/MapleCoconuts.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/events/gm/MapleEvent.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/events/gm/MapleFitness.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/events/gm/MapleOla.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/events/gm/MapleOxQuiz.java	java	2	2	pending	
+src/server/events/gm/MapleSnowball.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/expeditions/MapleExpedition.java	java	63	39	pending	
+src/server/expeditions/MapleExpeditionBossLog.java	java	17	9	pending	
+src/server/expeditions/MapleExpeditionType.java	java	26	7	pending	
+src/server/gachapon/ElNath.java	java	9	4	pending	
+src/server/gachapon/Ellinia.java	java	12	4	pending	
+src/server/gachapon/GachaponItems.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/gachapon/Global.java	java	18	4	pending	
+src/server/gachapon/Henesys.java	java	6	4	pending	
+src/server/gachapon/KerningCity.java	java	13	6	pending	
+src/server/gachapon/Ludibrium.java	java	1	1	pending	
+src/server/gachapon/MapleGachapon.java	java	50	44	pending	
+src/server/gachapon/MushroomShrine.java	java	7	7	pending	
+src/server/gachapon/NautilusHarbor.java	java	4	1	pending	
+src/server/gachapon/NewLeafCity.java	java	12	4	pending	
+src/server/gachapon/Perion.java	java	5	5	pending	
+src/server/gachapon/ShowaSpaFemale.java	java	25	12	pending	
+src/server/gachapon/ShowaSpaMale.java	java	25	13	pending	
+src/server/gachapon/Sleepywood.java	java	12	21	pending	
+src/server/life/ChangeableStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/Element.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/MapleLifeFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/MapleMonster.java	java	35	31	pending	
+src/server/life/MapleMonsterInformationProvider.java	java	4	3	pending	
+src/server/life/MapleMonsterStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/MapleNPCStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/MaplePlayerNPC.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/MaplePlayerNPCFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/MobAttackInfo.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/MobAttackInfoFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/MobSkill.java	java	3	0	pending	
+src/server/life/MobSkillFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/MonsterDropEntry.java	java	3	1	pending	
+src/server/life/MonsterGlobalDropEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/MonsterListener.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/SpawnPoint.java	java	15	2	pending	
+src/server/life/positioner/MaplePlayerNPCPodium.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/life/positioner/MaplePlayerNPCPositioner.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/loot/MapleLootInventory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/loot/MapleLootManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/AbstractAnimatedMapleMapObject.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/AbstractMapleMapObject.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/AnimatedMapleMapObject.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/FieldLimit.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapMonitor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleDoor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleDoorObject.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleDragon.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleFoothold.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleFootholdTree.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleGenericPortal.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleHiredMerchant.java	java	5	2	pending	
+src/server/maps/MapleKite.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleMap.java	java	91	40	pending	
+src/server/maps/MapleMapFactory.java	java	3	1	pending	
+src/server/maps/MapleMapItem.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleMapManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleMapObject.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleMiniDungeon.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleMiniDungeonInfo.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleMiniGame.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleMist.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MaplePlayerShop.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MaplePlayerShopItem.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MaplePortal.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleReactor.java	java	3	1	pending	
+src/server/maps/MapleReactorFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleReactorStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleSummon.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/MapleTVEffect.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/ReactorDropEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/maps/SavedLocation.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/minigame/MapleRockPaperScissor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/movement/AbsoluteLifeMovement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/movement/ChairMovement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/movement/ChangeEquip.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/movement/JumpDownMovement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/movement/LifeMovement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/movement/LifeMovementFragment.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/movement/RelativeLifeMovement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/movement/TeleportMovement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/partyquest/AriantColiseum.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/partyquest/GuardianSpawnPoint.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/partyquest/MapleCarnivalFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/partyquest/MonsterCarnival.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/partyquest/MonsterCarnivalParty.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/partyquest/PartyQuest.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/partyquest/Pyramid.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/MapleQuest.java	java	24	0	pending	
+src/server/quest/MapleQuestActionType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/MapleQuestRequirementType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/BuffAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/ExpAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/FameAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/InfoAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/ItemAction.java	java	3	3	pending	
+src/server/quest/actions/MapleQuestAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/MesoAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/NextQuestAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/PetSkillAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/PetSpeedAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/PetTamenessAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/QuestAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/actions/SkillAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/BuffExceptRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/BuffRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/CompletedQuestRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/EndDateRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/FieldEnterRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/InfoExRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/InfoNumberRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/IntervalRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/ItemRequirement.java	java	1	1	pending	
+src/server/quest/requirements/JobRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/MapleQuestRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/MaxLevelRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/MesoRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/MinLevelRequirement.java	java	3	0	pending	
+src/server/quest/requirements/MinTamenessRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/MobRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/MonsterBookCountRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/NpcRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/PetRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/QuestRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/server/quest/requirements/ScriptRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/tools/ArrayMap.java	java	3	0	pending	
+src/tools/AutoJCE.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/tools/BCrypt.java	java	73	57	pending	
+src/tools/DatabaseConnection.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/tools/FilePrinter.java	java	11	0	pending	
+src/tools/HexTool.java	java	24	10	pending	
+src/tools/IntervalBuilder.java	java	3	2	pending	
+src/tools/LogHelper.java	java	66	16	pending	
+src/tools/LongTool.java	java	5	11	pending	
+src/tools/MapleAESOFB.java	java	8	4	pending	
+src/tools/MapleLogger.java	java	1	1	pending	
+src/tools/MaplePacketCreator.java	java	112	122	pending	
+src/tools/Pair.java	java	5	11	pending	
+src/tools/Randomizer.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/tools/StringUtil.java	java	12	3	pending	
+src/tools/data/input/ByteArrayByteStream.java	java	2	0	pending	
+src/tools/data/input/ByteInputStream.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/tools/data/input/GenericLittleEndianAccessor.java	java	15	6	pending	
+src/tools/data/input/GenericSeekableLittleEndianAccessor.java	java	3	1	pending	
+src/tools/data/input/InputStreamByteStream.java	java	3	0	pending	
+src/tools/data/input/LittleEndianAccessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/tools/data/input/RandomAccessByteStream.java	java	2	0	pending	
+src/tools/data/input/SeekableInputStreamBytestream.java	java	1	2	pending	
+src/tools/data/input/SeekableLittleEndianAccessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
+src/tools/data/output/BAOSByteOutputStream.java	java	2	0	pending	
+src/tools/data/output/ByteOutputStream.java	java	1	1	pending	
+src/tools/data/output/GenericLittleEndianWriter.java	java	52	9	pending	
+src/tools/data/output/LittleEndianWriter.java	java	1	1	pending	
+src/tools/data/output/MaplePacketLittleEndianWriter.java	java	2	0	pending	
+src/tools/exceptions/EmptyMovementException.java	java	0	1	pending	
+src/tools/exceptions/EventInstanceInProgressException.java	java	0	1	pending	
+src/tools/packets/Fishing.java	java	3	4	pending	
+src/tools/packets/Wedding.java	java	21	8	pending	
+src/client/command/commands/CommandManager.java	java-new	89	6	pending	
+src/client/command/commands/gm0/BossDmgAnalysisCommand.java	java-new	75	0	pending	
+src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	pending	
+src/client/command/commands/gm0/DetectCommand.java	java-new	78	0	pending	
+src/client/command/commands/gm0/MapDropsCommand.java	java-new	88	0	pending	
+src/client/command/commands/gm0/QianDaoCommand.java	java-new	86	0	pending	
+src/client/command/commands/gm0/RedeemCommand.java	java-new	90	0	pending	
+src/client/command/commands/gm0/RetrieveCommand.java	java-new	84	0	pending	
+src/client/command/commands/gm0/RollCommand.java	java-new	51	0	pending	
+src/client/command/commands/gm0/SellInvCommand.java	java-new	101	9	pending	
+src/client/command/commands/gm0/VerifyEmailCommand.java	java-new	45	0	pending	
+src/client/command/commands/gm1/WhoDrops2Command.java	java-new	103	0	pending	
+src/client/command/commands/gm2/CosPreviewCommand.java	java-new	119	0	pending	
+src/client/command/commands/gm2/ItemDropTimedCommand.java	java-new	111	0	pending	
+src/client/command/commands/gm2/PatrolCommand.java	java-new	118	0	pending	
+src/client/command/commands/gm2/RecallCommand.java	java-new	85	0	pending	
+src/client/command/commands/gm4/DeleteAccountCommand.java	java-new	108	0	pending	
+src/client/command/commands/gm4/DeleteCharacterCommand.java	java-new	95	0	pending	
+src/client/command/commands/gm4/DropProEquipCommand.java	java-new	90	0	pending	
+src/client/command/commands/gm4/GMBotCommand.java	java-new	123	9	pending	
+src/client/command/commands/gm4/LichDebugCommand.java	java-new	58	7	pending	
+src/client/command/commands/gm4/MobRateCommand.java	java-new	52	0	pending	
+src/client/command/commands/gm4/ProEquipCommand.java	java-new	89	0	pending	
+src/client/command/commands/gm4/RateEventCommand.java	java-new	88	0	pending	
+src/client/command/commands/gm4/SendMailCommand.java	java-new	51	0	pending	
+src/client/command/commands/gm4/UpdateVoteCommand.java	java-new	49	0	pending	
+src/client/command/commands/gm5/ReloadConfigCommand.java	java-new	40	0	pending	
+src/client/command/commands/gm5/RoyalCommand.java	java-new	114	0	pending	
+src/client/command/commands/gm5/TestScriptCommand.java	java-new	58	0	pending	
+src/constants/string/CNLanguageConstants.java	java-new	41	0	pending	
+src/net/mailing/MailConst.java	java-new	15	0	pending	
+src/net/mailing/MailManager.java	java-new	131	0	pending	
+src/net/mailing/Verifier.java	java-new	30	0	pending	
+src/net/server/handlers/VotePingBackHandler.java	java-new	52	0	pending	
+src/net/server/task/UpdateVotePointTask.java	java-new	143	0	pending	
+src/server/MessageBoard.java	java-new	91	0	pending	
+src/server/gachapon/Leafre.java	java-new	74	0	pending	
+src/server/ultils/RoyalAccount.java	java-new	69	0	pending	
+HeavenMS_LichKingMod.iml	other	22	0	noise	IDE 工程文件
+build.xml	other	73	0	noise	Ant 构建脚本；BeiDou 用 Maven
+cores/javax.mail-1.6.2.jar	other	0	0	pending	第三方依赖 jar；BeiDou 用 Maven 声明依赖而非入库
+helperTools/questWriter.js	other	11	0	pending	未分类，需人工判定
+hs_err_pid15580.log	other	341	0	noise	JVM 崩溃/回放日志，误提交的垃圾文件
+launch.bat	other	2	2	pending	未分类，需人工判定
+replay_pid15580.log	other	1270	0	noise	JVM 崩溃/回放日志，误提交的垃圾文件
+tools/MapleArrowFetcher/MapleArrowFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleBossHpBarFetcher/MapleBossHpBarFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleCashCosmeticsChecker/MapleCashCosmeticsChecker.iml	other	11	0	noise	IDE 工程文件
+tools/MapleCashCosmeticsFetcher/MapleCashCosmeticsFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleCashDropFetcher/MapleCashDropFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleCashVegaChecker/MapleCashVegaChecker.iml	other	11	0	noise	IDE 工程文件
+tools/MapleCodeCouponGenerator/MapleCodeCouponGenerator.iml	other	11	0	noise	IDE 工程文件
+tools/MapleCouponInstaller/MapleCouponInstaller.iml	other	11	0	noise	IDE 工程文件
+tools/MapleDojoUpdater/MapleDojoUpdater.iml	other	11	0	noise	IDE 工程文件
+tools/MapleEmptyItemWzChecker/MapleEmptyItemWzChecker.iml	other	11	0	noise	IDE 工程文件
+tools/MapleEquipmentOmnileveler/MapleEquipmentOmnileveler.iml	other	11	0	noise	IDE 工程文件
+tools/MapleEventMethodFiller/MapleEventMethodFiller.iml	other	16	0	noise	IDE 工程文件
+tools/MapleGachaponItemidRetriever/MapleGachaponItemidRetriever.iml	other	11	0	noise	IDE 工程文件
+tools/MapleIdRetriever/MapleIdRetriever.iml	other	11	0	noise	IDE 工程文件
+tools/MapleInvalidItemIdFetcher/MapleInvalidItemIdFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleInvalidItemWithNoNameFetcher/MapleInvalidItemWithNoNameFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleMapFieldLimitChecker/MapleMapFieldLimitChecker.iml	other	11	0	noise	IDE 工程文件
+tools/MapleMapInfoRetriever/MapleMapInfoRetriever.iml	other	16	0	noise	IDE 工程文件
+tools/MapleMesoFetcher/MapleMesoFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleMobBookIndexer/MapleMobBookIndexer.iml	other	11	0	noise	IDE 工程文件
+tools/MapleMobBookUpdate/MapleMobBookUpdate.iml	other	11	0	noise	IDE 工程文件
+tools/MapleQuestItemCountFetcher/MapleQuestItemCountFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleQuestItemFetcher/MapleQuestItemFetcher.iml	other	16	0	noise	IDE 工程文件
+tools/MapleQuestMesoFetcher/MapleQuestMesoFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleQuestlineFetcher/MapleQuestlineFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleReactorDropFetcher/MapleReactorDropFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleSkillMakerFetcher/MapleSkillMakerFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleSkillMakerReagentIndexer/MapleSkillMakerReagentIndexer.iml	other	11	0	noise	IDE 工程文件
+tools/MapleSkillbookChanceFetcher/MapleSkillbookChanceFetcher.iml	other	11	0	noise	IDE 工程文件
+tools/MapleSkillbookStackUpdate/MapleSkillbookStackUpdate.iml	other	11	0	noise	IDE 工程文件
+tools/MapleWorldmapChecker/MapleWorldmapChecker.iml	other	11	0	noise	IDE 工程文件
+tools/SpiderDropFetcher/SpiderDropFetcher.iml	other	11	0	noise	IDE 工程文件
+scripts/event/AmoriaPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/AreaBossDyle.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossEliza1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossFaust1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossFaust2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossKimera.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossKingClang.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossKingSageCat.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossLeviathan.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossMano.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossNineTailedFox.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossSeruf.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossSnackBar.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossStumpy.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossTaeRoon.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossTimer1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossTimer2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossTimer3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/AreaBossZeno.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/BalrogBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/BalrogBattle_Easy.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/Boats.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/BossRushPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/CWKPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/CafePQ_1.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/CafePQ_2.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/CafePQ_3.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/CafePQ_4.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/CafePQ_5.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/CafePQ_6.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/DelliBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/ElementalBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/EllinPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/ElnathPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/GuildQuest.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/HenesysPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/HolidayPQ_1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/HolidayPQ_2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/HolidayPQ_3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/HorntailBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/HorntailPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/KerningPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/KerningTrain.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/LatanicaBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/LudiMazePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/LudiPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/MK_PrimeMinister.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/MK_PrimeMinister2.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/MagatiaPQ_A.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/MagatiaPQ_Z.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/OrbisPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/PapulatusBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/PinkBeanBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/PiratePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/RescueGaga.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/ScargaBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/ShowaBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/Subway.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/TD_Battle1.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/TD_Battle2.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/TD_Battle3.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/TD_Battle4.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/TD_Battle5.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/TreasurePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/ZakumBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/ZakumPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/item/killarmush.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/item/removethorns.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/map/onUserEnter/dojang_Msg.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/map/onUserEnter/explorationPoint.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1002000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1002002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1002003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1002004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1002006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1002007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1002100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1012103.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1012104.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1012105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012112.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012113.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012114.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012117.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1012118.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1012119.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/10200.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/10201.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/10202.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/10203.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/10204.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1022000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1022001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1022003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1022004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1022101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1022104.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1022105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1032000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1032004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1032005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1032007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1032100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1032113.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1032114.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1052001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1052003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1052007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1052012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1052013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1052014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052015.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1052100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052107.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052113.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1052114.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1052115.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1052125.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1061000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1061006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1061007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1061009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1061010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1061012.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1061014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1061018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1061100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1063000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1063001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1063002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1063016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1063017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1072000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1072001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1072002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1072003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1072004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1072005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1072006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1072007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1072008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1081001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1090000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1091003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1092000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1092007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1092008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1092010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1092014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1092015.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1092018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1092090.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1092091.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1092094.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1092095.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1095001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1095002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1100003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1100004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1100005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1100006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1100007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1100008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1101001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1101008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1102001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1102002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1102003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1104000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1104100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1104101.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1104102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1104103.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1104104.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1200003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1200004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1202000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1202009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1202010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1204001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1209000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1209002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1209003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/12101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1300001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1300006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/1300013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2010005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2012000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2012009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2012013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2012015.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2012021.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012022.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2012024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2012025.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2013000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2020000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2020002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2020005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2020008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2020009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2020010.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2020011.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2020013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2023000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2030000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2030006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2030006_old.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2030008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2030010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2030013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2032001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2032002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040016.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040019.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040020.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040021.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040022.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040024.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040026.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040027.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040028.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040030.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040031.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040034.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040035.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040036.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040037.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040038.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040039.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040040.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040041.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040042.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040043.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040044.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040045.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040046.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040047.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040048.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040050.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2040052.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2041000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2041001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2041007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2041009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2041010.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2041013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2041023.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2041024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2041025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2041029.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2042000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2042001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2042002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2042005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2050014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2050015.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2050016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2050017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2050018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2050019.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2060005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2060009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2080000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081200.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081300.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081400.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081500.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2082000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2082001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2082002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2082003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2082004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2082014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2083000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2083001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2083002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2083004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2083006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2090004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2090005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2090100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2090101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2090102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2090103.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2090104.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2091005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2091009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2093004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2094000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2094001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2094002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2095000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2096000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2100001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2100005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2100006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2100007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2100008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2100009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2101003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2101006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2101007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2101008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2101011.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2101013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2101014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2101017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2102001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2102002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2103000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2103002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2110005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2111000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2111003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2111008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2111009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2111010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2111013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2111014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2111015.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2111017.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2111018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2111019.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2111026.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2112000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2112001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2112003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2112004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2112005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2112006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2112007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2112010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2112011.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2112013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2112016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2112018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2131000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2131001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2131002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2131003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2131005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2131006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2131007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2132000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2132001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2132002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2132003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2133000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2133001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2133002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2133004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2141001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2141002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/22000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9000000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000011.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000019.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000020.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9000021.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9000036.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9000037.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000038.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9000040.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9000041.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9001105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9010001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9010002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9010003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9010004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9010021.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9020000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9020001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9020002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9030000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9040000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9040001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9040002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9040005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9040011.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9103001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9103002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9103003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9105004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9110002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9120003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120010.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120015.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120023.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9120100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120102.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120103.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120200.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9120201.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120202.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9120203.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9200100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9200101.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9200102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201015.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201016.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201018.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201019.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201022.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201023.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201026.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201027.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201039.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201043.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201044.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201045.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201047.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201048.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201051.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201052.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201054.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201056.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201057.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201061.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201062.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201063.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201064.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201065.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201068.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201069.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201070.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201071.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201072.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201073.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201082.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201083.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201093.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201094.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201095.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201096.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201097.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201099.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201106.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201113.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201123.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201124.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201125.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201126.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201127.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201128.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201129.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201130.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201131.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201132.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201133.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9201134.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201135.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201142.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201143.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9209000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9209000_old.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9209001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9220005_old.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9220018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9220019.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9220020.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9270017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9270018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9270023.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9270024.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9270025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9270026.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9270031.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9270033.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9270036.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9270037.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9270038.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9270041.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9270047.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310031.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310032.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310036.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310037.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310039.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310044.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310050.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9900000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9977777.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/MagatiaPassword.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/PupeteerPassword.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/ThiefPassword.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/commands.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/gachapon.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/gachaponInfo.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/mapleTV.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/scroll_generator.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/waterOfLife.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/Depart_ToKerning.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/Depart_goFoward0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/Depart_goFoward1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_drakeroom.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_error.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_golem.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_high.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_mushroom.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_pig.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_protect.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_rabbit.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_remember.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_roundTable.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_sand.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/MD_treasure.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/Populatus00.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/TD_Boss_enter.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/TD_MC_enterboss2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/TD_MC_first.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/TD_neo_inTree.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/Zakum03.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/Zakum05.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/advice00.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/advice02.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/advice03.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/advice05.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/advice06.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/advice07.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/advice08.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/advice09.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/adviceMap.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/apqClosed.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/apqDoor.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/aranTutorGuide0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/ariant_Agit.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/ariant_castle.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/ariant_queens.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/balog_end.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/captinsg00.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/curseforest.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/davy_next0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/davy_next1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/davy_next2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/davy_next3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/davy_next4.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/dojang_next.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/dojang_tuto.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/dojang_up.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/dragonNest.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/elevator.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/end_cow.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterBackStreet.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/enterDisguise0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterDisguise1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterDisguise2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterDisguise3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterDisguise4.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterDisguise5.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterDollWay.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterFirstDH.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterGym.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterNepenthes.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterRider.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterWitch.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enter_earth00.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enter_earth01.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterfourthDH.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/enterthirdDH.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/entertraining.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/exit_puppeteer.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/female00.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/gendergo.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/glTutoMsg0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/glpqPortal3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/glpqPortal4.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/glpqPortal5.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/glpqPortal6.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/go_secretroom.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/gotocastle.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/hontale_BR.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/hontale_Bopen.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/hontale_BtoB1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jail_out.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr1_out.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr1_pt00.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr2_out.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr3_in0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr3_in1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr3_out.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr4_r1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr4_r2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr4_r3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr4_r4.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr6_out.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr_201_0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/jnr_202.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/kinggate_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/kpq0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/kpq1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/kpq2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/kpq3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/kpq4.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/magatia_dark0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/minar_elli.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/move_elin.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/obstacle.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/outPerrion_1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/out_pepeking.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/party6_stage800.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/q2073.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/q3366in.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/q3367in.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/q3368in.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/raid_rest.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/raid_stage.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rankDeveloperRoom.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rienCaveEnter.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rienTutor1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rienTutor2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rienTutor3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rienTutor4.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/rienTutor7.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj1_out.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj1_pt00.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj2_out.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj3_in0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj3_in1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj3_out.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj4_r1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj4_r2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj4_r3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj4_r4.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj6_out.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj_201_0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/rnj_202.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/s4berserk.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/s4berserk_move.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/s4firehawk.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/s4hitman.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/s4iceeagle.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/s4nest.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/s4resur_enter.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/s4resurrection.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/s4rush.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/s4tornado_enter.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/secretDoor.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/secretgate1_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/secretgate2_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/secretgate3_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/timeQuest.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/tristanEnter.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/tutorHelper.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/tutorquest.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/1021.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20011.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20016.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/20017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20101.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20103.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20104.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20200.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20201.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20202.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20203.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20204.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20205.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20311.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20312.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20313.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20314.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20315.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20514.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20520.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20522.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20526.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20527.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20700.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20710.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/20720.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21011.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21015.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21101.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21200.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21201.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21202.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2127.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21300.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21301.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21302.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21303.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21400.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21401.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2148.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2149.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2150.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2151.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21600.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21604.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21613.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21618.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21700.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21703.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21704.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21712.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21716.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21719.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21720.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21729.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21733.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21734.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21735.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21736.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21738.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/21739.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21740.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21741.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21742.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21746.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21747.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21748.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21749.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21750.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21753.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21754.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/21757.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2197.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2230.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2232.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2233.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/2234.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/2245.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2251.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/2257.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2258.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2259.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2260.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2291.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2293.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/2300.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2301.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2302.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2303.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2304.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2305.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2306.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2307.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2308.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2309.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2310.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2314.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2316.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/2322.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/2325.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2327.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2332.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2333.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2334.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/2335.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/29900.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/29901.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/29902.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/29903.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/29906.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/29907.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/29908.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/29909.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/3301.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3303.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3305.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/3306.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/3314.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3320.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3321.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3353.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3354.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3360.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3382.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3452.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3514.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3523.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3524.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3525.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3526.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3527.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3529.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3539.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3714.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3933.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3941.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/3953.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/4659.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/6030.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/6031.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/6032.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8185.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8189.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/8219.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8221.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8223.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8224.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8225.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8226.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8227.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8228.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8229.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8230.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8231.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8232.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8233.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8234.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8235.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8236.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8237.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/quest/8238.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2110000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2111001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2119001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2119002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2119003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2119004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2119005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2119006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2200002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2201004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2221000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2221001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2221002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2401000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2406000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2408002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2408003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/2619003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2619004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2619005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/5411000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/5511000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/5511001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/8091000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/8091001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/8091002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/8091003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/8091004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/reactor/8098000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/event/CentipedeBattle.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/event/KrexelBattle.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/event/YaoSengBattle.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/1002103.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/1022007 .js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/1022101_test.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/2081004.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/2140000.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/9000036_accessory.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/9270045.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/9800001.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/changePassword.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/detectMap.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/detected.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/npcTemplate.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/testScript.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/under_maintenance.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/verifyEmail.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/portal/mahavira_enter.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/portal/treeboss00.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/reactor/5411001.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+sql/db_LichKingMod.sql	sql	492	0	pending	需转成 Flyway 迁移，不能直接跑
+sql/db_LichKingMod_patch.sql	sql	765	0	pending	需转成 Flyway 迁移，不能直接跑
+sql/db_database.sql	sql	73	73	pending	需转成 Flyway 迁移，不能直接跑
+sql/db_drops.sql	sql	1	1	pending	需转成 Flyway 迁移，不能直接跑
+wz/Etc.wz/BlockReason.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/CashPackage.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/Category.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/ChatBlockReason.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/Commodity.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/Curse.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/DeveloperNpc.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/EmotionEffect.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/ForbiddenName.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/Halloween.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/ItemMake.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/MakeCharInfo.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/MapNeighbors.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/MedalQuestCategory.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/NPT_exception.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/NpcLocation.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/OXQuiz.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/QuestCategory.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/RecommendSkill.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/ScanBlock.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/ScriptInfo.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/Swindle.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/Tips.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/VegaSpell.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Cash/0515.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Cash/0521.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Cash/0536.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Consume/0200.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Consume/0202.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Consume/0204.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Consume/0207.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Consume/0210.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Consume/0212.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Consume/0226.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Consume/0234.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0400.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0403.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0413.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0416.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0425.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0426.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0428.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0429.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0431.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Install/0301.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Back/ShanghaiCN.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Effect.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map1/102000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map1/105070002.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map2/211000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map2/211040101.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map2/230040420.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map2/240000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map2/240060200.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701000100.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010100.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010200.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010300.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010310.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010320.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010321.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010322.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010323.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010324.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010400.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010500.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/701010600.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702010000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702020000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702030000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702040000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702050000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702060000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702070100.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702070200.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702070300.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702070400.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702080000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/702100000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map7/741000200.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map9/910000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/Christmas.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/EnSchoolCN.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/ShanghaiCN.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/acc1.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/acc10.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/acc3.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/acc6.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/acc9.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/connect.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/dungeon.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/dungeon2.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/dungeon3.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/dungeon4.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/etc.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/event.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/globalJP.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/guide.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/halloween.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/houseDW.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/houseGS.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/houseVPT.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/insideGL.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/insideGS.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/job.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/login.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/masteriaGL3.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/pachinko.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/shop.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/shop2.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/shouwaDungeon.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/signboard.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/trap.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/tutorial_jp.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Tile/grassySoil.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/5090000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/5090001.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/6090000.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/6090001.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/6090002.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/6090003.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/6090004.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/7090000.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8090000.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8200009.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8200010.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8200011.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8200012.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8220004.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8800000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8800001.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8800002.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8810000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8810001.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8810003.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8810004.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8810005.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8810006.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8810007.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8810008.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8810009.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8820006.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/8820018.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9420542.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9420543.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9420544.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9420548.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600012.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600013.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600014.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600015.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600016.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600017.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600018.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600019.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600020.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600021.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600022.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600023.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600024.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600025.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/9600026.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Morph.wz/1001.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Morph.wz/1101.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/2140000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9120015.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250001.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250003.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250004.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250005.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250006.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250007.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250008.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250009.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250010.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250011.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250012.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250013.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250014.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250016.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250022.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250027.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250028.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250029.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9270045.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310004.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310005.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310006.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310007.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310013.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310030.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310031.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310032.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310033.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310034.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310035.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310036.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310037.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310038.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310039.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310040.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310041.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310042.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310043.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310044.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310045.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310046.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310047.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310048.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310049.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310050.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310051.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310052.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310053.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310054.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310055.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310056.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310057.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310058.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310060.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310061.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310082.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310083.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9330045.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9330046.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Quest.wz/Act.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Quest.wz/Check.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Quest.wz/Exclusive.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Quest.wz/PQuest.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Quest.wz/QuestInfo.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Quest.wz/Say.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/110.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/112.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/120.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/121.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/122.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/131.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/132.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/210.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/211.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/2111.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/212.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/222.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/312.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/321.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/322.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/422.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/512.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/522.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/MobSkill.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Sound.wz/BgmCN.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Cash.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Consume.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/EULA.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Eqp.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Etc.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/GLcloneC.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/GuestEULA.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Ins.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Map.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Mob.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/MonsterBook.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/NameChange.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Npc.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Pet.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/PetDialog.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Skill.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/TestEULA.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/ToolTipHelp.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/TransferWorld.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/TrialEULA.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/UI.wz/UIWindow.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Character.wz/**	wz-cosmetic	9423	0	pending	皇家点装/发型/脸型：LK 改动 9423 个，其中 BeiDou 完全没有 8807 个；批次 8 整体决策，不逐个列
+wz/Item.wz/Etc/0490.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Item.wz/Install/0310.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749040000.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749040001.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749040002.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749040003.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749040004.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749040005.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749040006.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749040007.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749040008.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749050500.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749050501.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Map/Map7/749050502.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Obj/FishingSystemTW.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Obj/Tokyo2JP.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Obj/TokyoJP.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Obj/beer1.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Obj/eventTW.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Obj/glacierExplorer.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Obj/trapSG.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Tile/TokyoJP.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Tile/grassySoil3.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Tile/lionCastle.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Tile/ninjaJP.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Tile/ninja_jp.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Tile/sakuraCastle_inside.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Tile/sakuraCastle_outside.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Tile/snowyLightrock3.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/Tile/thai.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Map.wz/WorldMap/WorldMap016.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Mob.wz/9601105.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Mob.wz/9601116.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Npc.wz/9250002.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Npc.wz/9250021.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Npc.wz/9330085.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Npc.wz/9330086.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Npc.wz/9330108.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Npc.wz/9390221.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Npc.wz/9400794.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Reactor.wz/5411001.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件

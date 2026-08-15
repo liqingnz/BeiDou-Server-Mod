@@ -1,0 +1,4 @@
+# core.autocrlf=true 会在 checkout 时把 LF 换成 CRLF，shell 脚本因此会带上 \r，
+# 在 Linux / Git Bash 下报 "bash: \r: command not found"。这里强制这几类文件保持 LF。
+*.sh   text eol=lf
+*.bash text eol=lf
