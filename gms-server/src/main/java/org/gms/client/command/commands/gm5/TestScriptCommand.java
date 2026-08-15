@@ -17,11 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-/*
-   @Author: Arthur L - Refactored command content into modules
-*/
-package org.gms.client.command.commands.gm1;
+package org.gms.client.command.commands.gm5;
 
 import org.gms.client.Client;
 import org.gms.client.command.Command;
@@ -29,20 +25,19 @@ import org.gms.constants.id.NpcId;
 import org.gms.util.I18nUtil;
 
 /**
- * 物品掉落查询入口。
- * <p>
- * 查询逻辑本身在脚本中心的「当前地图掉落_物品查询」里：按 11 个大类浏览、分页展示，
- * 点开单个物品可看掉落来源、基础爆率与角色实际爆率，比原先的按名搜索完善。
+ * 按脚本名直接打开一个 NPC 脚本，用于调试脚本而不必先在地图上摆好 NPC。
  */
-public class WhoDropsCommand extends Command {
-    private static final String SCRIPT_NAME = "当前地图掉落_物品查询";
-
+public class TestScriptCommand extends Command {
     {
-        setDescription(I18nUtil.getMessage("WhoDropsCommand.message1"));
+        setDescription(I18nUtil.getMessage("TestScriptCommand.message1"));
     }
 
     @Override
     public void execute(Client c, String[] params) {
-        c.getPlayer().getAbstractPlayerInteraction().openNpc(NpcId.BEI_DOU_NPC_BASE, SCRIPT_NAME);
+        if (params.length < 1) {
+            c.getPlayer().yellowMessage(I18nUtil.getMessage("TestScriptCommand.message2"));
+            return;
+        }
+        c.getPlayer().getAbstractPlayerInteraction().openNpc(NpcId.BEI_DOU_NPC_BASE, params[0]);
     }
 }

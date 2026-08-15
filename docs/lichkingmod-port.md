@@ -121,11 +121,16 @@ if (GameConfig.getServerBoolean("use_mts_to_fm")) { ... }
 | 方式 | 裸 JDBC `DatabaseConnection.getConnection()` + PreparedStatement | MyBatis-Flex |
 | 实体 | 无 | `org.gms.dao.entity.XxxDO`（`@Table` + Lombok） |
 | 访问 | 手写 SQL | `org.gms.dao.mapper.XxxMapper` |
-| 建表 | `sql/db_LichKingMod_patch.sql` 手动跑 | Flyway `src/main/resources/db/migration/V1.0.x__*.sql` |
+| 建表 | `sql/db_LichKingMod_patch.sql` 手动跑 | Flyway；**本次移植的迁移一律放 `src/main/resources/db/lkport/`，版本号用 `V1000.x`**（见下） |
 | 生成 | — | `mvn -pl gms-server test -Dtest=CodeGen#genMapperAndEntity` |
 
 **不能直接跑 LK 的 sql 文件**，必须转成 Flyway 迁移。注意 LK 的 DDL 是 `CHARSET=gbk`，
 BeiDou 要用 utf8mb4。
+
+**迁移文件与上游隔离**：`db/migration/` 留给上游 BeiDou-Server，本次移植的全部放 `db/lkport/`。
+但 Flyway 的版本号是**全局唯一**的，目录隔离防不住冲突——上游哪天也发 `V1.12.0` 就会报
+`Found more than one migration with version`。所以 lkport 用 `V1000.x` 段位，上游不会碰到。
+`application.yml` 里 `locations` 必须同时列出两个目录，只写一个会让另一个整体失效。
 
 ### 3.4 i18n（硬约束）
 
@@ -248,7 +253,7 @@ LK 的 29 个新指令**全是硬编码中文**，还有一个 `constants/string
 | 批次 | 内容 | 依赖 |
 |---|---|---|
 | 0 | Flyway 建 login_history / message_board 两张表 + DO/Mapper | — |
-| 1 | 12 个无状态指令 + `CommandsExecutor` 注册（**试点，用来跑通流程**） | 0 |
+| 1 | CommandManager + 6 个指令；3 个功能复用 BeiDou 现成脚本 | 0 |
 | 2 | 邮箱验证 / 改密码 / 登录 IP 记录 | 0 |
 | 3 | 投票奖励系统 | 0 |
 | 4 | 留言板 / 站内邮件 / 签到 / 账号角色删除（`@redeem` 已移出，见批次 8） | 0 |
@@ -410,27 +415,88 @@ key 跟着各批次的代码一起进。命名沿用现有约定：`<类名>.mes
 > 而建表要先启动服务端跑 Flyway；手写并严格照 `AutobanConfigDO` 的产物格式即可，
 > 已 `mvn -pl gms-server compile` 验证通过。后续如果跑了 CodeGen，产物应与此一致。
 
-### 批次 1 — 无状态指令（试点）
+### 批次 1 — 指令（试点）✅ 已完成
 
-不依赖新表，风险最低，用来验证整套移植流程：
+**原定的「12 个无状态指令」前提不成立**，逐个查依赖后重新划分。实际结果：6 个写了代码，
+2 个毙掉，4 个挪到别的批次。
 
-| 指令类 | 权限 | 作用 |
+| LK 指令 | 处置 | 依据 |
 |---|---|---|
-| `RollCommand` | gm0 | `@roll` 掷 0–100 随机数 |
-| `DetectCommand` | gm0 | 测谎仪，不输名字则检测当前地图玩家 |
-| `MapDropsCommand` | gm0 | 查当前地图掉落 |
-| `SellInvCommand` | gm0 | 批量卖背包 |
-| `BossDmgAnalysisCommand` | gm0 | BOSS 伤害分析（`@analysis`） |
-| `WhoDrops2Command` | gm1 | 旧版按怪物查掉落（新版 `@whodrops` 改为按道具名搜索） |
-| `PatrolCommand` | gm2 | 巡逻 |
-| `RecallCommand` | gm2 | 召回 |
-| `CosPreviewCommand` | gm2 | 点装预览 |
-| `MobRateCommand` | gm4 | 调怪物倍率 |
-| `TestScriptCommand` | gm5 | 测试脚本 |
-| `LichDebugCommand` | gm4 | 调试 |
+| `RollCommand` | ✅ gm0 `@roll` | 无依赖 |
+| `MapDropsCommand` | ✅ gm0 `@mapdrops`，**改成入口指令** | 见下 |
+| `SellInvCommand` | ✅ gm0 `@sellinv` | 靠 `CommandManager` 解锁 |
+| `PatrolCommand` | ✅ gm2 `@patrol` | 同上 |
+| `CosPreviewCommand` | ✅ gm2 `@cospreview`，**默认走 Salon** | 见下 |
+| `TestScriptCommand` | ✅ gm5 `@testscript` | 无依赖 |
+| `WhoDrops2Command` | ❌ 不移植 | BeiDou 脚本版更完善，改为让既有 `@whodrops` 指向它 |
+| `LichDebugCommand` | ❌ 不移植 | 作者自用的 `public static int debugVar`，LK 全仓库无消费方 |
+| `BossDmgAnalysisCommand` | ⏭ 挪批次 6 | 依赖 `Monster.getTakenDamage()`，BeiDou 无此方法 |
+| `MobRateCommand` | ⏭ 挪批次 6 | 热写 `MOB_SPAWN_BASE_RATE`，但要等批次 6 才有刷怪逻辑消费它 |
+| `DetectCommand` | ⏭ 挪批次 5 | 依赖 `APi.detectPlayer()` 与 `npc/detectMap.js`，两者都无 |
+| `RecallCommand` | ⏭ 待定 | `EventRecallCoordinator` 已有，但缺 `MAX_RECALL_TIME`/`RECALL_COOLDOWN` 配置键 |
 
-外加 `CommandManager`（新增）、`CommandsExecutor` 的注册改动（+186/-158），
-以及 `OnlineCommand`（+51）、`WhatDropsFromCommand`、`WhoDropsCommand` 的改进。
+#### 关键发现一：BeiDou 的指令注册机制完全不同
+
+[CommandsExecutor.java:72](../gms-server/src/main/java/org/gms/client/command/CommandsExecutor.java#L72) 里
+**所有 `registerLvXCommands()` 都被注释掉了**，改由 `CommandService.loadCommands` 从
+`command_info` 表读取，再按 `org.gms.client.command.commands.gm{default_level}.{clazz}` 反射实例化。
+
+所以**新增指令要写 Flyway 迁移插 `command_info` 行，不是改代码**。照 HeavenMS 的习惯往
+`registerLv0Commands()` 里加 `addCommand(...)` 是死代码。
+
+副作用是好的：指令的启用/禁用和权限等级可以在 gms-ui 后台直接改。
+
+#### 关键发现二：三个指令的功能 BeiDou 已有更好的实现
+
+| LK 指令 | BeiDou 现成实现 | 差距 |
+|---|---|---|
+| `MapDropsCommand` | `scripts-zh-CN/BeiDouSpecial/当前地图掉落_当前地图.js` | 脚本版按 BOSS/普通分组、可逐怪下钻、显示怪物属性与立绘（含超大图防客户端假死）、区分基础掉率与角色实际掉率。LK 版把全图掉落拼成一个字符串一次性输出，怪多时撑爆客户端文本框 |
+| `WhoDrops2Command` | `当前地图掉落_物品查询.js` | 脚本版 11 个大类浏览 + 分页 + 掉落源怪物名。LK 版只能精确输入 itemId，输出 80 条纯文本，连怪物名都是注释掉的 |
+| `CosPreviewCommand` | `Salon.js` | Salon 用客户端原生 `sendStyle` 预览窗口，不落库不改角色。LK 版起定时器每 800ms 真实修改角色发型/脸型，靠遍历撞可用 id |
+
+处理方式：**指令退化成入口，查询逻辑复用脚本**。
+
+- `@mapdrops` → `openNpc(9900001, "当前地图掉落_当前地图")`
+- `@whodrops` → 改写既有的 `WhoDropsCommand`，指向 `"当前地图掉落_物品查询"`
+- `@cospreview` → 默认 `openNpc(9900001, "Salon")`；LK 的遍历分支保留，需显式传
+  `face/hair` + 起始 id 才进入
+
+> `@whodrops` 的改写**丢掉了原来的按名字搜索**（脚本是分类浏览，不接受搜索词）。
+> 如果需要，可以按 `@cospreview` 的模式做成「带参数走搜索、不带参数开脚本」。
+
+#### 移植时修掉的 LK 问题
+
+| 文件 | 问题 | 处理 |
+|---|---|---|
+| `CommandManager` | 四个共享 map 用裸 `HashMap`，被多频道线程并发读写 | 换 `ConcurrentHashMap`；`cancelRunningCommands` 里的 `put(id, null)` 换成 `remove` |
+| `PatrolCommand` | **巡逻队列是 Command 实例字段**，而指令全局只实例化一次，多 GM 同时巡逻会互抢目标 | 队列挪进 `CommandManager` 按角色 id 隔离 |
+| `PatrolCommand` | `getNextPlayer` 递归，目标全在自由市场时会递归到底 | 改循环 |
+| `PatrolCommand` | `Short.parseShort` 无保护、硬编码 `910000000` | 加 try/catch、用 `MapId.FM_ENTRANCE` |
+| `SellInvCommand` | equip/use/etc 三分支逐字重复 60 行 | 合并，`InventoryType` 走 map 查 |
+| `SellInvCommand` | **硬编码格数上限 96**，扩容过的背包会漏格 | 改用 `inventory.getSlotLimit()` |
+| `CosPreviewCommand` | 调试残留 `yellowMessage("param length " + ...)`、拼写错误 `"only support face and hari"`、吞异常 | 全部清掉 |
+| 多处 | 大量未使用 import（`TestScriptCommand` 有 14 个 import 只用 2 个） | 删除 |
+
+#### 因 BeiDou API 差异做的调整
+
+- `Character.announce()` 不存在 → `MapleMap.broadcastStringMessage(int, String)`
+- `Shop.sell()` 返回 `void` 而非成交额 → 用前后 `getMeso()` 差额统计（比 LK 更准，
+  商店有税率或上限时差额才是玩家实际到手）
+- `isLoggedinWorld()` → `isLoggedInWorld()`
+- 脚本中心 NPC 是 `NpcId.BEI_DOU_NPC_BASE`（9900001），不是 LK 的 9010000
+- `CommandManager` 的 `setWorldExpRate/QuestRate/DropRate` 三个静态方法**没有移植**——
+  只被批次 4 的 `RateEventCommand` 用，且 `World` 只有 `setExpRate`/`setDropRate`，
+  **没有 `setQuestRate`**（`questRate` 是无 setter 的私有字段）。等做 `RateEventCommand`
+  时再决定是给 `World` 加 setter 还是走 `GameConfig`
+
+#### 已知未验证
+
+只做了编译验证，**没有运行验证**。要验证 `command_info` 插入是否生效需启动服务端跑 Flyway，
+而服务端一起来会连带让已删除的 6 个任务生效，那件事还卡在客户端 img 补丁上。
+
+另外 `@mapdrops`/`@whodrops`/`@cospreview` 依赖 `scripts-zh-CN/BeiDouSpecial/` 下的脚本，
+而 **`scripts/BeiDouSpecial/` 整个目录不存在**，en-US 语言下这三个指令会静默失效。
+这是既有状况（`@gacha` 菜单同样如此），不是本批引入。
 
 > BeiDou 的 gm0 已有 `ChangeLanguage/DropLimit/EnableAuth/EquipLv/Gacha/MapOwnerClaim/ReadPoints/ShowRates/ToggleExp` 等——
 > 这些是 HeavenMS 上游就有的，不是 LK 新增，别重复移植。

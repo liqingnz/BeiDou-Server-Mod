@@ -37,6 +37,10 @@ spring:
     validate-on-migrate: false
     # 允许乱序执行：补跑版本号小于已执行最大版本号的漏掉脚本
     out-of-order: true
+    # db/migration 是上游 BeiDou-Server 的迁移，db/lkport 是 LichKingMod 移植专用，
+    # 分目录是为了跟上游同步时一眼分清归属。注意 Flyway 的版本号是全局唯一的，
+    # 目录隔离不能防版本冲突，因此 lkport 用 V1000.x 段位，上游不会碰到。
+    locations: classpath:db/migration,classpath:db/lkport
   servlet:
     # 默认文件大小就是这里设置的，按需修改
     multipart:

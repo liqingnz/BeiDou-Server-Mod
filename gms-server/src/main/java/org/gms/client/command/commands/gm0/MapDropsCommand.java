@@ -17,11 +17,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-/*
-   @Author: Arthur L - Refactored command content into modules
-*/
-package org.gms.client.command.commands.gm1;
+package org.gms.client.command.commands.gm0;
 
 import org.gms.client.Client;
 import org.gms.client.command.Command;
@@ -29,16 +25,18 @@ import org.gms.constants.id.NpcId;
 import org.gms.util.I18nUtil;
 
 /**
- * 物品掉落查询入口。
+ * 当前地图掉落查询的快捷入口。
  * <p>
- * 查询逻辑本身在脚本中心的「当前地图掉落_物品查询」里：按 11 个大类浏览、分页展示，
- * 点开单个物品可看掉落来源、基础爆率与角色实际爆率，比原先的按名搜索完善。
+ * 只负责打开脚本中心已有的「当前地图掉落」脚本，查询逻辑本身不在这里实现——
+ * BeiDou 的脚本版按 BOSS/普通分组、可逐个怪物下钻、显示怪物属性与立绘、
+ * 区分基础掉率与角色实际掉率，比 LichKingMod 的一次性文本输出完善得多。
+ * 此前该功能只能从 9900001 的菜单进入，这里补一个指令入口。
  */
-public class WhoDropsCommand extends Command {
-    private static final String SCRIPT_NAME = "当前地图掉落_物品查询";
+public class MapDropsCommand extends Command {
+    private static final String SCRIPT_NAME = "当前地图掉落_当前地图";
 
     {
-        setDescription(I18nUtil.getMessage("WhoDropsCommand.message1"));
+        setDescription(I18nUtil.getMessage("MapDropsCommand.message1"));
     }
 
     @Override
