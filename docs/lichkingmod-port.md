@@ -247,15 +247,15 @@ LK 的 29 个新指令**全是硬编码中文**，还有一个 `constants/string
 
 | 批次 | 内容 | 依赖 |
 |---|---|---|
-| 0 | Flyway 4 张表 + CodeGen + GameConfig 新增项 + i18n key 骨架 | — |
+| 0 | Flyway 建 login_history / message_board 两张表 + DO/Mapper | — |
 | 1 | 12 个无状态指令 + `CommandsExecutor` 注册（**试点，用来跑通流程**） | 0 |
 | 2 | 邮箱验证 / 改密码 / 登录 IP 记录 | 0 |
 | 3 | 投票奖励系统 | 0 |
-| 4 | 留言板 / 站内邮件 / 签到 / 兑换 / 账号角色删除 | 0 |
+| 4 | 留言板 / 站内邮件 / 签到 / 账号角色删除（`@redeem` 已移出，见批次 8） | 0 |
 | 5 | `AbstractPlayerInteraction` +338 行 + 21 个独有脚本 | 0 |
 | 6 | C 类游戏性/平衡逐条 triage | — |
 | 7 | 掉落/商店 SQL + 262 个含代码改动的脚本 + 41 个缺失 wz + 276 个待 diff wz | 6 |
-| 8 | 皇家点券系统 + 8807 个点装 wz + 客户端 img 补丁 | 0 |
+| 8 | 皇家点券系统（含 `royal_accounts` 表与 `@redeem`）+ 8807 个点装 wz + 客户端 img 补丁 | 0 |
 
 ---
 
@@ -364,16 +364,51 @@ awk -F'\t' '$5=="pending"' docs/lichkingmod-port-manifest.tsv | wc -l
 
 ## 7. 各批次详细清单
 
-### 批次 0 — 基础设施
+### 批次 0 — 基础设施 ✅ 已完成
 
-1. **Flyway 迁移**：当前最新版本是 `V1.11.5`，新迁移从 `V1.12.x` 起。建 4 张表
-   （按 BeiDou 命名规范改成下划线小写，如 `loginHistroy` → `login_history`，
-   顺便修掉 LK 那个拼写错误）。DDL 见附录 C。
-2. **CodeGen**：`mvn -pl gms-server test -Dtest=CodeGen#genMapperAndEntity`，
-   改 `globalConfig.setGenerateTable(...)` 指定新表，实体后缀固定 `DO`。
-3. **GameConfig 新增项**：LK 新增了 22 个 server 级配置字段（见附录 B），
-   经查 BeiDou 只有 `equip_exp_rate` 已存在，其余 21 个都是新的。写 insert 迁移。
-4. **i18n 骨架**：在 `message_{zh_CN,en_US}.properties` 里划出本次移植的 key 命名空间。
+产出：`V1.12.0__create_login_history.sql`、`V1.12.1__create_message_board.sql`，
+以及 `LoginHistoryDO` / `MessageBoardDO` 与对应 Mapper。
+
+动手后改了三个原定计划，都是查证后的结果：
+
+**1. 只建 2 张表，不是 4 张。**
+
+| LK 表 | 处置 | 依据 |
+|---|---|---|
+| `loginHistroy` → `login_history` | ✅ 建（批次 2 用） | `MapleClient.java:628` 写入 |
+| `messageBoard` → `message_board` | ✅ 建（批次 4 用） | `MessageBoard.java` + `npc/9800001.js` |
+| `monsterBookReward` | ❌ **不建** | `grep -rni monsterbookreward src/ scripts/` 在 LK 全仓库**零引用**，是张死表 |
+| `royalAccounts` | ⏸ 推迟到批次 8 | 只被 `RedeemCommand`（皇家月卡）和 `RoyalCommand` 用，属待定的 F 类 |
+
+> 连带调整：**`RedeemCommand` 从批次 4 挪到批次 8** —— 它读写 `royalAccounts`，
+> 是皇家月卡领取逻辑，不该跟留言板/站内邮件放一批。
+
+**2. 表结构相对 LK 原始 DDL 做了四处改动**（附录 C 是原始 DDL，实际以迁移文件为准）：
+
+- 补自增代理主键。LK 两张表都没有主键，MyBatis-Flex 的 `BaseMapper` 需要 `@Id`；
+  `login_history` 的去重仍由 `UNIQUE(account_id, ip)` 保证。
+- `CHARSET=gbk` → `utf8mb4`。
+- `messageBoard.time` 是 MySQL 关键字，改名 `create_time`，并加索引
+  （LK 靠 `DELETE ... ORDER BY time ASC LIMIT 1` 淘汰旧留言，只保留 30 条）。
+- 名字与留言从 `TEXT` 改成定长 `VARCHAR`。LK 侧 `CHARACTER_LIMIT = 40` 是玩家输入上限，
+  入库前会拼上角色名与颜色控制码，`VARCHAR(255)` 足够。
+
+**3. GameConfig 的 21 个新配置项不在批次 0 一次性写入**，改为**跟随各自的消费代码分批加**。
+
+原因：`game_config` 是 gms-ui 后台可见的运营旋钮。提前塞进 21 个点了不起作用的开关
+（`mob_spawn_base_rate` 要等批次 6 才有代码读它），对运维是误导，比晚一点加更糟。
+键名与归属批次的对照见附录 B。
+
+写 insert 迁移时注意：`game_config` 的每一条都要**同时**往 `lang_resources` 插
+`zh-CN` 与 `en-US` 两行描述，格式照 `V1.11.3__insert_game_config_stage_skip.sql`。
+
+**4. i18n 骨架没有单独建。** 批次 0 没有任何面向人的输出，凭空加空 key 没有意义；
+key 跟着各批次的代码一起进。命名沿用现有约定：`<类名>.message1` 是指令的
+`@help` 描述文案，`message2` 起是运行时消息。
+
+> **DO/Mapper 是手写的，没跑 CodeGen。** CodeGen 需要目标表已存在于本地 `beidou` 库，
+> 而建表要先启动服务端跑 Flyway；手写并严格照 `AutobanConfigDO` 的产物格式即可，
+> 已 `mvn -pl gms-server compile` 验证通过。后续如果跑了 CodeGen，产物应与此一致。
 
 ### 批次 1 — 无状态指令（试点）
 
