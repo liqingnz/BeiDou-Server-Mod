@@ -38,6 +38,7 @@ import org.gms.constants.skills.*;
 import org.gms.net.AbstractPacketHandler;
 import org.gms.net.packet.InPacket;
 import org.gms.net.server.PlayerBuffValueHolder;
+import org.gms.net.server.Server;
 import org.gms.scripting.AbstractPlayerInteraction;
 import org.gms.server.StatEffect;
 import org.gms.server.TimerManager;
@@ -136,6 +137,8 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
             if (player.isBanned()) {
                 return;
             }
+            // 记录最近一次发动攻击的时刻，供测谎判断对方是不是正在刷怪
+            player.setLastAttack(Server.getInstance().getCurrentTime());
             if (attack.skill != 0) {
                 theSkill = SkillFactory.getSkill(attack.skill); // thanks Conrad for noticing some Aran skills not consuming MP
                 attackEffect = attack.getAttackEffect(player, theSkill); //returns back the player's attack effect so we are gucci

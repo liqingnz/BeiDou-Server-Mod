@@ -143,6 +143,10 @@ public class ItemId {
     public static final int BLUE_SNAIL_SHELL = 4000000;
     public static final int RED_SNAIL_SHELL = 4000016;
 
+    // 卷轴的物品id段，左闭右开
+    public static final int SCROLL_RANGE_START = 2040000;
+    public static final int SCROLL_RANGE_END = 2050000;
+
     // Special scroll
     public static final int COLD_PROTECTION_SCROLl = 2041058;
     public static final int SPIKES_SCROLL = 2040727;

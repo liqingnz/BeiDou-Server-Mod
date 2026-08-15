@@ -991,6 +991,31 @@ public class Monster extends AbstractLoadedLife {
         }
     }
 
+    /**
+     * 各角色对本怪造成的累计伤害快照，key 是角色id。
+     * <p>
+     * 内部那张 {@code takenDamage} 是裸 HashMap，写入点 {@code applyDamage} 由
+     * {@link #lockMonster()} 保护（见 {@code damage()}）。<b>拷贝动作本身必须在同一把锁下做</b>——
+     * 只是把结果拷出去并不能消除拷贝过程中的竞争，无锁遍历照样会撞
+     * {@code ConcurrentModificationException} 或读到半截数据。
+     * <p>
+     * 拿到的是拷贝而不是内部表，一是调用方遍历时不再受写入影响，二是不把可变的
+     * {@code AtomicLong} 交出去。发奖、伤害统计这类用途的量都很小，拷贝代价可以忽略。
+     * 锁是可重入的，已经持锁的调用方（比如怪物死亡流程里的脚本钩子）直接调也没问题。
+     */
+    public Map<Integer, Long> getTakenDamage() {
+        Map<Integer, Long> ret = new HashMap<>();
+        lockMonster();
+        try {
+            for (Entry<Integer, AtomicLong> damage : takenDamage.entrySet()) {
+                ret.put(damage.getKey(), damage.getValue().get());
+            }
+        } finally {
+            unlockMonster();
+        }
+        return ret;
+    }
+
     public int getHighestDamagerId() {
         int curId = 0;
         long curDmg = 0;

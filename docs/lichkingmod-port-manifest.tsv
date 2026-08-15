@@ -505,22 +505,22 @@ src/provider/wz/XMLDomMapleData.java	java	0	0	noise	仅格式化/空白改动（
 src/provider/wz/XMLWZFile.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/AbstractPlayerInteraction.java	java	338	15	pending	
 src/scripting/AbstractScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/scripting/event/EventInstanceManager.java	java	30	0	pending	
-src/scripting/event/EventManager.java	java	12	9	pending	
+src/scripting/event/EventInstanceManager.java	java	30	0	ported	gms-server/src/main/java/org/gms/scripting/event/EventInstanceManager.java（distributeBossCertificate 加了 itemId 参数、补角色不在地图时的空值判断；distributePQClearReward 走 getPlayers() 持读锁取快照）。registerPlayer 里那句 storeEventInstance(chr.getId(), null) 未搬——两边的 isRecallableEvent 都会把 null 挡掉，是空操作
+src/scripting/event/EventManager.java	java	12	9	rejected	startInstance(Expedition) 由 boolean 改 int 返回码，唯一意图是给远征入口脚本区分失败原因，但 LK 自己的 treeboss00.js 里那句 em.startInstance(expedition) 是注释掉的，全仓库无人消费这个返回码；改签名反而会让 BeiDou 现有远征脚本的 if (!em.startInstance(...)) 判断整体反掉。其余全是花括号换行重排
 src/scripting/event/EventScheduledFuture.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/event/EventScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/event/scheduler/EventScriptScheduler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/item/ItemScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/item/ItemScriptMethods.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/map/MapScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/scripting/map/MapScriptMethods.java	java	10	10	pending	
-src/scripting/npc/NPCConversationManager.java	java	30	13	pending	
-src/scripting/npc/NPCScriptManager.java	java	9	0	pending	
+src/scripting/map/MapScriptMethods.java	java	10	10	already-fixed	gms-server/src/main/java/org/gms/scripting/map/MapScriptMethods.java:38 与 :139 :166 —— 改动只是把勋章提示译成中文，BeiDou 已是中文
+src/scripting/npc/NPCConversationManager.java	java	30	13	deferred	缓，挪至批次7：真增量只有 doGachapon(quantity) 的批量抽奖，它的四个消费方 gachapon.js / gachaponRemote.js / gachaponold.js / 9270043.js 全是批次7 的脚本，且 BeiDou 已有自己的 @gacha 体系，要连同脚本一起取舍。displayCharacterRanks 全仓库零消费，随本行一并终局否决；嘉年华场地文案属汉化。重启条件：批次7 处理 gachapon 系列脚本时
+src/scripting/npc/NPCScriptManager.java	java	9	0	rejected	唯一改动是新增一段被整体注释掉的 createEmptyCMS，其余是 javadoc 空行删除
 src/scripting/portal/PortalPlayerInteraction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/portal/PortalScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/quest/QuestActionManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/quest/QuestScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/scripting/reactor/ReactorActionManager.java	java	1	1	pending	
+src/scripting/reactor/ReactorActionManager.java	java	1	1	already-fixed	gms-server/src/main/java/org/gms/scripting/reactor/ReactorActionManager.java:230 —— generateDropList 的 dropRate 已经是 float
 src/scripting/reactor/ReactorScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/CashShop.java	java	3	2	pending	
 src/server/DueyPackage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -708,7 +708,7 @@ src/tools/packets/Wedding.java	java	21	8	pending
 src/client/command/commands/CommandManager.java	java-new	89	6	ported	org/gms/client/command/commands/CommandManager.java；改并发容器。三个 setWorldXxxRate 确定不补 —— 唯一的消费方 RateEventCommand 已 rejected。批次4 追加三处：clearItemSold 供 RetrieveCommand 清空出售记录（并发容器不接受 null 值，用不了原实现的 set(id, null)）；registerRunningCommandIfAbsent 原子登记，给 GMBot 这种 key 是目标角色而非发起者自己的指令用；cancelRunningCommands 改为先原子 remove 再 cancel，原先先查后删会在并发下取消掉别人刚登记的新任务
 src/client/command/commands/gm0/BossDmgAnalysisCommand.java	java-new	75	0	pending	
 src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	deferred	缓：LK 版的安全闸门就是邮箱验证码（脚本第一步的算术码是自显自验，无鉴权作用），去掉邮箱等于任何人在已登录客户端上都能改账号密码。BeiDou 已有网页端改密码（AccountService.updateAccountByUser:101，闸门为旧密码）。重启条件：邮箱验证方案定案，或决定改用旧密码闸门做游戏内入口
-src/client/command/commands/gm0/DetectCommand.java	java-new	78	0	pending	
+src/client/command/commands/gm0/DetectCommand.java	java-new	78	0	ported	gms-server/src/main/java/org/gms/client/command/commands/gm0/DetectCommand.java + V1000.0.5 注册；判定与处罚在 AbstractPlayerInteraction.detectPlayer，参数落成 V1000.0.6 的五个 game_config 键，use_player_detect 默认关闭
 src/client/command/commands/gm0/MapDropsCommand.java	java-new	88	0	ported	org/gms/client/command/commands/gm0/MapDropsCommand.java；退化为入口，逻辑复用 scripts-zh-CN/BeiDouSpecial/当前地图掉落_当前地图.js
 src/client/command/commands/gm0/QianDaoCommand.java	java-new	86	0	already-fixed	gms-server/scripts-zh-CN/BeiDouSpecial/每日签到.js:26 已实现每日签到（角色级，走 ExtendValue 的 daily 类型自动重置，发道具 2430033）。LK 版是账号级发点券，粒度不同但功能重叠，且其实现是坏的：oneDay 被写成 10000 毫秒（真正的 24 小时被注释掉）、两行调试用 dropMessage 残留会直接打给玩家、并把签到时间存进 accounts.lastVoteTime 与投票系统抢同一列，而 BeiDou 的 AccountsDO 根本没有这一列。如需账号级签到应走 ExtendValue 的 ACCOUNT_EXTEND_DAILY 另立新需求，不是移植
 src/client/command/commands/gm0/RedeemCommand.java	java-new	90	0	pending	
@@ -1088,6 +1088,7 @@ scripts/npc/2060005.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2060009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2080000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2081000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081004.js	script	0	0	ported	gms-server/scripts/npc/2081004.js 与 scripts-zh-CN/npc/2081004.js —— 修了材料校验：原实现把校验写在循环体内，第一种材料够了就直接走 else 收材料发成品，另外两种一件都不用有
 scripts/npc/2081005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2081100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2081200.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1178,6 +1179,7 @@ scripts/npc/2133000.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2133001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2133002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2133004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/2140000.js	script	0	0	ported	gms-server/scripts/npc/2140000.js 与 scripts-zh-CN/npc/2140000.js —— 任务重置NPC，用到本批新增的 cm.startQuestPro；改成先重置成功再扣钱，原实现重置失败也照扣一千万
 scripts/npc/2141001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2141002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/22000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1345,6 +1347,8 @@ scripts/npc/MagatiaPassword.js	script	0	0	noise	改动可证明只落在字符�
 scripts/npc/PupeteerPassword.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/ThiefPassword.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/commands.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/detectMap.js	script	0	0	ported	gms-server/scripts/npc/detectMap.js 与 scripts-zh-CN/npc/detectMap.js —— 修了两处：getAllPlayers() 是 java.util.List，原实现按数组用 .length/[i]，列表永远为空；选项值用的是含自己在内的原下标，跳过自己后会选中别人
+scripts/npc/detected.js	script	0	0	ported	gms-server/scripts/npc/detected.js 与 scripts-zh-CN/npc/detected.js —— getText() 返回的 java.lang.String 在 GraalVM 下与数字松散比较不做数值转换，改 parseInt 严格比较；去掉「通过检测发1000点券」，那是一条刷点券的路子
 scripts/npc/gachapon.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/gachaponInfo.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/mapleTV.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1709,27 +1713,23 @@ scripts/reactor/8091002.js	script	0	0	noise	改动可证明只落在字符串字
 scripts/reactor/8091003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/8091004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/8098000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/event/CentipedeBattle.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/event/KrexelBattle.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/event/YaoSengBattle.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/1002103.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/1022007 .js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/1022101_test.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/2081004.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/2140000.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/9000036_accessory.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/9270045.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/event/CentipedeBattle.js	script-new	0	0	already-fixed	gms-server/scripts-zh-CN/event/WuGongPQ.js:5 —— 同一场蜈蚣战，进出场地图（701010323/701010320/701010322）与BOSS（9600009）逐项相同，入口同为 npc/9310006.js。BeiDou 版另有难度倍率、掉落表与 GameConfig 人数/等级解限，比 LK 版完整
+scripts/event/KrexelBattle.js	script-new	0	0	deferred	缓，挪至批次7：整条克雷塞尔线依赖 BeiDou 缺失的两张地图 wz（Map5/541020700 与 541020800，LK 基线自带故不在本清单分母内）、新增的 ExpeditionType.KREXEL 与 ExpeditionBossLog 条目（批次6），以及 distributeBossCertificate 用的 BOSS凭证 3100000（Item.wz/Install/0310.img.xml，见附录D）。重启条件：批次7 补齐上述 wz 且批次6 敲定远征类型枚举
+scripts/event/YaoSengBattle.js	script-new	0	0	already-fixed	gms-server/scripts-zh-CN/event/YaoSengPQ.js:5 —— 同一场妖僧战，进出场地图（702060000/702070400）与BOSS（9600025）相同，入口 npc/9310006.js 与 9310039.js。另：LK 侧 YaoSengBattle 全仓库零引用，本身就是死脚本
+scripts/npc/1002103.js	script-new	0	0	rejected	正文是 LK 自造的一句寒暄「同学，想了解一下冒险学院吗？」，没有任何功能。而 1002103 在 Quest.wz/Check.img.xml 里出现 5 次，是任务NPC，给它挂一个只 sendOk 就 dispose 的脚本是净损失
+scripts/npc/1022007 .js	script-new	0	0	rejected	文件名带空格，是 LK 的笔误；内容是 NPC 2010000（Master Sergeant Fox，天空之城兑换）的脚本被错存成 1022007 这个id。BeiDou 已有正确归位的 scripts/npc/2010000.js
+scripts/npc/1022101_test.js	script-new	0	0	rejected	作者自用的兑换脚本试验稿，文案中英混杂（"are you sure you have..." 后半句突然变中文），兑换表是 2000000 蓝药换 1472053 武器这种随手填的测试数据。正式版是 scripts/npc/1022101.js（清单 script 档）
+scripts/npc/9000036_accessory.js	script-new	0	0	deferred	缓，挪至批次7：工作人员E 的饰品分支，与主体 scripts/npc/9000036.js（清单 script 档，+102 逻辑行）是一套，拆开搬没有意义。另：LK 全仓库没有任何地方 openNpc 到这个脚本名，得先确认它的入口是不是随主体一起改的
+scripts/npc/9270045.js	script-new	0	0	deferred	缓，挪至批次7：内容是「离开这里」传送到 541020700，而该地图 BeiDou 没有（同 KrexelBattle.js）。搬过来会把玩家送进不存在的地图
 scripts/npc/9800001.js	script-new	0	0	deferred	缓：留言板的唯一入口脚本（留言收 50 万金币），随 src/server/MessageBoard.java 一并暂缓。BeiDou 两个语言层都没有。重启条件同 MessageBoard；届时要按 §3.5 同时落到 scripts/ 与 scripts-zh-CN/ 两套
 scripts/npc/changePassword.js	script-new	0	0	deferred	随 ChangePasswordCommand 一并暂缓
-scripts/npc/detectMap.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/detected.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/npcTemplate.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/testScript.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/npc/under_maintenance.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/npc/npcTemplate.js	script-new	0	0	rejected	NPC 脚本模板，BeiDou 已有自己的脚本写法（sendNextLevel/sendSelectLevel 那套），模板不通用
+scripts/npc/testScript.js	script-new	0	0	rejected	作者自用的排版试验稿：status 0 打一段 #i#t#c 混排就 dispose，status 1 之后是从 detected.js 整段复制来的死代码（永远走不到）
+scripts/npc/under_maintenance.js	script-new	0	0	deferred	缓，挪至批次8：正文只有一句「功能维护中」，真正的逻辑（cm.redeemDailyRoyalReward 领皇家月卡日奖励）连同 sendYesNo 一起被 LK 注释掉了。随皇家系统一并决策
 scripts/npc/verifyEmail.js	script-new	0	0	deferred	随 VerifyEmailCommand 一并暂缓
-scripts/portal/mahavira_enter.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/portal/treeboss00.js	script-new	0	0	pending	BeiDou 两个语言层都没有
-scripts/reactor/5411001.js	script-new	0	0	pending	BeiDou 两个语言层都没有
+scripts/portal/mahavira_enter.js	script-new	0	0	deferred	缓，挪至批次7：这个 portal 脚本名只出现在 LK 改过的 wz/Map.wz/Map/Map7/702050000.img.xml 里，BeiDou 同名文件没有任何 portal script 字段，脚本单独搬过来不会被触发。随该 wz 行一并处理
+scripts/portal/treeboss00.js	script-new	0	0	deferred	缓，挪至批次7：克雷塞尔入口，portal 脚本挂在缺失的 Map5/541020700 上，随 KrexelBattle.js 一并处理
+scripts/reactor/5411001.js	script-new	0	0	deferred	缓，挪至批次7：召唤克雷塞尔的反应堆，本体 Reactor.wz/5411001.img.xml 就在附录D 的缺失清单里，且所在地图 541020800 同样缺失。随 KrexelBattle.js 一并处理
 sql/db_LichKingMod.sql	sql	492	0	pending	需转成 Flyway 迁移，不能直接跑
 sql/db_LichKingMod_patch.sql	sql	765	0	pending	需转成 Flyway 迁移，不能直接跑
 sql/db_database.sql	sql	73	73	pending	需转成 Flyway 迁移，不能直接跑

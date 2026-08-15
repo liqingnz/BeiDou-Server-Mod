@@ -268,7 +268,7 @@ LK 的 29 个新指令**全是硬编码中文**，还有一个 `constants/string
 | 2 | 登录 IP 记录（邮箱验证与改密码已 deferred） | 0 |
 | 3 | ⏸ 投票奖励系统 —— **整批暂缓**，见 §7 | 0 |
 | 4 | ✅ `@retrieve` / `@drop` 有效期 / `@gmbot`；留言板与站外邮件暂缓，见 §7 | 0 |
-| 5 | `AbstractPlayerInteraction` +338 行 + 21 个独有脚本 | 0 |
+| 5 | ✅ `AbstractPlayerInteraction` 的 4 个方法 + 4 个独有脚本 + `@detect`；其余 already-fixed / rejected / 挪批次7 | 0 |
 | 6 | C 类游戏性/平衡逐条 triage | — |
 | 7 | 掉落/商店 SQL + 262 个含代码改动的脚本 + 41 个缺失 wz + 276 个待 diff wz | 6 |
 | 8 | 皇家点券系统（含 `royal_accounts` 表与 `@redeem`）+ 8807 个点装 wz + 客户端 img 补丁 | 0 |
@@ -794,13 +794,246 @@ BeiDou 要改接现有调度方式。
 插入是否生效需启动服务端跑 Flyway，情况同批次 1。`@gmbot` 的定时任务行为
 （取消、目标掉线、跨频道查找）没有实跑确认。
 
-### 批次 5 — 脚本 API + 独有脚本
+### 批次 5 — 脚本 API + 独有脚本 ✅ 已完成（4 个脚本 + 4 个 API + 1 个指令）
 
-先移植 `scripting/AbstractPlayerInteraction`（**+338/-15，后续所有 NPC 脚本的前置依赖**），
-连带 `NPCConversationManager`、`EventInstanceManager`、`EventManager`、`QuestScriptManager`。
+原定「`AbstractPlayerInteraction` +338 行 + 21 个独有脚本」。逐条查证后：
+**Java 侧 338 行里真正要搬的只有 4 个方法，21 个脚本里只有 4 个当下能落地。**
 
-然后是 21 个 BeiDou 完全没有的脚本（清单见附录 E），其中 3 个测试类脚本
-（`1022101_test`、`testScript`、`npcTemplate`）评估是否需要。
+#### Java：+338 行的实际构成
+
+| LK 新增 | 处置 | 依据 |
+|---|---|---|
+| `startQuestPro(int)` | ✅ 搬 | 任务重置，`Quest.getNpcRequirement(boolean)` BeiDou 已有 |
+| `createExpedition(type, silent)` 重载 | ✅ 搬 | 2 行，`Expedition` 构造器对 0 就是「取该类型默认值」 |
+| `isRecyclableScroll(Item, boolean)` | ✅ 搬 | 消费方 `npc/9201142.js` 在批次 7，先把前置放好 |
+| `detectPlayer(Character)` | ✅ 搬（重写） | 见下 |
+| `weakenAreaBoss` + 三个私有方法 | ❌ already-fixed | `AbstractPlayerInteraction.java:1252` 已有，且用的是 `MobSkillType` 枚举而非魔法数字 157/155 |
+| `getFirstJobStatRequirement` 中文化 | ❌ already-fixed | 同文件 `:1218` 已是中文 |
+| 背包已满提示中文化 | ❌ already-fixed | 同文件 `:651` 已是中文 |
+| 注释掉「饰品补 3 格升级卷孔」 | ❌ rejected | 不跟 LK 的删法，但这条讨论出了一个 BeiDou 侧改动，见下 |
+| `redeemDailyRoyalReward` / `gainRoyalPoint` / `gainRoyalTime` | ⏸ 批次 8 | 读写 `royalAccounts` |
+| `getEmail` / `sendVerificationCode` / `checkEmailAndSendVerificationCode` / `verifyEmail` / `verifyChangePassword` | ⏸ 批次 2 deferred | 全部依赖 `net/mailing/Verifier` |
+
+> 因此清单里 `AbstractPlayerInteraction.java` 这一行**仍是 `pending`** ——
+> 皇家与邮箱两组方法还没落地，等批次 8 与批次 2 重启时再收尾。同批次 2 的 `MapleClient.java`。
+
+连带的四个类，真增量比预期少得多：
+
+| 文件 | 处置 |
+|---|---|
+| `EventInstanceManager` | ✅ `distributeBossCertificate` / `distributePQClearReward` 两个发奖方法 |
+| `EventManager` | ❌ rejected，见下 |
+| `NPCConversationManager` | ⏸ 挪批次 7（`doGachapon(quantity)` 要连同 4 个 gacha 脚本一起取舍） |
+| `NPCScriptManager` | ❌ rejected，唯一改动是一段整体注释掉的 `createEmptyCMS` |
+| `QuestScriptManager` | — 清单里本来就是 `noise`（`git diff -w` 后无差异），计划书写错了 |
+| `MapScriptMethods` / `ReactorActionManager` | ❌ already-fixed（前者已是中文，后者 `dropRate` 已是 `float`） |
+
+**`EventManager.startInstance` 的返回类型不改。** LK 把 `boolean` 改成 `int` 想让远征入口脚本
+区分失败原因，但它自己 `treeboss00.js` 里那句 `em.startInstance(expedition)` 是注释掉的，
+全仓库无人读这个返回码；而改签名会让 BeiDou 现有远征脚本里所有
+`if (!em.startInstance(...))` 的判断整体反过来。**收益为零，风险是全部远征入口失灵。**
+
+`EventInstanceManager.registerPlayer` 里 LK 加的 `storeEventInstance(chr.getId(), null)` 也没搬 ——
+两边的 `isRecallableEvent` 都会把 `null` 挡在门外，这句是空操作。
+
+#### 连带产生的一个 BeiDou 侧改动：饰品补孔收紧到制作流程
+
+**这不是移植，是 BeiDou 自己的设计决定**，记在这里只为不丢失结论。清单里 `AbstractPlayerInteraction.java`
+的判定与本条无关。
+
+LK 把 `gainItem` 里这三行整个注释掉了，改动处留的是一句 `// why this line exist?`：
+
+```java
+if (ItemConstants.isAccessory(item.getItemId()) && it.getUpgradeSlots() <= 0) {
+    it.setUpgradeSlots(3);
+}
+```
+
+**先厘清它原本的意思。** `upgradeSlots` 取自 wz 的 `tuc`（total upgrade count，出厂自带几个卷孔），
+链路是 `getEquipById` → `stat.getKey().equals("tuc")` → `setUpgradeSlots`
+（[ItemInformationProvider.java:1238](../gms-server/src/main/java/org/gms/server/ItemInformationProvider.java#L1238)），
+字段缺失时 `getEquipStats` 兜底成 0。所以 `<= 0` 的含义是
+**「这件饰品按游戏数据本来就没有卷孔」** —— 不是数据坏了，也不是没初始化。
+
+**出处能查到。** 一字不差的同三行还在
+[MakerProcessor.java:381](../gms-server/src/main/java/org/gms/client/processor/action/MakerProcessor.java#L381)，
+那是专业技能制作（Maker）系统 —— GMS 里 Maker 产出的饰品确实带孔，在那儿它是对的。
+`gainItem` 这份是从那儿抄的，连紧随其后的 `use_enhanced_crafting` + 混沌卷轴分支都一起抄了。
+
+**LK 问对了一半：这行在 `gainItem` 里挂错了位置。** 看两行的守卫差异 —— 补孔那行无条件，
+混沌卷轴那行要求 `c.getPlayer().isUseCS()`。而 `useCS` 的声明注释就写着
+`//chaos scroll upon crafting item`（[Character.java:463](../gms-server/src/main/java/org/gms/client/Character.java#L463)），
+由 18 个精炼/制作 NPC 脚本 `setCS(true)` 打开，`NPCScriptManager.dispose` 复位，
+**它就是「玩家此刻正处在制作流程中」的标记**。下面那行用了它，上面那行没用。
+
+结果是所有脚本发放的饰品都吃这条 —— 任务奖励、活动、扭蛋、GM 脚本全算在内。
+数据上这不是边缘情况，`1110000..1139999` 段在 BeiDou 的 wz 里共 166 个饰品：
+
+| | 数量 | 占比 |
+|---|---|---|
+| wz 里没有 `tuc` 字段（戒指基本都是） | 101 | 61% |
+| `tuc = 0` | 13 | 8% |
+| **本来没孔、会被强行改成 3 孔** | **114** | **69%** |
+| 自带孔（3~7，项链腰带居多） | 52 | 31% |
+
+也就是同一枚戒指，怪掉的 0 孔、NPC 给的 3 孔。
+
+**但 LK 的删法也不对**：整段删掉会让制作 NPC 也不补孔，包括它自己批次 7 要搬的
+`9000036_accessory.js`（第 49 行就是 `setCS(true)`）。为了修「适用面太宽」而把合理用途一起砍掉。
+
+**最终做法：把补孔挪进 `isUseCS()`，与混沌卷轴分支合并成一个制作块。**
+Maker 不受影响（`MakerProcessor` 是独立的一份），18 个制作 NPC 不受影响，
+任务/活动/扭蛋发的饰品回归 wz 数据。注意补孔只挂 `isUseCS()`，**不挂 `use_enhanced_crafting`** ——
+后者是混沌卷轴那条单独的开关，两件事。
+
+> **动手前扫过依赖，对现有内容零影响。** 全仓库脚本只发两种饰品：`1122007` 与 `1122010`，
+> 两个都自带 `tuc=3`，`<= 0` 对它们从来就不成立，这行代码压根没对它们生效过。
+> `BeiDouSpecial/` 的在线奖励、签到、新人福利奖励表里没有饰品。唯一行为会变的是
+> `一键刷道具.js` 这个 GM 刷物工具刷戒指时 —— 那本来就该按物品数据来。
+
+#### 关键发现一：两个 BOSS 战 BeiDou 早就有了，而且更完整
+
+| LK | BeiDou 现成实现 | 证据 |
+|---|---|---|
+| `event/CentipedeBattle.js` | `scripts-zh-CN/event/WuGongPQ.js` | 进出场地图 701010323 / 701010320 / 701010322、BOSS 9600009、入口 `npc/9310006.js` **逐项相同** |
+| `event/YaoSengBattle.js` | `scripts-zh-CN/event/YaoSengPQ.js` | 地图 702060000 / 702070400、BOSS 9600025 相同 |
+
+BeiDou 版另有难度倍率、掉落表、多大厅并发，以及按 `use_enable_solo_expeditions` /
+`use_enable_party_level_limit_lift` 解限。**LK 版没有任何增量。**
+
+顺带查出 `YaoSengBattle.js` 在 LK 全仓库零引用，本身就是死脚本 —— 同 `VotePingBackHandler`。
+
+#### 关键发现二：克雷塞尔整条线卡在 BeiDou 缺两张地图
+
+`KrexelBattle.js` / `portal/treeboss00.js` / `reactor/5411001.js` / `npc/9270045.js` 是一套，
+全部指向 `541020700`（大厅）与 `541020800`（战场）。**这两张地图 BeiDou 的 `wz/Map.wz/Map/Map5/` 里没有**
+（该目录只有 57 个文件，LK 有 87 个）。
+
+这个缺口**清单发现不了**：LK 基线 `b0671161` 自带这两张 wz，从没改过，所以它们压根不在
+`b0671161..HEAD` 的分母里。附录 D 的「41 个缺失 wz」是从 LK 的 diff 里推的，同样看不见。
+
+> **教训**：`pending` 归零只证明「LK 改过的都处理了」，不证明「移植过来的东西能跑」。
+> 依赖 LK 基线自带资源的脚本，必须单独查 BeiDou 有没有那份资源。§6.5 的「反向抽查」是唯一的兜底。
+
+连带的还有 `distributeBossCertificate` 发的 BOSS凭证 `3100000` ——
+它在 `Item.wz/Install/0310.img.xml` 里，正好在附录 D 的缺失清单上。所以那 8 个调用它的批次 7
+BOSS 脚本，也得等 wz 补齐才有意义。
+
+`portal/mahavira_enter.js` 同理但成因不同：这个脚本名只出现在 LK **改过**的
+`wz/Map.wz/Map/Map7/702050000.img.xml` 里，BeiDou 的同名文件没有任何 `portal script` 字段。
+脚本单独搬过来永远不会被触发，得跟那一行 wz 一起处理。
+
+#### 关键发现三：测谎是唯一一个需要做运营决策的功能
+
+`detectPlayer` + `@detect` + `detectMap.js` / `detected.js` 是一套「玩家互测挂机」机制：
+花 1500 点券对另一个玩家发起，对方 15 秒内答不出一道加法题，就被关进监狱 60 分钟并被罚走
+10000 点券，钱转给发起方。
+
+**这是一条现成的骚扰渠道** —— 专挑对方打 BOSS、跑图、开商店的时候发起，成本 1500 点券。
+所以移植时把它整套参数化并**默认关闭**：
+
+| `game_config` 键 | 默认 | 作用 |
+|---|---|---|
+| `use_player_detect` | **false** | 普通玩家能否发起。GM（`gmLevel >= 2`）不受此开关限制，也不花钱 |
+| `detect_cost_nx` | 1500 | 发起成本 |
+| `detect_reward_nx` | 10000 | 罚没并转给发起方的点券上限 |
+| `detect_jail_minutes` | 60 | 监禁时长 |
+| `detect_answer_seconds` | 15 | 答题时限 |
+
+**开不开是运营决定，不是移植决定。** 现状是「GM 可用、玩家不可用」，
+把 `use_player_detect` 打开就变成 LK 的原始形态。
+
+#### 移植时修掉的 LK 问题
+
+| 文件 | 问题 | 处理 |
+|---|---|---|
+| `detectPlayer` | **目标为空时只发了条消息没有 `return`**，下一句就对 `null` 调 `getLastAttack()` | 加 `return` |
+| `detectPlayer` | 没挡「测自己」，测自己会把自己关进监狱 | 加判断 |
+| `detectPlayer` | 目标正在与NPC对话时，`openNpc` 直接返回，题目根本弹不出来，倒计时结束照样处罚 | 发起前查 `getCM()`，有会话就不发起 |
+| `detectPlayer` | 目标掉线时**直接写 `accounts.nxCredit`** 扣点券 | 不跟。掉线角色的点券还在内存 `CashShop` 里，登出保存与这条 UPDATE 谁后写谁生效，轻则罚款丢失，重则冲掉登出时保存的其它点券改动。改为不处罚 + 退还发起方 |
+| `detectPlayer` | `dropMessage("player nx: " + victimNX)` 把别人的点券余额播给发起方 | 删掉 |
+| `detectPlayer` | 没考虑**发起方**在这十几秒里下线 | 判罚照做，但退款与赏金不发——往已登出的 `CashShop` 对象记账没人会保存，钱等于凭空消失 |
+| `detectPlayer` | 另有 4 处由复查查出（可处罚 GM、题没弹出去也处罚、截止时刻答对仍被罚、入狱污染所有存档位） | 见本节末「复查发现的 6 个问题与修正」 |
+| `detectPlayer` | 结束时 `registerRunningCommands(..., null)` | 批次 1 已把 `CommandManager` 换成并发容器，`null` 值会直接抛异常；改成对应的移除 |
+| `detectPlayer` | 「先查有没有在测 → 再登记」，两人同时对同一目标发起会双双通过 | 用 `registerRunningCommandIfAbsent` 原子登记 |
+| `detectMap.js` | **`getAllPlayers()` 是 `java.util.List`，却按数组用 `.length` / `[i]`** | `.length` 恒为 `undefined`，循环一次都进不去，名单永远是空的 —— 这个脚本在 LK 那边就是坏的。改 `size()` / `get()` |
+| `detectMap.js` | 选项值用含自己在内的原下标，跳过自己后下标错位，会选中名单里的另一个人 | 单独维护候选 id 数组 |
+| `detectMap.js` | `sendYesNo("是否要检测：" + delectedPlayer)` 把角色对象拼进字符串 | 改 `getName()` |
+| `detected.js` | `cm.getText() == c` 拿 `java.lang.String` 和数字做松散比较，GraalVM 下不会像纯 JS 那样转数值 | 改 `parseInt` 严格比较 |
+| `detected.js` | 通过检测发 1000 点券 | 去掉。被检测不该有收益，否则找管理员反复检测自己就是刷点券 |
+| `2081004.js` | **材料校验写在循环体内**，第一种材料够了就走 `else` 收材料发成品，另外两种一件都不用有 | 改成整批预检再一次性扣除 |
+| `2140000.js` | 先扣一千万再重置，不看重置结果 | 改成重置成功才扣钱 |
+| `distributeBossCertificate` | 对 `getCharacterById` 的结果直接调 `getAbstractPlayerInteraction()`，打完就离开地图的人会当场 NPE，整个发放循环断在这里，后面的人一个都拿不到 | 加空值跳过 |
+| `distributeBossCertificate` | 硬编码物品 `3100000`，还有一句 `System.out.println` 打伤害占比 | 改成 `itemId` 参数；日志删掉 |
+| `distributePQClearReward` | 直接迭代 `chars.values()`，不持读锁 | 改走 `getPlayers()` 取快照 |
+
+#### 因 BeiDou API 差异做的调整
+
+- **`Character` 没有 `lastAttack`**。LK 在 `MapleCharacter` 上加了字段并在
+  `AbstractDealDamageHandler:143` 打点，BeiDou 两处都没有，本批一并补上
+  （`Character.java` 的字段 + `AbstractDealDamageHandler` 里一行）。字段只活在内存，不落库。
+- **`Monster.getTakenDamage()` 不存在**，但 `takenDamage` 字段是有的。加了个返回**拷贝**的访问器：
+  内部那张表是裸 `HashMap`，写入点在 `applyDamage` 里，直接把内部表交出去会让调用方一边遍历
+  一边撞上别人打怪。批次 6 的 `BossDmgAnalysisCommand` 也依赖这个访问器，届时直接用即可。
+- `TimerManager.getInstance().schedule(...)` 对齐 BeiDou 现有用法（同批次 4 的 `@gmbot`）。
+- 脚本中心 NPC 用 `NpcId.BEI_DOU_NPC_BASE`（9900001），不是 LK 的 9010000。
+- 监狱地图用 `MapId.JAIL`，不是魔法数字 `300000012`。
+- 卷轴 id 段 `2040000..2050000` 落成 `ItemId.SCROLL_RANGE_START/END`。
+
+#### 21 个独有脚本的最终去向
+
+| 处置 | 数量 | 明细 |
+|---|---|---|
+| ✅ ported | 4 | `detectMap` / `detected` / `2081004` / `2140000` |
+| ❌ already-fixed | 2 | `CentipedeBattle` / `YaoSengBattle` |
+| ❌ rejected | 5 | `1002103`（LK 自造的一句寒暄，而该 NPC 在 `Quest.wz/Check.img.xml` 里出现 5 次，给它挂只 `sendOk` 的脚本是净损失）、`1022101_test` / `testScript` / `npcTemplate`（作者自用试验稿）、`1022007 .js`（文件名带空格的笔误，内容其实是 NPC 2010000 的脚本，BeiDou 已有归位版） |
+| ⏸ deferred | 10 | 克雷塞尔四件套 + `mahavira_enter` + `9000036_accessory`（挪批次 7）、`under_maintenance`（挪批次 8）、`9800001` / `changePassword` / `verifyEmail`（批次 2、4 已缓） |
+
+> ported 的 4 个脚本都**同时落到 `scripts/` 与 `scripts-zh-CN/` 两套**（§3.5），
+> 英文层是重写不是复制，en-US 语言下功能一致。
+
+#### 复查发现的 6 个问题与修正
+
+代码复查提了 1 个 P1、5 个 P2，全部核实成立并已修。**其中两条是本批自己写出来的问题，不是 LK 的**，
+分开记：
+
+| # | 级别 | 问题 | 来源 | 修正 |
+|---|---|---|---|---|
+| 1 | **P1** | **测谎可以处罚 GM。** 只挡了「自己」，没校验目标权限。开了 `use_player_detect` 后普通玩家能对正在打怪的 GM 发起并罚走其点券，低权限 GM 也能处罚高权限 GM | LK 原有 | 加 `victim.isGM()` 拒绝。与 `JailCommand` 一致——它同样直接拒绝 `victim.isGM()`。`isGM()` 的阈值 `gmLevel > 1` 恰好与「发起方免费」的 `gmLevel >= 2` 对齐 |
+| 2 | P2 | **题没弹出去也照样处罚。** `getCM()` 预检与 `openNpc` 不是原子的，目标在两者之间自己点开别的 NPC，`openNpc` 就静默返回，而费用与判罚已经生效 | LK 原有（本批的预检只缩小了窗口，没关掉） | 新增 `openDetectionPrompt` 把结果透出来，**成功之后才收费**，失败则 `abortDetection` 撤销整场 |
+| 3 | P2 | **截止时刻答对仍会被处罚。** `cancel(false)` 拦不住已经开跑的结算，且原先没看取消结果。答题包与倒计时同时到达时玩家看到「通过」，结算线程照样扣券关监狱 | LK 原有 | 判定改为 CAS，见下 |
+| 4 | P2 | **入狱污染所有存档位。** `saveLocationOnWarp()` 会把当前地图灌进 `savedLocations` 的**每一个空槽**，连带占掉自由市场、活动、副本的返回点，而出狱脚本只读 `JAIL` | LK 原有 | 改 `saveLocation("JAIL")`，与 `JailCommand` 一致 |
+| 5 | P2 | **`lastAttack` 跨线程读没有可见性保证。** 写在目标频道的攻击线程，而 `@detect` 支持跨频道找人，读的通常是另一个线程，两者之间没有共同的锁 | **本批新增的代码** | 字段加 `volatile` |
+| 6 | P2 | **`Monster.getTakenDamage()` 的「快照」不是快照。** `new ArrayList<>(takenDamage.entrySet())` 仍然直接遍历内部裸 `HashMap`，返回拷贝并不能消除拷贝过程本身的竞争 | **本批新增的代码，注释还写错了** | 拷贝动作放进 `lockMonster()`——那正是写入点 `applyDamage` 所在的锁（见 `Monster.damage()`）。可重入，已持锁的调用方直接调也没问题 |
+
+**#3 连带把整个判定机制换掉了。** 原先靠「两个定时任务谁先响」决定结果，这是 LK 的设计，
+本批照搬了。它的根本问题是 `ScheduledFuture.cancel(false)` 只能拦住还没开跑的任务。现在改成：
+
+- 新增 `DetectSession`，按被测角色 id 登记在 `DETECT_SESSIONS` 里，登记入口只有 `putIfAbsent` 一处
+- 里面一个 `AtomicBoolean settled` 是**判罚与答对之间唯一的裁决点**，两条路径都要 CAS 成功才继续，
+  抢输的直接退出；`cancel` 降级成「省一次无谓唤醒」，不再承担正确性
+- 脚本侧不再自己下结论：`detected.js` 调 `cm.passDetection()`，按返回值显示「通过」还是
+  「答对了但已超时」。顺带把 `Detect` 这个类别字符串从脚本里拿掉了——脚本不该知道它
+- **「通过检测」的 20 秒延迟提示整个删掉。** 有了 CAS，答对时可以立刻通知发起方，
+  不需要 LK 那个第二定时器，也就不存在两个定时器互相取消的时序问题
+- 测谎不再借用 `CommandManager`，改为自带登记表，单一事实来源。
+  `registerRunningCommandIfAbsent` 仍由批次 4 的 `@gmbot` 使用，不受影响
+
+**#2 查到了 `start()` 的第三条静默失败路径**，复查意见里没提到：
+`NPCScriptManager.start` 在目标处于 500 毫秒点击 NPC 冷却（`canClickNPC()` 为假）时，
+只补发一个 `enableActions` 就**照样返回 true**，对话框根本没弹。所以判定成功不能只看返回值，
+还要看会话有没有真的登记进去（只有成功那条分支才 `cms.put`），即 `getCM() != null`。
+
+> `openDetectionPrompt` 开头那道 `getCM()` 检查也不能省，理由和防误判无关：
+> `NPCScriptManager.start` 自己会把已存在的会话 `dispose` 掉再开新的，
+> 少了这道检查，测谎会直接顶掉目标正在进行的对话。
+
+#### 已知未验证
+
+只做了 `mvn -pl gms-server clean compile`，**没有运行验证**。`V1000.0.5` 的 `command_info` 与
+`V1000.0.6` 的 5 个 `game_config` 键是否生效需启动服务端跑 Flyway，情况同批次 1、4。
+测谎的运行时行为（答对、超时判罚、截止时刻的 CAS 竞争、目标掉线退款、发起方掉线、
+题弹不出去时的撤销、两人同时发起）没有实跑确认。
 
 ### 批次 6 — 游戏性 triage（唯一无法机械化的部分）
 
@@ -984,6 +1217,10 @@ Reactor.wz/5411001.img.xml
 （`Character.wz` 的 8807 个点装文件归批次 8）
 
 ### E. BeiDou 完全缺失的 21 个 LK 独有脚本
+
+> **本表是批次 5 动手前的盘点，逐条查证后有多处不成立**（`CentipedeBattle` / `YaoSengBattle` BeiDou 已有更完整的实现，
+> 克雷塞尔整条线卡在缺失的 wz 地图，`npc/1022101.js` 其实不在这 21 个里）。
+> **最终去向以 §7 批次 5 为准**，下表只保留作为当时的判断记录。
 
 | 脚本 | 说明 |
 |---|---|

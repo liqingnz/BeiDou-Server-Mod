@@ -843,6 +843,48 @@ public class EventInstanceManager {
         }
     }
 
+    /**
+     * 按对BOSS造成的伤害占比发放凭证，占比不足的不发。
+     * <p>
+     * 移植自 LichKingMod。给BOSS战脚本在 monsterKilled 里调用，替代「只有最高伤害者拿奖励」的默认行为。
+     * 领取者按伤害记录取，不要求还在事件实例里——打完就走的人也算数。
+     *
+     * @param monster          刚被击杀的BOSS
+     * @param itemId           凭证物品id
+     * @param quantity         每人发放的数量
+     * @param minimumDmgPercent 参与发放所需的最低伤害占比（百分数）
+     */
+    public void distributeBossCertificate(Monster monster, int itemId, short quantity, short minimumDmgPercent) {
+        long maxHp = monster.getMaxHp();
+        if (maxHp <= 0) {
+            return;
+        }
+
+        MapleMap map = monster.getMap();
+        for (Map.Entry<Integer, Long> damage : monster.getTakenDamage().entrySet()) {
+            long percent = damage.getValue() * 100L / maxHp;
+            if (percent < minimumDmgPercent) {
+                continue;
+            }
+            // 原实现在这里直接对 getCharacterById 的结果调 getAbstractPlayerInteraction()，
+            // 打完就离开地图的人会取到 null 当场崩掉，整个发放循环也就断在这里，后面的人一个都拿不到
+            Character chr = map.getCharacterById(damage.getKey());
+            if (chr == null) {
+                continue;
+            }
+            chr.getAbstractPlayerInteraction().gainItem(itemId, quantity, true);
+        }
+    }
+
+    /**
+     * 给当前还在事件实例里的全部玩家发放通关奖励。
+     */
+    public void distributePQClearReward(int itemId, short quantity) {
+        for (Character chr : getPlayers()) {
+            chr.getAbstractPlayerInteraction().gainItem(itemId, quantity, true);
+        }
+    }
+
     public boolean isLeader(Character chr) {
         return (chr.getParty().getLeaderId() == chr.getId());
     }

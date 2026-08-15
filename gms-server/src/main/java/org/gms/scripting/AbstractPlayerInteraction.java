@@ -44,6 +44,7 @@ import org.gms.scripting.event.EventManager;
 import org.gms.scripting.npc.NPCScriptManager;
 import org.gms.server.ItemInformationProvider;
 import org.gms.server.Marriage;
+import org.gms.server.TimerManager;
 import org.gms.server.expeditions.Expedition;
 import org.gms.server.expeditions.ExpeditionBossLog;
 import org.gms.server.expeditions.ExpeditionType;
@@ -61,12 +62,25 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.util.concurrent.TimeUnit.DAYS;
 
 public class AbstractPlayerInteraction {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractPlayerInteraction.class);
+
+    /**
+     * 进行中的测谎，key 是被测角色id。登记入口只有 putIfAbsent 一处，同一目标同时只能有一场。
+     */
+    private static final Map<Integer, DetectSession> DETECT_SESSIONS = new ConcurrentHashMap<>();
+
+    /**
+     * 距目标上一次发动攻击多久之内才允许发起测谎。超过这个时间说明对方没在刷怪，不构成嫌疑。
+     */
+    private static final long DETECT_ATTACK_WINDOW_MS = 30_000L;
 
     public Client c;
 
@@ -643,17 +657,25 @@ public class AbstractPlayerInteraction {
                 item = ii.getEquipById(id);
 
                 if (item != null) {
-                    Equip it = (Equip) item;
-                    if (ItemConstants.isAccessory(item.getItemId()) && it.getUpgradeSlots() <= 0) {
-                        it.setUpgradeSlots(3);
-                    }
+                    // isUseCS 是「玩家此刻正处在制作/精炼NPC流程中」的标记，由那些NPC脚本 setCS(true) 打开，
+                    // NPCScriptManager.dispose 时复位。下面两条都是制作规则，只在这个流程里生效。
+                    if (c.getPlayer().isUseCS()) {
+                        Equip it = (Equip) item;
 
-                    if (GameConfig.getServerBoolean("use_enhanced_crafting") && c.getPlayer().isUseCS()) {
-                        Equip eqp = (Equip) item;
-                        if (!(c.getPlayer().isGM() && GameConfig.getServerBoolean("use_perfect_gm_scroll"))) {
-                            eqp.setUpgradeSlots((byte) (eqp.getUpgradeSlots() + 1));
+                        // 制作出来的饰品补满 3 个卷孔，与 MakerProcessor.addBoostedMakerItem 的规则一致。
+                        // upgradeSlots 取自 wz 的 tuc，<= 0 意味着这件饰品本来就没有卷孔（戒指基本都是）。
+                        // 原实现这一条不受 isUseCS 约束，于是任务奖励、活动、扭蛋发出去的饰品也一并补孔，
+                        // 结果同一枚戒指怪掉的 0 孔、NPC 给的 3 孔。补孔是制作系统的设定，不该覆盖所有发放路径。
+                        if (ItemConstants.isAccessory(it.getItemId()) && it.getUpgradeSlots() <= 0) {
+                            it.setUpgradeSlots(3);
                         }
-                        item = ItemInformationProvider.getInstance().scrollEquipWithId(item, ItemId.CHAOS_SCROll_60, true, ItemId.CHAOS_SCROll_60, c.getPlayer().isGM());
+
+                        if (GameConfig.getServerBoolean("use_enhanced_crafting")) {
+                            if (!(c.getPlayer().isGM() && GameConfig.getServerBoolean("use_perfect_gm_scroll"))) {
+                                it.setUpgradeSlots((byte) (it.getUpgradeSlots() + 1));
+                            }
+                            item = ii.scrollEquipWithId(item, ItemId.CHAOS_SCROll_60, true, ItemId.CHAOS_SCROll_60, c.getPlayer().isGM());
+                        }
                     }
                 }
             } else {
@@ -1120,6 +1142,15 @@ public class AbstractPlayerInteraction {
         return createExpedition(type, false, 0, 0);
     }
 
+    /**
+     * 用远征类型自带的人数上下限创建远征，只指定是否静默。
+     * <p>
+     * 传 0 会走 {@link Expedition} 里「取该类型默认值」的分支，与 {@link #createExpedition(ExpeditionType)} 一致。
+     */
+    public int createExpedition(ExpeditionType type, boolean silent) {
+        return createExpedition(type, silent, 0, 0);
+    }
+
     public int createExpedition(ExpeditionType type, boolean silent, int minPlayers, int maxPlayers) {
         Character player = getPlayer();
         Expedition exped = new Expedition(player, type, silent, minPlayers, maxPlayers);
@@ -1264,6 +1295,261 @@ public class AbstractPlayerInteraction {
 
     private void sendBlueNotice(MapleMap map, String message) {
         map.dropMessage(6, message);
+    }
+
+    /**
+     * 判断是否是可回收的卷轴。
+     * <p>
+     * 卷轴的物品id段是 2040000 ~ 2049999。
+     *
+     * @param item           待判定的物品
+     * @param excludePerfect 是否把成功率100%的卷轴排除在外（这类卷轴回收没有意义）
+     */
+    public boolean isRecyclableScroll(Item item, boolean excludePerfect) {
+        if (item == null) {
+            return false;
+        }
+        int itemId = item.getItemId();
+        if (itemId < ItemId.SCROLL_RANGE_START || itemId >= ItemId.SCROLL_RANGE_END) {
+            return false;
+        }
+        if (excludePerfect) {
+            // 原实现直接对 getEquipStats(...).get("success") 拆箱比较，而 getEquipStats 在
+            // 物品数据缺失时会返回 null，成功率字段也可能不存在，这里两处都要兜住
+            Map<String, Integer> stats = ItemInformationProvider.getInstance().getEquipStats(itemId);
+            if (stats == null) {
+                return false;
+            }
+            Integer success = stats.get("success");
+            return success == null || success != 100;
+        }
+        return true;
+    }
+
+    /**
+     * 测谎：给目标弹一道限时算术题，答不上来就按挂机脚本处理（关监狱并罚没点券）。
+     * <p>
+     * 移植自 LichKingMod 的同名方法。整套机制默认关闭，由 {@code use_player_detect} 控制——
+     * 它允许普通玩家花点券去处罚另一个玩家，是一条现成的骚扰渠道（比如专挑对方打BOSS时发起），
+     * 开之前请先想清楚运营上是否接受。开关关闭时仍可由GM发起，GM本来就不花钱也不受这条限制。
+     * <p>
+     * 相对原实现的改动：
+     * <ul>
+     *   <li>目标为空时原实现只发了条消息没有 return，下一句就对 null 调 getLastAttack() 直接崩</li>
+     *   <li>补三条前置校验：不能测自己（否则把自己关进监狱）、不能测GM（与 {@code JailCommand} 一致）、
+     *       目标正在与NPC对话时不发起</li>
+     *   <li>目标掉线时原实现直接写 accounts 表扣点券。这里不跟：掉线角色的点券还在内存的
+     *       CashShop 对象里，登出保存与这条 UPDATE 谁后写谁生效，时序不可控，
+     *       轻则罚款丢失，重则把登出时保存的其它点券改动一起冲掉。改为不处罚并退还发起方</li>
+     *   <li>原实现有一句 {@code dropMessage("player nx: " + victimNX)}，把别人的点券余额播给发起方，删掉</li>
+     *   <li>成本、赏金、监禁时长、答题时限全部改成 {@code game_config} 项，不再硬编码</li>
+     * </ul>
+     * <p>
+     * <b>判罚与答对的竞争不靠取消定时任务，靠 {@link DetectSession#settled} 这个 CAS。</b>
+     * {@code ScheduledFuture.cancel(false)} 拦不住已经开跑的结算，答题包与倒计时同时到达时，
+     * 玩家会看到「通过」而结算线程照样扣券关监狱。现在两条路径都要先抢到 {@code settled}，
+     * 抢输的一方直接退出，取消 future 只是省一次无谓唤醒。
+     */
+    public void detectPlayer(Character victim) {
+        Character player = getPlayer();
+        boolean freeOfCharge = player.gmLevel() >= 2;
+
+        if (!freeOfCharge && !GameConfig.getServerBoolean("use_player_detect")) {
+            player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message1"));
+            return;
+        }
+        if (victim == null || !victim.isLoggedInWorld()) {
+            player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message2"));
+            return;
+        }
+        if (victim.getId() == player.getId()) {
+            player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message3"));
+            return;
+        }
+        // GM 一律不可被测。只挡「自己」是不够的：开了 use_player_detect 之后普通玩家能对正在打怪的GM
+        // 发起检测并罚走其点券，低权限GM也能处罚高权限GM。JailCommand 同样直接拒绝 victim.isGM()。
+        if (victim.isGM()) {
+            player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message13"));
+            return;
+        }
+
+        // 构成「挂机刷怪」嫌疑的两个条件：目标近期发动过攻击，且所在地图确实有怪
+        if (Server.getInstance().getCurrentTime() - victim.getLastAttack() > DETECT_ATTACK_WINDOW_MS) {
+            player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message4"));
+            return;
+        }
+        MapleMap victimMap = victim.getMap();
+        if (victimMap == null || victimMap.getMapObjectsInRange(victim.getPosition(), Double.POSITIVE_INFINITY,
+                Collections.singletonList(MapObjectType.MONSTER)).isEmpty()) {
+            player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message5"));
+            return;
+        }
+
+        int cost = GameConfig.getServerInt("detect_cost_nx");
+        if (!freeOfCharge && player.getCashShop().getCash(1) < cost) {
+            player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message7", cost));
+            return;
+        }
+
+        final int victimId = victim.getId();
+        final String victimName = victim.getName();
+
+        // 抢占目标：putIfAbsent 是唯一的登记入口，两人同时对同一目标发起时只有一个能进
+        DetectSession session = new DetectSession(player, freeOfCharge, cost);
+        if (DETECT_SESSIONS.putIfAbsent(victimId, session) != null) {
+            player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message8"));
+            return;
+        }
+
+        long answerMs = GameConfig.getServerInt("detect_answer_seconds") * 1000L;
+        session.verdict = TimerManager.getInstance().schedule(() -> settleDetection(victimId, victimName), answerMs);
+
+        // 题必须确认真的弹出去了，才收费、才让判罚生效。openNpc 遇到目标已有会话是静默返回的，
+        // 前面那道 getCM() 预检与这里之间目标随时可能自己点开别的NPC，脚本加载失败也是同样结果——
+        // 这些情况下目标压根没看到题，不能扣他券关他监狱。
+        if (!openDetectionPrompt(victim)) {
+            abortDetection(victimId, session);
+            player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message6"));
+            return;
+        }
+
+        if (!freeOfCharge) {
+            player.getCashShop().gainCash(1, -cost);
+        }
+        player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message10", victimName));
+    }
+
+    /**
+     * 给目标弹出测谎答题框，返回题是否真的弹出去了。
+     * <p>
+     * {@link #openNpc(int, String)} 在目标已有会话时静默返回 void，调用方无从判断，所以这里另起一份。
+     * 开头那道 {@code getCM()} 也不能省：{@link NPCScriptManager#start} 自己会把已存在的会话
+     * {@code dispose} 掉再开新的，等于把目标正在进行的对话顶掉。
+     * <p>
+     * 判定成功与否<b>不能只看 {@code start} 的返回值</b>。它有三条出口：脚本加载不到返回 false；
+     * 正常开起来返回 true；而目标处在 500 毫秒点击NPC冷却里（{@code canClickNPC()} 为假）时，
+     * 它只补发一个 {@code enableActions} 就 <b>照样返回 true</b>，对话框根本没弹。
+     * 可靠的事后判据是会话有没有真的登记进去——只有成功那条分支才会 {@code cms.put}。
+     */
+    private static boolean openDetectionPrompt(Character victim) {
+        Client victimClient = victim.getClient();
+        if (victimClient.getCM() != null) {
+            return false;
+        }
+        victimClient.removeClickedNPC();
+        NPCScriptManager.getInstance().dispose(victimClient);
+        return NPCScriptManager.getInstance().start(victimClient, NpcId.BEI_DOU_NPC_BASE, "detected", null)
+                && victimClient.getCM() != null;
+    }
+
+    /**
+     * 目标答对了。由 detected.js 在验证答案之后调用，返回是否赶在判罚之前。
+     * <p>
+     * 返回 false 有两种情况：本来就没在被检测，或者判罚已经先一步抢到了 {@code settled}——
+     * 后者意味着玩家答对了但超时，处罚照旧，脚本不能显示「通过」。
+     */
+    public boolean passDetection() {
+        Character chr = getPlayer();
+        DetectSession session = DETECT_SESSIONS.get(chr.getId());
+        if (session == null || !session.settled.compareAndSet(false, true)) {
+            return false;
+        }
+        DETECT_SESSIONS.remove(chr.getId(), session);
+        cancelVerdict(session);
+
+        if (session.initiator.isLoggedInWorld()) {
+            session.initiator.dropMessage(6,
+                    I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message9", chr.getName()));
+        }
+        return true;
+    }
+
+    /**
+     * 题没能弹出去时撤销整场检测：占住 settled 让倒计时到点后直接退出，再把登记撤掉。
+     * 此时还没收费，所以没有退款动作。
+     */
+    private static void abortDetection(int victimId, DetectSession session) {
+        session.settled.set(true);
+        DETECT_SESSIONS.remove(victimId, session);
+        cancelVerdict(session);
+    }
+
+    private static void cancelVerdict(DetectSession session) {
+        ScheduledFuture<?> verdict = session.verdict;
+        if (verdict != null) {
+            verdict.cancel(false);   // 只为省一次无谓唤醒，判定本身由 settled 决定
+        }
+    }
+
+    /**
+     * 测谎倒计时结束后的结算。抢不到 {@code settled} 说明目标已经答对了，直接退出。
+     */
+    private static void settleDetection(int victimId, String victimName) {
+        DetectSession session = DETECT_SESSIONS.get(victimId);
+        if (session == null || !session.settled.compareAndSet(false, true)) {
+            return;
+        }
+        DETECT_SESSIONS.remove(victimId, session);
+
+        // 发起方自己也可能在这十几秒里下线。判罚照做，但退款与赏金不再发放——
+        // 往一个已登出的 CashShop 对象里记账没人会保存，钱等于凭空消失，还不如不动。
+        Character player = session.initiator;
+        boolean initiatorPresent = player.isLoggedInWorld();
+
+        Character victim = player.getWorldServer().getPlayerStorage().getCharacterById(victimId);
+        if (victim == null || !victim.isLoggedInWorld()) {
+            // 目标在倒计时里掉线了，不处罚，退还发起方的花费，理由见 detectPlayer 的注释
+            if (initiatorPresent) {
+                if (!session.freeOfCharge) {
+                    player.getCashShop().gainCash(1, session.cost);
+                }
+                player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message11", victimName));
+            }
+            return;
+        }
+
+        NPCScriptManager.getInstance().dispose(victim.getClient());
+
+        int reward = 0;
+        if (initiatorPresent) {
+            reward = Math.min(GameConfig.getServerInt("detect_reward_nx"), victim.getCashShop().getCash(1));
+            if (reward > 0) {
+                victim.getCashShop().gainCash(1, -reward);
+                player.getCashShop().gainCash(1, reward);
+            }
+        }
+
+        long jailMs = GameConfig.getServerInt("detect_jail_minutes") * 60L * 1000L;
+        victim.addJailExpirationTime(jailMs);
+        if (victim.getMapId() != MapId.JAIL) {   // 已经在监狱里的不用再搬一次，出狱时会按存档位置放回去
+            // 只写 JAIL 这一个存档位。saveLocationOnWarp 会把当前地图灌进 savedLocations 的每一个
+            // 空槽，连带占掉自由市场、活动、副本的返回点，而出狱脚本只读 JAIL。JailCommand 也是这么写的。
+            victim.saveLocation("JAIL");
+            victim.changeMap(victim.getClient().getChannelServer().getMapFactory().getMap(MapId.JAIL));
+        }
+        if (initiatorPresent) {
+            player.dropMessage(6, I18nUtil.getMessage("AbstractPlayerInteraction.detectPlayer.message12", victimName, reward));
+        }
+    }
+
+    /**
+     * 一次测谎的运行时状态，按被测角色id登记在 {@link #DETECT_SESSIONS} 里。
+     * <p>
+     * {@code settled} 是判罚与答对之间唯一的裁决点，两边都要 CAS 成功才能继续往下做。
+     * 持有发起方的 {@code Character} 引用是可接受的：这是一次性任务，最长只活到答题时限结束。
+     */
+    private static final class DetectSession {
+        private final AtomicBoolean settled = new AtomicBoolean(false);
+        private final Character initiator;
+        private final boolean freeOfCharge;
+        private final int cost;
+        private volatile ScheduledFuture<?> verdict;
+
+        private DetectSession(Character initiator, boolean freeOfCharge, int cost) {
+            this.initiator = initiator;
+            this.freeOfCharge = freeOfCharge;
+            this.cost = cost;
+        }
     }
 
 /////////////////////////////////////////////////////////////////////////////////

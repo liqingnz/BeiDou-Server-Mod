@@ -9664,6 +9664,24 @@ public class Character extends AbstractCharacterObject {
         dragon = new Dragon(this);
     }
 
+    /**
+     * 最近一次发动攻击的服务端时间戳，只活在内存里，不落库。
+     * 目前给测谎（{@code AbstractPlayerInteraction.detectPlayer}）判断对方是不是正在刷怪用。
+     * <p>
+     * volatile 是必需的：写在目标自己频道的攻击处理线程，而 {@code @detect} 支持跨频道找人，
+     * 读的通常是另一个线程，两者之间没有共同的锁。不加就可能一直读到旧值，
+     * 把正在刷怪的人误判成「最近没有发动攻击」。
+     */
+    private volatile long lastAttack;
+
+    public long getLastAttack() {
+        return lastAttack;
+    }
+
+    public void setLastAttack(long time) {
+        this.lastAttack = time;
+    }
+
     public long getJailExpirationTimeLeft() {
         return jailExpiration - System.currentTimeMillis();
     }
