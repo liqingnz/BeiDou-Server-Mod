@@ -737,6 +737,42 @@ BeiDou 要改接现有调度方式。
 | `GMBotCommand` | 闭包持有 `Character` 引用，目标下线后回收不掉 | 任务体内按 id 重新取 |
 | `ItemDropTimedCommand` | 宠物分支把同一个「分钟」参数当天数用 | 不跟，BeiDou 宠物分支保持现状 |
 
+#### 复查时又抓出来的三个（都是移植版自己引入的，不是 LK 的）
+
+**1. `@retrieve` 曾经是个洗标记的后门（P1）。** 非装备原先走
+`InventoryManipulator.addById(c, itemId, quantity)`，那个重载委托成
+`owner=null, flag=0, expiration=-1`——发回来的是一件全新的干净物品。
+而 `Shop.canSell`（`Shop.java:174`）只校验数量，不看 flag 也不看过期时间。
+`@sellinv` 和 `@retrieve` **都是 gm0**，于是任何玩家都能靠这一卖一买
+洗掉 USE/ETC 物品的 `UNTRADEABLE`/`SANDBOX`/`ACCOUNT_SHARING` 标记，
+并把限时物品变成永久物品。
+
+改为一律走 `addFromDrop` 发放**原物品对象**：它在新建堆时原样复制
+`expiration`/`owner`/`flag`（`InventoryManipulator.java:231-233`），
+且只与 flag 和 owner 都相同的堆合并（:215）。
+
+**2. 聚合前的预检会低估堆叠所需格数（P2）。** 清单里**一个原背包格是一条记录**，
+同一种堆叠物品可能有好几条。`checkSpaceProgressively` 的 `usedSlots`
+只累计新增格数，**不累计前一条已经假想占掉的堆叠余量**，
+所以逐条问会让每条都看到当前背包里同一份剩余容量，全部通过，
+实际发放到第二条才发现要开新格。
+
+改为非装备先按 `itemId + flag + owner`（与 `addFromDrop` 的合并条件一致）聚合再检查；
+装备不堆叠，仍逐件累加。另外发放阶段**逐件检查 `addFromDrop` 的返回值**：
+放不下的留在记录里待玩家腾出空间后重试，并把待付金额清零，不二次收费。
+
+**3. `@gmbot` 多 GM 并发会留下幽灵任务（P2）。** 「查 → 建 → 登记」三步不是原子的，
+本指令的 key 又是**目标角色 id 而非发起者自己**（`@patrol`/`@cospreview` 都是按自己 id，
+所以没这个问题）。两个 GM 同时对同一目标发起时会双双看到 null、各自起一个任务，
+后登记的覆盖前一个——**被覆盖的那个 future 谁也取消不到，会一直跑下去**，
+而且它每轮发现目标离线时取消的是登记在册的**另一个**任务，
+目标重新登录后自己还会接着清怪。
+
+`CommandManager` 加 `registerRunningCommandIfAbsent`（`putIfAbsent` 原子占位），
+抢输的一方立刻撤掉自己刚建的 future。顺带把 `cancelRunningCommands`
+从「先查后删」改成「先原子 `remove` 再 `cancel`」——原写法在并发下会取消掉
+别人刚登记的新任务，这条对 `@patrol`/`@cospreview` 一并生效。
+
 #### 因 BeiDou API 差异做的调整
 
 - **`@retrieve` 的空间预检不能用 `checkSpace`**。它对装备只判断「还有没有一格」

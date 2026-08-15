@@ -78,17 +78,24 @@ public class GMBotCommand extends Command {
             return;
         }
 
-        if (CommandManager.getInstance().getRunningCommand(CATEGORY, victim.getId()) != null) {
-            CommandManager.getInstance().cancelRunningCommands(CATEGORY, victim.getId());
+        final int victimId = victim.getId();
+        if (CommandManager.getInstance().getRunningCommand(CATEGORY, victimId) != null) {
+            CommandManager.getInstance().cancelRunningCommands(CATEGORY, victimId);
             player.dropMessage(6, I18nUtil.getMessage("GMBotCommand.message4", victim.getName()));
             return;
         }
 
-        final int victimId = victim.getId();
         // 任务体内按id重新取角色，不持有 Character 引用：原实现的闭包捕获了目标对象，
         // 目标下线后若任务没被取消，这个对象就一直回收不掉。
         ScheduledFuture<?> sf = TimerManager.getInstance().register(() -> runBotTick(c, victimId), BOT_TICK_MS);
-        CommandManager.getInstance().registerRunningCommands(CATEGORY, victimId, sf);
+        // 本指令的 key 是目标角色id 而不是发起者自己，两个GM同时对同一目标发起时，
+        // 上面那句「先查再登记」会双双通过。这里用原子登记兜底，抢输的一方把自己的任务撤掉，
+        // 否则被覆盖的那个 future 谁也取消不到，会一直跑，目标重新登录后还会自动接着清怪。
+        if (!CommandManager.getInstance().registerRunningCommandIfAbsent(CATEGORY, victimId, sf)) {
+            sf.cancel(false);
+            player.dropMessage(6, I18nUtil.getMessage("GMBotCommand.message6", victim.getName()));
+            return;
+        }
         player.dropMessage(6, I18nUtil.getMessage("GMBotCommand.message5", victim.getName(), victimId));
     }
 

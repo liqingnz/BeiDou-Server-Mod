@@ -526,6 +526,22 @@ public class AbstractPlayerInteraction {
         }
     }
 
+    /**
+     * 强制开始任务，起始NPC取任务数据里自己配置的那个。
+     * <p>
+     * 与 {@link #startQuest(int, int)} 的区别只在于不用调用方指定NPC。脚本重置任务时不必再去
+     * 逐个任务查它归哪个NPC管，尤其是重置入口NPC与任务发布NPC不是同一个的场合。
+     */
+    public boolean startQuestPro(int id) {
+        try {
+            Quest quest = Quest.getInstance(id);
+            return quest.forceStart(getPlayer(), quest.getNpcRequirement(false));
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
     public Item evolvePet(byte slot, int afterId) {
         Pet evolved = null;
         Pet target;

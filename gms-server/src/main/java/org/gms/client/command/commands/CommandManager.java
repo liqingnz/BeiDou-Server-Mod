@@ -85,12 +85,29 @@ public class CommandManager {
         runningCommands.computeIfAbsent(category, k -> new ConcurrentHashMap<>()).put(characterId, runningCommand);
     }
 
+    /**
+     * 仅当该 (类别, 角色id) 尚无运行中任务时才登记，返回是否登记成功。
+     * <p>
+     * 给「任务作用于别人」的指令用：那类指令的 key 是目标角色id 而非发起者自己，
+     * 两个GM同时对同一目标发起时，先查后写的写法会双双看到空值、各自起一个任务，
+     * 后写入的覆盖前一个，被覆盖的那个再也取消不掉，会一直跑下去。
+     * 竞争失败的一方要自己把已创建的 future 取消掉。
+     */
+    public boolean registerRunningCommandIfAbsent(String category, Integer characterId, ScheduledFuture<?> runningCommand) {
+        return runningCommands.computeIfAbsent(category, k -> new ConcurrentHashMap<>())
+                .putIfAbsent(characterId, runningCommand) == null;
+    }
+
     public void cancelRunningCommands(String category, Integer characterId) {
-        ScheduledFuture<?> sf = getRunningCommand(category, characterId);
+        Map<Integer, ScheduledFuture<?>> categoryCommands = runningCommands.get(category);
+        if (categoryCommands == null) {
+            return;
+        }
+        // 先原子移除再取消：先查后删会在并发下取消掉别人刚登记的新任务
+        // （原实现在此 put(characterId, null)，并发容器不接受 null 值，改为移除，语义一致）
+        ScheduledFuture<?> sf = categoryCommands.remove(characterId);
         if (sf != null) {
             sf.cancel(false);
-            // 原实现在此 put(characterId, null)，并发容器不接受 null 值，改为移除，语义一致
-            runningCommands.get(category).remove(characterId);
         }
     }
 
