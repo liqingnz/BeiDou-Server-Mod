@@ -510,9 +510,10 @@
       <h2><span class="n">05</span>监控与预警</h2>
       <p class="lede">这台机器内存很紧，2 GiB 标称、系统可见 1.6 GiB。只需要盯一个指标。</p>
 
-      <div class="note danger">
-        <span class="h">2026-08-15 事故 · 待修复项未执行</span>
-        <p>部署当天打开管理后台后整机失去响应，SSH 无法进入，需要从控制台重启。下方的 <code>swappiness</code> 与 <code>-Xmx</code> 修复<strong>尚未执行</strong>——重新拿到服务器后先做第 05 节末尾的《恢复后必做》。</p>
+      <div class="note">
+        <span class="h">2026-08-15 事故 · 已修复并验证</span>
+        <p>部署当天整机曾失去响应，需从控制台重启。根因是可用内存只剩 90 MiB 且 <code>vm.swappiness=0</code> 使 swap 形同虚设，内核只能反复回收页缓存。<strong>修复已执行</strong>：swappiness 调到 30、<code>-Xmx</code> 降到 768m，可用内存从 145 MiB 提升到约 290 MiB。</p>
+        <p>当时怀疑是管理后台触发，事后定量实测<strong>推翻了这个结论</strong>——完整加载后台只让 JVM 涨 6 MiB，load 全程低于 0.05。后台可以放心用。</p>
       </div>
 
       <h3>核心指标：load average（不是 Swap）</h3>
@@ -557,16 +558,11 @@
         <pre><span class="p">$ </span>uptime &amp;&amp; free -h &amp;&amp; docker compose ps</pre>
       </div>
 
-      <h3>恢复后必做</h3>
-      <p>这三步针对 08-15 事故的根因，重新拿到服务器后按序执行。</p>
-
-      <div class="note warn">
-        <span class="h">先抢在 JVM 之前</span>
-        <p><code>restart: unless-stopped</code> 意味着开机后容器会自动拉起，用的仍是旧参数。SSH 一通就先停掉它，否则内存又会被吃满、重新失去控制权。</p>
-      </div>
+      <h3>当前生效的调优</h3>
+      <p>换机器或重装时按序执行这三步，它们是 08-15 事故的根因修复。</p>
 
       <div class="cmd">
-        <div class="bar"><span class="what">1 · 抢回控制权</span><span class="cwd any">任意目录</span></div>
+        <div class="bar"><span class="what">1 · 先停 JVM 腾出余量</span><span class="cwd any">任意目录</span></div>
         <pre><span class="p">$ </span>docker stop beidou-server</pre>
       </div>
 
@@ -578,16 +574,37 @@
 
       <div class="cmd">
         <div class="bar"><span class="what">3 · 降低 JVM 堆上限后重启</span><span class="cwd dir">/opt/beidou</span></div>
-        <pre><span class="c"># 把 .env 里的 JAVA_OPTS 改成：</span>
+        <pre><span class="c"># .env 里的 JAVA_OPTS 应为：</span>
 <span class="c"># JAVA_OPTS=-Xms384m -Xmx768m -XX:MaxMetaspaceSize=160m</span>
 <span class="p">$ </span>docker compose up -d</pre>
+      </div>
+
+      <div class="note warn">
+        <span class="h">重启实例后要抢在 JVM 之前</span>
+        <p><code>restart: unless-stopped</code> 意味着开机后容器自动拉起。如果调优还没生效，SSH 一通就先 <code>docker stop beidou-server</code>，改完参数再 <code>up -d</code>。</p>
       </div>
 
       <div class="note">
         <span class="h">为什么 swappiness 是根因</span>
         <p><code>swappiness=0</code> 让内核拒绝换出匿名内存（JVM 堆），可用内存只剩 90 MiB 时它只能反复回收<strong>页缓存</strong>，于是 JVM 和 MySQL 需要的可执行页被不断驱逐又从磁盘读回——这叫页缓存抖动。经济型实例的云盘 IOPS 基线低，进一步放大成雪崩。</p>
-        <p>换出冷页只损失一点性能，反复重读可执行页是灾难性的。配了 2 GB swap 却设 swappiness=0，等于白配。</p>
+        <p>换出冷页只损失一点性能，反复重读可执行页是灾难性的。配了 2 GB swap 却设 swappiness=0，等于白配。修复后 swap 稳定在 60~70 MiB，页缓存从 153 MiB 回到 381 MiB。</p>
       </div>
+
+      <h3>修复前后对比（实测）</h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>指标</th><th class="num">事故前</th><th class="num">修复后</th></tr></thead>
+          <tbody>
+            <tr><td>可用内存</td><td class="num">145 MiB</td><td class="num">290–300 MiB</td></tr>
+            <tr><td>buff/cache</td><td class="num">153 MiB</td><td class="num">381 MiB</td></tr>
+            <tr><td>Swap 已用</td><td class="num">0 B</td><td class="num">60–71 MiB</td></tr>
+            <tr><td>beidou-server</td><td class="num">732 MiB</td><td class="num">671 MiB</td></tr>
+            <tr><td>beidou-db</td><td class="num">270 MiB</td><td class="num">224 MiB</td></tr>
+            <tr><td>空闲 load</td><td class="num">—</td><td class="num">0.00–0.05</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Swap 从 0 变成几十 MiB 正是修复生效的证据：内核把冷的 JVM 堆页换出，腾出的物理内存回到页缓存。这是雪崩时缺的那一环。</p>
 
       <div class="note warn">
         <span class="h">不要盲目下调 -Xmx</span>
@@ -763,8 +780,8 @@
         <li><strong>不要用不带 <code>-d</code> 的 <code>docker compose up</code>。</strong>那是前台附着模式，SSH 断开会把容器一起停掉。</li>
         <li><strong>不要把密码写进 <code>docker-compose.yml</code>。</strong>那个文件在 git 里。密钥只放 <code>.env</code>，它已被 gitignore。</li>
         <li><strong>不要手动改容器里的文件。</strong>容器重建就没了。改动要走「改代码 → push → 重新构建」。</li>
-        <li><strong>不要长时间挂着管理后台。</strong>它不是静态页面，前端一加载就并发打一批 API。在只剩百 MiB 余量的机器上这就是尖峰——08-15 的卡死就是这么触发的。看完就 <code>exit</code> 掉隧道。</li>
-        <li><strong>不要把 Swap used = 0 当成健康。</strong>在 <code>swappiness=0</code> 下它濒死时也是 0。看 load average。</li>
+        <li><strong>不要把 Swap used = 0 当成健康。</strong>在 <code>swappiness=0</code> 下系统濒死时它也是 0。现在 swappiness 是 30，几十 MiB 的 swap 占用是正常的减压行为，不是告警。看 load average。</li>
+        <li><strong>不要把时间上的巧合当成因果。</strong>08-15 事故当时判断是管理后台触发，实测推翻了——后台完整加载只花 6 MiB。真正的问题是可用内存只剩 90 MiB 的脆弱状态，任何尖峰都能压垮它。下次排查先量，再下结论。</li>
       </ul>
     </section>
 
