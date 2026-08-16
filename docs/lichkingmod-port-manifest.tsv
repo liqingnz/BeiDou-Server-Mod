@@ -53,8 +53,8 @@ src/client/MonsterBook.java	java	0	0	noise	仅格式化/空白改动（git diff 
 src/client/Skill.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/SkillFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/SkillMacro.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/autoban/AutobanFactory.java	java	8	1	pending	
-src/client/autoban/AutobanManager.java	java	67	2	pending	
+src/client/autoban/AutobanFactory.java	java	8	1	ported	alert 日志补 characterId/accountId（角色可改名，事后追查只有名字对不上）；新增 addPoint(ban, reason, weight) 重载供严重情形一次性加重计分。LK 的 public static int rangeFastAttackInterval/generalFastAttackInterval 两个可变公有静态字段 rejected——BeiDou 走 GameConfig。LK 的 MONSTER_VAC 条目 rejected，见 AutobanManager 一行
+src/client/autoban/AutobanManager.java	java	67	2	ported	addPoint 增加 weight 重载（原方法委托为 weight=1），日志补 characterId/accountId。LK 的 ban(String) rejected：BeiDou 已有等价且更稳的 Character.autoBan（有 isGM/isBanned 前置、警察包、GM广播、可逆），LK 那版额外写 ipbans 表并 banMacs()——IP 在 CGNAT/校园网/网吧下不等于身份、封了会牵连无辜且作弊者换IP只需十秒，MAC 由客户端上报、能改伤害包的人改MAC是顺手事而共用电脑/虚拟网卡的正常玩家反被封；且触发判据 maxWithCrit 是本移植两次确认偏低的估算值。LK 实现本身也有缺陷：ip.matches("/[0-9]{1,3}\..*") 依赖 InetSocketAddress.toString 的前导斜杠，Connection/PreparedStatement 无 try-with-resources。改为走 DAMAGE_HACK 加权计分（V1000.0.15 的 damage_hack_severe_ratio/points）。LK 的 checkForVac + MONSTER_VAC rejected：逻辑是「最近3次怪物死亡坐标完全相同就告警」，固定刷新点的怪、不移动的怪、反复击杀BOSS 坐标本就相同，误报率极高，且落在跨组钩子文件 MapleMap.java。spam() 改用 Calendar 取时间随 FAST_ATTACK 一并 rejected
 src/client/command/Command.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/CommandsExecutor.java	java	220	187	pending	
 src/client/command/commands/gm0/BuyBackCommand.java	java	2	2	pending	
@@ -267,7 +267,7 @@ src/net/server/audit/locks/factory/MonitoredReentrantLockFactory.java	java	0	0	n
 src/net/server/audit/locks/factory/MonitoredWriteLockFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/Channel.java	java	6	6	pending	
 src/net/server/channel/CharacterIdChannelPair.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/AbstractDealDamageHandler.java	java	18	12	pending	
+src/net/server/channel/handlers/AbstractDealDamageHandler.java	java	18	12	ported	（1）Shadower.ASSASSINATE 并入 +40000 距离容差组，Hero.BRANDISH/SPEAR_CRUSHER/POLE_ARM_CRUSHER 由 40000 提到 120000（LK 是 200000，用户决定取3倍而非5倍，放宽容差会相应削弱位移检测）。（2）真 BUG：Bandit.STEAL 无任何 BOSS 保护，全仓库也没别处兜，补 !monster.isBoss()。（3）伤害检测三档全部配置化：damage_hack_alert_ratio(1.5=原值)、damage_hack_point_ratio(5=原值)、damage_hack_severe_ratio(30)+damage_hack_severe_points(15)。LK 把告警阈值放到5倍并注释掉计分那段（净效果是伤害外挂永不计分），不采纳；配置化后运营想要 LK 口径改值即可。（4）采纳 LK 的 GM 豁免：addPoint 本就跳过 GM，只有 alert 会对 GM 触发，GM 用 @maxstats 测伤害会刷屏；加在调用点而非改 alert() 本身以免静音其他告警类型。（5）Marksman.SNIPE 固定伤害 → marksman_snipe_damage（默认195000=原值，LK直接三倍），hitDmgMax 由它 +5000 推出保持联动。（6）setLastAttack 批次5已加，already-fixed。所有新配置读取处均按上轮复查的教训做了非正数回落
 src/net/server/channel/handlers/AbstractMovementPacketHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AcceptFamilyHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AdminChatHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -289,7 +289,7 @@ src/net/server/channel/handlers/ChangeMapSpecialHandler.java	java	0	0	noise	仅�
 src/net/server/channel/handlers/CharInfoRequestHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/ClickGuideHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/CloseChalkboardHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/CloseRangeDamageHandler.java	java	6	4	pending	
+src/net/server/channel/handlers/CloseRangeDamageHandler.java	java	6	4	rejected	LK 重新启用上游注释掉的 FAST_ATTACK 检测（共用 spam 槽位8 + 固定300ms阈值）。BeiDou 有 detectionAttackInterval：per-skill 滑动窗口+变异系数分析，带持续施法技能跳过集（暴风箭雨等）、网络抖动透明跳过、稳定高速计分/突发仅告警的分级，配独立的 ATTACK_INTERVAL 积分类型。LK 那版连暴风箭雨都会误报，整段不搬。道场秘技提示改硬编码中文亦不搬，BeiDou 已 i18n
 src/net/server/channel/handlers/CoconutHandler.java	java	2	2	pending	
 src/net/server/channel/handlers/CouponCodeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/DamageSummonHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -325,7 +325,7 @@ src/net/server/channel/handlers/ItemRewardHandler.java	java	0	0	noise	仅格式�
 src/net/server/channel/handlers/KeymapChangeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/LeftKnockbackHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/MTSHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/MagicDamageHandler.java	java	6	3	pending	
+src/net/server/channel/handlers/MagicDamageHandler.java	java	6	3	rejected	同 CloseRangeDamageHandler：LK 重新启用的 FAST_ATTACK 检测被 BeiDou 的 detectionAttackInterval 全面超越，不搬
 src/net/server/channel/handlers/MakerSkillHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/MesoDropHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/MobBanishPlayerHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -365,7 +365,7 @@ src/net/server/channel/handlers/QuickslotKeyMappedModifiedHandler.java	java	0	0	
 src/net/server/channel/handlers/RPSActionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/RaiseIncExpHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/RaiseUIStateHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/RangedAttackHandler.java	java	12	8	pending	
+src/net/server/channel/handlers/RangedAttackHandler.java	java	12	8	ported	战神连击技能改为「消耗」对应连击数而不是清空：COMBO_SMASH -30、COMBO_FENRIR -100、COMBO_TEMPEST -200，剩余连击可继续累积（与 G9 的满连续期配合更明显，是对战神的实质增强）。LK 该文件里的 FAST_ATTACK 段自己也留在注释中，noise
 src/net/server/channel/handlers/ReactorHitHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/RemoteGachaponHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/RemoteStoreHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -380,7 +380,7 @@ src/net/server/channel/handlers/SpawnPetHandler.java	java	0	0	noise	仅格式化
 src/net/server/channel/handlers/SpecialMoveHandler.java	java	8	2	ported	GM 免冷却 → use_gm_no_skill_cooldown（默认true）；英雄意志快速重用除数原硬编码60（LK是10）→ fast_reuse_hero_will_divisor，默认60保持 BeiDou 现状，Math.max(1,..) 兜除零。复查修正两条：原 GM 分支调 addCooldown(..,0) 仍会写进 coolDowns，而 skillIsCooling 只看键在不在、到期条目要等每1500ms一轮的清理任务，等于反而多了约1.5秒隐形锁 → 改为只发 skillCooldown(skillid,0) 包；该开关只覆盖 SpecialMoveHandler，攻击技能冷却由 CloseRange/Magic/RangedAttack 三个 handler 各自登记 → 本次只把配置描述收窄到实际范围，扩大覆盖面留给 G8（那三个文件属 G8）。顺带把该文件里漏网的硬编码英文时空门提示补成 StatEffect.message4
 src/net/server/channel/handlers/SpouseChatHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/StorageHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/SummonDamageHandler.java	java	1	1	pending	
+src/net/server/channel/handlers/SummonDamageHandler.java	java	1	1	ported	damage > maxDmg 改为 damage > maxDmg * summon_max_damage_rate（默认1.5）。与 G6 的 mob_damage_mob_max_damage_rate 同源同值：calcMaxDamage 这套 OdinMS 估算式算出来比客户端实际低，直接钳位会砍掉合法伤害。配 1.0 恢复严格钳位，非正数回落 1.5
 src/net/server/channel/handlers/TakeDamageHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/TouchReactorHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/TouchingCashShopHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）

@@ -30,6 +30,7 @@ import org.gms.client.inventory.InventoryType;
 import org.gms.client.inventory.Item;
 import org.gms.client.inventory.WeaponType;
 import org.gms.client.status.MonsterStatusEffect;
+import org.gms.config.GameConfig;
 import org.gms.constants.skills.Outlaw;
 import org.gms.net.packet.InPacket;
 import org.slf4j.Logger;
@@ -104,11 +105,15 @@ public final class SummonDamageHandler extends AbstractDealDamageHandler {
 
         boolean magic = summonEffect.getWatk() == 0;
         int maxDmg = calcMaxDamage(summonEffect, player, magic);    // thanks Darter (YungMoozi) for reporting unchecked max dmg
+        // 与 MobDamageMobHandler 同源：calcMaxDamage 这套估算式算出来比客户端实际打出的低，
+        // 直接钳位会砍掉合法伤害。这个系数只抬「服务端愿意接受的上限」，配 1.0 恢复严格钳位
+        double summonRate = GameConfig.getServerDouble("summon_max_damage_rate");
+        double maxAcceptedDmg = maxDmg * (summonRate > 0 ? summonRate : 1.5);
         for (SummonAttackEntry attackEntry : allDamage) {
             int damage = attackEntry.getDamage();
             Monster target = player.getMap().getMonsterByOid(attackEntry.getMonsterOid());
             if (target != null) {
-                if (damage > maxDmg) {
+                if (damage > maxAcceptedDmg) {
                     AutobanFactory.DAMAGE_HACK.alert(c.getPlayer(), "Possible packet editing summon damage exploit.");
                     final String mobName = MonsterInformationProvider.getInstance().getMobNameFromId(target.getId());
                     log.info("Possible exploit - chr {} used a summon of skillId {} to attack {} with damage {} (max: {})",

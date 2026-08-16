@@ -36,6 +36,13 @@ public class AutobanManager {
     }
 
     public void addPoint(AutobanFactory fac, String reason) {
+        addPoint(fac, reason, 1);
+    }
+
+    public void addPoint(AutobanFactory fac, String reason, int weight) {
+        if (weight < 1) {
+            weight = 1;
+        }
         if (GameConfig.getServerBoolean("use_auto_ban")) {
             if (chr.isGM() || chr.isBanned()) {
                 return;
@@ -59,9 +66,9 @@ public class AutobanManager {
             }
 
             if (points.containsKey(fac)) {
-                points.put(fac, points.get(fac) + 1);
+                points.put(fac, points.get(fac) + weight);
             } else {
-                points.put(fac, 1);
+                points.put(fac, weight);
             }
 
             // 获取生效的积分阈值
@@ -72,7 +79,9 @@ public class AutobanManager {
         }
         if (GameConfig.getServerBoolean("use_auto_ban_log")) {
             // Lets log every single point too.
-            log.info("Autoban - chr {} caused {} {}", Character.makeMapleReadable(chr.getName()), fac.name(), reason);
+            // 带上 id：角色可以改名，事后追查只有名字对不上
+            log.info("Autoban - chr {} (characterId: {}, accountId: {}) caused {} {}",
+                    Character.makeMapleReadable(chr.getName()), chr.getId(), chr.getAccountId(), fac.name(), reason);
         }
     }
 

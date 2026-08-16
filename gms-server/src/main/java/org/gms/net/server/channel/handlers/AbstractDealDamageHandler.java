@@ -124,6 +124,15 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
         }
     }
 
+    /**
+     * 读取伤害检测用的倍率配置。配置缺失时 {@link GameConfig#getServerDouble} 返回 0，
+     * 那会让判定退化成「任何伤害都超标」，因此非正数一律回落到硬编码默认值。
+     */
+    private static double configuredRatio(String key, double fallback) {
+        double ratio = GameConfig.getServerDouble(key);
+        return ratio > 0 ? ratio : fallback;
+    }
+
     protected void applyAttack(AttackInfo attack, final Character player, int attackCount) {
         final MapleMap map = player.getMap();
         if (map.isOwnershipRestricted(player)) {
@@ -259,12 +268,14 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
                         distanceToDetect += 200000; // Arans have extra range over normal warriors.
                     }
 
-                    if (attack.skill == Aran.COMBO_SMASH || attack.skill == Aran.BODY_PRESSURE) {
+                    if (attack.skill == Aran.COMBO_SMASH || attack.skill == Aran.BODY_PRESSURE || attack.skill == Shadower.ASSASSINATE) {
+                        // 绝杀的实际判定范围超出原有容差，是 DISTANCE_HACK 的误报源之一
                         distanceToDetect += 40000;
                     } else if (attack.skill == Bishop.GENESIS || attack.skill == ILArchMage.BLIZZARD || attack.skill == FPArchMage.METEOR_SHOWER) {
                         distanceToDetect += 275000;
                     } else if (attack.skill == Hero.BRANDISH || attack.skill == DragonKnight.SPEAR_CRUSHER || attack.skill == DragonKnight.POLE_ARM_CRUSHER) {
-                        distanceToDetect += 40000;
+                        // 同上，这三个的横扫范围也比原容差宽。放宽会相应削弱位移检测，故只取 3 倍而不是 LK 的 5 倍
+                        distanceToDetect += 120000;
                     } else if (attack.skill == DragonKnight.DRAGON_ROAR || attack.skill == SuperGM.SUPER_DRAGON_ROAR) {
                         distanceToDetect += 250000;
                     } else if (attack.skill == Shadower.BOOMERANG_STEP || attack.skill == ILArchMage.CHAIN_LIGHTNING) {
@@ -368,7 +379,8 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
                         player.addHP(Math.min(monster.getMaxHp(), Math.min((int) ((double) totDamage * (double) SkillFactory.getSkill(attack.skill).getEffect(player.getSkillLevel(SkillFactory.getSkill(attack.skill))).getX() / 100.0), player.getCurrentMaxHp() / 2)));
                     } else if (attack.skill == Bandit.STEAL) {
                         Skill steal = SkillFactory.getSkill(Bandit.STEAL);
-                        if (monster.getStolen().size() < 1) { // One steal per mob <3
+                        // 原先没有任何 BOSS 保护，扎昆、闪光兽这类都能被偷
+                        if (monster.getStolen().size() < 1 && !monster.isBoss()) { // One steal per mob <3
                             if (steal.getEffect(player.getSkillLevel(steal)).makeChanceResult()) {
                                 monster.addStolen(0);
 
@@ -976,8 +988,13 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
                 }
 
                 if (ret.skill == Marksman.SNIPE) {
-                    damage = 195000 + Randomizer.nextInt(5000);
-                    hitDmgMax = 200000;
+                    // 狙击是固定伤害，原先写死 195000。配置缺失时回落到原值
+                    int snipeDamage = GameConfig.getServerInt("marksman_snipe_damage");
+                    if (snipeDamage <= 0) {
+                        snipeDamage = 195000;
+                    }
+                    damage = snipeDamage + Randomizer.nextInt(5000);
+                    hitDmgMax = snipeDamage + 5000;
                 } else if (ret.skill == Beginner.BAMBOO_RAIN || ret.skill == Noblesse.BAMBOO_RAIN || ret.skill == Evan.BAMBOO_THRUST || ret.skill == Legend.BAMBOO_THRUST) {
                     hitDmgMax = 82569000; // 30% of Max HP of strongest Dojo boss
                 }
@@ -988,14 +1005,25 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
                     maxWithCrit *= 2;
                 }
 
-                // Warn if the damage is over 1.5x what we calculated above.
-                if (damage > maxWithCrit * 1.5) {
-                    AutobanFactory.DAMAGE_HACK.alert(chr, "DMG: " + damage + " MaxDMG: " + maxWithCrit + " SID: " + ret.skill + " MobID: " + (monster != null ? monster.getId() : "null") + " Map: " + chr.getMap().getMapName() + " (" + chr.getMapId() + ")");
-                }
+                // GM 用 @maxstats 之类测伤害时会刷屏——addPoint 本来就跳过 GM，只有 alert 会触发
+                if (!chr.isGM()) {
+                    String dmgReason = "DMG: " + damage + " MaxDMG: " + maxWithCrit + " SID: " + ret.skill + " MobID: " + (monster != null ? monster.getId() : "null") + " Map: " + chr.getMap().getMapName() + " (" + chr.getMapId() + ")";
 
-                // Add a ab point if its over 5x what we calculated.
-                if (damage > maxWithCrit * 5) {
-                    AutobanFactory.DAMAGE_HACK.addPoint(chr.getAutoBanManager(), "DMG: " + damage + " MaxDMG: " + maxWithCrit + " SID: " + ret.skill + " MobID: " + (monster != null ? monster.getId() : "null") + " Map: " + chr.getMap().getMapName() + " (" + chr.getMapId() + ")");
+                    // Warn if the damage is over 1.5x what we calculated above.
+                    if (damage > maxWithCrit * configuredRatio("damage_hack_alert_ratio", 1.5)) {
+                        AutobanFactory.DAMAGE_HACK.alert(chr, dmgReason);
+                    }
+
+                    // Add a ab point if its over 5x what we calculated.
+                    if (damage > maxWithCrit * configuredRatio("damage_hack_point_ratio", 5)) {
+                        AutobanFactory.DAMAGE_HACK.addPoint(chr.getAutoBanManager(), dmgReason);
+                    }
+
+                    // 高倍数一次性加重计分。maxWithCrit 是服务端估算值，为 0 时说明估不出来，不能据此判定
+                    if (maxWithCrit > 0 && damage > maxWithCrit * configuredRatio("damage_hack_severe_ratio", 30)) {
+                        int severePoints = GameConfig.getServerInt("damage_hack_severe_points");
+                        AutobanFactory.DAMAGE_HACK.addPoint(chr.getAutoBanManager(), dmgReason, severePoints > 0 ? severePoints : 15);
+                    }
                 }
 
                 if (ret.skill == Marksman.SNIPE || (canCrit && damage > hitDmgMax)) {

@@ -1081,7 +1081,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G5** | 白医卷轴 / 制作 | `ScrollHandler`、`MakerProcessor`、`MakerItemFactory` | ✅ 已完成 |
 | **G6** | 怪物技能与怪打怪 | `life/MobSkill`（157 封技能）、`MobDamageMobHandler`、`maps/MapleReactor` | ✅ java 侧完成（wz 留 pending） |
 | **G7** ✅ | 远征次数配额 | `expeditions/{Expedition, ExpeditionType, ExpeditionBossLog}`、`world/PartyCharacter` | — |
-| **G8** | 反外挂 / 误封 | `autoban/{AutobanManager, AutobanFactory}`、`AbstractDealDamageHandler`、`CloseRange`/`Magic`/`Ranged`/`Summon` 四个伤害 handler | — |
+| **G8** ✅ | 反外挂 / 误封 | `autoban/{AutobanManager, AutobanFactory}`、`AbstractDealDamageHandler`、`CloseRange`/`Magic`/`Ranged`/`Summon` 四个伤害 handler | — |
 | **G9** ✅ | 技能平衡 | `MapleStatEffect`、`AranComboHandler`、`SpecialMoveHandler`、`gm2/BuffMapCommand`、`gm2/EmpowerMeCommand`、`constants/skills/Corsair`、`AssignAPProcessor` | `aran_combo_last_time`、`aran_combo_gm_bonus`、`battleship_hp_per_skill_level`、`battleship_hp_per_level`、`battleship_stance`、`mana_reflection_stance`、`marksman_blind_stance`、`use_gm_no_skill_cooldown`、`fast_reuse_hero_will_divisor` |
 | **G10** | 等级上限 | `constants/game/GameConstants` | `max_level_cap`、`cygnus_max_level_cap` |
 | **G11** | 自动喂药重复消耗 | `PetAutoPotHandler`、`PetAutopotProcessor` | — |
@@ -1875,6 +1875,85 @@ LK 顺手重排的枚举顺序也不搬 —— 改 `ordinal()` 没必要冒险�
 > **第 9 条是全套移植的系统性风险，不止这几个键。** `db/lkport/` 下 14 份迁移**至今一次都没在
 > 任何环境执行过**（本机无 MySQL）。凡是「0 会造成灾难」的新配置键，都应在读取处补默认值兜底，
 > 后续批次沿用这条。
+
+#### G8 — 反外挂 / 误封 ✅ 已完成
+
+7 个文件。**本组以 reject 为主**——BeiDou 的反外挂系统比 LK（2022 年 HeavenMS 原版）成熟一个代际：
+`AutobanFactory` 数据库配置驱动（`AutobanConfigDO`、每类可单独禁用、`ignoredChrIds` 白名单、i18n 名称），
+`AutobanManager.addPoint` 到阈值即调 `chr.autoBan()`。
+
+##### 最大的一条 reject：LK 的即时封禁 + 封 IP + 封 MAC
+
+LK 新增 `AutobanManager.ban(String)`：封号 + 写 `ipbans` 表 + `banMacs()` + 60 秒后断线，
+由 `damage > maxWithCrit * 30` 单个包触发。**IP/MAC 部分不搬**，理由：
+
+1. **IP 不等于身份。** CGNAT、校园网、宿舍、网吧、公司出口，一个公网 IP 后面常是几百上千真人。
+   封一个作弊者等于把整栋楼锁在门外且他们无从得知原因；而作弊者切热点/VPN/重拨十秒换一个。
+   **代价全在无辜者，成本几乎不在目标。**
+2. **MAC 是客户端上报的。** v83 登录包携带 MAC 列表，是攻击者完全可控的数据；能改伤害包的人改 MAC
+   是顺手的事。而共用电脑、网吧同批机器、装了虚拟网卡的正常玩家反而被封。
+3. **触发判据本身不可靠。** 判据分母 `maxWithCrit` 来自服务端估算式，本移植**已两次确认它偏低**
+   （G6 的 `mob_damage_mob_max_damage_rate`、本组的 `summon_max_damage_rate`）。
+   从「估算可能不准」跳到「永久封掉一整栋楼」，风险比例不对。
+4. **LK 实现本身有缺陷**：`ip.matches("/[0-9]{1,3}\\..*")` 依赖 `InetSocketAddress.toString()` 的前导斜杠
+   （BeiDou 取址方式不同，大概率永不匹配）；`Connection`/`PreparedStatement` 无 try-with-resources，
+   异常路径泄漏连接。
+
+**保留了 LK 的 30 倍阈值**，但改走 BeiDou 现有的账号封禁链路（可逆、有 GM 广播、有日志、有
+`isGM`/`isBanned` 前置），并做成可调：`damage_hack_severe_ratio`(30) + `damage_hack_severe_points`(15)。
+默认 15 = `DAMAGE_HACK` 阈值，即单次触发就封；想要「三振出局」调成 5，想纯观察调成 1。
+为此给 `AutobanManager.addPoint` / `AutobanFactory.addPoint` 加了 `weight` 重载。
+
+> BeiDou 本身有 IP 封禁能力（`ServerFilter` 会校验），那是**人工决策**的工具——
+> 不该由一条启发式规则自动扣扳机。
+
+##### 第二条 reject：FAST_ATTACK 检测
+
+LK 把上游注释掉的「共用 spam 槽位 8 + 固定 300ms 阈值」放回 `CloseRange` / `Magic`。
+BeiDou 有 [`detectionAttackInterval`](../gms-server/src/main/java/org/gms/net/server/channel/handlers/AbstractDealDamageHandler.java#L1339)：
+**per-skill 滑动窗口 + 变异系数分析**，带持续施法技能跳过集（暴风箭雨等）、网络抖动透明跳过、
+稳定高速计分 / 突发仅告警的分级，配独立的 `ATTACK_INTERVAL` 积分类型。
+LK 那版**连暴风箭雨都会误报**。整段 rejected，连带 `public static int rangeFastAttackInterval` 那两个
+可变公有静态字段（BeiDou 走 `GameConfig`）。
+
+##### 第三条 reject：`MONSTER_VAC` 吸怪检测
+
+`checkForVac(Point)` 的逻辑是「最近 3 次怪物死亡坐标完全相同就告警」。
+固定刷新点的怪、不移动的怪、反复击杀 BOSS，坐标本来就一样 —— **误报率极高**。
+只 `alert` 不计分，代价是刷 GM 屏而非封号，但 BeiDou 已有更成熟的手段；
+且调用点在 `MapleMap.java`（跨组钩子文件）。
+
+##### 写了什么
+
+| 项 | 处置 | 说明 |
+|---|---|---|
+| `Bandit.STEAL` 加 `!monster.isBoss()` | **真 BUG，ported** | BeiDou [:371](../gms-server/src/main/java/org/gms/net/server/channel/handlers/AbstractDealDamageHandler.java#L371) 无任何 BOSS 保护，全仓库也没别处兜——可以从扎昆、闪光兽身上偷道具 |
+| `Shadower.ASSASSINATE` 距离容差 | ported | 并入 +40000 组，减少 `DISTANCE_HACK` 误报 |
+| `Hero.BRANDISH` 组距离容差 | ported（**改动 LK 数值**） | 40000 → **120000**。LK 给 200000，用户决定取 3 倍而非 5 倍——放宽容差会相应削弱位移检测 |
+| 伤害检测三档阈值 | ported（配置化） | LK 把告警放到 5 倍并**注释掉计分那段**，净效果是伤害外挂永不计分，不采纳。配置化后想要 LK 口径改值即可 |
+| GM 豁免 | ported | `addPoint` 本就跳过 GM，只有 `alert` 会对 GM 触发，GM 用 `@maxstats` 测伤害会刷屏。加在调用点而非改 `alert()` 本身，以免顺手静音其他告警类型 |
+| `Marksman.SNIPE` 固定伤害 | ported（配置化） | 默认 **195000 = 原值**（LK 直接三倍），`hitDmgMax` 由它 +5000 推出保持联动 |
+| 召唤兽伤害上限 ×1.5 | ported | 与 G6 同源同值 |
+| 战神连击技能改「消耗」 | ported | `setCombo(0)` → `setCombo(combo - 30/-100/-200)`，剩余连击继续累积。**是对战神的实质增强**，与 G9 的满连续期配合更明显 |
+| autoban 日志补 `characterId`/`accountId` | ported | 角色可以改名，事后追查只有名字对不上 |
+| `setLastAttack` | **already-fixed** | 批次 5 已加 |
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `AbstractDealDamageHandler.java` | 两处距离容差、STEAL 的 BOSS 保护、伤害三档配置化 + GM 豁免、SNIPE 配置化、`configuredRatio` 兜底helper |
+| `AutobanManager.java` / `AutobanFactory.java` | `addPoint` 的 `weight` 重载、日志补 id |
+| `RangedAttackHandler.java` | 连击消耗而非清零 |
+| `SummonDamageHandler.java` | 伤害上限系数 |
+| `V1000.0.15__insert_game_config_anticheat.sql` | 6 个键 + zh/en 各 6 条 `lang_resources` |
+
+无新增指令、无 i18n 变动。所有新键的读取处都按上一轮复查的教训做了「非正数回落默认值」——
+这些键**为 0 会让判定退化成「任何伤害都超标」，那就是全服误封**。
+
+> 顺带结清 G9 复查留下的一条：`use_gm_no_skill_cooldown` 是否扩大到三个伤害 handler。
+> 结论**不扩大** —— 这三处登记的是攻击技能自身的冷却，属技能机制而非防作弊，
+> 让 GM 绕过它会使 GM 测出来的手感完全不代表玩家。配置描述已在上一轮收窄到实际范围，就此定案。
 
 ### 批次 7 — 数据类
 

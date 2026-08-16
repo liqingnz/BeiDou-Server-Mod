@@ -163,7 +163,15 @@ public enum AutobanFactory {
     }
 
     public void addPoint(AutobanManager ban, String reason) {
-        ban.addPoint(this, reason);
+        ban.addPoint(this, reason, 1);
+    }
+
+    /**
+     * 一次记多分。用于「单次行为已经严重到不需要再观察」的场合，
+     * 权重给满就等于当场触顶封禁，但走的仍是可逆的账号封禁链路。
+     */
+    public void addPoint(AutobanManager ban, String reason, int weight) {
+        ban.addPoint(this, reason, weight);
     }
 
     public void alert(Character chr, String reason) {
@@ -174,7 +182,10 @@ public enum AutobanFactory {
             Server.getInstance().broadcastGMMessage((chr != null ? chr.getWorld() : 0), PacketCreator.sendYellowTip((chr != null ? Character.makeMapleReadable(chr.getName()) : "") + " caused " + this.name() + " " + reason));
         }
         if (GameConfig.getServerBoolean("use_auto_ban_log")) {
-            final String chrName = chr != null ? Character.makeMapleReadable(chr.getName()) : "";
+            // 带上 id：角色可以改名，事后追查只有名字对不上
+            final String chrName = chr != null
+                    ? Character.makeMapleReadable(chr.getName()) + " (characterId: " + chr.getId() + ", accountId: " + chr.getAccountId() + ")"
+                    : "";
             log.info("Autoban alert - chr {} caused {}-{}", chrName, this.name(), reason);
         }
     }
