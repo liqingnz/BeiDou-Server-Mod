@@ -909,8 +909,8 @@ scripts/npc/1052006.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1052007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1052014.js	script	0	0	rejected	网吧 PQ 兑换机。奖池 LK 是 BeiDou 的真子集（lv2 少 1022073，lv1 少 1302033/1002419/2040207/4031203），取并集即保持现状。givePrize() 两处 BeiDou 更好：有数量为 0 的守卫（LK 会调 gainItem(id, -0)），且发完奖有中奖提示（LK 把整句删了，玩家点完什么都不显示）
-scripts/npc/1052015.js	script	0	0	rejected	奖池：LK 两档都是 BeiDou 的真子集（BeiDou lv2 多 1022073，lv1 多 1302033/1002419/2040207/4031203），取并集等于保持现状
+scripts/npc/1052014.js	script	0	0	done	网吧 PQ 兑换机。用户 2026-08-17 决定改用 LK 的奖池：lv1 移除枫叶旗 1302033/枫叶帽 1002419/眼部装饰智力卷轴 2040207/万圣节糖果 4031203，lv2 移除划痕眼镜 1022073，lv3-lv6 两边本就相同。**同步改了公示牌 1052015**（同图 Billy，只显示不发奖，六档是同一份数据的第二份拷贝），并在两文件加互指注释。givePrize 不动：BeiDou 的 0 值守卫与中奖提示都比 LK 好
+scripts/npc/1052015.js	script	0	0	done	Cafe PQ 公示牌（Billy，只显示不发奖）。随 1052014 改用 LK 奖池同步更新，四份（发奖方+公示方 × 两层）六档逐项相等
 scripts/npc/1052016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052100.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/1052101.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
