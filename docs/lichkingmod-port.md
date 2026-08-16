@@ -2234,6 +2234,13 @@ CREATE TABLE IF NOT EXISTS `messageBoard` (      -- → message_board
 
 ### D. BeiDou 完全缺失的非点装 wz（41 个）
 
+> **2026-08-16 补充**：另一支 BeiDou 分支 `BeiDou-Server-ASM` 里有其中 **35 个**，
+> 包括卡住克雷塞尔整条线的 `Map5/541020700`、`541020800`。ASM 也没有的 6 个是
+> `Item.wz/Etc/0490`、**`Item.wz/Install/0310`（BOSS 凭证 3100000，仍须从 LK 取）**、
+> `Map.wz/Obj/{glacierExplorer,trapSG}`、`Map.wz/Tile/grassySoil3`、`Npc.wz/9400794`。
+> ASM 的完整评估与地图导入的依赖分析见 [asm-reference-assessment.md](asm-reference-assessment.md)
+> ——结论是 **ASM 只做素材参考，不作为迁移基础**（语言分层冲突 + 会丢 Skill.wz 的 cooltime 数据）。
+
 ```
 Item.wz/Etc/0490.img.xml
 Item.wz/Install/0310.img.xml
