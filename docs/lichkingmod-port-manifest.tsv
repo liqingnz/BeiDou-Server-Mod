@@ -995,7 +995,7 @@ scripts/npc/2010001.js	script	0	0	ported	批次7 美容券统一：造型券→5
 scripts/npc/2010002.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/2010003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2010005.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
-scripts/npc/2010007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010007.js	script	0	0	done	公会创建费用配置化：Java 侧与 scripts-zh-CN 早已走 GameConfig，只有 scripts/ 英文层写死 1500000，本次补上
 scripts/npc/2010008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2010009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文

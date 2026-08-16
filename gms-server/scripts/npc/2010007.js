@@ -47,7 +47,9 @@ function action(mode, type, selection) {
                     cm.sendOk("You may not create a new Guild while you are in one.");
                     cm.dispose();
                 } else {
-                    cm.sendYesNo("Creating a Guild costs #b 1500000 mesos#k, are you sure you want to continue?");
+                    // 实际扣费走 MatchCheckerGuildCreation 里的 create_guild_cost，这里不能写死金额
+                    const GameConfig = Java.type('org.gms.config.GameConfig');
+                    cm.sendYesNo("Creating a Guild costs #b " + GameConfig.getServerInt("create_guild_cost") + " mesos#k, are you sure you want to continue?");
                 }
             } else if (selection == 1) {
                 if (cm.getPlayer().getGuildId() < 1 || cm.getPlayer().getGuildRank() != 1) {

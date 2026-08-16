@@ -2244,6 +2244,26 @@ BeiDou 的是原版分布。用户决定**取并集**：保留 BeiDou 原池与�
 
 **遗留**：`Map.wz` 的改动需随 wz 批次同步到 BeiDou-Client（第 6 项）。
 
+#### 公会创建费用配置化（`npc/2010007.js`）✅ 已完成
+
+LK 的改动是把家族创建费用从写死的 `1500000` 换成
+`Packages.config.YamlConfig.config.server.CREATE_GUILD_COST`。查下来 BeiDou 早已做完同一件事，
+而且做得更彻底——**唯独漏了英文脚本层**：
+
+| 位置 | 状态 |
+|---|---|
+| `MatchCheckerGuildCreation`（校验 + 实际扣钱）、`GuildOperationHandler`（校验） | 已走 `GameConfig.getServerInt("create_guild_cost")`，默认值由 `V1.7.0` 种子给出 |
+| `Guild.getIncreaseGuildCost`（扩容费用） | 三个配置项 `expand_guild_base_cost` / `_tier_cost` / `_max_cost`，LK 那边仍是常量 |
+| `scripts-zh-CN/npc/2010007.js` | 已读 `GameConfig` 显示 |
+| `scripts/npc/2010007.js`（英文层） | ❌ 仍写死 `1500000` —— **本次补上** |
+
+后果是运营在 gms-ui 改了 `create_guild_cost` 之后，`gms.service.language=en-US` 下这个 NPC
+会报一个假价：对话说 1500000，实际按配置值扣。改动只有一处 `sendYesNo` 的文案取值，
+按英文层惯例在用到的分支里就地 `const GameConfig = Java.type(...)`。
+
+> 英文层 `selection == 2` 的族长判定（`getGuildRank() != 1`）与中文层（`> 2`，副族长也可）不一致，
+> **不动**：这是 BeiDou 中文层自己的放宽，LK 侧同样是 `!= 1`，与本次移植无关。
+
 ### 批次 8 — 皇家系统（最后决策）
 
 `server/ultils/RoyalAccount`（+69）、`RoyalCommand`（+114）、`royal_accounts` 表、
