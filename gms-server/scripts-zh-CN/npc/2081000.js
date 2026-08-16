@@ -25,7 +25,9 @@ var cost;
 var status = 0;
 
 function start() {
-    cm.sendSimple("...我可以帮你吗？\r\n#L0##b购买魔法种子#k#l\r\n#L1##b为利夫雷做点什么#k#l");
+    // 第二项「为利夫雷做点什么」点进去只有一句「正在开发中...」，是条死路，
+    // 连同下面对应的分支一起去掉。
+    cm.sendSimple("...我可以帮你吗？\r\n#L0##b购买魔法种子#k#l");
 }
 
 function action(mode, type, selection) {
@@ -39,14 +41,9 @@ function action(mode, type, selection) {
     }
     status++;
     if (status == 1) {
-        if (selection == 0) {
-            cm.sendSimple("你好像不是本地人。我能帮你吗？#L0##b我想要一些#t4031346#。#k#l");
-        } else {
-            cm.sendNext("正在开发中...");
-            cm.dispose();
-        }
+        cm.sendSimple("你好像不是本地人。我能帮你吗？#L0##b我想要一些#t4031346#。#k#l");
     } else if (status == 2) {
-        cm.sendGetNumber("#b#t4031346##k is a precious iteml I cannot give it to you just like that. How about doing me a little favor? Then I'll give it to you. I'll sell the #b#t4031346##k to you for #b30,000 mesos#k each. Are you willing to make the purchase? How many would you like, then?", 0, 0, 99);
+        cm.sendGetNumber("#b#t4031346##k 是很珍贵的东西，我可没法白送给你。不如你帮我个小忙？那样我就把它给你。每颗 #b#t4031346##k 价格为 #b30,000 金币#k，你想买多少颗？", 0, 0, 99);
     } else if (status == 3) {
         if (selection == 0) {
             cm.sendOk("我不能卖给你0。");

@@ -12,6 +12,7 @@ function end(mode, type, selection) {
         qm.gainItem(1142069, 1);
         qm.forceStartQuest();
         qm.forceCompleteQuest();
+        qm.sendOk("Congratulations on receiving the #b#t1142069##k. Best of luck to you.");
     }
     qm.dispose();
 }

@@ -12,6 +12,7 @@ function end(mode, type, selection) {
         qm.gainItem(1142068, 1);
         qm.forceStartQuest();
         qm.forceCompleteQuest();
+        qm.sendOk("恭喜获得#b#t1142068##k。祝你一切顺利");
     }
     qm.dispose();
 }

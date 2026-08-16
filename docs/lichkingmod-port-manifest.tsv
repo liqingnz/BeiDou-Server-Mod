@@ -958,12 +958,12 @@ scripts/npc/1092094.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1092095.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1095001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1095002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1100003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1100004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1100005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1100006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1100007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1100008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1100003.js	script	0	0	rejected	LK 只在 mode==-1 的 dispose 后加了个 return，而该分支带 else，加不加行为一致；其余全是译文
+scripts/npc/1100004.js	script	0	0	rejected	同 1100003：多余的 return + 译文
+scripts/npc/1100005.js	script	0	0	rejected	去注释后与 BeiDou 结构完全相同，纯译文
+scripts/npc/1100006.js	script	0	0	rejected	去注释后与 BeiDou 结构完全相同，纯译文
+scripts/npc/1100007.js	script	0	0	rejected	同 1100003：多余的 return + 译文
+scripts/npc/1100008.js	script	0	0	rejected	同 1100003：多余的 return + 译文
 scripts/npc/1101001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1101008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1102001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1040,7 +1040,7 @@ scripts/npc/2040019.js	script	0	0	ported	批次7 美容券统一：整形券→5
 scripts/npc/2040020.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040021.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040022.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
-scripts/npc/2040024.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040024.js	script	0	0	rejected	只把 if/else 的大括号去掉，纯格式；其余是译文
 scripts/npc/2040025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040026.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040027.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1087,7 +1087,7 @@ scripts/npc/2050019.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2060005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2060009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2080000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2081000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081000.js	script	0	0	done	采纳去掉死菜单项「为神木村做点什么」（点进去只有 Under development）；不照抄 LK 注释掉代码的做法，连同分支一并删。顺带补了 zh-CN 层漏译的 sendGetNumber
 scripts/npc/2081004.js	script	0	0	ported	gms-server/scripts/npc/2081004.js 与 scripts-zh-CN/npc/2081004.js —— 修了材料校验：原实现把校验写在循环体内，第一种材料够了就直接走 else 收材料发成品，另外两种一件都不用有
 scripts/npc/2081005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2081100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1136,7 +1136,7 @@ scripts/npc/2101013.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/2101014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2101017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2102001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2102002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2102002.js	script	0	0	rejected	把玩家拒绝购买时的告别对话注释掉（反而少了反馈），另提了个只用在提示文案里的 ticketId 变量（gainItem/canHold 仍写字面量），无实质改进
 scripts/npc/2103000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2103002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2110005.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
@@ -1632,10 +1632,10 @@ scripts/quest/29900.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/quest/29901.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/quest/29902.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/29903.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/quest/29906.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/quest/29907.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/quest/29908.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/quest/29909.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/29906.js	script	0	0	done	采纳：领到骑士勋章后弹一句获得提示（原本静默发放）。LK 的 sendNext 统一改 sendOk
+scripts/quest/29907.js	script	0	0	done	采纳：领到骑士勋章后弹一句获得提示（原本静默发放）
+scripts/quest/29908.js	script	0	0	done	采纳：领到骑士勋章后弹一句获得提示；LK 用 sendNext 且放在 gainItem 前，改为 sendOk 且放发放后
+scripts/quest/29909.js	script	0	0	done	采纳：领到骑士勋章后弹一句获得提示（原本静默发放）
 scripts/quest/3301.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/3303.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/3305.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上游已有同名脚本，抹掉字符串后与 LK 版逐行同构，只差译文

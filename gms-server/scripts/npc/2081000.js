@@ -25,7 +25,9 @@ var cost;
 var status = 0;
 
 function start() {
-    cm.sendSimple("...Can I help you?\r\n#L0##bBuy the Magic Seed#k#l\r\n#L1##bDo something for Leafre#k#l");
+    // The second menu entry ("Do something for Leafre") led nowhere but an
+    // "Under development..." dead end, so it is gone along with its branch below.
+    cm.sendSimple("...Can I help you?\r\n#L0##bBuy the Magic Seed#k#l");
 }
 
 function action(mode, type, selection) {
@@ -39,12 +41,7 @@ function action(mode, type, selection) {
     }
     status++;
     if (status == 1) {
-        if (selection == 0) {
-            cm.sendSimple("You don't seem to be from out town. How can I help you?#L0##bI would like some #t4031346#.#k#l");
-        } else {
-            cm.sendNext("Under development...");
-            cm.dispose();
-        }
+        cm.sendSimple("You don't seem to be from out town. How can I help you?#L0##bI would like some #t4031346#.#k#l");
     } else if (status == 2) {
         cm.sendGetNumber("#b#t4031346##k is a precious iteml I cannot give it to you just like that. How about doing me a little favor? Then I'll give it to you. I'll sell the #b#t4031346##k to you for #b30,000 mesos#k each. Are you willing to make the purchase? How many would you like, then?", 0, 0, 99);
     } else if (status == 3) {
