@@ -1087,7 +1087,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G11** ✅ | 自动喂药重复消耗 | `PetAutoPotHandler`、`PetAutopotProcessor` | — |
 | **G12** ✅ | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
 | **G13** ✅ | 雇佣商店存续天数 | `maps/HiredMerchant`、`world/World`（仅存续判定一处） | `merchant_expire_time` |
-| **G14** | `@analysis` BOSS 伤害占比 | `gm0/BossDmgAnalysisCommand`（批次 1 挪来） | — |
+| **G14** ✅ | `@analysis` BOSS 伤害占比 | `gm2/BossDmgAnalysisCommand`（批次 1 挪来，权限从 gm0 收到 gm2） | — |
 | **G15** | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`quest/requirements/MinLevelRequirement`、`UseItemHandler` | — |
 | **G16** | `client/Character`（钩子汇聚点，**按组拆散**） | `client/MapleCharacter` 一个文件同时属于 G2/G3/G7/G9/G10/G11 | — |
 
@@ -2185,6 +2185,53 @@ BeiDou 的 `FilePrinter` 已基本废弃（只剩几处注释掉的调用），�
   但不在 LK 本次 diff 范围内，未混进本组提交。
 - `World.java:33-34` 有一对**重复的 `import org.gms.config.GameConfig`**（仓库既有，非本次引入）。
   该文件在清单里仍是 `pending`，后续还会动，留到那时一并清。
+
+#### G14 — `@analysis` BOSS 伤害占比 ✅ 已完成
+
+批次 1 挪过来的唯一一条。前置 [`Monster.getTakenDamage()`](../gms-server/src/main/java/org/gms/server/life/Monster.java#L1006)
+批次 5 已加好，且返回的是**持锁拷贝**的 `Map<Integer, Long>`，比 LK 直接把内部
+`HashMap<Integer, AtomicLong>` 交出去安全（调用方遍历不受写入影响，也拿不到可变的 `AtomicLong`）。
+
+纯新增文件（LK +75 行），没有 BeiDou 对应实现要比对。有效代码只有 30 行，但问题不少。
+
+##### LK 原文的问题与本次做法
+
+| # | LK | 本次 |
+|---|---|---|
+| 1 | **每个玩家发一条 `yellowMessage`** —— 那是屏幕顶部提示条，后一条顶掉前一条，多人时**实际只看得到最后一个人** | 全部走 `dropMessage(6, ...)` 进聊天框，可回滚查看 |
+| 2 | 亿/万 分段在余数为 0 时多吐一个 `0`：`100000000` → 「1亿0」，`250000000` → 「2亿5000万0」 | 只在余数非零时才拼末段 |
+| 3 | `long percent = damage * 100L / maxHp` 整数除法，**不足 1% 一律显示 0%** | 保留一位小数，`String.format(Locale.ROOT, "%.1f", ...)`；`Locale.ROOT` 不能省，否则某些区域小数点会变逗号 |
+| 4 | 地图上没有存活 BOSS 时**完全没有输出** | 补一条提示 |
+| 5 | 7 行注释掉的 `totalDamage` 死代码 | 不搬 |
+| 6 | 全部硬编码中文（含 `setDescription`） | 走 i18n（`BossDmgAnalysisCommand.message1~6`） |
+| 7 | `damages.get(attacker.getId())` 每人查两次 | 查一次 |
+| 8 | 输出顺序 = `getAllPlayers()` 的顺序 | 按伤害降序 |
+
+##### 两处按运营决定，不是技术判断
+
+- **权限从 `gm0` 收到 `gm2`**：LK 放 gm0 等于给全服一张 DPS 表，远征/组队里容易引发扯皮。
+  包名必须与 `command_info.default_level` 一致（反射按 `gm{default_level}` 找类），所以这决定了文件放在哪个包。
+- **统计口径保持 LK 原样**：只列**当前还在本地图**的玩家。中途离开或掉线的人，伤害仍计在 BOSS 的
+  `takenDamage` 里但不列出来。因此各行百分比之和通常小于「已掉血量」——
+  表头给的是 **BOSS 剩余血量比例**（直接来自 `hp/maxHp`）而不是各行合计，免得两个数对不上引起误会。
+
+##### 数字格式
+
+中文客户端按亿/万分段，其余语言按千分位 `%,d`（v83 BOSS 伤害动辄上亿，紧凑写法好读得多）。
+分支依据是 `CharsetConstants.getLanguageLocale(ThreadLocalUtil.getClientLang())`，
+与 `I18nUtil.getMessage` 取语言的路径同源。
+
+> 单位键 `message5`（亿）/ `message6`（万）在 `message_en_US.properties` 里也放了同样的中文值。
+> 它们只在中文客户端的拼接分支里被读到，英文那份纯粹是防止 MessageSource 回退时抛
+> `NoSuchMessageException`，两个文件里都有注释说明。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `gm2/BossDmgAnalysisCommand.java`（新） | `@analysis` |
+| `V1000.0.19__insert_command_info_analysis.sql` | 1 条 `command_info` |
+| `message_{zh_CN,en_US}.properties` | `BossDmgAnalysisCommand.message1~6` |
 
 ### 批次 7 — 数据类
 

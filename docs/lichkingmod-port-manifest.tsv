@@ -706,7 +706,7 @@ src/tools/exceptions/EventInstanceInProgressException.java	java	0	1	pending
 src/tools/packets/Fishing.java	java	3	4	pending	
 src/tools/packets/Wedding.java	java	21	8	pending	
 src/client/command/commands/CommandManager.java	java-new	89	6	ported	org/gms/client/command/commands/CommandManager.java；改并发容器。三个 setWorldXxxRate 确定不补 —— 唯一的消费方 RateEventCommand 已 rejected。批次4 追加三处：clearItemSold 供 RetrieveCommand 清空出售记录（并发容器不接受 null 值，用不了原实现的 set(id, null)）；registerRunningCommandIfAbsent 原子登记，给 GMBot 这种 key 是目标角色而非发起者自己的指令用；cancelRunningCommands 改为先原子 remove 再 cancel，原先先查后删会在并发下取消掉别人刚登记的新任务
-src/client/command/commands/gm0/BossDmgAnalysisCommand.java	java-new	75	0	pending	
+src/client/command/commands/gm0/BossDmgAnalysisCommand.java	java-new	75	0	ported	批次6-G14：改写为 gm2/BossDmgAnalysisCommand。修掉 yellowMessage 只显示最后一人、亿万分段多吐0、百分比整数除法三个问题；补无BOSS提示、按伤害降序、全量i18n
 src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	deferred	缓：LK 版的安全闸门就是邮箱验证码（脚本第一步的算术码是自显自验，无鉴权作用），去掉邮箱等于任何人在已登录客户端上都能改账号密码。BeiDou 已有网页端改密码（AccountService.updateAccountByUser:101，闸门为旧密码）。重启条件：邮箱验证方案定案，或决定改用旧密码闸门做游戏内入口
 src/client/command/commands/gm0/DetectCommand.java	java-new	78	0	ported	gms-server/src/main/java/org/gms/client/command/commands/gm0/DetectCommand.java + V1000.0.5 注册；判定与处罚在 AbstractPlayerInteraction.detectPlayer，参数落成 V1000.0.6 的五个 game_config 键，use_player_detect 默认关闭
 src/client/command/commands/gm0/MapDropsCommand.java	java-new	88	0	ported	org/gms/client/command/commands/gm0/MapDropsCommand.java；退化为入口，逻辑复用 scripts-zh-CN/BeiDouSpecial/当前地图掉落_当前地图.js
