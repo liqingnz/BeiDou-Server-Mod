@@ -37,6 +37,7 @@ import org.gms.constants.inventory.ItemConstants;
 import org.gms.net.AbstractPacketHandler;
 import org.gms.net.packet.InPacket;
 import org.gms.server.ItemInformationProvider;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 
 import java.util.ArrayList;
@@ -79,6 +80,8 @@ public final class ScrollHandler extends AbstractPacketHandler {
                 Item wscroll = null;
 
                 if (ItemConstants.isCleanSlate(scroll.getItemId()) && !ii.canUseCleanSlate(toScroll)) {
+                    // 客户端只收得到一个失败特效，不说明原因，这里补一条文字提示
+                    chr.dropMessage(1, I18nUtil.getMessage("ScrollHandler.message1"));
                     announceCannotScroll(c, legendarySpirit); // 如果清洁卷轴不能用于该装备，通知客户端无法使用
                     return;
                 } else if (!ItemConstants.isModifierScroll(scroll.getItemId()) && toScroll.getUpgradeSlots() < 1) {

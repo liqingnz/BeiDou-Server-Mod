@@ -1053,7 +1053,14 @@ public class ItemInformationProvider {
     public boolean canUseCleanSlate(Equip equip) {
         Map<String, Integer> eqStats = getEquipStats(equip.getItemId());
         if (eqStats == null || eqStats.get("tuc") == 0) {
+            // tuc 为 0 的装备原本就不可打卷，两种规则下都不许拿白医给它开孔
             return false;
+        }
+        if (GameConfig.getServerBoolean("use_lk_clean_slate")) {
+            // LK 规则：白医不再是「找回失败掉的孔」，而是「给已经打满的装备额外加一个孔」。
+            // 因此只在剩余孔为 0 时可用，且孔数不再受 tuc 上限约束——反复「白医开孔 → 打卷」
+            // 可以把同一件装备的总孔数无限叠上去，是有意为之的产出侧放宽，不是漏判。
+            return equip.getUpgradeSlots() == 0;
         }
         int totalUpgradeCount = eqStats.get("tuc");
         int freeUpgradeCount = equip.getUpgradeSlots();
@@ -1110,7 +1117,9 @@ public class ItemInformationProvider {
                         case ItemId.CLEAN_SLATE_3:
                         case ItemId.CLEAN_SLATE_5:
                         case ItemId.CLEAN_SLATE_20:
-                            if (canUseCleanSlate(nEquip)) {
+                            // upgradeSlots 是 byte，use_lk_clean_slate 打开后孔数没有 tuc 封顶，
+                            // 加到 127 再 +1 会绕成 -128，装备既打不了卷也用不了白医，直接废掉
+                            if (canUseCleanSlate(nEquip) && nEquip.getUpgradeSlots() < Byte.MAX_VALUE) {
                                 nEquip.setUpgradeSlots((byte) (nEquip.getUpgradeSlots() + 1)); // 增加升级插槽数量
                             }
                             break;

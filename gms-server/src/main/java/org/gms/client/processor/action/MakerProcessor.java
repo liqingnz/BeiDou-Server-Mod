@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.gms.server.ItemInformationProvider;
 import org.gms.server.MakerItemFactory;
 import org.gms.server.MakerItemFactory.MakerItemCreateEntry;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 import org.gms.util.Pair;
 
@@ -66,7 +67,7 @@ public class MakerProcessor {
                     int fromLeftover = toCreate;
                     toCreate = ii.getMakerCrystalFromLeftover(toCreate);
                     if (toCreate == -1) {
-                        c.sendPacket(PacketCreator.serverNotice(1, ii.getName(fromLeftover) + " is unavailable for Monster Crystal conversion."));
+                        c.sendPacket(PacketCreator.serverNotice(1, I18nUtil.getMessage("MakerProcessor.message1", ii.getName(fromLeftover))));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         return;
                     }
@@ -84,12 +85,12 @@ public class MakerProcessor {
                         if (pair != null) {
                             recipe = MakerItemFactory.generateDisassemblyCrystalEntry(toDisassemble, pair.getLeft(), pair.getRight());
                         } else {
-                            c.sendPacket(PacketCreator.serverNotice(1, ii.getName(toCreate) + " is unavailable for Monster Crystal disassembly."));
+                            c.sendPacket(PacketCreator.serverNotice(1, I18nUtil.getMessage("MakerProcessor.message2", ii.getName(toCreate))));
                             c.sendPacket(PacketCreator.makerEnableActions());
                             return;
                         }
                     } else {
-                        c.sendPacket(PacketCreator.serverNotice(1, "An unknown error occurred when trying to apply that item for disassembly."));
+                        c.sendPacket(PacketCreator.serverNotice(1, I18nUtil.getMessage("MakerProcessor.message3")));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         return;
                     }
@@ -137,7 +138,7 @@ public class MakerProcessor {
 
                         if (!reagentids.isEmpty()) {
                             if (!removeOddMakerReagents(toCreate, reagentids)) {
-                                c.sendPacket(PacketCreator.serverNotice(1, "You can only use WATK and MATK Strengthening Gems on weapon items."));
+                                c.sendPacket(PacketCreator.serverNotice(1, I18nUtil.getMessage("MakerProcessor.message4")));
                                 c.sendPacket(PacketCreator.makerEnableActions());
                                 return;
                             }
@@ -152,32 +153,32 @@ public class MakerProcessor {
                 switch (createStatus) {
                     case -1:// non-available for Maker itemid has been tried to forge
                         log.warn("Chr {} tried to craft itemid {} using the Maker skill.", c.getPlayer().getName(), toCreate);
-                        c.sendPacket(PacketCreator.serverNotice(1, "The requested item could not be crafted on this operation."));
+                        c.sendPacket(PacketCreator.serverNotice(1, I18nUtil.getMessage("MakerProcessor.message5")));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
                     case 1: // no items
-                        c.sendPacket(PacketCreator.serverNotice(1, "You don't have all required items in your inventory to make " + ii.getName(toCreate) + "."));
+                        c.sendPacket(PacketCreator.serverNotice(1, I18nUtil.getMessage("MakerProcessor.message6", ii.getName(toCreate))));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
                     case 2: // no meso
-                        c.sendPacket(PacketCreator.serverNotice(1, "You don't have enough mesos (" + GameConstants.numberWithCommas(recipe.getCost()) + ") to complete this operation."));
+                        c.sendPacket(PacketCreator.serverNotice(1, I18nUtil.getMessage("MakerProcessor.message7", GameConstants.numberWithCommas(recipe.getCost()))));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
                     case 3: // no req level
-                        c.sendPacket(PacketCreator.serverNotice(1, "You don't have enough level to complete this operation."));
+                        c.sendPacket(PacketCreator.serverNotice(1, I18nUtil.getMessage("MakerProcessor.message8")));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
                     case 4: // no req skill level
-                        c.sendPacket(PacketCreator.serverNotice(1, "You don't have enough Maker level to complete this operation."));
+                        c.sendPacket(PacketCreator.serverNotice(1, I18nUtil.getMessage("MakerProcessor.message9")));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
                     case 5: // inventory full
-                        c.sendPacket(PacketCreator.serverNotice(1, "Your inventory is full."));
+                        c.sendPacket(PacketCreator.serverNotice(1, I18nUtil.getMessage("MakerProcessor.message10")));
                         c.sendPacket(PacketCreator.makerEnableActions());
                         break;
 
@@ -246,7 +247,10 @@ public class MakerProcessor {
         Map<Integer, Integer> reagentType = new LinkedHashMap<>();
         List<Integer> toRemove = new LinkedList<>();
 
-        boolean isWeapon = ItemConstants.isWeapon(toCreate) || GameConfig.getServerBoolean("use_maker_permissive_atk_up");  // thanks Vcoc for finding a case where a weapon wouldn't be counted as such due to a bounding on isWeapon
+        // 护盾（1092xxx）落在 isWeapon 的 1302000 下界之外，但同样吃攻击类强化宝石，
+        // 制作数据里有 20 个可锻造护盾，不补这一项它们会被误判成非武器直接拒绝
+        boolean isWeapon = ItemConstants.isWeapon(toCreate) || ItemConstants.isShield(toCreate)
+                || GameConfig.getServerBoolean("use_maker_permissive_atk_up");  // thanks Vcoc for finding a case where a weapon wouldn't be counted as such due to a bounding on isWeapon
 
         for (Map.Entry<Integer, Short> r : reagentids.entrySet()) {
             int curRid = r.getKey();

@@ -160,7 +160,7 @@ src/client/inventory/manipulator/MapleKarmaManipulator.java	java	0	0	noise	仅�
 src/client/keybind/MapleQuickslotBinding.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/newyear/NewYearCardRecord.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/processor/action/BuybackProcessor.java	java	1	1	pending	
-src/client/processor/action/MakerProcessor.java	java	8	8	pending	
+src/client/processor/action/MakerProcessor.java	java	8	8	ported	搬 isShield 并入 removeOddMakerReagents 的 isWeapon 判定（1092xxx 落在 isWeapon 的 1302000 下界外，制作数据里有 20 个可锻造护盾，原先被误判成非武器直接拒绝攻击类宝石）。LK 的 6 处中文硬编码不照抄，连同 BeiDou 原有的 4 处英文硬编码一并转 i18n（MakerProcessor.message1..10）
 src/client/processor/action/PetAutopotProcessor.java	java	2	2	pending	
 src/client/processor/action/SpawnPetProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/processor/npc/DueyProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -372,7 +372,7 @@ src/net/server/channel/handlers/RemoteStoreHandler.java	java	0	0	noise	仅格式
 src/net/server/channel/handlers/ReportHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/RingActionHandler.java	java	3	3	pending	
 src/net/server/channel/handlers/ScriptedItemHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/ScrollHandler.java	java	1	0	pending	
+src/net/server/channel/handlers/ScrollHandler.java	java	1	0	ported	去掉格式噪声后 LK 只改了一行：白医不可用时补一条文字提示。已搬为 I18nUtil.getMessage("ScrollHandler.message1")。canScroll 的 20492 饰品分支 BeiDou 早已有（ScrollHandler.java:201）
 src/net/server/channel/handlers/SkillBookHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/SkillMacroHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/SnowballHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -525,7 +525,7 @@ src/scripting/reactor/ReactorScriptManager.java	java	0	0	noise	仅格式化/空�
 src/server/CashShop.java	java	3	2	pending	
 src/server/DueyPackage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MTSItemInfo.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/MakerItemFactory.java	java	2	1	pending	
+src/server/MakerItemFactory.java	java	2	1	rejected	LK 把配方数据源从 makercreatedata/makerrecipedata 两张表换成 Etc.wz/ItemMake.img。不搬：覆盖率等价（wz 834 个 itemid vs 迁移脚本 836 行），DB 源可运营（一条 SQL vs 改 wz+重启+客户端同步），且 LK 的 getMakerRecipe 在缓存未命中且 wz 也查不到时返回 null，调用方 MakerItemFactory:41 紧接着 makerEntry.isInvalid() 会 NPE；BeiDou 的 DB 版返回全 -1 的 entry 被 getCreateStatus 的 case -1 正常拦住
 src/server/MapleItemInformationProvider.java	java	154	28	pending	
 src/server/MapleMarriage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MapleShop.java	java	4	2	pending	

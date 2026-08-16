@@ -1078,7 +1078,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G2** | 阶梯经验 + 倍率 float 化 | `world/World`、`net/server/Server`、`config/WorldConfig`、`gm0/ShowRatesCommand` | `exp_rate_30`、`exp_rate_70`（world 级） |
 | **G3** | 组队蹭经验判定 | `life/MapleMonster`、`tools/IntervalBuilder` | `exp_mob_leech_interval` |
 | **G4** | **Godly 装备属性 + 装备成长等级门槛 + 堆叠上限** | `MapleItemInformationProvider`、`inventory/Equip` | `equip_stat_randomize_range`、`item_max_slot`、`elemental_weapon_use_default_lvlup` |
-| **G5** | 白医卷轴 / 制作 | `ScrollHandler`、`MakerProcessor`、`MakerItemFactory` | — |
+| **G5** | 白医卷轴 / 制作 | `ScrollHandler`、`MakerProcessor`、`MakerItemFactory` | ✅ 已完成 |
 | **G6** | 怪物技能与怪打怪 | `life/MobSkill`（157 封技能）、`MobDamageMobHandler`、`maps/MapleReactor` | — |
 | **G7** | 远征次数配额 | `expeditions/{Expedition, ExpeditionType, ExpeditionBossLog}`、`world/PartyCharacter` | — |
 | **G8** | 反外挂 / 误封 | `autoban/{AutobanManager, AutobanFactory}`、`AbstractDealDamageHandler`、`CloseRange`/`Magic`/`Ranged`/`Summon` 四个伤害 handler | — |
@@ -1423,6 +1423,130 @@ if (member.getLevel() < this.getLevel() - EXP_MOB_LEECH_INTERVAL && member.getId
 `World.java` / `Server.java` / `MapleCharacter.java` / `ServerConfig.java` **仍是 `pending`** ——
 它们各自还夹着别组的改动（`World` 有 G13 的雇佣商店存续、`Server` 有角色删除与批次 3 的投票任务、
 `MapleCharacter` 是 G2/G3/G7/G9/G10/G11 的汇聚点、`ServerConfig` 要等全部配置键落地）。
+
+#### G5 — 白医卷轴 / 制作 ✅ 已完成
+
+`git diff --stat` 看是 4 个文件 300+ 行，`git diff -w` 之后只剩 **8 个语义点**（LK 在这批做过一次
+全仓库 IDE 重排，`switch(` → `switch (`、去尾空格、import 之间加空行，占了绝大部分行数）。
+其中 2 个搬、5 个否、1 个纯噪声。
+
+##### 逐条判定
+
+| # | 项 | 判定 | 依据 |
+|---|---|---|---|
+| 1 | `ScrollHandler` 白医失败无提示 | ✅ ported | 唯一的真改动。原先客户端只收到一个失败特效，不说明原因 |
+| 2 | `canUseCleanSlate` 规则重写 | ✅ ported（**带开关**） | 见下 |
+| 3 | `canUseCleanSlate` 硬编码禁用 1122000 | ❌ rejected | 运营口味不是修 BUG。黑龙项链在 v83 数据里 `Character.wz/Accessory/01122000.img.xml:25` 是 `tuc=3`，本来就可打卷；且 LK 只堵白医不堵普通卷轴，自身也不自洽 |
+| 4 | `scrollEquipWithId` 去掉 `assertGM` | ❌ rejected | `assertGM` 在 BeiDou 是 `isGM && use_perfect_gm_scroll`，删掉它等于把这个配置的唯一效果删掉，键就成了死键。想要 LK 的行为把配置关掉即可，零代码 |
+| 5 | `MakerProcessor` 护盾并入 `isWeapon` | ✅ ported | 真 BUG，且是活的，见下 |
+| 6 | `MakerProcessor` 提示文案 | ✅ ported（**转 i18n，不抄中文硬编码**） | LK 把 6 处英文字面量换成中文字面量，两者都不合规则 2 |
+| 7 | `MakerItemFactory` 配方改读 wz | ❌ rejected | 见下 |
+| 8 | `MakerSkillHandler` | ⬜ noise | 只删了 javadoc 里一个空 `*` 行 |
+
+##### 白医规则（项 2）——为什么给开关而不是直接覆盖
+
+两套规则语义根本不同，不是「谁修了谁的 BUG」：
+
+- **BeiDou 原实现**：白医 = 找回一次打卷失败掉掉的孔。判定式
+  `剩余孔 + 已成功次数 < tuc + Vicious`，等价于「这件装备失败过」。总孔数永不超过 `tuc`。
+- **LK**：白医 = 给已经打满的装备额外加一个孔。判定式只有 `剩余孔 == 0`。
+
+逐状态对照：
+
+| 装备状态 | 剩余孔 | 已成功 | BeiDou | LK |
+|---|---|---|---|---|
+| 全新未打（7 孔） | 7 | 0 | ✗ | ✗ |
+| 失败过一次 | 6 | 0 | ✓ | ✗ |
+| 7 孔全成功 | 0 | 7 | ✗ | ✓ |
+
+关键在第三行：LK 规则下「白医开孔 → 打卷成功 → 剩余孔又是 0 → 再白医」可以无限循环，
+**总孔数没有上界**。按原实现的语义这是漏判，按 LK 的语义这是刻意的产出放宽——所以做成
+`use_lk_clean_slate`（`V1000.0.11`，**默认 true**），而不是二选一。
+
+落地时补的两件事（LK 没有，标出来）：
+
+1. **保留 `tuc == 0` 的前置拦截**。LK 直接 `return getUpgradeSlots() == 0`，那么本身不可打卷
+   （`tuc=0`）的装备也会因为「剩余孔是 0」而通过，被白医开出第一个孔。BeiDou 这条通用拦截
+   放在开关之前，两种规则共用——这也正是 LK 需要硬编码 1122000 那种单件黑名单的原因，
+   通用拦截在，就不需要黑名单。
+2. **挡 byte 溢出**。`upgradeSlots` 是 `byte`，开关打开后孔数没有 `tuc` 封顶，加到 127 再 +1
+   会绕成 -128，装备既打不了卷（`< 1`）也用不了白医（`!= 0`），直接废掉。
+   [ItemInformationProvider.java:1113](../gms-server/src/main/java/org/gms/server/ItemInformationProvider.java#L1113)
+   的自增加了 `< Byte.MAX_VALUE` 条件。
+
+##### 护盾吃不到攻击宝石（项 5）——查证是活 BUG
+
+`removeOddMakerReagents` 里 `type < 42502 && !isWeapon` 直接 `return false`
+（[MakerProcessor.java:257](../gms-server/src/main/java/org/gms/client/processor/action/MakerProcessor.java#L257)），
+而 `ItemConstants.isWeapon` 的下界是 `1302000`，护盾段 `1092xxx` 落在外面。
+
+三点确认它不是死代码：
+
+- `V1.0.53__maker_insert_data.sql` 的 create 段里有 **20 个 1092xxx 护盾配方**
+  （1092004、1092009、1092060 …）。
+- 唯一的逃生阀 `use_maker_permissive_atk_up` 默认 **false**（`V1.7.0__create_game_config.sql:100`），
+  而且它是一刀切放开**所有**非武器，粒度太粗，不能算已修。
+- 上游那句 `// thanks Vcoc for finding a case where a weapon wouldn't be counted as such
+  due to a bounding on isWeapon` 说的就是这个下界，LK 补的正是它漏掉的那一类。
+
+`ItemConstants.isShield` 在 BeiDou 不存在，本组顺带新增。
+
+##### 配方数据源（项 7）——不跟 LK 换到 wz
+
+LK 新增 `getMakerRecipe` 读 `Etc.wz/ItemMake.img`，把 `MakerItemFactory` 从
+`makercreatedata`/`makerrecipedata` 两张表切过去。不跟，三个理由：
+
+1. **不是覆盖率问题**。`ItemMake.img.xml` 里有 **834** 个 8 位 itemid，
+   `V1.0.53__maker_insert_data.sql` 的 create 段有 **836** 行，两边等价。
+2. **DB 源可运营，wz 源不可**。改一条配方 = 一条 SQL vs 改 wz + 重启 + 客户端同步。
+3. **LK 这版有 NPE**（修 LK 的问题，按 §3.7 标出）。`getMakerRecipe` 在缓存未命中且
+   `ItemMake.img` 里也查不到该 itemid 时，`for` 一次都不 `break`，`makerEntry` 保持 `null` 返回；
+   调用方 `MakerItemFactory:41` 紧接着 `makerEntry.isInvalid()` 就炸。BeiDou 的 DB 版在这条路上
+   返回 `cost/reqLevel/reqMakerLevel` 全 `-1` 的 entry，被 `getCreateStatus` 的 `case -1` 正常拦住。
+
+顺带记一笔：真正该走 wz 的地方 BeiDou 已经走了——
+`getMakerStimulant`（[:2255](../gms-server/src/main/java/org/gms/server/ItemInformationProvider.java#L2255)）
+读的就是 `ItemMake.img`。配方留在 DB 是有意的，不是遗漏。
+
+##### i18n（项 6）——两处主动扩范围，先说明
+
+- **多转了 3 条**。LK 只改了 7 条里的后 6 条，BeiDou 的 `execute` 里另有 3 条英文硬编码
+  （怪物结晶转换/分解/未知错误，`:69` `:87` `:92`）LK 没碰。同一个方法、同一个
+  `serverNotice(1, …)` 模式，7 条走 i18n、3 条留英文硬编码更糟，一并转掉，共 10 条。
+- **`en_US` 保留 BeiDou 原有英文原文**，只有 `MakerProcessor.message4` 改了措辞
+  （加上 shield，因为规则本身变了）。英文玩家其余文案零变化。
+- **`zh_CN` 用 LK 的措辞，但改掉一处病句**：LK 写「你的背包不足 (N) 金币来完成此次锻造。」
+  原文是 mesos 不足与背包无关，改成「你的金币不足（{0}），无法完成此次锻造。」
+- `message6`/`message7` 的英文里有 `don't`，而这两条带 `{0}` 参数会走 `MessageFormat`，
+  单引号是转义符。这两条写成 `don''t`。**注意仓库里已有同类隐患**
+  （`ClearSavedLocationsCommand.message2`、`JailCommand.message4`、`GetAccCommand.message3` 等
+  都是 `{0}'s` 单引号，渲染时撇号会被吃掉），不属本组范围，另记。
+
+##### 清单影响
+
+`ScrollHandler.java`、`MakerProcessor.java` 判 `ported`，`MakerItemFactory.java` 判 `rejected`
+（`MakerSkillHandler.java` 生成器已判 `noise`）。
+
+`ItemConstants.java` **仍是 `pending`**：本组只取走了 `isShield`，它还夹着两项别组的改动——
+`isPotion` 加 `2002xxx` 与 `2050004`（消费方是宠物自动喂药，属 **G11**）、
+`isHair` 上界 `35000` → `70000`（属**批次 8**，且 BeiDou 现有实现按 `itemId/10000 ∈ {3,4,6}` 判，
+已覆盖 30000–69999，大概率是 `already-fixed`，留给批次 8 定）。
+
+`MapleItemInformationProvider.java` 也**仍是 `pending`**：本组在它身上只加了白医开关，
+它还欠批次 7 的 `getItemDataById` 与批次 8 的披风 ID 段。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `ScrollHandler.java` | +1 条 i18n 提示 |
+| `ItemConstants.java` | +`isShield` |
+| `MakerProcessor.java` | `isShield` 并入 `isWeapon`；10 处文案转 i18n |
+| `ItemInformationProvider.java` | `canUseCleanSlate` 加 `use_lk_clean_slate` 分支；白医自增挡 byte 溢出 |
+| `V1000.0.11__insert_game_config_clean_slate.sql` | 1 个键 + zh/en 两条 `lang_resources` |
+| `message_{zh_CN,en_US}.properties` | +11 键 × 2 |
+
+无新增指令。`MakerItemFactory.java` 未改。
 
 ### 批次 7 — 数据类
 
