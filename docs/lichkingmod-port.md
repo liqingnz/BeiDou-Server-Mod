@@ -1083,8 +1083,8 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G7** ✅ | 远征次数配额 | `expeditions/{Expedition, ExpeditionType, ExpeditionBossLog}`、`world/PartyCharacter` | — |
 | **G8** ✅ | 反外挂 / 误封 | `autoban/{AutobanManager, AutobanFactory}`、`AbstractDealDamageHandler`、`CloseRange`/`Magic`/`Ranged`/`Summon` 四个伤害 handler | — |
 | **G9** ✅ | 技能平衡 | `MapleStatEffect`、`AranComboHandler`、`SpecialMoveHandler`、`gm2/BuffMapCommand`、`gm2/EmpowerMeCommand`、`constants/skills/Corsair`、`AssignAPProcessor` | `aran_combo_last_time`、`aran_combo_gm_bonus`、`battleship_hp_per_skill_level`、`battleship_hp_per_level`、`battleship_stance`、`mana_reflection_stance`、`marksman_blind_stance`、`use_gm_no_skill_cooldown`、`fast_reuse_hero_will_divisor` |
-| **G10** | 等级上限 | `constants/game/GameConstants` | `max_level_cap`、`cygnus_max_level_cap` |
-| **G11** | 自动喂药重复消耗 | `PetAutoPotHandler`、`PetAutopotProcessor` | — |
+| **G10** ✅ | 等级上限 | `constants/game/GameConstants` | `max_level_cap`、`cygnus_max_level_cap` |
+| **G11** ✅ | 自动喂药重复消耗 | `PetAutoPotHandler`、`PetAutopotProcessor` | — |
 | **G12** | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
 | **G13** | 雇佣商店存续天数 | `maps/HiredMerchant` | `merchant_expire_time` |
 | **G14** | `@analysis` BOSS 伤害占比 | `gm0/BossDmgAnalysisCommand`（批次 1 挪来） | — |
@@ -1954,6 +1954,88 @@ LK 那版**连暴风箭雨都会误报**。整段 rejected，连带 `public stat
 > 顺带结清 G9 复查留下的一条：`use_gm_no_skill_cooldown` 是否扩大到三个伤害 handler。
 > 结论**不扩大** —— 这三处登记的是攻击技能自身的冷却，属技能机制而非防作弊，
 > 让 GM 绕过它会使 GM 测出来的手感完全不代表玩家。配置描述已在上一轮收窄到实际范围，就此定案。
+
+#### G10 — 等级上限 ✅ 已完成
+
+##### 关键：上限在**两处**硬编码，LK 只改了一个
+
+| 位置 | 代码 | 何时生效 |
+|---|---|---|
+| [`GameConstants.getJobMaxLevel`](../gms-server/src/main/java/org/gms/constants/game/GameConstants.java#L488) | `(job.getId()/1000 == 1) ? 120 : 200` | 仅当 `use_enforce_job_level_range` **打开** |
+| [`Character.getMaxClassLevel`](../gms-server/src/main/java/org/gms/client/Character.java#L4930) | `isCygnus() ? 120 : 200` | **默认路径** |
+
+`use_enforce_job_level_range` 默认 `false`（[V1.7.0:68](../gms-server/src/main/resources/db/migration/V1.7.0__create_game_config.sql#L68)），
+`getMaxLevel()` 直接返回 `getMaxClassLevel()`。**只照搬 LK 改的那处，配置在默认设置下一行都不会生效。**
+两处已统一到 `GameConstants.getMaxLevel()` / `getCygnusMaxLevel()`。
+
+配置：`max_level_cap` = **200**（原值）、`cygnus_max_level_cap` = **155**（原版 120，运营决定）。
+
+> ⚠️ v83 客户端是按骑士团 120 上限设计的，超过之后经验表、称号、部分 UI 的表现未经验证，
+> 上服前应在测试环境确认。
+
+##### `WORLD_NAMES[0]` → 配置化
+
+LK 把 `"Scania"` 直接改成 `"枫之大陆"`。这个字符串**随服务器列表发给客户端显示**
+（`ServerlistRequestHandler`、`PacketCreator:5540`），硬编码中文违反规则 2，而且它是运营品牌信息。
+
+新增 `GameConstants.getWorldName(int)`：优先读 `world.N.world_name` 配置，回落到 `WORLD_NAMES` 原值；
+6 个显示/日志调用点换过去（`Server.java:701` 用的是 `.length`，不动）。默认值填 **`枫之大陆MapleLand`**。
+
+> 走 `game_config` 的 `world` 段而不是 i18n —— 大区名是**这个大区的名字**，
+> 不该随玩家语言变化。
+
+##### `@goto` 目标表新增 13 项
+
+逐个核过 wz 存在性，并改用 `MapId` 常量（LK 用的是裸数字）：
+
+| | 条目 |
+|---|---|
+| `GOTO_TOWNS` | `barber`、`shanghai`(上海外滩)、`shaolin`(嵩山镇) |
+| `GOTO_AREAS`（GM） | `zakum2`、`gs2`、`balrogboss`、`scarga`、`101`、`orbispq`、`mpqa`、`mpqz`、`cjg`(藏经阁七层)、`wugong` |
+| **不加**（地图缺失） | `krex` 541020700、`ulu` 541020500、`ulu2` 541020200 —— `wz/` 与 `wz-zh-CN/` 里都没有，加了只会传送失败。`krex` 与 G7 的克雷塞尔缺图是同一件事 |
+
+中文版特有的四张（`shanghai`/`shaolin`/`cjg`/`wugong`）只有 `wz-zh-CN` 有 String 条目，
+**刷怪与任务脚本尚未移植（批次 7），现在传送过去基本是空地图**，代码里已注明。
+
+##### `temple` 270000100 → 270000000 —— **rejected，LK 改错了**
+
+查 `String.wz`：`270000100` = Temple of Time / 神殿入口（入口），
+`270000000` = Three Doors / 三个门（内层房间）。`@goto temple` 该去入口，BeiDou 现值正确。
+
+#### G11 — 自动喂药重复消耗 ✅ 已完成（**几乎整组 already-fixed**）
+
+| LK 改动 | 处置 |
+|---|---|
+| `PetAutoPotHandler` 的 `setAutopotHpAlert(hp + 0.05f)` → `+0.1f` | **rejected（不适用）**。该机制 Cosmic 整个换掉了，BeiDou 的 handler 只剩 8 行纯转发 |
+| `PetAutopotProcessor` 两行 `System.out.println` 注释掉 | **already-fixed**，BeiDou 早已没有 |
+| `ItemConstants.isShield` | **already-fixed**，G5 已加 |
+| `ItemConstants.isHair` 35000 → 70000 | **already-fixed**，BeiDou 用 `itemId/10000 ∈ {3,4,6}`，等价且更整齐 |
+| `ItemConstants.isPotion` += `2002xxx` + `2050004` | ported |
+
+**「重复消耗」本身 BeiDou 修得更好**：`PetAutopotProcessor` 用 `useInv.lockInventory()`
+把「吃满就不要吃了」的判断放进锁内，注释写明「避免已排队的数据跳过限制」——是根治；
+LK 的 `+0.1f` 是靠加宽迟滞带缓解，治标。
+
+##### 订正一处归属
+
+§7 原写 `isPotion` 的「消费方是宠物自动喂药，属 G11」，**查实不成立**：
+
+- **LK 自己的 `isPotion` 零调用者**（`grep -rn "isPotion(" src/` 无结果），在 LK 那边就是死代码。
+- BeiDou 只有 `isPotion` → `isConsumable` → [`RechargeCommand`](../gms-server/src/main/java/org/gms/client/command/commands/gm2/RechargeCommand.java#L54) 一条链路，
+  **与宠物自动喂药无关**。实际效果仅限 `@recharge` 能对这些道具补满堆叠。
+
+2002xxx 是敏捷/迅速/魔法/勇士药水、2050004 是万能药，按名字确实是 potion，扩展语义上更正确。
+
+##### 本组产物（G10 + G11）
+
+| 文件 | 改动 |
+|---|---|
+| `GameConstants.java` | 等级上限两个 getter、`getWorldName`、`@goto` 新增 13 项 |
+| `Character.java` | `getMaxClassLevel` 取同一套配置 |
+| `MapId.java` | 新增 13 个地图常量 |
+| `Client.java` / `IpListCommand.java` / `ServerlistRequestHandler.java` / `Storage.java` / `PacketCreator.java` / `CharacterService.java` | 换用 `getWorldName` |
+| `ItemConstants.java` | `isPotion` 扩展 |
+| `V1000.0.16__insert_game_config_level_cap_and_world_name.sql` | 3 个键 + zh/en 各 3 条 `lang_resources` |
 
 ### 批次 7 — 数据类
 

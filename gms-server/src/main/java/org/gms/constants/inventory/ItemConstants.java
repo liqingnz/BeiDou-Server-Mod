@@ -78,7 +78,8 @@ public final class ItemConstants {
     }
 
     public static boolean isPotion(int itemId) {
-        return itemId / 1000 == 2000;
+        // 2000xxx 恢复类，2002xxx 属性药水（敏捷/迅速/魔法/勇士），2050004 万能药
+        return itemId / 1000 == 2000 || itemId / 1000 == 2002 || itemId == ItemId.ALL_CURE_POTION;
     }
 
     public static boolean isFood(int itemId) {

@@ -161,7 +161,7 @@ src/client/keybind/MapleQuickslotBinding.java	java	0	0	noise	仅格式化/空白
 src/client/newyear/NewYearCardRecord.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/processor/action/BuybackProcessor.java	java	1	1	pending	
 src/client/processor/action/MakerProcessor.java	java	8	8	ported	搬 isShield 并入 removeOddMakerReagents 的 isWeapon 判定（1092xxx 落在 isWeapon 的 1302000 下界外，制作数据里有 20 个可锻造护盾，原先被误判成非武器直接拒绝攻击类宝石）。LK 的 6 处中文硬编码不照抄，连同 BeiDou 原有的 4 处英文硬编码一并转 i18n（MakerProcessor.message1..10）
-src/client/processor/action/PetAutopotProcessor.java	java	2	2	pending	
+src/client/processor/action/PetAutopotProcessor.java	java	2	2	already-fixed	LK 的改动是把两行 System.out.println 调试输出注释掉，BeiDou 早已没有。而「重复消耗」这个问题本身 BeiDou 修得更好：用 useInv.lockInventory() 把「吃满就不要吃了」的判断放进锁内，注释明确写着「避免已排队的数据跳过限制」，是根治而非 LK 的加宽迟滞带
 src/client/processor/action/SpawnPetProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/processor/npc/DueyProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/processor/npc/FredrickProcessor.java	java	2	2	pending	
@@ -174,11 +174,11 @@ src/config/ServerConfig.java	java	20	8	pending
 src/config/WorldConfig.java	java	3	1	rejected	不搬。两处改动：新增 exp_rate_30/exp_rate_70 两个世界级阶梯经验字段——BeiDou 已有四套按等级调经验的机制且都更细（use_add_rates_by_level 每20级取斐波那契档并按角色经 ExtendValue 持久化；level_exp_rate 线性随等级；quick_level/quick_level_rate 低于目标等级越多加成越高，正是这两个键的意图但为连续斜坡而非两个断崖；use_enforce_novice_exp_rate 初心者11级前恒1x），再叠一层世界级三档只会与它们连乘。quest_rate 由 int 改 float——BeiDou 的 World.questRate 本就是 float。另 BeiDou 没有 WorldConfig 这个类，世界级配置走 game_config 表的 world 类型
 src/config/YamlConfig.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/game/ExpTable.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/constants/game/GameConstants.java	java	19	3	pending	
+src/constants/game/GameConstants.java	java	19	3	ported	（1）等级上限配置化 max_level_cap(200)/cygnus_max_level_cap(155，原版120，用户决定)。关键：上限在两处硬编码，LK 只改了 getJobMaxLevel，而 use_enforce_job_level_range 默认 false 意味着默认路径走的是 Character.getMaxClassLevel()——只改 LK 改的那处，配置在默认设置下完全不生效。两处都改为取同一套配置。（2）WORLD_NAMES[0] 硬编码中文违反规则2 且属运营品牌决策，改为新增 getWorldName(worldId) 优先读 world.N.world_name 配置、回落数组原值，6 个显示/日志调用点换过去（Server.java:701 用的是 .length 不动）；默认值按用户决定填「枫之大陆MapleLand」。（3）@goto 目标表新增 13 项，全部先核过 wz 存在性并改用 MapId 常量；LK 的 krex(541020700)、ulu(541020500)、ulu2(541020200) 三张地图 wz 与 wz-zh-CN 里都没有，不加。中文版特有的 shanghai/shaolin/cjg/wugong 已加并注明刷怪与脚本属批次7、现在过去是空地图。（4）temple 270000100→270000000 rejected：查 String.wz，270000100 是「Temple of Time/神殿入口」，270000000 是「Three Doors/三个门」的内层房间，BeiDou 现值正确，LK 改错了
 src/constants/game/ScriptableNPCConstants.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/inventory/EquipSlot.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/inventory/EquipType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/constants/inventory/ItemConstants.java	java	6	2	pending	
+src/constants/inventory/ItemConstants.java	java	6	2	ported	isPotion 补 2002xxx（敏捷/迅速/魔法/勇士药水）与 2050004（万能药，用 ItemId.ALL_CURE_POTION 常量）。订正计划书归属：§7 写「消费方是宠物自动喂药，属G11」不成立——LK 自己的 isPotion 零调用者（死代码），BeiDou 只有 isPotion→isConsumable→RechargeCommand 一条链路，与宠物自动喂药无关，实际效果仅限 @recharge 能对这些道具补满堆叠。isShield 已在 G5 补；isHair 35000→70000 已是 already-fixed（BeiDou 用 itemId/10000 ∈ {3,4,6}，等价且更整齐）
 src/constants/net/OpcodeConstants.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/net/ServerConstants.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/skills/Aran.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -351,7 +351,7 @@ src/net/server/channel/handlers/PartyOperationHandler.java	java	0	0	noise	仅格
 src/net/server/channel/handlers/PartySearchRegisterHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/PartySearchStartHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/PartySearchUpdateHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/PetAutoPotHandler.java	java	1	1	pending	
+src/net/server/channel/handlers/PetAutoPotHandler.java	java	1	1	rejected	LK 把 setAutopotHpAlert(hp + 0.05f) 改成 +0.1f，靠加宽迟滞带缓解重复消耗。该机制在 BeiDou 不存在——Cosmic 把整套 autopot alert 换掉了，PetAutoPotHandler 只剩 8 行纯转发。不适用
 src/net/server/channel/handlers/PetChatHandler.java	java	3	3	pending	
 src/net/server/channel/handlers/PetCommandHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/PetExcludeItemsHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）

@@ -278,4 +278,21 @@ public class MapId {
     public static final int CRIMSONWOOD_KEEP = 610020006;
     public static final int MU_LUNG_DOJO_HALL = 925020001;
     public static final int EXCLUSIVE_TRAINING_CENTER = 970030000;
+    public static final int ENTRANCE_TO_ZAKUM_ALTAR = 211042400;
+    public static final int GHOST_SHIP_2 = 541010010;
+    public static final int BOTTOM_OF_THE_TEMPLE = 105100100;
+    public static final int ENTRANCE_TO_SPOOKY_WORLD = 551030100;
+    public static final int EOS_TOWER_101ST_FLOOR = 221024500;
+    public static final int THE_UNKNOWN_TOWER = 200080101;
+    public static final int ZENUMIST_HIDDEN_ROOM = 261000011;
+    public static final int ALCADNO_HIDDEN_ROOM = 261000021;
+
+    // 中文版特有地图。地图数据在 wz-zh-CN 里有，wz（英文基础层）没有对应的 String 条目，
+    // 且刷怪与任务脚本尚未移植（属批次 7），现在传送过去基本是空地图
+    public static final int SHANGHAI_BUND = 701000000;
+    public static final int SONGSHAN_TOWN = 702000000;
+    public static final int SCRIPTURE_PAVILION_7F = 702070400;
+    public static final int WUGONG_PASSAGE = 701010322;
+
+    public static final int HENESYS_HAIR_SALON = 100000104;
 }

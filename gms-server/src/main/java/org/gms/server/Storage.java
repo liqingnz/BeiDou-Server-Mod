@@ -100,7 +100,7 @@ public class Storage {
 
             return ret;
         } catch (SQLException ex) { // exceptions leading to deploy null storages found thanks to Jefe
-            log.error("SQL error occurred when trying to load storage for accId {}, world {}", id, GameConstants.WORLD_NAMES[world], ex);
+            log.error("SQL error occurred when trying to load storage for accId {}, world {}", id, GameConstants.getWorldName(world), ex);
             throw new RuntimeException(ex);
         }
     }

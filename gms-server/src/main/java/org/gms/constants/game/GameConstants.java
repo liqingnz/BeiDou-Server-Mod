@@ -97,6 +97,10 @@ public class GameConstants {
         put("square", MapId.KERNING_SQUARE);
         put("neo", MapId.NEO_CITY);
         put("mushking", MapId.MUSHROOM_KINGDOM);
+        put("barber", MapId.HENESYS_HAIR_SALON);
+        // 中文版特有城镇，刷怪与任务脚本尚未移植（批次 7），现在过去基本是空地图
+        put("shanghai", MapId.SHANGHAI_BUND);
+        put("shaolin", MapId.SONGSHAN_TOWN);
     }};
 
     // "goto" command for only-GMs
@@ -120,6 +124,19 @@ public class GameConstants {
         put("dojo", MapId.MU_LUNG_DOJO_HALL);
         put("bosspq", MapId.EXCLUSIVE_TRAINING_CENTER);
         put("fm", MapId.FM_ENTRANCE);
+        put("zakum2", MapId.ENTRANCE_TO_ZAKUM_ALTAR);
+        put("gs2", MapId.GHOST_SHIP_2);
+        put("balrogboss", MapId.BOTTOM_OF_THE_TEMPLE);
+        put("scarga", MapId.ENTRANCE_TO_SPOOKY_WORLD);
+        put("101", MapId.EOS_TOWER_101ST_FLOOR);
+        put("orbispq", MapId.THE_UNKNOWN_TOWER);
+        put("mpqa", MapId.ZENUMIST_HIDDEN_ROOM);
+        put("mpqz", MapId.ALCADNO_HIDDEN_ROOM);
+        // 中文版特有，同上：地图在但内容未移植
+        put("cjg", MapId.SCRIPTURE_PAVILION_7F);
+        put("wugong", MapId.WUGONG_PASSAGE);
+        // LK 还有 krex(541020700)、ulu(541020500)、ulu2(541020200)，这三张地图 wz 与
+        // wz-zh-CN 里都不存在，加了只会传送失败，故不列入
     }};
 
     public static final List<String> GAME_SONGS = new ArrayList<>(170) {{
@@ -485,8 +502,41 @@ public class GameConstants {
                 return 120;   // 3rd job
 
             default:
-                return (job.getId() / 1000 == 1) ? 120 : 200;   // 4th job: cygnus is 120, rest is 200
+                // 4th job: cygnus is 120, rest is 200
+                return (job.getId() / 1000 == 1) ? getCygnusMaxLevel() : getMaxLevel();
         }
+    }
+
+    /**
+     * 普通职业的等级上限。注意上限在两处判定：本方法只在 use_enforce_job_level_range
+     * 打开时才走到，默认路径是 {@code Character.getMaxClassLevel()}，两边必须取同一个配置。
+     */
+    public static int getMaxLevel() {
+        int cap = GameConfig.getServerInt("max_level_cap");
+        return cap > 0 ? cap : 200;
+    }
+
+    /**
+     * 骑士团（Cygnus）的等级上限，见 {@link #getMaxLevel()} 的说明。
+     */
+    public static int getCygnusMaxLevel() {
+        int cap = GameConfig.getServerInt("cygnus_max_level_cap");
+        return cap > 0 ? cap : 120;
+    }
+
+    /**
+     * 大区显示名。优先取 {@code world.N.world_name} 配置，缺失时回落到 {@link #WORLD_NAMES}。
+     * 这个名字会随服务器列表发给客户端显示，属运营品牌信息，不该写死在代码里。
+     */
+    public static String getWorldName(int worldId) {
+        if (worldId >= 0 && worldId < WORLD_NAMES.length) {
+            String configured = GameConfig.getWorldString(worldId, "world_name");
+            if (configured != null && !configured.isBlank()) {
+                return configured;
+            }
+            return WORLD_NAMES[worldId];
+        }
+        return String.valueOf(worldId);
     }
 
     public static int getSkillBook(final int job) {

@@ -47,7 +47,7 @@ public class IpListCommand extends Command {
             Collection<Character> chars = w.getPlayerStorage().getAllCharacters();
 
             if (!chars.isEmpty()) {
-                str.append("\r\n").append(GameConstants.WORLD_NAMES[w.getId()]).append("\r\n");
+                str.append("\r\n").append(GameConstants.getWorldName(w.getId())).append("\r\n");
 
                 for (Character chr : chars) {
                     str.append("  ").append(chr.getName()).append(" - ").append(chr.getClient().getRemoteAddress()).append("\r\n");

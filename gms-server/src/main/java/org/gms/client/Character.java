@@ -4928,7 +4928,9 @@ public class Character extends AbstractCharacterObject {
     }
 
     public int getMaxClassLevel() {
-        return isCygnus() ? 120 : 200;
+        // 与 GameConstants.getJobMaxLevel 取同一套配置：use_enforce_job_level_range 默认关闭，
+        // 走的就是这里，只改那边等于配置不生效
+        return isCygnus() ? GameConstants.getCygnusMaxLevel() : GameConstants.getMaxLevel();
     }
 
     public int getMaxLevel() {

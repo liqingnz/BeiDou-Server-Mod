@@ -496,8 +496,7 @@ public class CharacterService {
         List<CharactersDO> list = getCharacterByAccountId(accountId);
         return list.stream().map(cdo -> {
             int worldId = Optional.ofNullable(cdo.getWorld()).orElse(0);
-            String worldName = (worldId >= 0 && worldId < GameConstants.WORLD_NAMES.length)
-                    ? GameConstants.WORLD_NAMES[worldId] : String.valueOf(worldId);
+            String worldName = GameConstants.getWorldName(worldId);
             Job job = Job.getById(cdo.getJob());
             return CharacterListItemDTO.builder()
                     .id(cdo.getId())

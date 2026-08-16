@@ -5537,7 +5537,7 @@ public class PacketCreator {
             List<World> worlds = Server.getInstance().getWorlds();
             p.writeInt(worlds.size());
             for (World world : worlds) {
-                p.writeString(GameConstants.WORLD_NAMES[world.getId()]);
+                p.writeString(GameConstants.getWorldName(world.getId()));
             }
         }
         return p;
