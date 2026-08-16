@@ -839,7 +839,7 @@ scripts/event/PiratePQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的
 scripts/event/RescueGaga.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/ScargaBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min + 通关箱奖励清空改走掉落（V1000.1.2/1.3）；getEligibleParty+任务4576门槛与消费方 npc/9270037 一起做。凭证 3100000 的发放已注释（同上缺 wz），wz 补齐后取消注释
 scripts/event/ShowaBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min。凭证 3100000 的发放已注释（同上缺 wz），wz 补齐后取消注释
-scripts/event/Subway.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/Subway.js	script	0	0	partial	采纳发车倒计时（站台上的人看到下一班多久回来）。汽笛 playSound("subway/whistle") 不做：LK 自己的 wz/Sound.wz 里也没有 subway.img，音源是他们客户端里自制的
 scripts/event/TD_Battle1.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/TD_Battle2.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/TD_Battle3.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
@@ -893,7 +893,7 @@ scripts/npc/1032002.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/1032003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1032007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032007.js	script	0	0	rejected	删掉玩家拒绝购买时的告别对话，其余是译文与大括号风格；同 2102002
 scripts/npc/1032008.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/1032009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -914,7 +914,7 @@ scripts/npc/1052015.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/1052016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052100.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/1052101.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
-scripts/npc/1052107.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052107.js	script	0	0	rejected	把点灯的 sendAcceptDecline 确认改成 sendOk 直接触发，少了退出余地
 scripts/npc/1052113.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052114.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052115.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -942,7 +942,7 @@ scripts/npc/1072005.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1072006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1072007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1072008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1081001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1081001.js	script	0	0	rejected	只在 dispose 后加多余的 return（分支是 if/else if 链），其余译文
 scripts/npc/1090000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1091003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1092000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -989,7 +989,7 @@ scripts/npc/1300001.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1300006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1300013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2007.js	script	0	0	rejected	把「跳过新手教程直达 Lith Harbor」的 sendYesNo + warp(104000000) 换成 LK 自家的群公告广告，功能被删
 scripts/npc/2010000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2010001.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/2010002.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
@@ -1000,8 +1000,8 @@ scripts/npc/2010008.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/2010009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2012001.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
-scripts/npc/2012002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2012006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012002.js	script	0	0	rejected	删掉 sendOk("Good choice") 反馈，无收益
+scripts/npc/2012006.js	script	0	0	rejected	new Array(...) 换成字面量数组、显示串里两个字段前后调换，无实质差别
 scripts/npc/2012007.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/2012008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012009.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
@@ -1070,7 +1070,7 @@ scripts/npc/2041007.js	script	0	0	ported	批次7 美容券统一：造型券→5
 scripts/npc/2041009.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/2041010.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/2041013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2041023.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2041023.js	script	0	0	done	修 bug：进入元素塔纳托斯 PQ 原先只判冰雷的钥匙 6316，火毒大魔导士（6225+6226）永远进不去。改成按分支配对；不照抄 LK 把钥匙判定整个删掉的做法
 scripts/npc/2041024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2041025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2041029.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1100,7 +1100,7 @@ scripts/npc/2082001.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字�
 scripts/npc/2082002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2082003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2082004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2082014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2082014.js	script	0	0	rejected	LK 用 YamlConfig，BeiDou 已是 GameConfig 版且多一个兜底 else 分支
 scripts/npc/2083000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2083001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2083002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1132,7 +1132,7 @@ scripts/npc/2101006.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2101007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2101008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2101011.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2101013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2101013.js	script	0	0	rejected	new Array(...) vs 字面量数组 + 大括号风格
 scripts/npc/2101014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2101017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2102001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1194,7 +1194,7 @@ scripts/npc/9000013.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9000017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000019.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000020.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9000021.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9000021.js	script	0	0	rejected	LK 在 status==0 就 sendOk+dispose+return，等于把 BossRushPQ 的入口 NPC 废掉，后面 4 步再也走不到
 scripts/npc/9000036.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9000037.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000038.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1220,7 +1220,7 @@ scripts/npc/9103002.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9103003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9105004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9110002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9120003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120003.js	script	0	0	rejected	LK 把 cm.getMeso() 写成 cm.getMeso（漏括号），金币不足的判定永远不成立，是引入 bug
 scripts/npc/9120010.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9120013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9120015.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
@@ -1305,7 +1305,7 @@ scripts/npc/9201130.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201131.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201132.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201133.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201134.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201134.js	script	0	0	rejected	BeiDou 版更全：多了 eim.giveEventReward 与背包满时的提示，LK 版没有
 scripts/npc/9201135.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9201142.js	script	0	0	ported	批次7：卷轴回收系统，双语两份重写（isRecyclableScroll API 批次5已备）；LK 注释噪音未搬
 scripts/npc/9201143.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1405,7 +1405,7 @@ scripts/portal/dojang_up.js	script	0	0	noise	改动可证明只落在字符串�
 scripts/portal/dragonNest.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/elevator.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/end_cow.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/portal/enterBackStreet.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/enterBackStreet.js	script	0	0	done	修 bug：原 isQuestActive(21744)&&isQuestCompleted(21745) 会在玩家进洞交掉 21744 后失效，而 21746 起止 NPC 就在洞里、21747 要等 21746 完成，中间离开地图就锁死。改成 isQuestCompleted(21745) 永久放行（同 LK）
 scripts/portal/enterDisguise0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/enterDisguise1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/enterDisguise2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1474,7 +1474,7 @@ scripts/portal/rienCaveEnter.js	script	0	0	noise	改动可证明只落在字符�
 scripts/portal/rienTutor1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/rienTutor2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/rienTutor3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/portal/rienTutor4.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/rienTutor4.js	script	0	0	rejected	强制绑定邮箱才放行（pi.getEmail + openNpc verifyEmail）。批次2 已决定账号安全只做登录 IP 记录，BeiDou 无 getEmail 也无 verifyEmail 脚本；LK 版在无邮箱分支还漏了返回值
 scripts/portal/rienTutor7.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/rnj1_out.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/rnj1_pt00.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1601,7 +1601,7 @@ scripts/quest/2232.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/quest/2233.js	script	0	0	rejected	LK 版是 13 行 stub（只判 getReputation()>999 就发 3000 经验）；BeiDou 是完整状态机——带 isQuestActive 守卫、多段对话、发 2400 经验。BeiDou 更完整，经验 2400 vs 3000 属数值口味
 scripts/quest/2234.js	script	0	0	rejected	LK 版是 13 行 stub；BeiDou 是完整状态机，且判定条件与 LK 等价（getTotalReputation()>=2000 且 getReputation()<=500），经验同为 3000
 scripts/quest/2245.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/quest/2251.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/2251.js	script	0	0	rejected	纯大括号风格
 scripts/quest/2257.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2258.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2259.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）

@@ -2305,6 +2305,67 @@ LK 把这 6 个反应堆从「按次扣血」改成「一击削弱区域 BOSS」
 `#t<id>#` 能正常渲染；`qm.sendOk(...)` 紧跟 `qm.dispose()` 是 BeiDou quest 脚本的既有写法
 （如 `quest/20020.js`、`20101.js`），不引入新模式。
 
+##### 差异 5–13 行的一批（16 个，3 采纳 13 拒）
+
+这一档的结构差异**绝大多数是 LK 去掉单语句 `if/else` 的大括号**，以及
+`new Array(...)` 换成字面量数组——判据把空白抹了但抹不掉 `{`，所以计数虚高。
+真有内容的只有 3 个，其中 2 个是 BeiDou 侧的 bug：
+
+**① `portal/enterBackStreet.js` — 任务链会被锁死（采纳 LK 的改法）**
+
+武公线的顺序是：`21744`（影子武士的预告，洞外 NPC 2090004 接）→ `21745`（如果想见到武公，
+道场 NPC 2091005 起止，也在洞外）→ 进洞 → `21746`（武公的考试）→ `21747`（抓住影子武士）。
+原条件 `isQuestActive(21747) || (isQuestActive(21744) && isQuestCompleted(21745))` 的洞在第 4 步：
+
+| 步骤 | 状态 | 能否进洞 |
+|---|---|---|
+| 完成 21745 | 21744 进行中 + 21745 已完成 | ✅ |
+| 进洞后在 2091007 交掉 21744 | `isQuestActive(21744)` 变 false | ❌ |
+| 接 21746（起止 NPC **就是洞里的 2091007**，前置要求 21744 已完成） | 21747 尚未开始 | ❌ |
+| 完成 21746 后接上 21747 | `isQuestActive(21747)` 为 true | ✅ |
+
+也就是说交掉 21744 到接上 21747 这一段门是关的，一旦离开地图或掉线就再也进不去，
+任务链废掉。`portal/outSpecialSchool.js` 是子图回 925040000 的返回口，不是独立入口，没有绕路。
+LK 换成 `isQuestCompleted(21745)` 正好堵上——原条件成立时 21745 必然已完成，是真包含关系。
+
+**② `npc/2041023.js` — 火毒大魔导士进不了元素塔纳托斯 PQ（采纳意图，改法与 LK 不同）**
+
+「调换属性」和「异界钥匙」是按职业成对的，两把钥匙都从怪 `8160000`（地图 220060400，
+在副本**外面**，无循环依赖）以同样 2% 掉落：
+
+| 职业 | 调换属性 | 异界钥匙 | 钥匙道具 | 最终技能 |
+|---|---|---|---|---|
+| 火毒 (212) | `6225` | **`6226`** | `4031473` | `2121005` |
+| 冰雷 (222) | `6315` | **`6316`** | `4031496` | `2221005` |
+
+原条件 `isQuestCompleted(6316) && (isQuestStarted(6225) || isQuestStarted(6315))`
+接受两条线的「调换属性」、却只认冰雷那把钥匙，火毒永远开不了这个 PQ。
+**不照抄 LK**——LK 是把钥匙判定整个删掉，那样冰雷也不用拿钥匙了，等于删掉设计里的前置。
+改成按分支各配各的钥匙：`(6225 进行中 && 6226 已完成) || (6315 进行中 && 6316 已完成)`。
+
+**③ `event/Subway.js` — 发车倒计时（采纳一半）**
+
+LK 在 `takeoff()` 里加了两样：站台广播汽笛 + `timerMapPlayers(rideTime/1000)` 倒计时。
+倒计时采纳（地铁开走后正好一个 `rideTime` 回来，站台上的人因此知道下一班什么时候到）；
+BeiDou 没有 `MapleMap.timerMapPlayers`，等价写法是 `map.broadcastMessage(PacketCreator.getClock(...))`，
+与 `Coconut.java`、`TimerMapCommand` 一致，且 `getClock(Number)` 本就为旅行倍率的小数widened 过。
+**汽笛不做**：`playSound("subway/whistle")` 指向 `Sound.wz/subway.img`，
+BeiDou 的 `Sound.wz` 里没有，**LK 自己的 `wz/Sound.wz` 里也没有**——
+它注释里写着音源取自 soundjay.com，只存在于他们的客户端，本仓库无从移植。
+
+**其余 13 个全部 rejected**，其中 4 个是 LK 侧的退化，值得单独记一笔：
+
+| 脚本 | 拒绝理由 |
+|---|---|
+| `npc/9120003` | LK 把 `cm.getMeso()` 写成 `cm.getMeso`（漏括号），拿函数对象和数字比，金币不足的判定永远不成立——引入 bug |
+| `npc/9000021` | LK 在 `status == 0` 就 `sendOk` + `dispose` + `return`，后面 4 步永远走不到，等于把 BossRushPQ 的入口 NPC 废掉 |
+| `npc/2007` | 把「跳过新手教程直达 Lith Harbor」的 `sendYesNo` + `warp(104000000)` 换成 LK 自家的群公告（技改/投票/验证），功能被删 |
+| `portal/rienTutor4` | 强制绑邮箱才放行。批次 2 已决定账号安全只做登录 IP 记录，BeiDou 既无 `pi.getEmail()` 也无 `verifyEmail` 脚本；LK 版在无邮箱分支还漏了返回值 |
+
+另外 `npc/9201134`、`npc/2082014` 属 BeiDou 侧更全（前者多 `giveEventReward` 与背包满守卫，
+后者已是 GameConfig 版且多一个兜底 `else`）；`1032007`/`2012002`/`1052107` 都是 LK 删掉一步
+玩家反馈；`1081001` 是 `if/else if` 链里多余的 `return`。
+
 ### 批次 8 — 皇家系统（最后决策）
 
 `server/ultils/RoyalAccount`（+69）、`RoyalCommand`（+114）、`royal_accounts` 表、

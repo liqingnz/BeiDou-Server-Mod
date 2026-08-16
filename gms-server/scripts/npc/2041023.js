@@ -51,7 +51,13 @@ function action(mode, type, selection) {
         }
 
         if (status == 0) {
-            if (!(cm.isQuestCompleted(6316) && (cm.isQuestStarted(6225) || cm.isQuestStarted(6315)))) {
+            // "Switching Attributes" and its "Key to a Different World" come in a pair per
+            // branch: F/P runs 6225 + 6226, I/L runs 6315 + 6316. Checking 6316 alone (as it
+            // used to) accepted either branch's Switching Attributes but only the I/L key, so
+            // no F/P Arch Mage could ever open this party quest. Match each key to its branch.
+            var keyed = (cm.isQuestStarted(6225) && cm.isQuestCompleted(6226))
+                || (cm.isQuestStarted(6315) && cm.isQuestCompleted(6316));
+            if (!keyed) {
                 cm.sendOk("You seems to have no reason to meet element-based Thanatos.");
                 cm.dispose();
                 return;

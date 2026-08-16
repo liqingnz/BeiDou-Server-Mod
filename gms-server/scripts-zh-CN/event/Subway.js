@@ -36,6 +36,11 @@ function stopEntry() {
 }
 
 function takeoff() {
+    // 给还留在站台上的人一个倒计时：地铁开走后正好一个 rideTime 就会回来。
+    const PacketCreator = Java.type('org.gms.util.PacketCreator');
+    KC_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    NLC_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+
     em.setProperty("docked", "false");
     KC_Waiting.warpEveryone(Subway_to_NLC.getId());
     NLC_Waiting.warpEveryone(Subway_to_KC.getId());

@@ -51,7 +51,12 @@ function action(mode, type, selection) {
         }
 
         if (status == 0) {
-            if (!(cm.isQuestCompleted(6316) && (cm.isQuestStarted(6225) || cm.isQuestStarted(6315)))) {
+            // 「调换属性」和对应的「异界钥匙」是按职业成对的：火毒走 6225 + 6226，
+            // 冰雷走 6315 + 6316。原先只判 6316，等于接受两条线的调换属性、却只认冰雷那把
+            // 钥匙，火毒大魔导士永远开不了这个组队任务。改成按分支各配各的钥匙。
+            var keyed = (cm.isQuestStarted(6225) && cm.isQuestCompleted(6226))
+                || (cm.isQuestStarted(6315) && cm.isQuestCompleted(6316));
+            if (!keyed) {
                 cm.sendOk("你似乎没有理由去遇见基于元素的萨那托斯。");
                 cm.dispose();
                 return;

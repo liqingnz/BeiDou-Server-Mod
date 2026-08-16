@@ -36,6 +36,12 @@ function stopEntry() {
 }
 
 function takeoff() {
+    // Give whoever is left standing on the platform a clock counting down to the
+    // next train: the subway comes back exactly one rideTime after it pulls out.
+    const PacketCreator = Java.type('org.gms.util.PacketCreator');
+    KC_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    NLC_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+
     em.setProperty("docked", "false");
     KC_Waiting.warpEveryone(Subway_to_NLC.getId());
     NLC_Waiting.warpEveryone(Subway_to_KC.getId());
