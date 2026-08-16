@@ -428,13 +428,27 @@ IDEA 改代码 → git push master
   │ 阶段 3  temurin:21-jre-alpine        │ 只留运行时
   └─────────────────────────────────────┘
                   ↓
-        ghcr.io/<用户名>/<仓库名>:latest
+   ghcr.io/<用户名>/<仓库名>:latest  +  :<短 sha>
                   ↓
         服务器 docker compose pull && up -d
 ```
 
 前端产物被塞进 `src/main/resources/static/` **再**打 jar，所以出来的是单镜像、
 8686 同源提供后台，不需要额外的 nginx 容器（与官方 release 版形态一致）。
+
+**触发条件只有两个**（`build-image.yml` 的 `on:`）：
+
+| 触发 | 说明 |
+|---|---|
+| `push` 到 **master** | 唯一的自动路径。`paths-ignore` 排除了 `docs/**`、`**.md`、`.gitignore`，纯改文档不烧 Actions 额度 |
+| `workflow_dispatch` | 手动，可指定任意分支：`gh workflow run build-image.yml --ref <分支名>` |
+
+**推功能分支什么都不会发生。** 想让改动上线，要么 merge 进 master，要么手动触发。
+
+> 🔴 **手动触发的坑：`latest` 会被功能分支抢走。**
+> 标签规则里 `type=raw,value=latest` 是无条件的，从任何分支构建都会把 `latest`
+> 指向那次构建。如果服务器 `.env` 用的是 `:latest`，等于把没合并的分支
+> 发布成了"最新版"。所以生产的 `.env` 请钉短 sha，见 9.3。
 
 ### 9.2 层顺序是最关键的设计
 
@@ -466,6 +480,16 @@ docker compose -f docker-compose.prod.yml up -d
 `JWT_SECRET`（`openssl rand -hex 10` 生成）。compose 里用了 `${VAR:?}` 语法，
 漏填会直接报错而不是带着默认值跑起来。
 
+**`BEIDOU_IMAGE` 钉短 sha，不要用 `latest`：**
+
+```
+BEIDOU_IMAGE=ghcr.io/<用户名>/<仓库名>:a1b2c3d
+```
+
+CI 每次同时推 `latest` 和短 sha 两个标签，钉 sha 有三个好处：回滚就是改一行
+`.env` 再 `up -d`；`docker compose ps` 一眼能看出线上跑的是哪个提交；
+不会被 9.1 那个"手动触发抢走 `latest`"的坑波及。
+
 ### 9.4 日常升级
 
 ```
@@ -473,20 +497,83 @@ docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-**没有第三步**。本文件刻意不使用官方镜像那套"首次拷贝到卷 + `.initialized` 标记"
-的模式，代码和 wz 全部烤在镜像里，卷只挂日志 —— 因此不存在 6.2 那个
-"换了新镜像但卷里还是旧 jar"的陷阱。
+⚠️ **`docker restart` 不算升级**——它用同一个镜像 ID 重跑容器，不会去拉新镜像。
+`pull` 才是取新镜像那一步。（钉了 sha 的话，改完 `.env` 里的 tag 再 `pull` + `up -d`。）
+
+代码和 wz 全部烤在镜像里，卷只挂日志，因此不存在 6.2 那个"换了新镜像但卷里还是旧 jar"
+的陷阱，**镜像这一侧没有第三步**。
+
+但如果这次升级带了新的**数据库迁移**，还有 9.5 要看。
 
 代价是服务器上不能直接改 `.js` 脚本或 wz。但那些本来就在 git 里，
 正确流程就该是「改 → 提交 → 重新构建」。
 
-### 9.5 不要在小内存服务器上构建
+### 9.5 数据库迁移（Flyway）
+
+镜像升级只换代码，**建表和插配置靠 Flyway**，它在服务端启动时自动跑，没有单独的命令。
+
+`application.yml` 的相关设置：
+
+```yaml
+flyway:
+  validate-on-migrate: false
+  out-of-order: true      # 补跑版本号小于已执行最大版本的漏掉脚本
+  locations: classpath:db/migration,classpath:db/lkport
+```
+
+| 目录 | 归属 | 版本段 |
+|---|---|---|
+| `db/migration/` | 上游 BeiDou-Server | `V1.x` |
+| `db/lkport/` | LichKingMod 移植专用 | `V1000.x` |
+
+分目录只是为了跟上游同步时一眼分清归属，**Flyway 的版本号是全局唯一的**，
+目录隔离不能防版本冲突——所以移植用 `V1000.x` 段位，上游不会碰到。
+
+**新增的游戏配置键、新指令的 `command_info` 行，全部靠这条路生效，不是靠代码。**
+所以「代码合了但指令用不了」这类现象，第一反应应该是查迁移有没有跑。
+
+#### 升级前
+
+如果这次带了迁移（`git diff --name-only <上个部署的 sha>..HEAD -- '*/db/lkport/*' '*/db/migration/*'` 非空），
+**先停服备份数据库**：
+
+```bash
+docker compose -f docker-compose.prod.yml stop beidou-server
+tar czf db-backup-$(date +%F-%H%M).tar.gz docker-db-data/
+```
+
+Flyway 没有自动回滚。迁移写错了只能从这个包恢复。
+
+#### 升级后核对
+
+```bash
+docker compose -f docker-compose.prod.yml logs beidou-server | grep -iE "flyway|migrat|error"
+```
+
+或直接查表：
+
+```sql
+SELECT version, description, success, installed_on
+FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 20;
+```
+
+每条新脚本都应该有一行且 `success = 1`。**出现 `success = 0` 就停下来**——
+Flyway 会把失败的行留在表里，不清掉的话下次启动仍然失败。
+
+#### 写迁移时
+
+- 版本号只增不减，**已经在任何环境跑过的脚本不要再改内容**（`validate-on-migrate: false`
+  会让 checksum 变化不报错，于是改动被静默跳过，比报错更难查）。
+- 插配置用 `INSERT ... SELECT ... WHERE NOT EXISTS`，不要用裸 `INSERT`——
+  同一份库可能已经被手工改过。
+
+### 9.6 不要在小内存服务器上构建
 
 阶段 1 的 `yarn build` 光 Node 就要 1.5-2G 堆，Maven 编译也要 1G+。
 **2G 内存的机器上 `docker compose build` 必然 OOM**。
 构建放 GitHub Actions（免费额度够用）或你本机，服务器只负责 `pull`。
 
-### 9.6 备选：不用镜像仓库
+### 9.7 备选：不用镜像仓库
 
 不想用 ghcr.io 的话，本机构建后直传：
 
@@ -498,7 +585,7 @@ docker save beidou:v1 | gzip | ssh user@服务器 "gunzip | docker load"
 缺点是每次全量（约 900 MB，gzip 后 wz 是 XML 能压到 150-250 MB），
 且没有分层增量的好处。适合服务器无法访问 ghcr.io 的情况。
 
-### 9.7 只想快速验证一次改动
+### 9.8 只想快速验证一次改动
 
 不走镜像也行：本地 `mvn clean package -DskipTests` 出 jar，
 覆盖进 `deploy/beidou-server-release/` 再 `docker compose restart`
@@ -507,6 +594,8 @@ docker save beidou:v1 | gzip | ssh user@服务器 "gunzip | docker load"
 ⚠️ 如果改了 wz 数据，**必须连 wz 一起同步**。只换 jar 会出现
 "服务端行为和数据对不上"的诡异 bug，很难查。这条路只适合临时验证，
 正式部署走 9.1。
+
+⚠️ 这条路同样会跑 Flyway 迁移（迁移脚本打在 jar 里），所以 9.5 的备份与核对照样适用。
 
 ---
 
