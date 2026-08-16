@@ -37,7 +37,10 @@ function action(mode, type, selection) {
             sel = selection;
             if (sel == 0) {
                 if (cm.getPlayer().getGuildRank() == 1) {
-                    cm.sendYesNo("Creating or changing Guild Emblem costs #b 5000000 mesos#k, are you sure you want to continue?");
+                    // Actual charge happens in GuildOperationHandler against change_emblem_cost,
+                    // so the quoted price cannot be a literal -- same fix as 2010007.
+                    const GameConfig = Java.type('org.gms.config.GameConfig');
+                    cm.sendYesNo("Creating or changing Guild Emblem costs #b " + GameConfig.getServerInt("change_emblem_cost") + " mesos#k, are you sure you want to continue?");
                 } else {
                     cm.sendOk("You must be the Guild Leader to change the Emblem. Please tell your leader to speak with me.");
                 }

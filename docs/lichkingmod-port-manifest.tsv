@@ -887,8 +887,8 @@ scripts/npc/1022004.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1022101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1022104.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1022105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1032000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1032001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032000.js	script	0	0	rejected	只把变量名 mesos 改成中文标识符「金币」
+scripts/npc/1032001.js	script	0	0	rejected	LK 用 Packages.server.life.MaplePlayerNPC 老包名，BeiDou 已改用 Java.type 引自己的类，逻辑相同
 scripts/npc/1032002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1032003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -896,7 +896,7 @@ scripts/npc/1032005.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1032007.js	script	0	0	rejected	删掉玩家拒绝购买时的告别对话，其余是译文与大括号风格；同 2102002
 scripts/npc/1032008.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/1032009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1032100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032100.js	script	0	0	rejected	只是提示语里 item 变量的拼接位置不同
 scripts/npc/1032102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032113.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032114.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -910,7 +910,7 @@ scripts/npc/1052007.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1052012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1052015.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052015.js	script	0	0	rejected	奖池：LK 两档都是 BeiDou 的真子集（BeiDou lv2 多 1022073，lv1 多 1302033/1002419/2040207/4031203），取并集等于保持现状
 scripts/npc/1052016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052100.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/1052101.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
@@ -996,9 +996,9 @@ scripts/npc/2010002.js	script	0	0	ported	批次7 美容券统一：整形券→5
 scripts/npc/2010003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2010005.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2010007.js	script	0	0	done	公会创建费用配置化：Java 侧与 scripts-zh-CN 早已走 GameConfig，只有 scripts/ 英文层写死 1500000，本次补上
-scripts/npc/2010008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010008.js	script	0	0	done	家族徽章费用配置化：同 2010007，Java 侧与 scripts-zh-CN 已走 GameConfig change_emblem_cost，只有 scripts/ 英文层写死 5000000
 scripts/npc/2010009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2012000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012000.js	script	0	0	rejected	new Array vs 字面量数组；BeiDou 多一组 mapName2 且提示里给出真实航行分钟数
 scripts/npc/2012001.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2012002.js	script	0	0	rejected	删掉 sendOk("Good choice") 反馈，无收益
 scripts/npc/2012006.js	script	0	0	rejected	new Array(...) 换成字面量数组、显示串里两个字段前后调换，无实质差别
@@ -1016,22 +1016,22 @@ scripts/npc/2012025.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字�
 scripts/npc/2013000.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：新增「预览通关奖励」菜单项，读 em.getProperty("reward")（由对应 PQ 脚本的 setRewardList() 写入）。译文与其余改动不搬
 scripts/npc/2020000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2020002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2020005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2020005.js	script	0	0	rejected	把单次购买上限 100 提到 2000。canHold 只校验一格，先扣钱后发货，上限拉高会放大背包放不下就丢钱的既有风险
 scripts/npc/2020008.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2020009.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2020010.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2020011.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2020013.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
-scripts/npc/2023000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2023000.js	script	0	0	rejected	new Array vs 字面量数组；BeiDou 提示里多给出发地并多一段对话
 scripts/npc/2030000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2030006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2030006_old.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2030008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2030008.js	script	0	0	rejected	新增「已完成 100201 后，30 个 4000082 反复换 2 个火焰之眼」的可重复兑换。BeiDou 现有路径是一次性锻造 5 个，之后走 NPC 2082014 的商店按 6000 万金币购买——不是死路，属经济向调参，需要时再开
 scripts/npc/2030010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2030013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2032001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2032002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2040000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2032002.js	script	0	0	rejected	译文里塞了「自行百度流程 = =」还留着英文原文；其余是把道具名改成 #t4001018# 宏，纯外观
+scripts/npc/2040000.js	script	0	0	rejected	只是把 4031045 提成 ticketId 变量，行为不变
 scripts/npc/2040002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1090,12 +1090,12 @@ scripts/npc/2080000.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/2081000.js	script	0	0	done	采纳去掉死菜单项「为神木村做点什么」（点进去只有 Under development）；不照抄 LK 注释掉代码的做法，连同分支一并删。顺带补了 zh-CN 层漏译的 sendGetNumber
 scripts/npc/2081004.js	script	0	0	ported	gms-server/scripts/npc/2081004.js 与 scripts-zh-CN/npc/2081004.js —— 修了材料校验：原实现把校验写在循环体内，第一种材料够了就直接走 else 收材料发成品，另外两种一件都不用有
 scripts/npc/2081005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2081100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2081200.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2081300.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2081400.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2081500.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2082000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081100.js	script	0	0	rejected	把「教我本职业技能」的 sendSimple 菜单换成 sendOk+dispose，等于删掉四转技能书发放入口；BeiDou 版已按 getSkillLevel==0 防重复领取
+scripts/npc/2081200.js	script	0	0	rejected	同 2081100：删掉四转技能书发放入口
+scripts/npc/2081300.js	script	0	0	rejected	同 2081100：删掉四转技能书发放入口
+scripts/npc/2081400.js	script	0	0	rejected	同 2081100：删掉四转技能书发放入口
+scripts/npc/2081500.js	script	0	0	rejected	同 2081100：删掉四转技能书发放入口
+scripts/npc/2082000.js	script	0	0	rejected	同 2040000 的 ticketId 提取，且 BeiDou 多一句 sendNext
 scripts/npc/2082001.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2082002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2082003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1114,7 +1114,7 @@ scripts/npc/2090102.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2090103.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/2090104.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/2091005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2091009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2091009.js	script	0	0	rejected	同 PupeteerPassword：LK 删掉口令校验
 scripts/npc/2093004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2094000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2094001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1182,7 +1182,7 @@ scripts/npc/2133004.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2140000.js	script	0	0	ported	gms-server/scripts/npc/2140000.js 与 scripts-zh-CN/npc/2140000.js —— 任务重置NPC，用到本批新增的 cm.startQuestPro；改成先重置成功再扣钱，原实现重置失败也照扣一千万
 scripts/npc/2141001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2141002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/22000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/22000.js	script	0	0	rejected	强制绑邮箱才放行（批次2 已定不做）；另把等级门槛 6 改 5，属调参
 scripts/npc/9000000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1198,8 +1198,8 @@ scripts/npc/9000021.js	script	0	0	rejected	LK 在 status==0 就 sendOk+dispose+r
 scripts/npc/9000036.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9000037.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000038.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9000040.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9000041.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9000040.js	script	0	0	rejected	LK 用 YamlConfig + USE_STARTER_MERGE，BeiDou 已是 GameConfig 版且变量更全
+scripts/npc/9000041.js	script	0	0	rejected	LK 用 YamlConfig，BeiDou 已是 GameConfig 版；其余是提示语参数顺序
 scripts/npc/9001105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9010001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9010002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1260,7 +1260,7 @@ scripts/npc/9201025.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201026.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201027.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201039.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201043.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201043.js	script	0	0	rejected	LK 删掉 10 钥匙换门票的 sendYesNo 确认，直接扣道具
 scripts/npc/9201044.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9201045.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9201047.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
@@ -1321,7 +1321,7 @@ scripts/npc/9270018.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9270023.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/9270024.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/9270025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9270026.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9270026.js	script	0	0	rejected	LK 版对女性角色算错：colors[i]/100%100 在 gender=1（21000 基数）会得 10+i，扣错券。BeiDou 版按性别取基数且用 %10，正确
 scripts/npc/9270031.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270033.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270036.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
@@ -1344,8 +1344,8 @@ scripts/npc/9310050.js	script	0	0	already-fixed	两版同为 sendStorage(9310050
 scripts/npc/9900000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9977777.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/MagatiaPassword.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/PupeteerPassword.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/ThiefPassword.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/PupeteerPassword.js	script	0	0	rejected	LK 删掉 sendGetText 口令校验直接放行，BeiDou 版保留了谜题
+scripts/npc/ThiefPassword.js	script	0	0	rejected	同 PupeteerPassword：LK 删掉口令校验
 scripts/npc/commands.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/detectMap.js	script	0	0	ported	gms-server/scripts/npc/detectMap.js 与 scripts-zh-CN/npc/detectMap.js —— 修了两处：getAllPlayers() 是 java.util.List，原实现按数组用 .length/[i]，列表永远为空；选项值用的是含自己在内的原下标，跳过自己后会选中别人
 scripts/npc/detected.js	script	0	0	ported	gms-server/scripts/npc/detected.js 与 scripts-zh-CN/npc/detected.js —— getText() 返回的 java.lang.String 在 GraalVM 下与数字松散比较不做数值转换，改 parseInt 严格比较；去掉「通过检测发1000点券」，那是一条刷点券的路子
@@ -1620,8 +1620,8 @@ scripts/quest/2308.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/quest/2309.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2310.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2314.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/quest/2316.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/quest/2322.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/2316.js	script	0	0	rejected	只多一句 importPackage(Packages.client)，GraalVM 下是死代码
+scripts/quest/2322.js	script	0	0	rejected	LK 把 forceStartQuest 注释掉，改成在 start() 里直接 forceCompleteQuest + gainExp(11000)，而 end() 里还会再发一次；接任务即完成且经验翻倍，是坏掉的改法
 scripts/quest/2325.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2327.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2332.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
