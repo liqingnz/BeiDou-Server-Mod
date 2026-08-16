@@ -62,7 +62,8 @@ function action(mode, type, selection) {
         selectedType = selection;
         if (selectedType == 0) { //mineral refine
             var selStr = "So, what kind of mineral ore would you like to refine?#b";
-            var minerals = ["Bronze", "Steel", "Mithril", "Adamantium", "Silver", "Orihalcon", "Gold"];
+            var minerals = ["#i4011000##t4011000#", "#i4011001##t4011001#", "#i4011002##t4011002#", "#i4011003##t4011003#",
+                           "#i4011004##t4011004#", "#i4011005##t4011005#", "#i4011006##t4011006#"];
             for (var i = 0; i < minerals.length; i++) {
                 selStr += "\r\n#L" + i + "# " + minerals[i] + "#l";
             }
@@ -70,7 +71,9 @@ function action(mode, type, selection) {
             equip = false;
         } else if (selectedType == 1) { //jewel refine
             var selStr = "So, what kind of jewel ore would you like to refine?#b";
-            var jewels = ["Garnet", "Amethyst", "Aquamarine", "Emerald", "Opal", "Sapphire", "Topaz", "Diamond", "Black Crystal"];
+            var jewels = ["#i4021000##t4021000#", "#i4021001##t4021001#", "#i4021002##t4021002#", "#i4021003##t4021003#",
+                           "#i4021004##t4021004#", "#i4021005##t4021005#", "#i4021006##t4021006#", "#i4021007##t4021007#",
+                           "#i4021008##t4021008#"];
             for (var i = 0; i < jewels.length; i++) {
                 selStr += "\r\n#L" + i + "# " + jewels[i] + "#l";
             }
@@ -78,10 +81,12 @@ function action(mode, type, selection) {
             equip = false;
         } else if (selectedType == 2) { //helmet refine
             var selStr = "Ah, you wish to upgrade a helmet? Then tell me, which one?#b";
-            var helmets = ["Blue Metal Gear#k - Common Lv. 15#b", "Yellow Metal Gear#k - Common Lv. 15#b", "Metal Koif#k - Warrior Lv. 10#b", "Mithril Koif#k - Warrior Lv. 10#b", "Steel Helmet#k - Warrior Lv. 12#b", "Mithril Helmet#k - Warrior Lv. 12#b", "Steel Full Helm#k - Warrior Lv. 15#b",
-                "Mithril Full Helm#k - Warrior Lv. 15#b", "Iron Viking Helm#k - Warrior Lv. 20#b", "Mithril Viking Helm#k - Warrior Lv. 20#b", "Steel Football Helmet#k - Warrior Lv. 20#b", "Mithrill Football Helmet#k - Warrior Lv. 20#b", "Mithril Sharp Helm#k - Warrior Lv. 22#b", "Gold Sharp Helm#k - Warrior Lv. 22#b",
-                "Orihalcon Burgernet Helm#k - Warrior Lv. 25#b", "Gold Burgernet Helm#k - Warrior Lv. 25#b", "Great Red Helmet#k - Warrior Lv. 35#b", "Great Blue Helmet#k - Warrior Lv. 35#b", "Mithril Nordic Helm#k - Warrior Lv. 40#b", "Gold Nordic Helm#k - Warrior Lv. 40#b", "Mithril Crusader Helm#k - Warrior Lv. 50#b",
-                "Silver Crusader Helm#k - Warrior Lv. 50#b", "Old Steel Nordic Helm#k - Warrior Lv. 55#b", "Old Mithril Nordic Helm#k - Warrior Lv. 55#b"];
+            var helmets = ["#i1002042##t1002042##k - Common Lv. 15#b", "#i1002041##t1002041##k - Common Lv. 15#b", "#i1002002##t1002002##k - Warrior Lv. 10#b", "#i1002044##t1002044##k - Warrior Lv. 10#b",
+                           "#i1002003##t1002003##k - Warrior Lv. 12#b", "#i1002040##t1002040##k - Warrior Lv. 12#b", "#i1002007##t1002007##k - Warrior Lv. 15#b", "#i1002052##t1002052##k - Warrior Lv. 15#b",
+                           "#i1002011##t1002011##k - Warrior Lv. 20#b", "#i1002058##t1002058##k - Warrior Lv. 20#b", "#i1002009##t1002009##k - Warrior Lv. 20#b", "#i1002056##t1002056##k - Warrior Lv. 20#b",
+                           "#i1002087##t1002087##k - Warrior Lv. 22#b", "#i1002088##t1002088##k - Warrior Lv. 22#b", "#i1002050##t1002050##k - Warrior Lv. 25#b", "#i1002049##t1002049##k - Warrior Lv. 25#b",
+                           "#i1002047##t1002047##k - Warrior Lv. 35#b", "#i1002048##t1002048##k - Warrior Lv. 35#b", "#i1002099##t1002099##k - Warrior Lv. 40#b", "#i1002098##t1002098##k - Warrior Lv. 40#b",
+                           "#i1002085##t1002085##k - Warrior Lv. 50#b", "#i1002028##t1002028##k - Warrior Lv. 50#b", "#i1002022##t1002022##k - Warrior Lv. 55#b", "#i1002101##t1002101##k - Warrior Lv. 55#b"];
             for (var i = 0; i < helmets.length; i++) {
                 selStr += "\r\n#L" + i + "# " + helmets[i] + "#l";
             }
@@ -89,7 +94,7 @@ function action(mode, type, selection) {
             equip = true;
         } else if (selectedType == 3) { //shield refine
             var selStr = "Ah, you wish to upgrade a shield? Then tell me, which one?#b";
-            var shields = ["Adamantium Tower Shield#k - Warrior Lv. 40#b", "Mithril Tower Shield#k - Warrior Lv. 40#b", "Silver Legend Shield#k - Warrior Lv. 60#b", "Adamantium Legend Shield#k - Warrior Lv. 60#b"];
+            var shields = ["#i1092014##t1092014##k - Warrior Lv. 40#b", "#i1092013##t1092013##k - Warrior Lv. 40#b", "#i1092010##t1092010##k - Warrior Lv. 60#b", "#i1092011##t1092011##k - Warrior Lv. 60#b"];
             for (var i = 0; i < shields.length; i++) {
                 selStr += "\r\n#L" + i + "# " + shields[i] + "#l";
             }

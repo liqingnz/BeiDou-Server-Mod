@@ -880,9 +880,9 @@ scripts/npc/10201.js	script	0	0	noise	改动可证明只落在字符串字面量
 scripts/npc/10202.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/10203.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/10204.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1022000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1022000.js	script	0	0	rejected	通篇是 BeiDou 已做过的写法现代化（var→let、==→===、Packages.a.b.C→Java.type）与单行 if 拆两行，另有几处按职业分支的对话文案；无逻辑差异
 scripts/npc/1022001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1022003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1022003.js	script	0	0	done	LK 把菜单从写死道具名改成 #i##z# 宏。BeiDou 的 scripts-zh-CN 早已是宏形式且保留了等级提示（LK 丢了），落后的是英文基础层。改英文层 44 项为 #i##t# + 保留原等级后缀：逐项与 String.wz 核对过，41 项精确匹配，7 项矿石是英文层用简称（Bronze vs Bronze Plate）、1 项是拼写错误（Mithrill Football Helmet），正是用宏要解决的。LK 其余改动不采纳：BeiDou 的 prompt 有单复数处理、matSet 用字面量数组
 scripts/npc/1022004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1022101.js	script	0	0	rejected	LK 把快乐村传送 NPC「Rooney」整个换成枫叶兑换商。Rooney 是快乐村 209000000 唯一入口且放置在 23 张地图（其余碰该图的 NPC 都在里面，是出口），照搬等于圣诞活动区失联。四档兑换货币里 3100000/3100001/3101001 三档数据缺失，奖池另有椅子 3010121/3010135 缺。原文封存在 docs/lkport-parked/。可捞的一块是「枫叶换职业武器」（30 件武器 Character.wz 全有、货币 4001126 也有），但要挂新 NPC 并加 Map.wz 放置，归第 6 项
 scripts/npc/1022104.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -990,7 +990,7 @@ scripts/npc/1300006.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1300013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2007.js	script	0	0	rejected	把「跳过新手教程直达 Lith Harbor」的 sendYesNo + warp(104000000) 换成 LK 自家的群公告广告，功能被删
-scripts/npc/2010000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010000.js	script	0	0	rejected	奖池按 Math.random 均匀取一项，但 LK 四处都更差：eQuestPrizes[3] 把 60% 披风智力卷 2041016 换成 10% 的 2041017；[15] 把 [4020008, 2] 误写成 [4020008.2]（逗号写成句点）；[24] 注释掉 3 项只剩 2 项且用了 BeiDou 完全不存在的 4010008；发放守卫也从四参 canHold(奖品,数量,消耗品,100) + prizeQuantity<=0 退成一参 canHold。并集规则是为「LK 加内容」准备的，这里取并集只会搬进坏条目。其余全是 new Array vs 字面量数组
 scripts/npc/2010001.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/2010002.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/2010003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
