@@ -1197,7 +1197,7 @@ scripts/npc/9000020.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/9000021.js	script	0	0	rejected	LK 在 status==0 就 sendOk+dispose+return，等于把 BossRushPQ 的入口 NPC 废掉，后面 4 步再也走不到
 scripts/npc/9000036.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9000037.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9000038.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9000038.js	script	0	0	done	BossRushPQ 奖励公示牌：不按 LK 的池子改，而是从 event/BossRushPQ.js 的实际奖池同步（lv4 +1、lv5/lv6 各 +24，与上一轮并集一致），并在两边加了互指注释。上一轮只合并了 event 侧，公示牌因此说了谎
 scripts/npc/9000040.js	script	0	0	rejected	LK 用 YamlConfig + USE_STARTER_MERGE，BeiDou 已是 GameConfig 版且变量更全
 scripts/npc/9000041.js	script	0	0	rejected	LK 用 YamlConfig，BeiDou 已是 GameConfig 版；其余是提示语参数顺序
 scripts/npc/9001105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
