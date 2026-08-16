@@ -58,6 +58,12 @@ function takeoff() {
     Ellinia_docked.broadcastShip(false);
     Orbis_docked.broadcastShip(false);
 
+    // Give whoever is left on the dock a clock counting down to the next departure: the
+    // ferry comes back exactly one rideTime after it pulls out. Same treatment as Subway.js.
+    const PacketCreator = Java.type('org.gms.util.PacketCreator');
+    Ellinia_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    Orbis_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+
     em.setProperty("docked", "false");
 
     if (Math.random() < 0.42) {

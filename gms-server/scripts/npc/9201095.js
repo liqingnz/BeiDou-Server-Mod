@@ -67,7 +67,7 @@ function action(mode, type, selection) {
         selectedType = selection;
         if (selectedType == 0) { //weapon forge
             var selStr = "So, what kind of weapon would you like me to forge?#b";
-            var weapon = ["#t2070018#", "#t1382060#", "#t1442068#", "#t1452060#"];
+            var weapon = ["#v2070018##t2070018#", "#v1382060##t1382060#", "#v1442068##t1442068#", "#v1452060##t1452060#"];
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }
@@ -75,7 +75,7 @@ function action(mode, type, selection) {
             cm.sendSimple(selStr);
         } else if (selectedType == 1) { //weapon upgrade
             var selStr = "An upgraded weapon? Of course, but note that upgrades won't carry over to the new item... #b";
-            var weapon = ["#t1472074#", "#t1472073#", "#t1472075#", "#t1332079#", "#t1332078#", "#t1332080#", "#t1462054#", "#t1462053#", "#t1462055#", "#t1402050#", "#t1402049#", "#t1402051#"];
+            var weapon = ["#v1472074##t1472074#", "#v1472073##t1472073#", "#v1472075##t1472075#", "#v1332079##t1332079#", "#v1332078##t1332078#", "#v1332080##t1332080#", "#v1462054##t1462054#", "#v1462053##t1462053#", "#v1462055##t1462055#", "#v1402050##t1402050#", "#v1402049##t1402049#", "#v1402051##t1402051#"];
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }

@@ -71,7 +71,12 @@ function takeoff() {
     // 玩家被传送至船上，广播船只离开的消息
     Orbis_btf.warpEveryone(Boat_to_Ellinia.getId());
     Ellinia_btf.warpEveryone(Boat_to_Orbis.getId());
-    
+
+    // 给还留在码头上的人一个倒计时：船开走后正好一个 rideTime 就会回来。同 Subway.js。
+    const PacketCreator = Java.type('org.gms.util.PacketCreator');
+    Ellinia_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    Orbis_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+
     // 设置码头状态为未停靠
     em.setProperty("docked", "false");
 

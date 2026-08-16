@@ -803,7 +803,7 @@ scripts/event/AreaBossTimer3.js	script	0	0	noise	改动可证明只落在字符�
 scripts/event/AreaBossZeno.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/BalrogBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/BalrogBattle_Easy.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
-scripts/event/Boats.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/Boats.js	script	0	0	partial	魔法密林↔天空之城渡轮。采纳发船倒计时（同 Subway.js：船开走后正好一个 rideTime 回来，码头上的人因此知道下一班什么时候到），BeiDou 无 timerMapPlayers，用 broadcastMessage(getClock) 等价。两层 takeoff() 结构本就不同（中文层被 BeiDou 重构过，broadcastShip(false) 挪到了 stopentry），按各自落点加。否决 MaplePacketCreator/MapleLifeFactory 老类名与 importPackage；另注意 BeiDou 的 Math.trunc 是修 em.schedule 传小数毫秒的问题，LK 没有
 scripts/event/BossRushPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：只做奖池合并——LK 重做了 6 档里的 3 档，按用户决定取并集（第1/2 档各并入 24 项、第3 档 1 项）。阈值调参不采（BeiDou 已有 GameConfig 开关）
 scripts/event/CWKPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：只采通关发组队凭证 3100001。LK 无 setRewardList（这两个 PQ 没有对应的预览 NPC）。不采阈值调参与 dropMessage 注释掉的内容削减。凭证 3100001 的发放已注释（BeiDou 缺 Item.wz/Install/0310.img.xml 与 String.wz/Ins.img.xml 条目），wz 补齐后取消注释
 scripts/event/CafePQ_1.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
@@ -1193,7 +1193,7 @@ scripts/npc/9000012.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9000013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000019.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9000020.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9000020.js	script	0	0	rejected	世界旅行社。LK 加第三条航线（上海 701000000 → 嵩山少林寺 702000000），但 BeiDou 的 scripts-zh-CN 早已是自己 2025 年的重写（Magical-H，「北斗航旅」），5 个目的地含少林寺，数据结构也不同——中文层 ⊃ LK ⊃ 英文层。英文层只有 2 个目的地，属 BeiDou 自身的双层缺口，补齐要整份重写 + 翻译 10 段中文描述，是创作不是移植，另记待办
 scripts/npc/9000021.js	script	0	0	rejected	LK 在 status==0 就 sendOk+dispose+return，等于把 BossRushPQ 的入口 NPC 废掉，后面 4 步再也走不到
 scripts/npc/9000036.js	script	0	0	rejected	LK 把亨内西的饰品制作 NPC「Agent E」整个换成皇家点券兑换台（原逻辑复制到 9000036_accessory.js，但脚本引擎按 npc/<id>.js 找文件，那份永远不会被加载，LK 也无任何 openNpc 引用它）。五个菜单项依赖 cm.gainRoyalPoint/gainRoyalTime、@redeem 指令、以及 3100000/3100001/3101000/3101001 四个两层 Item.wz 都没有的道具。用户 2026-08-17 决定皇家系统整个跳过，故判 rejected；照搬只会白白删掉一个能用的饰品制作 NPC
 scripts/npc/9000037.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1222,7 +1222,7 @@ scripts/npc/9105004.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9110002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9120003.js	script	0	0	rejected	LK 把 cm.getMeso() 写成 cm.getMeso（漏括号），金币不足的判定永远不成立，是引入 bug
 scripts/npc/9120010.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
-scripts/npc/9120013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120013.js	script	0	0	rejected	BeiDou 多一个 startFinalQuestIfNeeded()，处理 8010 已完成但 8012 未开始的情况并自动衔接；LK 只判 isQuestStarted(8012)，覆盖不到那个状态
 scripts/npc/9120015.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9120023.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9120100.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
@@ -1285,7 +1285,7 @@ scripts/npc/9201082.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201083.js	script	0	0	rejected	BeiDou 是新叶城的一句话闲聊 NPC。LK 改成高科技合成台（2070018+4031917+1亿金币→2070016），但他自己在 start() 里无条件 sendOk+dispose，把整个菜单注释掉了，action() 那 40 行永远走不到——LK 那边这功能本身就是关着的
 scripts/npc/9201093.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201094.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201095.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201095.js	script	0	0	partial	武器锻造/升级 NPC。采纳菜单加道具图标：两层原本都是 "#t<id>#" 只有名字，改成 "#v<id>##t<id>#"（同文件的材料提示本就用 #i，兄弟 NPC 9201097 的菜单也用 #v）。16 个 ID 已逐个核对存在且两层名字齐全。其余是译文、大括号、new Array 与 #z/#t 别名
 scripts/npc/9201096.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201097.js	script	0	0	partial	乌鸦令牌兑换商。采纳 LK 的「先看奖励再兑换」预览，但重写：LK 那版三处坏——循环写成 i < listLength-1 漏掉倒数第二项、#z 传的是整个 [id,qty] 数组导致宏失效、发完菜单立刻 dispose 点了没反应。否决 LK 注释掉 eQuestChoices[4..7] 与 eQuestPrizes[4..7]（那不是重复项，是「25 个令牌换 350 万金币」这条路，删了等于砍功能）。奖池不动：LK 往法师档 eQuestPrizes[3] 加的 2044701 爪卷 / 2044501 弓卷跑题，会稀释该档的法师向产出
 scripts/npc/9201099.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1328,7 +1328,7 @@ scripts/npc/9270036.js	script	0	0	ported	批次7 美容券统一：造型券→5
 scripts/npc/9270037.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/9270038.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270041.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9270047.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9270047.js	script	0	0	rejected	Scarga 远征 NPC。①LK 用 exped.getPartInfo() 取要求文案，BeiDou 统一用 em.getProperty("party")（全仓库 8 个 NPC 都是，getPartInfo 零使用）；②MapleExpeditionType/MaplePacketCreator 是 BeiDou 已改的类名；③importPackage 死代码；④若干 dispose 后多余的 return。LK 新增的「必须完成任务 4576（前往梦幻主题公园）才能加入/组建远征队」是新增限制而非修 bug——该任务在 BeiDou 脚本里零引用，没有别处锁这条线，属运营决策，需要时再开
 scripts/npc/9310004.js	script	0	0	rejected	东方神舟撞车：LK 与 BeiDou 各自独立做了蜈蚣入口守卫，同目标图 701010321。BeiDou 更完整——兼顾 4103/8512 两个版本的任务、支持资格证明道具 4031289 进入、带重复进入/是否扣券开关、用地图名宏；LK 只查 isQuestStarted(8512)，还带个零调用的 generateSelectionMenu
 scripts/npc/9310005.js	script	0	0	rejected	东方神舟撞车：黑羊守卫，同目标图 701010322、同退出图 701010320。BeiDou 走任务模式（任务 4109 + 完成后自动 reset）、显示收集进度、可指定落点传送门 h000；LK 只是直接扣 50 个黑羊毛，等价于 BeiDou 的 QuestMode=false 分支
 scripts/npc/9310006.js	script	0	0	rejected	BeiDou 版（@Magical-H 东方神舟框架）更完整：组队/等级/赤珠任务校验俱全；LK 版是单人 startInstance + 60 行死注释
@@ -1607,7 +1607,7 @@ scripts/quest/2258.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/quest/2259.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2260.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2291.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/quest/2293.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/2293.js	script	0	0	rejected	摇滚精神的最后一首歌。实质差异只有 playSound 路径：BeiDou 用 quest2288/6（与它自己那段 TODO 注释自洽——10 段旋律在 quest2288/0~9），LK 改成 quest2293/Die。两边服务端 Sound.wz 都不含这两个 img（音效客户端播，服务端只传路径串），无法从仓库验证；但 .../Die 是 Mob 音效命名法不是任务旋律形式。LK 还把那段解释 riff 随机播放机制的 TODO 整块删了
 scripts/quest/2300.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2301.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2302.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
