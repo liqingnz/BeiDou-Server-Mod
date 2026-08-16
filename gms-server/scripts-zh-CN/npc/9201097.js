@@ -68,6 +68,7 @@ var prizeItem = 0;
 var prizeQuantity = 0;
 var itemSet;
 var qnt;
+var previewing = false;
 
 function start() {
     status = -1;
@@ -91,8 +92,9 @@ function action(mode, type, selection) {
 
         cm.sendNext("嘿，有时间吗？我的工作是收集这些物品然后在其他地方卖掉，但最近怪物变得更凶，所以很难得到好的材料……你觉得呢？想和我做点交易吗？");
     } else if (status == 1) {
-        cm.sendYesNo("交易很简单。你给我我需要的东西，我给你你想要的东西。不过问题是，我要跟很多人打交道，所以每次你来，我能提供的物品可能会不同。你觉得怎么样？还想继续吗？");
+        cm.sendSimple("交易很简单。你给我我需要的东西，我给你你想要的东西。不过问题是，我要跟很多人打交道，所以每次你来，我能提供的物品可能会不同。你觉得怎么样？还想继续吗？\r\n\r\n#b#L0#来吧，开始交易。#l\r\n#L1#先让我看看能换到什么。#l");
     } else if (status == 2) {
+        previewing = (selection == 1);
         var eQuestChoice = makeChoices(eQuestChoices);
         cm.sendSimple(eQuestChoice);
     } else if (status == 3) {
@@ -103,6 +105,12 @@ function action(mode, type, selection) {
             qnt = 50;
         } else {
             qnt = 25;
+        }
+
+        if (previewing) {
+            cm.sendOk(makeRewardList(eQuestPrizes[selection], requiredItem, qnt));
+            cm.dispose();
+            return;
         }
 
         cm.sendYesNo("让我看看，你想用我的东西交换 #b" + qnt + " #t" + requiredItem + "##k，对吗？在交易之前，请确保你的消耗栏或其他物品栏有足够空位。现在，你想交易吗？");
@@ -134,6 +142,25 @@ function makeChoices(a) {
 
     for (var x = 0; x < a.length; x++) {
         result += " #L" + x + "##v" + a[x] + "#  #b#t" + a[x] + "# #kx " + qnty[Math.floor(x / 4)] + "#l\r\n";
+    }
+    return result;
+}
+
+/* 把某一档的奖池渲染成文本，供「先让我看看」用。奖池是均匀随机取一项，
+   所以照实列出来就是全部信息。条目里道具 ID 为 0 表示发金币。 */
+function makeRewardList(pool, tradeItem, tradeQty) {
+    var result = "用 #b" + tradeQty + " 个#t" + tradeItem + "##k可以随机换到下列#b其中一样#k：\r\n\r\n";
+
+    for (var i = 0; i < pool.length; i++) {
+        if (pool[i][0] == 0) {
+            result += "  #i4031138# #b" + pool[i][1] + " 金币#k\r\n";
+        } else {
+            result += "  #i" + pool[i][0] + "# #b#t" + pool[i][0] + "##k";
+            if (pool[i][1] > 1) {
+                result += " x " + pool[i][1];
+            }
+            result += "\r\n";
+        }
     }
     return result;
 }

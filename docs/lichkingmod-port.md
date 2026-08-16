@@ -2505,6 +2505,47 @@ LK 把雷电的精炼菜单从写死道具名改成 `#i##z#` 宏。查下来 **B
 
 LK 其余改动不采纳：BeiDou 的 `prompt` 有单复数处理，`matSet` 用字面量数组。
 
+##### 判定改看真 diff（用户 2026-08-17 要求）
+
+之前汇报只给结论不给材料，看不出脚本在干嘛。改用 `realdiff.ps1`：剥掉两边版权头后
+`git diff --no-index` 出**未归一化的真实 diff**。归一化那套只用来排序，判定一律看原文。
+
+| 脚本 | 是什么 | 判定 |
+|---|---|---|
+| `npc/2091005` | 武陵道场守卫（进道场/领腰带/领勋章/重置点数） | ❌ 零逻辑改动。`importPackage` 是 Nashorn 死代码；`YamlConfig` 对应 BeiDou 已有的 `GameConfig`；`GameConstants.isDojoPartyArea` 对应 BeiDou 重构后的 `MapId.isPartyDojo`；**`getFinishedDojoTutorial()` 对应 BeiDou 已改名的 `isFinishedDojoTutorial()`——照搬会找不到方法**。若干 `dispose()` 后的 `return` 逐个核对位置，都在分支末尾，加不加一样。LK 这份还是半汉化，两处 Dojo 占用提示他自己没翻 |
+| `npc/1052014` | 网吧 PQ 兑换机（投橡皮擦换 6 档奖励） | ❌ 奖池又是 LK ⊂ BeiDou（同 `1052015`）。且 `givePrize()` 两处 BeiDou 更好：**有数量为 0 的守卫**（LK 会调 `gainItem(id, -0)`），**发完奖有中奖提示**（LK 把整句删了，玩家点完兑换屏幕上什么都不显示） |
+
+##### `npc/9201097` — 采纳奖励预览，重写 LK 那份坏掉的实现
+
+乌鸦令牌兑换商（需任务 8225 完成）。先厘清 BeiDou 的结构，它**不是**有重复项：
+
+```js
+var eQuestChoices = [4032007, 4032006, 4032009, 4032008,   // 选项 0-3
+                     4032007, 4032006, 4032009, 4032008];  // 选项 4-7
+// makeChoices 里 qnty[Math.floor(x / 4)] → 0-3 收 50 个，4-7 收 25 个
+eQuestPrizes[0..3] = [...装备/卷轴/椅子...];   // 50 个令牌 → 随机装备
+eQuestPrizes[4..7] = [[0, 3500000]];          // 25 个令牌 → 350 万金币
+```
+
+同 4 种令牌的**两条兑法**。LK 把 `[4..7]` 整段注释掉，等于删掉「换钱」这条路——**否决**。
+
+**采纳**的是 LK 加的「先看奖励再兑换」预览（与 PQ 组已批准的通关奖励预览同一想法），
+但 LK 那版三处坏，全部重写：
+
+| LK 的写法 | 问题 |
+|---|---|
+| `for (var i = 0; i < listLength - 1; i++)`，其中 `listLength = length - 1` | 循环到 `length - 3`，**漏掉倒数第二项奖励** |
+| `"#z" + eQuestPrizes[selection][i] + "#"` | 传的是整个 `[id, qty]` 数组，渲染成 `#z1002801,1#`，**宏失效** |
+| `cm.sendSimple(sendStr); cm.dispose();` | 发完菜单立刻 dispose，**点了没反应** |
+
+重写版在 `status == 1` 加一个二选一入口，`status == 2` 记下 `previewing`，
+`status == 3` 分流到 `makeRewardList()`（正确处理 `itemId == 0` 表示金币的条目）。
+两层状态机验过同构，语法与 CRLF 均通过。
+
+**奖池不动**：LK 往法师档 `eQuestPrizes[3]`（Kage/Thorns/杖卷/棒卷）里加的
+`2044701` 爪卷与 `2044501` 弓卷跑题，会稀释该档的法师向产出——并集规则是为
+「LK 补充同类内容」准备的，不适用于往主题池里塞异类。
+
 > **必须一并移植的前置**：`ItemInformationProvider` 中为支持新发型/脸型扩大的 ID 段判断，
 > 否则点装不显示。**批次 6 盘点时查证过，三条里已有两条不成立**：
 >

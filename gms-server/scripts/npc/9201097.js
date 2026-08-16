@@ -68,6 +68,7 @@ var prizeItem = 0;
 var prizeQuantity = 0;
 var itemSet;
 var qnt;
+var previewing = false;
 
 function start() {
     status = -1;
@@ -91,8 +92,9 @@ function action(mode, type, selection) {
 
         cm.sendNext("Hey, got a little bit of time? Well, my job is to collect items here and sell them elsewhere, but these days the monsters have become much more hostile so it have been difficult to get good items... What do you think? Do you want to do some business with me?");
     } else if (status == 1) {
-        cm.sendYesNo("The deal is simple. You get me something I need, I get you something you need. The problem is, I deal with a whole bunch of people, so the items I have to offer may change every time you see me. What do you think? Still want to do it?");
+        cm.sendSimple("The deal is simple. You get me something I need, I get you something you need. The problem is, I deal with a whole bunch of people, so the items I have to offer may change every time you see me. What do you think? Still want to do it?\r\n\r\n#b#L0#Let's trade.#l\r\n#L1#Show me what I could get first.#l");
     } else if (status == 2) {
+        previewing = (selection == 1);
         var eQuestChoice = makeChoices(eQuestChoices);
         cm.sendSimple(eQuestChoice);
     } else if (status == 3) {
@@ -103,6 +105,12 @@ function action(mode, type, selection) {
             qnt = 50;
         } else {
             qnt = 25;
+        }
+
+        if (previewing) {
+            cm.sendOk(makeRewardList(eQuestPrizes[selection], requiredItem, qnt));
+            cm.dispose();
+            return;
         }
 
         cm.sendYesNo("Let's see, you want to trade your #b" + qnt + " #t" + requiredItem + "##k with my stuff, right? Before trading make sure you have an empty slot available on your use or etc. inventory. Now, do you want to trade with me?");
@@ -134,6 +142,26 @@ function makeChoices(a) {
 
     for (var x = 0; x < a.length; x++) {
         result += " #L" + x + "##v" + a[x] + "#  #b#t" + a[x] + "# #kx " + qnty[Math.floor(x / 4)] + "#l\r\n";
+    }
+    return result;
+}
+
+/* Renders one trade's prize pool for the "show me first" branch. The pool is picked from
+   uniformly at random, so listing it plainly is the whole story. An entry with item id 0
+   means mesos. */
+function makeRewardList(pool, tradeItem, tradeQty) {
+    var result = "Trading #b" + tradeQty + " #t" + tradeItem + "##k gets you #bone#k of these, at random:\r\n\r\n";
+
+    for (var i = 0; i < pool.length; i++) {
+        if (pool[i][0] == 0) {
+            result += "  #i4031138# #b" + pool[i][1] + " mesos#k\r\n";
+        } else {
+            result += "  #i" + pool[i][0] + "# #b#t" + pool[i][0] + "##k";
+            if (pool[i][1] > 1) {
+                result += " x " + pool[i][1];
+            }
+            result += "\r\n";
+        }
     }
     return result;
 }

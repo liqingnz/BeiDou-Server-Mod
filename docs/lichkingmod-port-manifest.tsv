@@ -909,7 +909,7 @@ scripts/npc/1052006.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1052007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1052014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052014.js	script	0	0	rejected	网吧 PQ 兑换机。奖池 LK 是 BeiDou 的真子集（lv2 少 1022073，lv1 少 1302033/1002419/2040207/4031203），取并集即保持现状。givePrize() 两处 BeiDou 更好：有数量为 0 的守卫（LK 会调 gainItem(id, -0)），且发完奖有中奖提示（LK 把整句删了，玩家点完什么都不显示）
 scripts/npc/1052015.js	script	0	0	rejected	奖池：LK 两档都是 BeiDou 的真子集（BeiDou lv2 多 1022073，lv1 多 1302033/1002419/2040207/4031203），取并集等于保持现状
 scripts/npc/1052016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052100.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
@@ -1113,7 +1113,7 @@ scripts/npc/2090101.js	script	0	0	ported	批次7 美容券统一：造型券→5
 scripts/npc/2090102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2090103.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/2090104.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
-scripts/npc/2091005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2091005.js	script	0	0	rejected	武陵道场守卫。零逻辑改动：importPackage 是 Nashorn 死代码、YamlConfig 对 BeiDou 已有的 GameConfig、GameConstants.isDojoPartyArea 对 BeiDou 重构后的 MapId.isPartyDojo、getFinishedDojoTutorial 对 BeiDou 已改名的 isFinishedDojoTutorial（照搬会找不到方法）。若干 dispose 后的 return 逐个核对过都在分支末尾，加不加一样。LK 这份还是半汉化，两处 Dojo 占用提示他自己没翻
 scripts/npc/2091009.js	script	0	0	rejected	同 PupeteerPassword：LK 删掉口令校验
 scripts/npc/2093004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2094000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1287,7 +1287,7 @@ scripts/npc/9201093.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201094.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201095.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9201096.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201097.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201097.js	script	0	0	partial	乌鸦令牌兑换商。采纳 LK 的「先看奖励再兑换」预览，但重写：LK 那版三处坏——循环写成 i < listLength-1 漏掉倒数第二项、#z 传的是整个 [id,qty] 数组导致宏失效、发完菜单立刻 dispose 点了没反应。否决 LK 注释掉 eQuestChoices[4..7] 与 eQuestPrizes[4..7]（那不是重复项，是「25 个令牌换 350 万金币」这条路，删了等于砍功能）。奖池不动：LK 往法师档 eQuestPrizes[3] 加的 2044701 爪卷 / 2044501 弓卷跑题，会稀释该档的法师向产出
 scripts/npc/9201099.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201101.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
