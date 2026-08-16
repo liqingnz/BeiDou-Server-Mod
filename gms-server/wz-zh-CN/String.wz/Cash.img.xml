@@ -2248,4 +2248,36 @@
         <string name="desc" value="Has a 100% chance of raising the Master Level of the #cCritical Magic# skill to 15.\nJob: Evan\nCondition: Skill must be at least level 5\n#cOnly usable once per character"/>
         <string name="name" value="Critical Magic Mastery Book"/>
     </imgdir>
+    <imgdir name="5159000">
+        <string name="name" value="通用美发店高级会员卡"/>
+        <string name="desc" value="在#c所有美发店#可以用一次的高级会员\n卡.可以把发型变换到#c指定#的样子"/>
+    </imgdir>
+    <imgdir name="5159001">
+        <string name="name" value="通用美发店普通会员卡"/>
+        <string name="desc" value="在#c所有美发店#可以用一次的会员\n卡.发型#c随机#."/>
+    </imgdir>
+    <imgdir name="5159002">
+        <string name="name" value="通用整形手术高级会员卡"/>
+        <string name="desc" value="在#c所有整形手术#可以用的高级\n会员卡。可以把脸变换成#c想要\n的样子#。(只限一次)"/>
+    </imgdir>
+    <imgdir name="5159003">
+        <string name="name" value="通用整形手术普通会员卡"/>
+        <string name="desc" value="在#c所有整形手术#可以用\n一次的会员卡。脸型#c随机#。"/>
+    </imgdir>
+    <imgdir name="5159004">
+        <string name="name" value="通用染色高级会员卡"/>
+        <string name="desc" value="在#c所有美发店#可以用的高级\n会员卡。可以把发型变换成#c想要\n的颜色#。(只限一次)"/>
+    </imgdir>
+    <imgdir name="5159005">
+        <string name="name" value="通用染色普通会员卡"/>
+        <string name="desc" value="在#c所有美发店#可以用一\n次的会员卡。颜色#c随机#。"/>
+    </imgdir>
+    <imgdir name="5211900">
+        <string name="name" value="1.5倍经验卡"/>
+        <string name="desc" value="拥有该道具可以获得\n#c1.5倍经验值#。\n获得道具后立即生效。"/>
+    </imgdir>
+    <imgdir name="5360900">
+        <string name="name" value="1.5倍爆率卡"/>
+        <string name="desc" value="拥有该道具可以获得\n#c1.5倍爆率#。\n获得道具后立即生效。"/>
+    </imgdir>
 </imgdir>

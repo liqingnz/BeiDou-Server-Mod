@@ -1990,4 +1990,36 @@
     <string name="name" value="MISSING NAME"/>
     <string name="desc" value="MISSING INFO"/>
   </imgdir>
+  <imgdir name="5159000">
+    <string name="name" value="Universal Hair Coupon (VIP)"/>
+    <string name="desc" value="Use it at #cany Hair Salon# to change your hair to a style of #cyour choice#. (one-time use)"/>
+  </imgdir>
+  <imgdir name="5159001">
+    <string name="name" value="Universal Hair Coupon (REG)"/>
+    <string name="desc" value="Use it at #cany Hair Salon# to change your hairstyle #crandomly#. (one-time use)"/>
+  </imgdir>
+  <imgdir name="5159002">
+    <string name="name" value="Universal Plastic Surgery Coupon (VIP)"/>
+    <string name="desc" value="Use it at #cany Plastic Surgery# to change your face to a look of #cyour choice#. (one-time use)"/>
+  </imgdir>
+  <imgdir name="5159003">
+    <string name="name" value="Universal Plastic Surgery Coupon (REG)"/>
+    <string name="desc" value="Use it at #cany Plastic Surgery# to change your face #crandomly#. (one-time use)"/>
+  </imgdir>
+  <imgdir name="5159004">
+    <string name="name" value="Universal Hair Color Coupon (VIP)"/>
+    <string name="desc" value="Use it at #cany Hair Salon# to change your hair to a color of #cyour choice#. (one-time use)"/>
+  </imgdir>
+  <imgdir name="5159005">
+    <string name="name" value="Universal Hair Color Coupon (REG)"/>
+    <string name="desc" value="Use it at #cany Hair Salon# to change your hair color #crandomly#. (one-time use)"/>
+  </imgdir>
+  <imgdir name="5211900">
+    <string name="name" value="1.5x EXP Card"/>
+    <string name="desc" value="Holding this item grants\n#c1.5x EXP#.\nTakes effect as soon as you obtain it."/>
+  </imgdir>
+  <imgdir name="5360900">
+    <string name="name" value="1.5x Drop Rate Card"/>
+    <string name="desc" value="Holding this item grants\n#c1.5x drop rate#.\nTakes effect as soon as you obtain it."/>
+  </imgdir>
 </imgdir>

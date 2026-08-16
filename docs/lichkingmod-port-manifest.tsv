@@ -1331,16 +1331,16 @@ scripts/npc/9270041.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9270047.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9310004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9310005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9310006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310006.js	script	0	0	rejected	BeiDou 版（@Magical-H 东方神舟框架）更完整：组队/等级/赤珠任务校验俱全；LK 版是单人 startInstance + 60 行死注释
 scripts/npc/9310007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9310013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9310031.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9310032.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9310036.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9310037.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9310039.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310031.js	script	0	0	ported	批次7：上海滩美发店助理小叶子（随机造型/染发，通用普通券 5159001/5159005）；BeiDou 原为空壳。券的 wz 数据本批一并补齐
+scripts/npc/9310032.js	script	0	0	ported	批次7：上海滩美发店老板丢夫人（指定造型/染发，通用高级券 5159000/5159004）；BeiDou 原为空壳
+scripts/npc/9310036.js	script	0	0	ported	批次7：少林寺整形院长芸萍（指定脸型，通用高级券 5159002）；BeiDou 原为空壳。换脸保留玩家瞳色
+scripts/npc/9310037.js	script	0	0	ported	批次7：少林寺整形助理如花（随机脸型，通用普通券 5159003）；BeiDou 原为空壳
+scripts/npc/9310039.js	script	0	0	rejected	BeiDou 版走通用组队副本框架（YaoSengPQ + 任务8534 + 防远程开启）；LK 版改用远征队系统，且 getEventManager 传的 YaosengBattle 与文件名 YaoSengBattle.js 大小写不符，其 startInstance 分支本身是断的。妖僧每周4次配额已在本批接进 YaoSengPQ.js
 scripts/npc/9310044.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9310050.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310050.js	script	0	0	already-fixed	两版同为 sendStorage(9310050) 仓库调用，逐字等价
 scripts/npc/9900000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9977777.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/MagatiaPassword.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1758,7 +1758,7 @@ wz/Etc.wz/ScriptInfo.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件�
 wz/Etc.wz/Swindle.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Etc.wz/Tips.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Etc.wz/VegaSpell.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Item.wz/Cash/0515.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Cash/0515.img.xml	wz	0	0	ported	批次7：补 6 张通用美容券道具数据（05159000-05159005）。LK 该文件 diff 显示 1增1213删纯属其把 XML 压成单行，语义比对后 BeiDou 仅缺这 6 条
 wz/Item.wz/Cash/0521.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Item.wz/Cash/0536.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Item.wz/Consume/0200.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
@@ -1989,7 +1989,7 @@ wz/Skill.wz/512.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件�
 wz/Skill.wz/522.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Skill.wz/MobSkill.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Sound.wz/BgmCN.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/String.wz/Cash.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Cash.img.xml	wz	0	0	partial	批次7：仅取 8 条新道具名（6 张通用美容券 + 1.5倍经验/爆率卡 5211900/5360900），中英双层各补一份。其余改动为纯汉化，按 §8 rejected
 wz/String.wz/Consume.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
 wz/String.wz/EULA.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
 wz/String.wz/Eqp.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
