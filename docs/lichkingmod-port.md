@@ -1086,7 +1086,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G10** ✅ | 等级上限 | `constants/game/GameConstants` | `max_level_cap`、`cygnus_max_level_cap` |
 | **G11** ✅ | 自动喂药重复消耗 | `PetAutoPotHandler`、`PetAutopotProcessor` | — |
 | **G12** ✅ | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
-| **G13** | 雇佣商店存续天数 | `maps/HiredMerchant` | `merchant_expire_time` |
+| **G13** ✅ | 雇佣商店存续天数 | `maps/HiredMerchant`、`world/World`（仅存续判定一处） | `merchant_expire_time` |
 | **G14** | `@analysis` BOSS 伤害占比 | `gm0/BossDmgAnalysisCommand`（批次 1 挪来） | — |
 | **G15** | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`quest/requirements/MinLevelRequirement`、`UseItemHandler` | — |
 | **G16** | `client/Character`（钩子汇聚点，**按组拆散**） | `client/MapleCharacter` 一个文件同时属于 G2/G3/G7/G9/G10/G11 | — |
@@ -2123,6 +2123,68 @@ LK 那版 85 行里 **40 行是注释掉的旧实现**，另有三个问题，�
 
 `PlayerLoggedinHandler` 零改动（判定已下沉）。LK 该文件里的未使用 import
 `gm4.LichDebugCommand`（批次 5 残留）与 GM 登录广播改中文（BeiDou 早已是中文）均为噪声。
+
+#### G13 — 雇佣商店存续天数 ✅ 已完成
+
+`MapleHiredMerchant.java` 的 `git diff -w` 后**只剩 2 处实质改动**（其余全是格式化）；
+`World.java` 里只有 1 处属于本组（同文件的 `exprate_30/70`、`questrate` 变 `float` 是别组的，未动）。
+
+##### 存续时长（功能主体）
+
+计数器在 [`World.runHiredMerchantSchedule`](../gms-server/src/main/java/org/gms/net/server/world/World.java#L1655) 里
+每 10 分钟加 1（[World.java:257](../gms-server/src/main/java/org/gms/net/server/world/World.java#L257) 注册的 `HiredMerchantTask` 周期），
+144 跳 = 1440 分钟 = 24 小时 —— 所以 `merchant_expire_time` 的**单位是天**，原版写死 144 即 1 天。
+
+```java
+int expireDays = GameConfig.getServerInt("merchant_expire_time");
+if (timeOn <= (expireDays > 0 ? expireDays : 1) * 144) {
+```
+
+`> 0` 兜底照例不能省：`getServerInt` 对缺失键返回 `0`，`0 * 144 = 0` 会让商店在**第二个 10 分钟跳**
+就被 `forceClose` —— 数据库没迁移就等于全服商店 10 分钟暴毙。
+
+默认值取 **3 天**（LK 三份配置分别是 3 / 7 / 3，Cosmic 原版 1）。
+
+##### `getTimeOpen()` —— 按 LK 原样搬，另加溢出钳制
+
+```java
+double openTime = ((now - start) / 60000) + ((expireDays > 0 ? expireDays : 1) - 1) * 1440L;
+```
+
+这个字段只在 [PacketCreator.java:5187](../gms-server/src/main/java/org/gms/util/PacketCreator.java#L5187) 给**店主本人**写一次，
+原注释就写着 *"heuristics since engineered method to count time here is unknown"*。
+
+> **移植记录**：我原本建议不搬这条偏移 —— 它等价于 `原值 + (天数-1)*1318`，即一个刚开的店会上报
+> 「已经开了 天数-1 天」。**运营方决定按 LK 原样搬**：客户端这一格只按 1 天的量程渲染，
+> 不整体前移的话，存续期放宽到 3 天在店主界面上根本无法表达，等于 ① 的配置只有一半效果。
+
+不过这条顺带暴露了一个真 bug，一并修掉：返回值以 **`short` 出包**。原来上限 1 天 → 最大约 1318，安全；
+天数可配之后，`(2×天数-1) × 1318 > 32767` 即 **13 天以上就会溢出成负数**。所以钳在 `Short.MAX_VALUE`。
+
+##### 成交流水日志
+
+LK 用 `FilePrinter.print(FilePrinter.MERCHANT_BOUGHT, ...)` 写 `interactions/MerchantLog.txt`。
+BeiDou 的 `FilePrinter` 已基本废弃（只剩几处注释掉的调用），改走 log4j2 + `I18nUtil.getLogMessage`，
+对照写法是现成的 [`Trade.logTrade`](../gms-server/src/main/java/org/gms/server/Trade.java#L587)。
+
+比 LK 多记一个 `price` —— 它是 `Trade.getFee` **扣完手续费后**店主实际入账的钱，查纠纷时比数量有用。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `World.java` | `runHiredMerchantSchedule` 读 `merchant_expire_time` |
+| `HiredMerchant.java` | `getTimeOpen` 偏移 + `short` 溢出钳制；`buy` 加成交流水日志 |
+| `V1000.0.18__insert_game_config_merchant_expire.sql` | 1 个配置键 + zh/en 各 1 条 `lang_resources` |
+| `log_{zh_CN,en_US}.properties` | `HiredMerchant.info.buy.msg1` |
+
+##### 记录但未做
+
+- `HiredMerchant` 里 3 条 Cosmic 遗留的硬编码英文玩家提示（`buy` 的背包满 / 金币不足，
+  `announceItemSold` 的 `[Hired Merchant] Item '...' has been sold...`），违反 CLAUDE.md 第 2 条，
+  但不在 LK 本次 diff 范围内，未混进本组提交。
+- `World.java:33-34` 有一对**重复的 `import org.gms.config.GameConfig`**（仓库既有，非本次引入）。
+  该文件在清单里仍是 `pending`，后续还会动，留到那时一并清。
 
 ### 批次 7 — 数据类
 

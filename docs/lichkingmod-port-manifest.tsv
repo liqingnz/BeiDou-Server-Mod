@@ -598,7 +598,7 @@ src/server/maps/MapleDragon.java	java	0	0	noise	仅格式化/空白改动（git 
 src/server/maps/MapleFoothold.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MapleFootholdTree.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MapleGenericPortal.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/maps/MapleHiredMerchant.java	java	5	2	pending	
+src/server/maps/MapleHiredMerchant.java	java	5	2	ported	批次6-G13：存续天数配置化（getTimeOpen 偏移按 LK 原样 + short 溢出钳制）、成交流水日志改 log4j2+i18n；其余为格式化噪声
 src/server/maps/MapleKite.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MapleMap.java	java	91	40	pending	
 src/server/maps/MapleMapFactory.java	java	3	1	pending	
