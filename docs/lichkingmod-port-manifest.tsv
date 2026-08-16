@@ -1730,10 +1730,10 @@ scripts/npc/verifyEmail.js	script-new	0	0	deferred	随 VerifyEmailCommand 一并
 scripts/portal/mahavira_enter.js	script-new	0	0	deferred	缓，挪至批次7：这个 portal 脚本名只出现在 LK 改过的 wz/Map.wz/Map/Map7/702050000.img.xml 里，BeiDou 同名文件没有任何 portal script 字段，脚本单独搬过来不会被触发。随该 wz 行一并处理
 scripts/portal/treeboss00.js	script-new	0	0	deferred	缓，挪至批次7：克雷塞尔入口，portal 脚本挂在缺失的 Map5/541020700 上，随 KrexelBattle.js 一并处理
 scripts/reactor/5411001.js	script-new	0	0	deferred	缓，挪至批次7：召唤克雷塞尔的反应堆，本体 Reactor.wz/5411001.img.xml 就在附录D 的缺失清单里，且所在地图 541020800 同样缺失。随 KrexelBattle.js 一并处理
-sql/db_LichKingMod.sql	sql	492	0	pending	需转成 Flyway 迁移，不能直接跑
-sql/db_LichKingMod_patch.sql	sql	765	0	pending	需转成 Flyway 迁移，不能直接跑
-sql/db_database.sql	sql	73	73	pending	需转成 Flyway 迁移，不能直接跑
-sql/db_drops.sql	sql	1	1	pending	需转成 Flyway 迁移，不能直接跑
+sql/db_LichKingMod.sql	sql	492	0	ported	批次7 V1000.1.3-.6；fm店9000069/宝藏PQ 6742014 挂起随脚本组，见批次7节
+sql/db_LichKingMod_patch.sql	sql	765	0	ported	批次7 V1000.1.1-.2；GBK ALTER 全套 rejected，4张建表归批次2/4/8，nxcoupons 1.5倍券随 Java float 化
+sql/db_database.sql	sql	73	73	rejected	纯 latin1→gbk 建表噪音（§8 GBK 终局 rejected）
+sql/db_drops.sql	sql	1	1	already-fixed	仅实验室怪 DELETE 上界 9300154→9300153；BeiDou V1.0.51 该 DELETE 整段被注释，掉落本就保留
 wz/Etc.wz/BlockReason.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Etc.wz/CashPackage.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Etc.wz/Category.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖

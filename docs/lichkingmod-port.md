@@ -2066,6 +2066,33 @@ LK 的 `+0.1f` 是靠加宽迟滞带缓解，治标。
 4. 276 个 LK 改过而 BeiDou 已有同名文件的非点装 wz —— 逐个 diff 判断改动是否已被覆盖
 5. wz 改动按 CLAUDE.md 的 wz 补丁工作流同步到 BeiDou-Client
 
+> **批次 7 在独立 worktree（分支 `port/lk-batch7`，基线 2daa01f5d）与批次 6 并行开发。**
+> 迁移编号分段：批次 6 用 `V1000.0.x`，批次 7 用 `V1000.1.x`，避免抢号；
+> 批次 7 收尾（批次 6 合并后）把 lkport 迁移压缩为单文件（用户 2026-08-16 要求，仅 lkport，不动上游 `db/migration/`）。
+
+#### 第 1 项 sql → Flyway ✅ 已完成（V1000.1.1–.6）
+
+4 个 sql 文件的真实构成与「drop_data 与 shopitems 调整」的原始描述出入较大，逐段判定如下：
+
+| 来源 | 处置 | 去向 / 依据 |
+|---|---|---|
+| `db_database.sql`（±73） | ❌ rejected | 纯 latin1→gbk 建表噪音，§8 GBK 终局 rejected |
+| `db_drops.sql`（±1） | ❌ already-fixed | 仅把实验室怪 DELETE 上界 9300154→9300153；BeiDou V1.0.51 里该 DELETE 整段本来就被注释掉 |
+| `db_LichKingMod.sql` 掉落/技能书/PKB/maker 段 | ✅ ported | V1000.1.3（祝福/混沌/点券/药丸）、V1000.1.4（技能书 BOSS 化）、V1000.1.5（中级宝石直接用矿石合成） |
+| `db_LichKingMod_patch.sql` drop fixes/saga/新加坡段 | ✅ ported | V1000.1.2；`distinctive` 列由 V1000.1.1 先建（Java 读取归第 2 项） |
+| reactor 调价 + 药水物价 | ✅ ported | V1000.1.6；APQ 调价限定 6702003–6702012，不波及 BeiDou V1.0.60 婚礼箱 |
+| 4 张建表 | ⏭ 不在本项 | login_history/message_board 批次 2、4 已建；monsterBookReward 死表；royalAccounts 批次 8 |
+| bosslog MODIFY bosstype | ❌ already-fixed | 批次 6 V1000.0.14 用 VARCHAR(32) 做过，方案更优 |
+
+**挂起转后续任务的 4 条**（都有明确归属，不是漏项）：
+
+| 挂起项 | 原因 | 归属 |
+|---|---|---|
+| fm 商店 9000069 整店重建 | BeiDou 基线里 9000069 是 pitch 计价商店，语义完全不同；要配 LK 自由市场 NPC 脚本才有意义 | 第 2 项脚本组 |
+| 宝藏 PQ 反应堆 6742014 三条调价 | BeiDou reactordrops 无此反应堆（V1.0.65 清理过），UPDATE 无目标 | TreasurePQ 脚本决策时连底行一起补 |
+| nxcoupons 1.5 倍经验/掉落券 | LK 把 `Server.couponRates` 改成 `Map<Integer, Float>` 并手工 ALTER rate 为 float；BeiDou 实体与列均为 int，直接插 1.5 会截断 | Java 尾巴（连 NxcouponsDO / Server.java 一起） |
+| 中国怪掉落（9600008–9600026） | BeiDou V1.7.3 东方神舟每只 21–73 行，远比 LK 6–13 行完整，整段 rejected；唯一遗留：LK 清空 9600026（妖僧分身）掉落防刷，BeiDou 保留 60 行 | YaoSeng 脚本组复核分身是否应掉落 |
+
 ### 批次 8 — 皇家系统（最后决策）
 
 `server/ultils/RoyalAccount`（+69）、`RoyalCommand`（+114）、`royal_accounts` 表、
