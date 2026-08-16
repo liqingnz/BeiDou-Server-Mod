@@ -54,7 +54,9 @@ function start() {
 }
 
 function action(mode, type, selection) {
-	levelmain();
+	// temporary disable this script
+	im.dispose();
+	// levelmain();
 }
 
 function level() {
