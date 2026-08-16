@@ -33,7 +33,7 @@ function action(mode, type, selection) {
             status--;
         }
         if (status == 0) {
-            cm.sendSimple("Hahaha... it takes a lot of style and flair for someone to pay attention to his or her hairsyle in a desert. Someone like you...If you have #bAriant hair style coupon(VIP)#k or #bAriant hair color coupon(VIP)#k, I'll give your hair a fresh new look. \r\n#L0#Haircut: #i5150027##t5150027##l\r\n#L1#Dye your hair: #i5151022##t5151022##l");
+            cm.sendSimple("Hahaha... it takes a lot of style and flair for someone to pay attention to his or her hairsyle in a desert. Someone like you...If you have #bAriant hair style coupon(VIP)#k or #bAriant hair color coupon(VIP)#k, I'll give your hair a fresh new look. \r\n#L0#Haircut: #i5159000##t5159000##l\r\n#L1#Dye your hair: #i5159004##t5159004##l");
         } else if (status == 1) {
             if (selection == 0) {
                 beauty = 1;
@@ -64,8 +64,8 @@ function action(mode, type, selection) {
         } else if (status == 2) {
             cm.dispose();
             if (beauty == 1) {
-                if (cm.haveItem(5150027) == true) {
-                    cm.gainItem(5150027, -1);
+                if (cm.haveItem(5159000) == true) {
+                    cm.gainItem(5159000, -1);
                     cm.setHair(hairnew[selection]);
                     cm.sendOk("Enjoy your new and improved hairstyle!");
                 } else {
@@ -73,8 +73,8 @@ function action(mode, type, selection) {
                 }
             }
             if (beauty == 2) {
-                if (cm.haveItem(5151022) == true) {
-                    cm.gainItem(5151022, -1);
+                if (cm.haveItem(5159004) == true) {
+                    cm.gainItem(5159004, -1);
                     cm.setHair(haircolor[selection]);
                     cm.sendOk("Enjoy your new and improved haircolor!");
                 } else {

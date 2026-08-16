@@ -53,7 +53,7 @@ function action(mode, type, selection) {
             status--;
         }
         if (status == 0) {
-            cm.sendSimple("Well, hello! Welcome to the Henesys Plastic Surgery! Would you like to transform your face into something new? With a #b#t5152001##k, you can let us take care of the rest and have the face you've always wanted~!\r\n#L2#Plastic Surgery: #i5152001##t5152001##l");
+            cm.sendSimple("Well, hello! Welcome to the Henesys Plastic Surgery! Would you like to transform your face into something new? With a #b#t5159002##k, you can let us take care of the rest and have the face you've always wanted~!\r\n#L2#Plastic Surgery: #i5159002##t5159002##l");
         } else if (status == 1) {
             if (selection == 2) {
                 facenew = Array();
@@ -67,12 +67,12 @@ function action(mode, type, selection) {
                         pushIfItemExists(facenew, fface_v[i] + cm.getPlayer().getFace() % 1000 - (cm.getPlayer().getFace() % 100));
                     }
                 }
-                cm.sendStyle("Let's see... I can totally transform your face into something new. Don't you want to try it? For #b#t5152001##k, you can get the face of your liking. Take your time in choosing the face of your preference.", facenew);
+                cm.sendStyle("Let's see... I can totally transform your face into something new. Don't you want to try it? For #b#t5159002##k, you can get the face of your liking. Take your time in choosing the face of your preference.", facenew);
             }
         } else if (status == 2) {
             cm.dispose();
-            if (cm.haveItem(5152001) == true) {
-                cm.gainItem(5152001, -1);
+            if (cm.haveItem(5159002) == true) {
+                cm.gainItem(5159002, -1);
                 cm.setFace(facenew[selection]);
                 cm.sendOk("Enjoy your new and improved face!");
             } else {

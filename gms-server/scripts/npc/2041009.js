@@ -55,7 +55,7 @@ function action(mode, type, selection) {
             status--;
         }
         if (status == 0) {
-            cm.sendSimple("Hi, I'm the assistant here. Don't worry, I'm plenty good enough for this. If you have #b#t5150006##k, #b#t5150012##k or #b#t5151006##k by any chance, then allow me to take care of the rest, alright?\r\n#L0#Haircut: #i5150006##t5150006##l\r\n#L1#Haircut: #i5150012##t5150012##l\r\n#L2#Dye your hair: #i5151006##t5151006##l");
+            cm.sendSimple("Hi, I'm the assistant here. Don't worry, I'm plenty good enough for this. If you have #b#t5159001##k or #b#t5159005##k by any chance, then allow me to take care of the rest, alright?\r\n#L0#Haircut (basic styles): #i5159001##t5159001##l\r\n#L1#Haircut (experimental styles): #i5159001##t5159001##l\r\n#L2#Dye your hair: #i5159005##t5159005##l");
         } else if (status == 1) {
             if (selection == 0) {
                 beauty = 3;
@@ -70,7 +70,7 @@ function action(mode, type, selection) {
                         pushIfItemExists(hairnew, fhair_r[i] + parseInt(cm.getPlayer().getHair() % 10));
                     }
                 }
-                cm.sendYesNo("If you use the REG coupon your hair will change RANDOMLY with a chance to obtain a new experimental style that I came up with. Are you going to use #b#t5150012##k and really change your hairstyle?");
+                cm.sendYesNo("If you use the REG coupon your hair will change RANDOMLY with a chance to obtain a new experimental style that I came up with. Are you going to use #b#t5159001##k and really change your hairstyle?");
             } else if (selection == 1) {
                 beauty = 1;
                 hairnew = Array();
@@ -84,7 +84,7 @@ function action(mode, type, selection) {
                         pushIfItemExists(hairnew, fhair_e[i] + parseInt(cm.getPlayer().getHair() % 10));
                     }
                 }
-                cm.sendYesNo("If you use the EXP coupon your hair will change RANDOMLY with a chance to obtain a new experimental style that I came up with. Are you going to use #b#t5150012##k and really change your hairstyle?");
+                cm.sendYesNo("If you use the EXP coupon your hair will change RANDOMLY with a chance to obtain a new experimental style that I came up with. Are you going to use #b#t5159001##k and really change your hairstyle?");
             } else if (selection == 2) {
                 beauty = 2;
                 haircolor = Array();
@@ -92,29 +92,29 @@ function action(mode, type, selection) {
                 for (var i = 0; i < 8; i++) {
                     pushIfItemExists(haircolor, current + i);
                 }
-                cm.sendYesNo("If you use a regular coupon your hair will change RANDOMLY. Do you still want to use #b#t5151006##k and change it up?");
+                cm.sendYesNo("If you use a regular coupon your hair will change RANDOMLY. Do you still want to use #b#t5159005##k and change it up?");
             }
         } else if (status == 2) {
             cm.dispose();
             if (beauty == 1) {
-                if (cm.haveItem(5150012)) {
-                    cm.gainItem(5150012, -1);
+                if (cm.haveItem(5159001)) {
+                    cm.gainItem(5159001, -1);
                     cm.setHair(hairnew[Math.floor(Math.random() * hairnew.length)]);
                     cm.sendOk("Enjoy your new and improved hairstyle!");
                 } else {
                     cm.sendOk("Hmmm...it looks like you don't have our designated coupon...I'm afraid I can't give you a haircut without it. I'm sorry...");
                 }
             } else if (beauty == 2) {
-                if (cm.haveItem(5151006)) {
-                    cm.gainItem(5151006, -1);
+                if (cm.haveItem(5159005)) {
+                    cm.gainItem(5159005, -1);
                     cm.setHair(haircolor[Math.floor(Math.random() * haircolor.length)]);
                     cm.sendOk("Enjoy your new and improved haircolor!");
                 } else {
                     cm.sendOk("Hmmm...it looks like you don't have our designated coupon...I'm afraid I can't dye your hair without it. I'm sorry...");
                 }
             } else if (beauty == 3) {
-                if (cm.haveItem(5150006)) {
-                    cm.gainItem(5150006, -1);
+                if (cm.haveItem(5159001)) {
+                    cm.gainItem(5159001, -1);
                     cm.setHair(haircolor[Math.floor(Math.random() * haircolor.length)]);
                     cm.sendOk("Enjoy your new and improved haircolor!");
                 } else {
@@ -123,11 +123,11 @@ function action(mode, type, selection) {
             } else if (beauty == 0) {
                 if (selection == 0 && cm.getMeso() >= hairprice) {
                     cm.gainMeso(-hairprice);
-                    cm.gainItem(5150012, 1);
+                    cm.gainItem(5159001, 1);
                     cm.sendOk("Enjoy!");
                 } else if (selection == 1 && cm.getMeso() >= haircolorprice) {
                     cm.gainMeso(-haircolorprice);
-                    cm.gainItem(5151006, 1);
+                    cm.gainItem(5159005, 1);
                     cm.sendOk("Enjoy!");
                 } else {
                     cm.sendOk("You don't have enough mesos to buy a coupon!");

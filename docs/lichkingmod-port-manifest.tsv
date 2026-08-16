@@ -866,8 +866,8 @@ scripts/npc/1012006.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1012007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1012103.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1012104.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1012103.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
+scripts/npc/1012104.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/1012105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012112.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012113.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -903,8 +903,8 @@ scripts/npc/1032114.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1052001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1052002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1052004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1052005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052004.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
+scripts/npc/1052005.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/1052006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -912,8 +912,8 @@ scripts/npc/1052013.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1052014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1052015.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1052016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1052100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1052101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052100.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
+scripts/npc/1052101.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/1052107.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1052113.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052114.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -991,8 +991,8 @@ scripts/npc/1300013.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2010000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2010001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2010002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010001.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
+scripts/npc/2010002.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/2010003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2010005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2010007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1002,9 +1002,9 @@ scripts/npc/2012000.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/2012001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2012002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2012006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2012007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012007.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/2012008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2012009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012009.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/2012012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2012014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1036,7 +1036,7 @@ scripts/npc/2040002.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2040003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040016.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2040019.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040019.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/2040020.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040021.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040022.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1066,9 +1066,9 @@ scripts/npc/2040050.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2040052.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2041000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2041001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2041007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2041009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2041010.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2041007.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
+scripts/npc/2041009.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
+scripts/npc/2041010.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/2041013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2041023.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2041024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1108,11 +1108,11 @@ scripts/npc/2083004.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/2083006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2090004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2090005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2090100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2090101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2090100.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
+scripts/npc/2090101.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/2090102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2090103.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2090104.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2090103.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
+scripts/npc/2090104.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/2091005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2091009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2093004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1122,11 +1122,11 @@ scripts/npc/2094002.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2095000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2096000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2100001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2100005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2100006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2100005.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
+scripts/npc/2100006.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/2100007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2100008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2100009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2100008.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
+scripts/npc/2100009.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/2101003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2101006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2101007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1225,10 +1225,10 @@ scripts/npc/9120010.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/9120013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9120015.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9120023.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9120100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9120101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9120102.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9120103.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120100.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
+scripts/npc/9120101.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
+scripts/npc/9120102.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
+scripts/npc/9120103.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/9120200.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9120201.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9120202.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1248,11 +1248,11 @@ scripts/npc/9201008.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201015.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201016.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201015.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
+scripts/npc/9201016.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/9201017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201018.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201019.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201018.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
+scripts/npc/9201019.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/9201022.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201023.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9201024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1272,12 +1272,12 @@ scripts/npc/9201056.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201057.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201061.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201062.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201063.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201064.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201063.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
+scripts/npc/9201064.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/9201065.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201068.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201069.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201070.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201069.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
+scripts/npc/9201070.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/9201071.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201072.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201073.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1318,14 +1318,14 @@ scripts/npc/9220019.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9220020.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9270023.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9270024.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9270023.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
+scripts/npc/9270024.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/9270025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270026.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9270031.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270033.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9270036.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9270037.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9270036.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
+scripts/npc/9270037.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/9270038.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270041.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270047.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文

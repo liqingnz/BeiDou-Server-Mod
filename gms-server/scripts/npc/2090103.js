@@ -60,7 +60,7 @@ function action(mode, type, selection) {
             status--;
         }
         if (status == 0) {
-            cm.sendSimple("Hey, I'm Pata, and I am a renowned plastic surgeon and cosmetic lens expert here in Mu Lung. I believe your face and eyes are the most important features in your body, and with #b#t5152028##k or #b#t5152041##k, I can prescribe the right kind of facial care and cosmetic lenses for you. Now, what would you like to use?\r\n#L1#Plastic Surgery: #i5152028##t5152028##l\r\n#L2#Cosmetic Lenses: #i5152041##t5152041##l\r\n#L3#One-time Cosmetic Lenses: #i5152100# (any color)#l");
+            cm.sendSimple("Hey, I'm Pata, and I am a renowned plastic surgeon and cosmetic lens expert here in Mu Lung. I believe your face and eyes are the most important features in your body, and with #b#t5159002##k or #b#t5152041##k, I can prescribe the right kind of facial care and cosmetic lenses for you. Now, what would you like to use?\r\n#L1#Plastic Surgery: #i5159002##t5159002##l\r\n#L2#Cosmetic Lenses: #i5152041##t5152041##l\r\n#L3#One-time Cosmetic Lenses: #i5152100# (any color)#l");
         } else if (status == 1) {
             if (selection == 1) {
                 beauty = 1;
@@ -79,7 +79,7 @@ function action(mode, type, selection) {
                                 % 100));
                     }
                 }
-                cm.sendStyle("I can totally transform your face into something new... how about giving us a try? For #b#t5152028##k, you can get the face of your liking...take your time in choosing the face of your preference.", facenew);
+                cm.sendStyle("I can totally transform your face into something new... how about giving us a try? For #b#t5159002##k, you can get the face of your liking...take your time in choosing the face of your preference.", facenew);
             } else if (selection == 2) {
                 beauty = 2;
                 if (cm.getPlayer().getGender() == 0) {
@@ -122,8 +122,8 @@ function action(mode, type, selection) {
         } else if (status == 2) {
             cm.dispose();
             if (beauty == 1) {
-                if (cm.haveItem(5152028)) {
-                    cm.gainItem(5152028, -1);
+                if (cm.haveItem(5159002)) {
+                    cm.gainItem(5159002, -1);
                     cm.setFace(facenew[selection]);
                     cm.sendOk("Enjoy your new and improved face!");
                 } else {

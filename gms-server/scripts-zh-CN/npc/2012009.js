@@ -38,7 +38,7 @@ function pushIfItemExists(array, itemid) {
 }
 
 function start() {
-    cm.sendSimple("嗨，我其实不应该这样做，但是有了一个#b#t5152004##k，我还是会为你做。但别忘了，这将是随机的！\r\n#L2#整形手术：#i5152004##t5152004##l");
+    cm.sendSimple("嗨，我其实不应该这样做，但是有了一个#b#t5159003##k，我还是会为你做。但别忘了，这将是随机的！\r\n#L2#整形手术：#i5159003##t5159003##l");
 }
 
 function action(mode, type, selection) {
@@ -58,11 +58,11 @@ function action(mode, type, selection) {
                         pushIfItemExists(facenew, fface_r[i] + cm.getPlayer().getFace() % 1000 - (cm.getPlayer().getFace() % 100));
                     }
                 }
-                cm.sendYesNo("如果你使用普通的优惠券，你的脸可能会变成一个随机的新样子……你还想用#b#t5152004##k来做吗？");
+                cm.sendYesNo("如果你使用普通的优惠券，你的脸可能会变成一个随机的新样子……你还想用#b#t5159003##k来做吗？");
             }
         } else if (status == 2) {
-            if (cm.haveItem(5152004)) {
-                cm.gainItem(5152004, -1);
+            if (cm.haveItem(5159003)) {
+                cm.gainItem(5159003, -1);
                 cm.setFace(facenew[Math.floor(Math.random() * facenew.length)]);
                 cm.sendOk("享受你的新面容吧！");
             } else {

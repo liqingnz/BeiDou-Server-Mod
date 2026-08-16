@@ -44,7 +44,7 @@ function action(mode, type, selection) {
         }
 
         if (status == 0) {
-            cm.sendSimple("Ah, welcome to the Ariant Plastic Surgery! Would you like to transform your face into something new? With a #b#t5152030##k or a #b#t5152047##k, I can make your face so much better!\r\n#L1#Plastic Surgery: #i5152030##t5152030##l\r\n#L2#Cosmetic Lens: #i5152047##t5152047##l\r\n#L3#One-time Cosmetic Lenses: #i5152101# (any color)#l");
+            cm.sendSimple("Ah, welcome to the Ariant Plastic Surgery! Would you like to transform your face into something new? With a #b#t5159002##k or a #b#t5152047##k, I can make your face so much better!\r\n#L1#Plastic Surgery: #i5159002##t5159002##l\r\n#L2#Cosmetic Lens: #i5152047##t5152047##l\r\n#L3#One-time Cosmetic Lenses: #i5152101# (any color)#l");
         } else if (status == 1) {
             if (selection == 1) {
                 beauty = 0;
@@ -109,8 +109,8 @@ function action(mode, type, selection) {
             cm.dispose();
 
             if (beauty == 0) {
-                if (cm.haveItem(5152030) == true) {
-                    cm.gainItem(5152030, -1);
+                if (cm.haveItem(5159002) == true) {
+                    cm.gainItem(5159002, -1);
                     cm.setFace(facenew[selection]);
                     cm.sendOk("Enjoy your new and improved face!");
                 } else {

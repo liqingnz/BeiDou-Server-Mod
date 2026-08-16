@@ -37,7 +37,7 @@ function action(mode, type, selection) {
             status--;
         }
         if (status == 0) {
-            cm.sendSimple("嘿！我是沙提，是马兹拉的学徒。如果你有 #b阿里安特发型券(REG)#k 或 #b阿里安特染发券(REG)#k，你愿意让我给你做头发吗？\r\n#L0#理发：#i5150026##t5150026##l\r\n#L1#染发：#i5151021##t5151021##l");
+            cm.sendSimple("嘿！我是沙提，是马兹拉的学徒。如果你有 #b阿里安特发型券(REG)#k 或 #b阿里安特染发券(REG)#k，你愿意让我给你做头发吗？\r\n#L0#理发：#i5159001##t5159001##l\r\n#L1#染发：#i5159005##t5159005##l");
         } else if (status == 1) {
             if (selection == 0) {
                 beauty = 1;
@@ -63,13 +63,13 @@ function action(mode, type, selection) {
                 for (var i = 0; i < 8; i++) {
                     pushIfItemExists(haircolor, current + i);
                 }
-                cm.sendYesNo("如果您使用普通的优惠券，您的发色将会随机变成一种新的颜色。您确定要使用 #b#t5151021##k 并随机改变您的发色吗？");
+                cm.sendYesNo("如果您使用普通的优惠券，您的发色将会随机变成一种新的颜色。您确定要使用 #b#t5159005##k 并随机改变您的发色吗？");
             }
         } else if (status == 2) {
             cm.dispose();
             if (beauty == 1) {
-                if (cm.haveItem(5150026) == true) {
-                    cm.gainItem(5150026, -1);
+                if (cm.haveItem(5159001) == true) {
+                    cm.gainItem(5159001, -1);
                     cm.setHair(hairnew[Math.floor(Math.random() * hairnew.length)]);
                     cm.sendOk("享受你的新发型吧！");
                 } else {
@@ -77,8 +77,8 @@ function action(mode, type, selection) {
                 }
             }
             if (beauty == 2) {
-                if (cm.haveItem(5151021) == true) {
-                    cm.gainItem(5151021, -1);
+                if (cm.haveItem(5159005) == true) {
+                    cm.gainItem(5159005, -1);
                     cm.setHair(haircolor[Math.floor(Math.random() * haircolor.length)]);
                     cm.sendOk("享受你的新发色吧！");
                 } else {

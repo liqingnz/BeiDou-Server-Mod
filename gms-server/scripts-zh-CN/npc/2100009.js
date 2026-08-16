@@ -48,7 +48,7 @@ function action(mode, type, selection) {
         }
 
         if (status == 0) {
-            cm.sendSimple("嗨，我是这里的整容助理医生。用一个#b#t5152029##k或者一个#b#t5152048##k，我可以让它变得完美，相信我。啊，别忘了，手术后的结果是随机的！那么，你要做哪个呢？\r\n#L1#整形手术：#i5152029##t5152029##l\r\n#L2#美瞳：#i5152048##t5152048##l");
+            cm.sendSimple("嗨，我是这里的整容助理医生。用一个#b#t5159003##k或者一个#b#t5152048##k，我可以让它变得完美，相信我。啊，别忘了，手术后的结果是随机的！那么，你要做哪个呢？\r\n#L1#整形手术：#i5159003##t5159003##l\r\n#L2#美瞳：#i5152048##t5152048##l");
         } else if (status == 1) {
             if (selection == 1) {
                 beauty = 0;
@@ -68,7 +68,7 @@ function action(mode, type, selection) {
                                 % 100));
                     }
                 }
-                cm.sendYesNo("如果你使用普通的优惠券，你的脸可能会变成一个随机的新样子...你还想用#b#t5152029##k来做吗？");
+                cm.sendYesNo("如果你使用普通的优惠券，你的脸可能会变成一个随机的新样子...你还想用#b#t5159003##k来做吗？");
             } else if (selection == 2) {
                 beauty = 1;
                 if (cm.getPlayer().getGender() == 0) {
@@ -87,8 +87,8 @@ function action(mode, type, selection) {
             cm.dispose();
 
             if (beauty == 0) {
-                if (cm.haveItem(5152029) == true) {
-                    cm.gainItem(5152029, -1);
+                if (cm.haveItem(5159003) == true) {
+                    cm.gainItem(5159003, -1);
                     cm.setFace(facenew[Math.floor(Math.random() * facenew.length)]);
                     cm.sendOk("享受你的新面容吧！");
                 } else {

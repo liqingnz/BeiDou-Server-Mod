@@ -44,7 +44,7 @@ function action(mode, type, selection) {
         }
 
         if (status == 0) {
-            cm.sendSimple("啊，欢迎来到阿里安特整形中心！您想将您的脸变成全新的样子吗？通过使用#b#t5152030##k或者#b#t5152047##k，我可以让您的脸变得更好看！\r\n#L1#整形手术：#i5152030##t5152030##l\r\n#L2#美瞳：#i5152047##t5152047##l\r\n#L3#一次性美瞳：#i5152101#（任何颜色）#l");
+            cm.sendSimple("啊，欢迎来到阿里安特整形中心！您想将您的脸变成全新的样子吗？通过使用#b#t5159002##k或者#b#t5152047##k，我可以让您的脸变得更好看！\r\n#L1#整形手术：#i5159002##t5159002##l\r\n#L2#美瞳：#i5152047##t5152047##l\r\n#L3#一次性美瞳：#i5152101#（任何颜色）#l");
         } else if (status == 1) {
             if (selection == 1) {
                 beauty = 0;
@@ -109,8 +109,8 @@ function action(mode, type, selection) {
             cm.dispose();
 
             if (beauty == 0) {
-                if (cm.haveItem(5152030) == true) {
-                    cm.gainItem(5152030, -1);
+                if (cm.haveItem(5159002) == true) {
+                    cm.gainItem(5159002, -1);
                     cm.setFace(facenew[selection]);
                     cm.sendOk("享受你的新面容吧！");
                 } else {

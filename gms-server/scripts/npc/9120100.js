@@ -53,7 +53,7 @@ function action(mode, type, selection) {
             status--;
         }
         if (status == 0) {
-            cm.sendSimple("Welcome to the Showa hair shop. If you have a #b#t5150009##k, or a #b#t5151009##k, allow me to take care of your hairdo. Please choose the one you want.\r\n#L1#Haircut: #i5150009##t5150009##l\r\n#L2#Dye your hair: #i5151009##t5151009##l");
+            cm.sendSimple("Welcome to the Showa hair shop. If you have a #b#t5159000##k, or a #b#t5159004##k, allow me to take care of your hairdo. Please choose the one you want.\r\n#L1#Haircut: #i5159000##t5159000##l\r\n#L2#Dye your hair: #i5159004##t5159004##l");
         } else if (status == 1) {
             if (selection == 1) {
                 beauty = 1;
@@ -68,7 +68,7 @@ function action(mode, type, selection) {
                         pushIfItemExists(hairnew, fhair_v[i] + parseInt(cm.getPlayer().getHair() % 10));
                     }
                 }
-                cm.sendStyle("I can totally change up your hairstyle and make it look so good. Why don't you change it up a bit? With #b#t5150009##k, I'll take care of the rest for you. Choose the style of your liking!", hairnew);
+                cm.sendStyle("I can totally change up your hairstyle and make it look so good. Why don't you change it up a bit? With #b#t5159000##k, I'll take care of the rest for you. Choose the style of your liking!", hairnew);
             } else if (selection == 2) {
                 beauty = 2;
                 haircolor = Array();
@@ -76,13 +76,13 @@ function action(mode, type, selection) {
                 for (var i = 0; i < 8; i++) {
                     pushIfItemExists(haircolor, current + i);
                 }
-                cm.sendStyle("I can totally change your haircolor and make it look so good. Why don't you change it up a bit? With #b#t5151009##k, I'll take care of the rest. Choose the color of your liking!", haircolor);
+                cm.sendStyle("I can totally change your haircolor and make it look so good. Why don't you change it up a bit? With #b#t5159004##k, I'll take care of the rest. Choose the color of your liking!", haircolor);
             }
         } else if (status == 2) {
             cm.dispose();
             if (beauty == 1) {
-                if (cm.haveItem(5150009)) {
-                    cm.gainItem(5150009, -1);
+                if (cm.haveItem(5159000)) {
+                    cm.gainItem(5159000, -1);
                     cm.setHair(hairnew[selection]);
                     cm.sendOk("Enjoy your new and improved hairstyle!");
                 } else {
@@ -90,8 +90,8 @@ function action(mode, type, selection) {
                 }
             }
             if (beauty == 2) {
-                if (cm.haveItem(5151009)) {
-                    cm.gainItem(5151009, -1);
+                if (cm.haveItem(5159004)) {
+                    cm.gainItem(5159004, -1);
                     cm.setHair(haircolor[selection]);
                     cm.sendOk("Enjoy your new and improved haircolor!");
                 } else {
@@ -101,11 +101,11 @@ function action(mode, type, selection) {
             if (beauty == 0) {
                 if (selection == 0 && cm.getMeso() >= hairprice) {
                     cm.gainMeso(-hairprice);
-                    cm.gainItem(5150009, 1);
+                    cm.gainItem(5159000, 1);
                     cm.sendOk("Enjoy!");
                 } else if (selection == 1 && cm.getMeso() >= haircolorprice) {
                     cm.gainMeso(-haircolorprice);
-                    cm.gainItem(5151009, 1);
+                    cm.gainItem(5159004, 1);
                     cm.sendOk("Enjoy!");
                 } else {
                     cm.sendOk("You don't have enough mesos to buy a coupon!");

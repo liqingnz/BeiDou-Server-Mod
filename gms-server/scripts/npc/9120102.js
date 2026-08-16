@@ -65,7 +65,7 @@ function action(mode, type, selection) {
             status--;
         }
         if (status == 0) {
-            cm.sendSimple("Well well well, welcome to the Showa Plastic Surgery! Would you like to transform your face into something new? With a #b#t5152009##k or a #b#t5152045##k, you can let us take care of the rest and have the face you've always wanted~!\r\n#L1#Plastic Surgery: #i5152009##t5152009##l\r\n#L2#Cosmetic Lens: #i5152045##t5152045##l\r\n#L3#One-time Cosmetic Lenses: #i5152102# (any color)#l");
+            cm.sendSimple("Well well well, welcome to the Showa Plastic Surgery! Would you like to transform your face into something new? With a #b#t5159002##k or a #b#t5152045##k, you can let us take care of the rest and have the face you've always wanted~!\r\n#L1#Plastic Surgery: #i5159002##t5159002##l\r\n#L2#Cosmetic Lens: #i5152045##t5152045##l\r\n#L3#One-time Cosmetic Lenses: #i5152102# (any color)#l");
         } else if (status == 1) {
             if (selection == 1) {
                 beauty = 0;
@@ -84,7 +84,7 @@ function action(mode, type, selection) {
                                 % 100));
                     }
                 }
-                cm.sendStyle("I can totally transform your face into something new... how about giving us a try? For #b#t5152009##k, you can get the face of your liking...take your time in choosing the face of your preference.", facenew);
+                cm.sendStyle("I can totally transform your face into something new... how about giving us a try? For #b#t5159002##k, you can get the face of your liking...take your time in choosing the face of your preference.", facenew);
             } else if (selection == 2) {
                 beauty = 1;
                 if (cm.getPlayer().getGender() == 0) {
@@ -128,8 +128,8 @@ function action(mode, type, selection) {
             cm.dispose();
 
             if (beauty == 0) {
-                if (cm.haveItem(5152009) == true) {
-                    cm.gainItem(5152009, -1);
+                if (cm.haveItem(5159002) == true) {
+                    cm.gainItem(5159002, -1);
                     cm.setFace(facenew[selection]);
                     cm.sendOk("Enjoy your new and improved face!");
                 } else {

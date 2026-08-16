@@ -51,7 +51,7 @@ function pushIfItemsExists(array, itemidList) {
 }
 
 function start() {
-    cm.sendSimple("Hi, I pretty much shouldn't be doing this, but with a #b#t5152008##k or a #b#t5152046##k, I will do it anyways for you. But don't forget, it will be random!\r\n#L1#Plastic Surgery: #i5152008##t5152008##l\r\n#L2#Cosmetic Lens: #i5152046##t5152046##l");
+    cm.sendSimple("Hi, I pretty much shouldn't be doing this, but with a #b#t5159003##k or a #b#t5152046##k, I will do it anyways for you. But don't forget, it will be random!\r\n#L1#Plastic Surgery: #i5159003##t5159003##l\r\n#L2#Cosmetic Lens: #i5152046##t5152046##l");
 }
 
 function action(mode, type, selection) {
@@ -72,7 +72,7 @@ function action(mode, type, selection) {
                         pushIfItemExists(facenew, fface_r[i] + cm.getPlayer().getFace() % 1000 - (cm.getPlayer().getFace() % 100));
                     }
                 }
-                cm.sendYesNo("If you use the regular coupon, your face may transform into a random new look...do you still want to do it using #b#t5152008##k?");
+                cm.sendYesNo("If you use the regular coupon, your face may transform into a random new look...do you still want to do it using #b#t5159003##k?");
             } else if (selection == 2) {
                 beauty = 1;
                 if (cm.getPlayer().getGender() == 0) {
@@ -89,8 +89,8 @@ function action(mode, type, selection) {
             }
         } else if (status == 2) {
             if (beauty == 0) {
-                if (cm.haveItem(5152008)) {
-                    cm.gainItem(5152008, -1);
+                if (cm.haveItem(5159003)) {
+                    cm.gainItem(5159003, -1);
                     cm.setFace(facenew[Math.floor(Math.random() * facenew.length)]);
                     cm.sendOk("Enjoy your new and improved face!");
                 } else {

@@ -33,7 +33,7 @@ function action(mode, type, selection) {
             status--;
         }
         if (status == 0) {
-            cm.sendSimple("哈哈哈……在沙漠里还愿意打理发型的人，确实需要不少风格和魅力。像你这样的人……如果你有#b阿里安特美发券（VIP）#k或#b阿里安特染发券（VIP）#k，我可以让你的头发焕然一新。\r\n#L0#理发：#i5150027##t5150027##l\r\n#L1#染发：#i5151022##t5151022##l");
+            cm.sendSimple("哈哈哈……在沙漠里还愿意打理发型的人，确实需要不少风格和魅力。像你这样的人……如果你有#b阿里安特美发券（VIP）#k或#b阿里安特染发券（VIP）#k，我可以让你的头发焕然一新。\r\n#L0#理发：#i5159000##t5159000##l\r\n#L1#染发：#i5159004##t5159004##l");
         } else if (status == 1) {
             if (selection == 0) {
                 beauty = 1;
@@ -64,8 +64,8 @@ function action(mode, type, selection) {
         } else if (status == 2) {
             cm.dispose();
             if (beauty == 1) {
-                if (cm.haveItem(5150027) == true) {
-                    cm.gainItem(5150027, -1);
+                if (cm.haveItem(5159000) == true) {
+                    cm.gainItem(5159000, -1);
                     cm.setHair(hairnew[selection]);
                     cm.sendOk("好好享受你焕然一新的发型吧！");
                 } else {
@@ -73,8 +73,8 @@ function action(mode, type, selection) {
                 }
             }
             if (beauty == 2) {
-                if (cm.haveItem(5151022) == true) {
-                    cm.gainItem(5151022, -1);
+                if (cm.haveItem(5159004) == true) {
+                    cm.gainItem(5159004, -1);
                     cm.setHair(haircolor[selection]);
                     cm.sendOk("好好享受你焕然一新的发色吧！");
                 } else {

@@ -52,7 +52,7 @@ function action(mode, type, selection) {
             status--;
         }
         if (status == 0) {
-            cm.sendSimple("嗨，你好！欢迎来到阿莫利亚整形外科！你想把你的脸变成全新的样子吗？使用#b#t5152022##k，你可以让我们来照顾剩下的事情，拥有你一直想要的脸~！\r\n#L2#整形外科：#i5152022##t5152022##l");
+            cm.sendSimple("嗨，你好！欢迎来到阿莫利亚整形外科！你想把你的脸变成全新的样子吗？使用#b#t5159002##k，你可以让我们来照顾剩下的事情，拥有你一直想要的脸~！\r\n#L2#整形外科：#i5159002##t5159002##l");
         } else if (status == 1) {
             if (selection == 2) {
                 facenew = Array();
@@ -66,11 +66,11 @@ function action(mode, type, selection) {
                         pushIfItemExists(facenew, fface_v[i] + cm.getPlayer().getFace() % 1000 - (cm.getPlayer().getFace() % 100));
                     }
                 }
-                cm.sendStyle("让我看看……我可以帮你换成全新的面容。使用#b#t5152022##k，就能选择你喜欢的脸型。慢慢挑，选一个最适合你的吧。", facenew);
+                cm.sendStyle("让我看看……我可以帮你换成全新的面容。使用#b#t5159002##k，就能选择你喜欢的脸型。慢慢挑，选一个最适合你的吧。", facenew);
             }
         } else if (status == 2) {
-            if (cm.haveItem(5152022) == true) {
-                cm.gainItem(5152022, -1);
+            if (cm.haveItem(5159002) == true) {
+                cm.gainItem(5159002, -1);
                 cm.setFace(facenew[selection]);
                 cm.sendOk("享受你的新面容吧！");
             } else {

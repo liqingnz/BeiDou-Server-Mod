@@ -49,7 +49,7 @@ function action(mode, type, selection) {
     } else {
         status++;
         if (status == 0) {
-            cm.sendSimple("我是这家美发沙龙的负责人。如果你有#b#t5150001##k或者#b#t5151001##k，请让我来为你打理发型。请选择你想要的那个。\r\n#L1#理发：#i5150001##t5150001##l\r\n#L2#染发：#i5151001##t5151001##l");
+            cm.sendSimple("我是这家美发沙龙的负责人。如果你有#b#t5159000##k或者#b#t5159004##k，请让我来为你打理发型。请选择你想要的那个。\r\n#L1#理发：#i5159000##t5159000##l\r\n#L2#染发：#i5159004##t5159004##l");
         } else if (status == 1) {
             if (selection == 1) {
                 beauty = 1;
@@ -64,7 +64,7 @@ function action(mode, type, selection) {
                         pushIfItemExists(hairnew, fhair_v[i] + parseInt(cm.getPlayer().getHair() % 10));
                     }
                 }
-                cm.sendStyle("我完全可以改变你的发型，让它看起来好极了。你为什么不改一下呢？如果你有 #b#t5150001##k 就可以。选一个自己喜欢的吧~。", hairnew);
+                cm.sendStyle("我完全可以改变你的发型，让它看起来好极了。你为什么不改一下呢？如果你有 #b#t5159000##k 就可以。选一个自己喜欢的吧~。", hairnew);
             } else if (selection == 2) {
                 beauty = 2;
                 haircolor = Array();
@@ -80,8 +80,8 @@ function action(mode, type, selection) {
                 if (cm.haveItem(5420002)) {  // thanks MedicOP for noticing uncoded functionality for Hair Membership coupons
                     cm.setHair(hairnew[selection]);
                     cm.sendOk("享受你的新发型吧！");
-                } else if (cm.haveItem(5150001)) {
-                    cm.gainItem(5150001, -1);
+                } else if (cm.haveItem(5159000)) {
+                    cm.gainItem(5159000, -1);
                     cm.setHair(hairnew[selection]);
                     cm.sendOk("享受你的新发型吧！");
                 } else {
@@ -89,8 +89,8 @@ function action(mode, type, selection) {
                 }
             }
             if (beauty == 2) {
-                if (cm.haveItem(5151001)) {
-                    cm.gainItem(5151001, -1);
+                if (cm.haveItem(5159004)) {
+                    cm.gainItem(5159004, -1);
                     cm.setHair(haircolor[selection]);
                     cm.sendOk("享受你的新发色！");
                 } else {
@@ -100,11 +100,11 @@ function action(mode, type, selection) {
             if (beauty == 0) {
                 if (selection == 0 && cm.getMeso() >= hairprice) {
                     cm.gainMeso(-hairprice);
-                    cm.gainItem(5150001, 1);
+                    cm.gainItem(5159000, 1);
                     cm.sendOk("享受！");
                 } else if (selection == 1 && cm.getMeso() >= haircolorprice) {
                     cm.gainMeso(-haircolorprice);
-                    cm.gainItem(5151001, 1);
+                    cm.gainItem(5159004, 1);
                     cm.sendOk("享受！");
                 } else {
                     cm.sendOk("你没有足够的金币来购买优惠券！");

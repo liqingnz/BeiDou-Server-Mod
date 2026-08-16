@@ -38,7 +38,7 @@ function pushIfItemExists(array, itemid) {
 }
 
 function start() {
-    cm.sendSimple("Hi, I pretty much shouldn't be doing this, but with a #b#t5152004##k, I will do it anyways for you. But don't forget, it will be random!\r\n#L2#Plastic Surgery: #i5152004##t5152004##l");
+    cm.sendSimple("Hi, I pretty much shouldn't be doing this, but with a #b#t5159003##k, I will do it anyways for you. But don't forget, it will be random!\r\n#L2#Plastic Surgery: #i5159003##t5159003##l");
 }
 
 function action(mode, type, selection) {
@@ -58,11 +58,11 @@ function action(mode, type, selection) {
                         pushIfItemExists(facenew, fface_r[i] + cm.getPlayer().getFace() % 1000 - (cm.getPlayer().getFace() % 100));
                     }
                 }
-                cm.sendYesNo("If you use the regular coupon, your face may transform into a random new look...do you still want to do it using #b#t5152004##k?");
+                cm.sendYesNo("If you use the regular coupon, your face may transform into a random new look...do you still want to do it using #b#t5159003##k?");
             }
         } else if (status == 2) {
-            if (cm.haveItem(5152004)) {
-                cm.gainItem(5152004, -1);
+            if (cm.haveItem(5159003)) {
+                cm.gainItem(5159003, -1);
                 cm.setFace(facenew[Math.floor(Math.random() * facenew.length)]);
                 cm.sendOk("Enjoy your new and improved face!");
             } else {

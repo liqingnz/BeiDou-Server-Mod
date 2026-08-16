@@ -60,7 +60,7 @@ function action(mode, type, selection) {
             status--;
         }
         if (status == 0) {
-            cm.sendSimple("嘿，我是帕塔，我是一位在勇士部落著名的整形外科医生和美瞳专家。我相信你的脸和眼睛是你身体中最重要的特征，通过使用#b#t5152028##k或者#b#t5152041##k，我可以为你开具适合的面部护理和美瞳。现在，你想要使用什么？\r\n#L1#整形手术：#i5152028##t5152028##l\r\n#L2#美瞳：#i5152041##t5152041##l\r\n#L3#一次性美瞳：#i5152100#（任何颜色）#l");
+            cm.sendSimple("嘿，我是帕塔，我是一位在勇士部落著名的整形外科医生和美瞳专家。我相信你的脸和眼睛是你身体中最重要的特征，通过使用#b#t5159002##k或者#b#t5152041##k，我可以为你开具适合的面部护理和美瞳。现在，你想要使用什么？\r\n#L1#整形手术：#i5159002##t5159002##l\r\n#L2#美瞳：#i5152041##t5152041##l\r\n#L3#一次性美瞳：#i5152100#（任何颜色）#l");
         } else if (status == 1) {
             if (selection == 1) {
                 beauty = 1;
@@ -79,7 +79,7 @@ function action(mode, type, selection) {
                                 % 100));
                     }
                 }
-                cm.sendStyle("我完全可以把你的脸改造成新的东西...我们试试看怎么样？只需 #b#t5152028##k，你可以得到你喜欢的脸......花点时间选择你喜欢的脸。", facenew);
+                cm.sendStyle("我完全可以把你的脸改造成新的东西...我们试试看怎么样？只需 #b#t5159002##k，你可以得到你喜欢的脸......花点时间选择你喜欢的脸。", facenew);
             } else if (selection == 2) {
                 beauty = 2;
                 if (cm.getPlayer().getGender() == 0) {
@@ -122,8 +122,8 @@ function action(mode, type, selection) {
         } else if (status == 2) {
             cm.dispose();
             if (beauty == 1) {
-                if (cm.haveItem(5152028)) {
-                    cm.gainItem(5152028, -1);
+                if (cm.haveItem(5159002)) {
+                    cm.gainItem(5159002, -1);
                     cm.setFace(facenew[selection]);
                     cm.sendOk("享受你的新面容吧！");
                 } else {
