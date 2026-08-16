@@ -14,8 +14,10 @@ import org.gms.constants.string.ExtendType;
 import org.gms.dao.entity.*;
 import org.gms.dao.mapper.*;
 import org.gms.model.dto.CharacterListItemDTO;
+import org.gms.model.dto.ChrListReqDTO;
 import org.gms.model.dto.ChrOnlineListReqDTO;
 import org.gms.model.dto.ChrOnlineListRtnDTO;
+import org.gms.model.dto.UpdateCharacterDTO;
 import org.gms.exception.BizException;
 import org.gms.model.pojo.SkillEntry;
 import org.gms.net.server.Server;
@@ -493,28 +495,117 @@ public class CharacterService {
     }
 
     public List<CharacterListItemDTO> getCharacterListByAccountId(int accountId) {
-        List<CharactersDO> list = getCharacterByAccountId(accountId);
-        return list.stream().map(cdo -> {
-            int worldId = Optional.ofNullable(cdo.getWorld()).orElse(0);
-            String worldName = GameConstants.getWorldName(worldId);
-            Job job = Job.getById(cdo.getJob());
-            return CharacterListItemDTO.builder()
-                    .id(cdo.getId())
-                    .name(cdo.getName())
-                    .job(cdo.getJob())
-                    .jobName(job == null ? "" : job.getName())
-                    .level(cdo.getLevel())
-                    .world(worldId)
-                    .worldName(worldName)
-                    .gm(cdo.getGm())
-                    .meso(cdo.getMeso())
-                    .fame(cdo.getFame())
-                    .guildid(cdo.getGuildid())
-                    .createdate(cdo.getCreatedate())
-                    .lastLogoutTime(cdo.getLastLogoutTime())
-                    .online(findOnlineCharacter(cdo.getId()) != null)
-                    .build();
-        }).toList();
+        return getCharacterByAccountId(accountId).stream().map(this::toCharacterListItem).toList();
+    }
+
+    /**
+     * 全量角色列表（含离线），供GM后台「角色列表」页分页查询。
+     */
+    public Page<CharacterListItemDTO> getCharacterList(ChrListReqDTO request) {
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        if (request.getId() != null) {
+            queryWrapper.where(CHARACTERS_D_O.ID.eq(request.getId()));
+        }
+        if (!RequireUtil.isEmpty(request.getName())) {
+            queryWrapper.where(CHARACTERS_D_O.NAME.like(request.getName()));
+        }
+        if (request.getAccountId() != null) {
+            queryWrapper.where(CHARACTERS_D_O.ACCOUNTID.eq(request.getAccountId()));
+        }
+        if (request.getWorld() != null) {
+            queryWrapper.where(CHARACTERS_D_O.WORLD.eq(request.getWorld()));
+        }
+        queryWrapper.orderBy(CHARACTERS_D_O.ID.asc());
+
+        int pageNo = request.getPageNo() == null ? 1 : request.getPageNo();
+        int pageSize = request.getPageSize() == null ? 20 : request.getPageSize();
+        Page<CharactersDO> page = charactersMapper.paginate(pageNo, pageSize, queryWrapper);
+
+        Page<CharacterListItemDTO> result = new Page<>();
+        result.setPageNumber(page.getPageNumber());
+        result.setPageSize(page.getPageSize());
+        result.setTotalRow(page.getTotalRow());
+        result.setRecords(page.getRecords().stream().map(this::toCharacterListItem).toList());
+        return result;
+    }
+
+    /**
+     * GM后台编辑角色：仅改 characters 表中的安全字段，且要求角色离线。
+     * <p>
+     * 在线时内存中的 Character 才是权威副本，登出/自动存档时 saveCharToDB 会用内存数据
+     * 覆盖这里写入的值，导致改动静默丢失，故直接拒绝——与 AccountService#updateAccountByGM 的策略一致。
+     * 在线玩家的实时调整请走「玩家管理」页。
+     */
+    public void updateCharacterByGm(UpdateCharacterDTO submitData) {
+        RequireUtil.requireNotNull(submitData.getId(), I18nUtil.getExceptionMessage("PARAMETER_SHOULD_NOT_EMPTY", "id"));
+        CharactersDO chr = findById(submitData.getId());
+        RequireUtil.requireNotNull(chr, I18nUtil.getExceptionMessage("UNKNOWN_CHARACTER"));
+        RequireUtil.requireTrue(findOnlineCharacter(submitData.getId()) == null,
+                I18nUtil.getExceptionMessage("CharacterService.isOnline"));
+        checkUpdateCharacterParam(submitData);
+
+        CharactersDO update = CharactersDO.builder()
+                .id(chr.getId())
+                .level(submitData.getLevel())
+                .exp(submitData.getExp())
+                .meso(submitData.getMeso())
+                .fame(submitData.getFame())
+                .job(submitData.getJob())
+                .gm(submitData.getGm())
+                .map(submitData.getMap())
+                .ap(submitData.getAp())
+                .build();
+        // mybatis-flex 的 update(entity) 默认忽略 null 字段，未填的项不会被清空
+        charactersMapper.update(update);
+
+        log.info(I18nUtil.getLogMessage("CharacterService.updateByGm.info1", chr.getId(), chr.getName()));
+    }
+
+    private void checkUpdateCharacterParam(UpdateCharacterDTO submitData) {
+        if (submitData.getLevel() != null && submitData.getLevel() < 1) {
+            throw new BizException(I18nUtil.getExceptionMessage("ILLEGAL_PARAMETERS", "level"));
+        }
+        requireNotNegative(submitData.getExp(), "exp");
+        requireNotNegative(submitData.getMeso(), "meso");
+        requireNotNegative(submitData.getAp(), "ap");
+        requireNotNegative(submitData.getMap(), "map");
+        if (submitData.getGm() != null && (submitData.getGm() < 0 || submitData.getGm() > 127)) {
+            throw new BizException(I18nUtil.getExceptionMessage("ILLEGAL_PARAMETERS", submitData.getGm()));
+        }
+        if (submitData.getJob() != null && Job.getById(submitData.getJob()) == null) {
+            throw new BizException(I18nUtil.getExceptionMessage("ILLEGAL_PARAMETERS", submitData.getJob()));
+        }
+    }
+
+    private void requireNotNegative(Integer value, String name) {
+        if (value != null && value < 0) {
+            throw new BizException(I18nUtil.getExceptionMessage("ILLEGAL_PARAMETERS", name));
+        }
+    }
+
+    private CharacterListItemDTO toCharacterListItem(CharactersDO cdo) {
+        int worldId = Optional.ofNullable(cdo.getWorld()).orElse(0);
+        Job job = Job.getById(cdo.getJob());
+        return CharacterListItemDTO.builder()
+                .id(cdo.getId())
+                .accountId(cdo.getAccountid())
+                .name(cdo.getName())
+                .job(cdo.getJob())
+                .jobName(job == null ? "" : job.getName())
+                .level(cdo.getLevel())
+                .exp(cdo.getExp())
+                .ap(cdo.getAp())
+                .map(cdo.getMap())
+                .world(worldId)
+                .worldName(GameConstants.getWorldName(worldId))
+                .gm(cdo.getGm())
+                .meso(cdo.getMeso())
+                .fame(cdo.getFame())
+                .guildid(cdo.getGuildid())
+                .createdate(cdo.getCreatedate())
+                .lastLogoutTime(cdo.getLastLogoutTime())
+                .online(findOnlineCharacter(cdo.getId()) != null)
+                .build();
     }
 
     /**

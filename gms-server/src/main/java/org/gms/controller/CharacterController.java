@@ -7,10 +7,12 @@ import lombok.AllArgsConstructor;
 import org.gms.constants.api.ApiConstant;
 import org.gms.dao.entity.ExtendValueDO;
 import org.gms.model.dto.CharacterListItemDTO;
+import org.gms.model.dto.ChrListReqDTO;
 import org.gms.model.dto.ChrOnlineListReqDTO;
 import org.gms.model.dto.ChrOnlineListRtnDTO;
 import org.gms.model.dto.ResultBody;
 import org.gms.model.dto.SubmitBody;
+import org.gms.model.dto.UpdateCharacterDTO;
 import org.gms.service.CharacterService;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,6 +54,21 @@ public class CharacterController {
     @PostMapping("/" + ApiConstant.LATEST + "/online/list")
     public ResultBody<Page<ChrOnlineListRtnDTO>> onlineList(@RequestBody SubmitBody<ChrOnlineListReqDTO> submitBody) {
         return ResultBody.success(characterService.getChrOnlineList(submitBody.getData()));
+    }
+
+    @Tag(name = "/character/" + ApiConstant.LATEST)
+    @Operation(summary = "查询角色列表（含离线，直接查库）")
+    @PostMapping("/" + ApiConstant.LATEST + "/list")
+    public ResultBody<Page<CharacterListItemDTO>> list(@RequestBody SubmitBody<ChrListReqDTO> submitBody) {
+        return ResultBody.success(characterService.getCharacterList(submitBody.getData()));
+    }
+
+    @Tag(name = "/character/" + ApiConstant.LATEST)
+    @Operation(summary = "编辑角色信息，角色在线时拒绝")
+    @PostMapping("/" + ApiConstant.LATEST + "/update")
+    public ResultBody<Object> update(@RequestBody SubmitBody<UpdateCharacterDTO> submitBody) {
+        characterService.updateCharacterByGm(submitBody.getData());
+        return ResultBody.success();
     }
 
     @Tag(name = "/character/" + ApiConstant.LATEST)

@@ -16,10 +16,14 @@ import java.sql.Timestamp;
 @Builder
 public class CharacterListItemDTO {
     private Integer id;
+    private Integer accountId;
     private String name;
     private Integer job;
     private String jobName;
     private Integer level;
+    private Integer exp;
+    private Integer ap;
+    private Integer map;
     private Integer world;
     private String worldName;
     private Integer gm;

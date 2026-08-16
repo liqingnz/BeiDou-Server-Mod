@@ -148,4 +148,34 @@ export default {
   'account.list.charList.column.createdate': 'Created At',
   'account.list.charList.column.operate.delete.confirm':
     'Delete this character? All related data will be removed. This cannot be undone!',
+
+  'account.character.filter.id': 'Character ID',
+  'account.character.filter.name': 'Character',
+  'account.character.filter.accountId': 'Account ID',
+  'account.character.filter.world': 'World',
+
+  'account.character.column.id': 'ID',
+  'account.character.column.name': 'Character',
+  'account.character.column.accountId': 'Account ID',
+  'account.character.column.job': 'Job',
+  'account.character.column.world': 'World',
+  'account.character.column.level': 'Level',
+  'account.character.column.exp': 'EXP',
+  'account.character.column.meso': 'Meso',
+  'account.character.column.fame': 'Fame',
+  'account.character.column.gm': 'GM Level',
+  'account.character.column.map': 'Map',
+  'account.character.column.ap': 'Remaining AP',
+  'account.character.column.status': 'Status',
+  'account.character.column.status.online': 'Online',
+  'account.character.column.status.offline': 'Offline',
+  'account.character.column.createdate': 'Created At',
+  'account.character.column.operate': 'Operate',
+  'account.character.column.operate.edit.online':
+    'Cannot edit while online. Let the character log out, or adjust it live on the Player page.',
+
+  'account.character.updateForm.title': 'Edit Character',
+  'account.character.updateForm.tip':
+    'Writes directly to the database and only applies to offline characters. Inventory, equipment and skills are not included.',
+  'account.character.updateForm.rules.gm.range': 'GM level must be 0 ~ 127',
 };

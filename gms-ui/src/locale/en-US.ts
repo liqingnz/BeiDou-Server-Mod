@@ -30,6 +30,7 @@ export default {
   'menu.account': 'Account',
   'menu.account.list': 'Account List',
   'menu.account.player': 'Player',
+  'menu.account.character': 'Character List',
   'menu.arco': 'UI Doc',
   'menu.beiDou': 'About BeiDou',
   'message.success': 'Success',

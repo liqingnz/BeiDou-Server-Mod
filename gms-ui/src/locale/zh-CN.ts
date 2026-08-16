@@ -31,6 +31,7 @@ export default {
   'menu.account': '玩家管理',
   'menu.account.list': '账户列表',
   'menu.account.player': '玩家管理',
+  'menu.account.character': '角色列表',
   'menu.arco': 'UI 开发文档',
   'menu.beiDou': '关于北斗',
   // 提示信息

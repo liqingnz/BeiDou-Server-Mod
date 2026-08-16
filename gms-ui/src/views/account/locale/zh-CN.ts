@@ -145,4 +145,34 @@ export default {
   'account.list.charList.column.createdate': '创建时间',
   'account.list.charList.column.operate.delete.confirm':
     '确定删除该角色？将清除角色所有关联数据，此操作不可恢复！',
+
+  'account.character.filter.id': '角色ID',
+  'account.character.filter.name': '角色名',
+  'account.character.filter.accountId': '账号ID',
+  'account.character.filter.world': '大区',
+
+  'account.character.column.id': 'ID',
+  'account.character.column.name': '角色名',
+  'account.character.column.accountId': '账号ID',
+  'account.character.column.job': '职业',
+  'account.character.column.world': '大区',
+  'account.character.column.level': '等级',
+  'account.character.column.exp': '经验',
+  'account.character.column.meso': '金币',
+  'account.character.column.fame': '人气',
+  'account.character.column.gm': 'GM等级',
+  'account.character.column.map': '所在地图',
+  'account.character.column.ap': '剩余AP',
+  'account.character.column.status': '状态',
+  'account.character.column.status.online': '在线',
+  'account.character.column.status.offline': '离线',
+  'account.character.column.createdate': '创建时间',
+  'account.character.column.operate': '操作',
+  'account.character.column.operate.edit.online':
+    '角色在线时无法编辑，请让其下线，或到「玩家管理」页实时调整',
+
+  'account.character.updateForm.title': '编辑角色',
+  'account.character.updateForm.tip':
+    '此处直接修改数据库，仅对离线角色生效。不含背包、装备、技能等关联数据。',
+  'account.character.updateForm.rules.gm.range': 'GM等级只能是 0 ~ 127',
 };
