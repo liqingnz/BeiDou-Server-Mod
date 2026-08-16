@@ -273,7 +273,7 @@ src/net/server/channel/handlers/AcceptFamilyHandler.java	java	0	0	noise	仅格�
 src/net/server/channel/handlers/AdminChatHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AdminCommandHandler.java	java	1	1	pending	
 src/net/server/channel/handlers/AllianceOperationHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/AranComboHandler.java	java	12	1	ported	3 秒断连窗口 → aran_combo_last_time（默认3=原值）；GM 连击加成 → aran_combo_gm_bonus（默认5，0=关）；满连后每次命中按满级续期 combo buff（原实现 100 连以上不再触发任何 case，只能等自然过期）。额外加了 LK 没有的 Short.MAX_VALUE 钳位——combo 是 short 且满连后不再清零，长时间连击会绕成负数
+src/net/server/channel/handlers/AranComboHandler.java	java	12	1	ported	3 秒断连窗口 → aran_combo_last_time（默认3=原值，配置缺失返回0会让连击每刀清零，故非正数退回3）；GM 连击加成 → aran_combo_gm_bonus（默认5，0=关）；满连后续期。复查修正三条：原 combo>100 分支无条件 getEffect(10) 会让低等级战神在第101连拿满级buff → 档位改取 min(skillLevel,10)、初心者例外；原 switch 只认恰好等于10的倍数，GM 每次+6 会整段跳过10/20档 → 改判「是否跨进新的十位档」；满连后每刀重登 buff（applyComboBuff 服务端 Long.MAX_VALUE 不过期，每刀一个包+一次三锁 registerEffect）→ 改为每10连续期一次。另有 LK 没有的 Short.MAX_VALUE 溢出钳位
 src/net/server/channel/handlers/AutoAggroHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AutoAssignHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/BBSOperationHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -377,7 +377,7 @@ src/net/server/channel/handlers/SkillBookHandler.java	java	0	0	noise	仅格式�
 src/net/server/channel/handlers/SkillMacroHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/SnowballHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/SpawnPetHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/SpecialMoveHandler.java	java	8	2	ported	GM 免冷却 → use_gm_no_skill_cooldown（默认true）；英雄意志快速重用除数原硬编码 60（LK 是 10）→ fast_reuse_hero_will_divisor，默认 60 保持 BeiDou 现状，代码用 Math.max(1,..) 兜除零。其余为 tab→space 与英文提示改中文（BeiDou 该处已走 I18nUtil，SpecialMoveHandler.java:77），噪声
+src/net/server/channel/handlers/SpecialMoveHandler.java	java	8	2	ported	GM 免冷却 → use_gm_no_skill_cooldown（默认true）；英雄意志快速重用除数原硬编码60（LK是10）→ fast_reuse_hero_will_divisor，默认60保持 BeiDou 现状，Math.max(1,..) 兜除零。复查修正两条：原 GM 分支调 addCooldown(..,0) 仍会写进 coolDowns，而 skillIsCooling 只看键在不在、到期条目要等每1500ms一轮的清理任务，等于反而多了约1.5秒隐形锁 → 改为只发 skillCooldown(skillid,0) 包；该开关只覆盖 SpecialMoveHandler，攻击技能冷却由 CloseRange/Magic/RangedAttack 三个 handler 各自登记 → 本次只把配置描述收窄到实际范围，扩大覆盖面留给 G8（那三个文件属 G8）。顺带把该文件里漏网的硬编码英文时空门提示补成 StatEffect.message4
 src/net/server/channel/handlers/SpouseChatHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/StorageHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/SummonDamageHandler.java	java	1	1	pending	
@@ -482,7 +482,7 @@ src/net/server/task/TimeoutTask.java	java	0	0	noise	仅格式化/空白改动（
 src/net/server/task/WeddingReservationTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/world/MapleMessenger.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/world/MapleParty.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/world/MaplePartyCharacter.java	java	5	0	ported	新增 attemptBoss(String) 转调 ExpeditionBossLog 的字符串重载，供批次7的 PapulatusBattle.js 使用。BeiDou 现版 PapulatusBattle.js:99 没有这个判断，时空的裂缝同样在绕过配额——那是脚本，归批次7
+src/net/server/world/MaplePartyCharacter.java	java	5	0	ported	新增 attemptBoss(String) 转调 ExpeditionBossLog 的字符串重载，供批次7的 PapulatusBattle.js 使用。注意它固定 log=true 是「查即扣」：LK 的脚本在构造 eligible 列表时逐成员调用，整队最终进不去也不回滚。当前无调用者不构成活缺陷，接脚本时要么拆出不记账的 canAttemptBoss 再统一登记，要么接受损耗
 src/net/server/world/World.java	java	17	6	pending	
 src/provider/MapleCanvas.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/provider/MapleData.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -532,7 +532,7 @@ src/server/MapleShop.java	java	4	2	pending
 src/server/MapleShopFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MapleShopItem.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MapleSkillbookInformationProvider.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/MapleStatEffect.java	java	20	5	ported	（1）真 BUG：isHerosWill() 漏了 Corsair.HEROS_WILL，导致船长的英雄意志不解除异常状态（isCureAllAbnormalStatus→StatEffect.java:955），已补；同时 isInfusion() 里残留的 Corsair 已删——Cosmic 改名只改了一半，LK 这两行是本批唯一「LK 比 BeiDou 对」的地方。（2）战舰/魔力反射/神射手黑暗的额外防击退落成 battleship_stance=30、mana_reflection_stance=30、marksman_blind_stance=100（V1000.0.13），0=恢复原版；配套 isExtraStance() 广播 Hero.STANCE 特效。战舰那条经查不是死代码——StatEffect.java:1376 会把被 MONSTER_RIDING 覆盖的 statups 还原。（3）USE_ULTRA_RECOVERY 条件对调纯短路顺序，噪声不搬。（4）LK 把时空门提示改成硬编码中文，违反规则2 不搬；改为补 StatEffect.message1~3 三个 i18n 键（中英各3条）
+src/server/MapleStatEffect.java	java	20	5	ported	（1）真 BUG：isHerosWill() 漏了 Corsair.HEROS_WILL，导致船长英雄意志不解除异常状态（isCureAllAbnormalStatus→StatEffect.java:955），已补；isInfusion() 里残留的 Corsair 已删——Cosmic 改名只改了一半，LK 这两行是本批唯一「LK 比 BeiDou 对」的地方。复查补充：PacketCreator.givePirateBuff/giveForeignPirateBuff 里同口径的 buffid==Corsair.HEROS_WILL 判断一并删除。（2）战舰/魔力反射/黑暗的额外防击退落成 battleship_stance=30、mana_reflection_stance=30、marksman_blind_stance=100（V1000.0.13），0=恢复原版；配套 isExtraStance() 广播 Hero.STANCE 特效——复查修正：该方法原先读实时配置而 statups 在技能加载时就固化进 SkillFactory 缓存，热改配置会「有特效无防击退」或反之，改为检查 statups 里有没有 STANCE，与 isWkCharge() 同源。战舰那条经查不是死代码——StatEffect.java:1376 会还原被 MONSTER_RIDING 覆盖的 statups。（3）USE_ULTRA_RECOVERY 条件对调纯短路顺序，噪声。（4）LK 把时空门提示改成硬编码中文违反规则2 不搬，改为补 StatEffect.message1~4
 src/server/MapleStorage.java	java	1	1	pending	
 src/server/MapleStorageInventory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MapleTrade.java	java	22	22	pending	
@@ -548,9 +548,9 @@ src/server/events/gm/MapleFitness.java	java	0	0	noise	仅格式化/空白改动�
 src/server/events/gm/MapleOla.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/events/gm/MapleOxQuiz.java	java	2	2	pending	
 src/server/events/gm/MapleSnowball.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/expeditions/MapleExpedition.java	java	63	39	ported	真BUG：addMemberInt 缺 attemptBoss 配额检查，而实际在用的入口正是它（scripts/npc/2101014.js:157），配额可绕过；addMember 有检查却无调用者。按 LK 思路把检查搬进 addMemberInt（返回码4），addMember 改为委托+返回码映射，保持 BeiDou 的 i18n（不搬 LK 的硬编码中文，也不留 LK 那段注释掉的旧代码）。EXPEDITION_BOSSES 补克雷塞尔双眼（MobId 新增 KREXEL_LEFT_EYE/KREXEL_RIGHT_EYE）。其余英文→中文硬编码与缩进为噪声，BeiDou 早已全套 i18n（Expedition.* 17 个键）
-src/server/expeditions/MapleExpeditionBossLog.java	java	17	9	ported	（1）新增 BALROG_NORMAL/KREXEL/SHOWA/YAOSENG 四个条目——此前 getBossEntryByName 返回 null 导致 attemptBoss 直接放行，这四个 BOSS 完全不受次数限制。（2）PINKBEAN/SCARGA entries 1→2 取 LK 值（用户决定）。（3）新增 attemptBoss(cid, channel, String, log) 重载供脚本使用。（4）修两个 BeiDou 真 BUG，不跟 LK 的写法：Calendar.HOUR 是12小时制且不动 AM_PM，下午启动会把清空点算成中午、删掉当天上午的记录 → 改用 HOUR_OF_DAY；set(DAY_OF_WEEK,THURSDAY) 在周日到周三指向未来的周四，deltaTime 为负且 Java 的 % 对负数仍为负，判定恒真 → 每次启动都拿未来时间戳把整张周榜删光，改为回退到最近一个已过去的周四并直接比较。LK 的 Math.abs 只是盖住症状，HOUR 12 更是越界写法
-src/server/expeditions/MapleExpeditionType.java	java	26	7	ported	新增 KREXEL(2,30,50,255,5) 与 YAOSENG(1,6,100,255,5)（克雷塞尔仍缺两张 wz 地图，枚举先补齐给批次7的脚本用）；新增 getPartInfo() 但改走 i18n（ExpeditionType.partInfo.size/level/time），且人数一栏用 getMinSize() 而非原始字段，开了单人远征时显示实际要求。LK 的 minSize 大改（6→2 等）rejected：纯运营调参，且 BeiDou 已有 use_enable_solo_expeditions 一开就把 minSize 压成1（ExpeditionType.java:61）是同一件事的更彻底做法。LK 重排枚举顺序不搬，改 ordinal 无必要
+src/server/expeditions/MapleExpedition.java	java	63	39	ported	统一 addMember/addMemberInt 的判定：检查搬进 addMemberInt（返回码4），addMember 改为委托+返回码映射，保持 BeiDou 的 i18n。【复查更正】初稿称此为「活的配额绕过 BUG」，不成立——addMemberInt 的唯一调用者 scripts/npc/2101014.js 用的是 ARIANT/ARIANT1/ARIANT2，三者都没有 BossLogEntry，attemptBoss 恒放行；而 7 个 BOSS NPC 脚本调的是本来就有检查的 addMember。此次重构是消除两个入口的判定分歧（预防性收敛），不是修复。批次7给BOSS脚本接配额时须处理 2101014.js:169 对返回码4的兜底。EXPEDITION_BOSSES 补克雷塞尔双眼（MobId 新增两个常量）。其余英文→中文硬编码与缩进为噪声
+src/server/expeditions/MapleExpeditionBossLog.java	java	17	9	ported	（1）新增 BALROG_NORMAL/KREXEL/SHOWA/YAOSENG 四个条目——此前无条目使 attemptBoss 直接放行。配套 V1000.0.14 把 bosslog_daily/weekly.bosstype 从 ENUM 改为 VARCHAR(32)：V1.0.3 的 ENUM 只有原五种，新名字严格模式下 INSERT 报错、非严格模式写空串，而 insertPlayerEntry 吞掉 SQLException 后 attemptBoss 仍返回 true，不改表等于白加。（2）PINKBEAN/SCARGA entries 1→2 取 LK 值。（3）新增 attemptBoss(cid, channel, String, log) 重载。（4）修两个真 BUG 且不跟 LK 写法：Calendar.HOUR 是12小时制不动 AM_PM，下午启动会把清空点算成中午、删掉当天上午记录 → 改 HOUR_OF_DAY；set(DAY_OF_WEEK,THURSDAY) 在周日到周三指向未来周四致判定恒真、整张周榜被删 → 回退到最近一个已过去的周四。复查后再去掉12小时窗口：DELETE 按 attempttime<=该周四限定，幂等安全，带窗口时停服跨过周四会让上周记录卡到下周四
+src/server/expeditions/MapleExpeditionType.java	java	26	7	ported	新增 KREXEL(2,30,50,255,5) 与 YAOSENG(1,6,100,255,5)（克雷塞尔仍缺两张 wz 地图，枚举先补齐给批次7用）；新增 getPartInfo() 但走 i18n（ExpeditionType.partInfo.size/level/time），人数一栏用 getMinSize() 而非原始字段。复查修正：时间那栏传的是 registrationMinutes（报名窗口，所有枚举都是5分钟）而非BOSS战时限，文案由「时间限制」改为「报名时限」/Registration window。LK 的 minSize 大改 rejected：纯调参，且 use_enable_solo_expeditions 是同一件事的更彻底做法。LK 重排枚举顺序不搬
 src/server/gachapon/ElNath.java	java	9	4	pending	
 src/server/gachapon/Ellinia.java	java	12	4	pending	
 src/server/gachapon/GachaponItems.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）

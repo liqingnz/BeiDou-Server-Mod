@@ -113,7 +113,10 @@ public final class MobDamageMobHandler extends AbstractPacketHandler {
         // 下面这套是 OdinMS 的估算式，算出来的上限比客户端实际打出的心灵控制伤害低，
         // 照搬会把海盗的合法伤害钳掉。这个系数只抬「服务端愿意接受的上限」，不提高实际伤害，
         // 伤害数值本身还是客户端报上来的。配 1.0 恢复原来的严格钳位。
-        double maxDamageRate = GameConfig.getServerDouble("mob_damage_mob_max_damage_rate");
+        // 配置缺失时 getServerDouble 返回 0，那样上限恒为 0、合法伤害会被全部钳成 0，
+        // 因此非正数退回迁移脚本里的默认值
+        double configuredRate = GameConfig.getServerDouble("mob_damage_mob_max_damage_rate");
+        double maxDamageRate = configuredRate > 0 ? configuredRate : 1.5;
         if (magic) {
             int atkRate = calcModifier(attacker, MonsterStatus.MAGIC_ATTACK_UP, MonsterStatus.MATK);
             attackerAtk = (attacker.getStats().getMADamage() * atkRate) / 100;

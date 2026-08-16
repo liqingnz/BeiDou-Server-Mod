@@ -81,17 +81,18 @@ WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'en-US' AND
 
 -- ---------- 3) 技能冷却 ----------
 
--- GM 免冷却。方便调试，但也意味着 GM 测出来的手感不代表玩家。
+-- GM 免冷却。只覆盖 SpecialMoveHandler 这条路径（buff/召唤/位移等非攻击技能）；
+-- 攻击技能的冷却由 CloseRange / Magic / RangedAttack 三个伤害 handler 各自登记，不受此开关影响。
 INSERT INTO `game_config`(`config_type`, `config_sub_type`, `config_clazz`, `config_code`, `config_value`, `config_desc`, `update_time`)
 SELECT 'server', 'Game Mechanics', 'java.lang.Boolean', 'use_gm_no_skill_cooldown', 'true', 'use_gm_no_skill_cooldown', '2026-08-16 12:00:00'
 WHERE NOT EXISTS (SELECT 1 FROM `game_config` WHERE `config_code` = 'use_gm_no_skill_cooldown');
 
 INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`)
-SELECT 'zh-CN', 'game_config', 'use_gm_no_skill_cooldown', 'GM（等级3以上）使用技能不进入冷却；关闭后GM与普通玩家一致', NULL
+SELECT 'zh-CN', 'game_config', 'use_gm_no_skill_cooldown', 'GM（等级3以上）使用非攻击类技能（SpecialMoveHandler 路径）不进入冷却；攻击技能的冷却仍由各伤害handler登记，不受此开关影响', NULL
 WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'zh-CN' AND `lang_code` = 'use_gm_no_skill_cooldown');
 
 INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`)
-SELECT 'en-US', 'game_config', 'use_gm_no_skill_cooldown', 'GMs (level 3+) skip skill cooldowns entirely; disable to make them behave like regular players', NULL
+SELECT 'en-US', 'game_config', 'use_gm_no_skill_cooldown', 'GMs (level 3+) skip cooldowns for non-attack skills (the SpecialMoveHandler path); attack skill cooldowns are still registered by the damage handlers and are not affected', NULL
 WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'en-US' AND `lang_code` = 'use_gm_no_skill_cooldown');
 
 -- 英雄意志快速重用的除数，默认 60 = 原硬编码值。仅在 use_fast_reuse_hero_will 打开时生效。

@@ -1763,17 +1763,26 @@ LK 没有、BeiDou 侧主动加的两处保险（LK 均无）：`AranComboHandle
 > `attemptBoss` 一进门就 `return true`。下面三个 BUG **只在运营把次数限制打开后才咬人**——
 > 但一旦打开就是三个一起咬。
 
-##### BUG 1：`addMemberInt` 漏配额检查（配额可绕过）
+##### 统一 `addMember` / `addMemberInt` 的判定（**不是**当时以为的活 BUG）
 
-BeiDou 两个入口不一致，而**有检查的那个没人调**：
+> ⚠️ **复查更正。** 本节初稿断言「`addMemberInt` 缺配额检查 = 配额可绕过，是活的真 BUG」，
+> **该结论不成立**，已按事实改写。原判断只看了「谁调用 `addMemberInt`」，没有回查那个调用点用的远征类型。
 
-| 方法 | `attemptBoss` 检查 | 调用者 |
-|---|---|---|
-| `addMember` | ✅ | 无 java 调用者 |
-| `addMemberInt` | ❌ **没有** | `scripts/npc/2101014.js:157` |
+事实是：
 
-按 LK 思路把检查搬进 `addMemberInt`（新返回码 4），`addMember` 改为委托 + 返回码映射。
+| 方法 | `attemptBoss` 检查 | 调用者 | 实际影响 |
+|---|---|---|---|
+| `addMember` | ✅ 本来就有 | 7 个 BOSS NPC 脚本（`1061014`、`2030013`、`2083004`、`2141001`、`9120201`、`9201113`、`9270047`） | 配额一直在生效 |
+| `addMemberInt` | ❌ 缺 | 仅 `scripts/npc/2101014.js`（ARIANT / ARIANT1 / ARIANT2） | **ARIANT 系列没有 `BossLogEntry`，`attemptBoss` 恒放行**，缺不缺检查都一样 |
+
+所以合并前**没有可利用的绕过口子**。这次重构的价值是**消除两个入口的判定分歧**，
+避免以后哪个 BOSS 脚本改用 `addMemberInt` 时静默失去配额——是预防性收敛，不是修复。
+
+做法：检查搬进 `addMemberInt`（新返回码 4），`addMember` 改为委托 + 返回码映射。
 不搬 LK 的硬编码中文（BeiDou 早已全套 i18n），也不留 LK 那段注释掉的旧实现。
+
+> `2101014.js:169` 对未知返回码兜底显示 "Error."，新增的码 4 会落进去 —— 当前不可达
+> （ARIANT 无配额条目）。**批次 7 给 BOSS 脚本接配额时必须处理这个返回码。**
 
 > 合并后 `addMember` 的成功播报统一走 `Expedition.addMemberInt.message1`，
 > `Expedition.addMember.message5` 成为孤儿键，保留未删（两条文案几乎一样）。
@@ -1836,8 +1845,36 @@ LK 顺手重排的枚举顺序也不搬 —— 改 `ordinal()` 没必要冒险�
 
 ##### 留给批次 7 的线索
 
-BeiDou 现版 [`scripts/event/PapulatusBattle.js:99`](../gms-server/scripts/event/PapulatusBattle.js)
-**没有 `attemptBoss` 判断**——时空的裂缝同样在绕过配额。API 已在本组补齐，脚本改动归批次 7。
+1. BeiDou 现版 [`scripts/event/PapulatusBattle.js:99`](../gms-server/scripts/event/PapulatusBattle.js)
+   **没有 `attemptBoss` 判断**——时空的裂缝同样在绕过配额。API 已在本组补齐，脚本改动归批次 7。
+2. **`PartyCharacter.attemptBoss` 固定 `log = true`，是「查即扣」。** LK 的 `PapulatusBattle.js`
+   在构造 eligible 列表时逐个成员调用它，之后才校验队长在场、人数、前置任务；整队最终进不去时，
+   前面查过的成员**已经被扣掉一次**且不回滚。接这个脚本时要么拆出不记账的 `canAttemptBoss`、
+   等整队确认后再统一登记，要么接受这个损耗。**当前无调用者，不构成活缺陷**，故本组只留 API 不改语义。
+
+#### G7/G9 复查修正
+
+两组提交完成后做了一轮交叉复查，**11 条成立**，其中 1 条推翻了本文档自己的结论（见上文 ⚠️）。
+
+| # | 问题 | 处置 |
+|---|---|---|
+| 1 | **战神满连续期绕过技能等级**：`combo > 100` 分支无条件 `getEffect(10)`，只学 1 级连击无双的战神在第 101 连也拿满级 buff | 重构为「跨十位档」判定，档位取 `min(skillLevel, 10)`，初心者（2000）例外 |
+| 2 | **GM 加成跳过增益阈值**：默认每次 +6，序列 `6,12,18,24,30…`，`switch` 只认恰好等于 10 的倍数，10/20 档整个跳过 | 同上，改判「本次是否跨进新的十位档」而非「是否恰好等于」 |
+| 3 | **满连后每刀重登 buff**：`applyComboBuff` 服务端过期时间是 `Long.MAX_VALUE`，每刀一个 `giveBuff` 包 + 一次三锁 `registerEffect`，落在攻击热路径上 | 改为每 10 连续期一次，成本降一个数量级；客户端图标 99999ms 足够覆盖 |
+| 4 | **「GM 免冷却」反而引入约 1.5 秒隐形锁**：`addCooldown(.., 0)` 仍写进 `coolDowns`，而 `skillIsCooling` 只看键在不在，到期条目要等每 1500ms 一轮的清理任务 | GM 分支只发 `skillCooldown(skillid, 0)` 包，不再调 `addCooldown` |
+| 5 | **免冷却开关只覆盖 `SpecialMoveHandler`**：攻击技能的冷却由 `CloseRange`/`Magic`/`RangedAttack` 三个 handler 各自登记 | **本次只把配置描述收窄到实际覆盖范围**（不再宣称「所有技能」）。三个伤害 handler 是 **G8** 的文件，扩大覆盖面留给 G8 一并处理，避免与该组撞车 |
+| 6 | **STANCE 热更新后效果与表现不一致**：`statups` 在技能加载时固化进 `SkillFactory` 缓存，而 `isExtraStance()` 每次施放读实时配置 → 0→100 时「有特效无防击退」，反向则「有防击退无特效」 | `isExtraStance()` 改为检查 `statups` 里有没有 `STANCE`，与 `isWkCharge()` 同一套路，两边同源 |
+| 7 | **新增 4 个 BOSS 类型写不进库**：`bosslog_daily/weekly.bosstype` 是 `ENUM('ZAKUM','HORNTAIL','PINKBEAN','SCARGA','PAPULATUS')`（[V1.0.3](../gms-server/src/main/resources/db/migration/V1.0.3__create_bosslog.sql)）。新名字严格模式下 INSERT 报错、非严格模式写成空串，而 `insertPlayerEntry` 吞掉 `SQLException` 后 `attemptBoss` 仍返回 `true` —— **比不加更糟，因为不报错** | 新增 `V1000.0.14`，两张表 `bosstype` 改 `VARCHAR(32)` |
+| 8 | **错过 12 小时窗口则整周不重置**：周三停服、周五启动时 `deltaTime > 12h`，周榜跳过，之后每日任务也都不满足，上周记录卡到下周四 | 去掉窗口。`DELETE` 已按 `attempttime <= 最近一个已过去的周四` 限定，幂等安全，每次直接执行 |
+| 9 | **配置缺失时 `getServerInt` 返回 `0`**（[GameConfig.java:322](../gms-server/src/main/java/org/gms/config/GameConfig.java#L322)，`getServerDouble` 同理返回 `0D`）。迁移没跑时：`aran_combo_last_time`=0 → 连击每刀清零彻底失效；`battleship_hp_*`=0 → **战舰 0 耐久一召即碎**；`mob_damage_mob_max_damage_rate`（G6）=0 → 心灵控制伤害全被钳成 0 | 这三处补「非正数退回迁移默认值」。0 属合法取值的键（三个 stance、`aran_combo_gm_bonus`）不动 |
+| 10 | **`PacketCreator` 里 Corsair 误分类还剩两处**：`givePirateBuff` / `giveForeignPirateBuff` 的 `buffid == Corsair.HEROS_WILL` 与本次修复口径相反 | 一并删除 |
+| 11 | **`getPartInfo()` 把报名时限标成「时间限制」**：传入的是 `registrationMinutes`（报名窗口，所有枚举都是 5 分钟），不是 BOSS 战时限，接入 NPC 后会误导玩家 | 文案改为「报名时限」/「Registration window」 |
+
+顺带补了 `SpecialMoveHandler` 里一条漏网的硬编码英文时空门提示 → `StatEffect.message4`。
+
+> **第 9 条是全套移植的系统性风险，不止这几个键。** `db/lkport/` 下 14 份迁移**至今一次都没在
+> 任何环境执行过**（本机无 MySQL）。凡是「0 会造成灾难」的新配置键，都应在读取处补默认值兜底，
+> 后续批次沿用这条。
 
 ### 批次 7 — 数据类
 

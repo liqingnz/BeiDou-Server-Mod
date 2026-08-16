@@ -41,37 +41,38 @@ public class AranComboHandler extends AbstractPacketHandler {
         if (GameConstants.isAran(player.getJob().getId()) && (skillLevel > 0 || player.getJob().getId() == 2000)) {
             final long currentTime = currentServerTime();
             short combo = player.getCombo();
-            // 连击断连的判定窗口，默认 3 秒与原硬编码一致
-            long comboKeepTime = SECONDS.toMillis(GameConfig.getServerInt("aran_combo_last_time"));
+            // 连击断连的判定窗口。配置缺失时 GameConfig.getServerInt 返回 0，那样每次攻击都会断连，
+            // 所以非正数一律退回默认的 3 秒
+            int keepSeconds = GameConfig.getServerInt("aran_combo_last_time");
+            long comboKeepTime = SECONDS.toMillis(keepSeconds > 0 ? keepSeconds : 3);
             if ((currentTime - player.getLastCombo()) > comboKeepTime && combo > 0) {
                 combo = 0;
             }
+
             int gmBonus = GameConfig.getServerInt("aran_combo_gm_bonus");
+            short prevCombo = combo;
             int nextCombo = combo + 1 + (gmBonus > 0 && player.gmLevel() > 2 ? gmBonus : 0);
             // 满连之后不再清零，长时间不断连会一路加上去；combo 是 short，加到 32767 再自增会绕成负数
             combo = (short) Math.min(nextCombo, Short.MAX_VALUE);
 
-            if (combo > 100) {
-                // 满连之后原实现不再命中任何 case，combo buff 只能等自然过期。
-                // 这里每次命中都按满级重新施加，让持续连击的战神保住 buff
-                SkillFactory.getSkill(Aran.COMBO_ABILITY).getEffect(10).applyComboBuff(player, combo);
-            } else {
-                switch (combo) {
-                    case 10:
-                    case 20:
-                    case 30:
-                    case 40:
-                    case 50:
-                    case 60:
-                    case 70:
-                    case 80:
-                    case 90:
-                    case 100:
-                        if (player.getJob().getId() != 2000 && (combo / 10) > skillLevel) {
-                            break;
-                        }
-                        SkillFactory.getSkill(Aran.COMBO_ABILITY).getEffect(combo / 10).applyComboBuff(player, combo);
-                        break;
+            // 原实现用 switch 匹配恰好等于 10 的倍数，GM 加成会让连击一次跨过多个阈值而整段跳过，
+            // 所以改判「本次是否跨进了新的十位档」
+            int prevTier = prevCombo / 10;
+            int newTier = combo / 10;
+            if (newTier > prevTier) {
+                boolean ignoreSkillLevel = player.getJob().getId() == 2000;
+                int tier;
+                if (newTier <= 10) {
+                    // 100 连以内保持原语义：档位超过技能等级就不给
+                    tier = ignoreSkillLevel || newTier <= skillLevel ? newTier : 0;
+                } else {
+                    // 满连之后没有更高的档，按自己的最高档每 10 连续期一次。
+                    // applyComboBuff 服务端是 Long.MAX_VALUE 不过期，续期只为维持客户端 99999ms 的图标，
+                    // 因此不必每刀都发包重登
+                    tier = ignoreSkillLevel ? 10 : Math.min(skillLevel, 10);
+                }
+                if (tier > 0) {
+                    SkillFactory.getSkill(Aran.COMBO_ABILITY).getEffect(tier).applyComboBuff(player, combo);
                 }
             }
             player.setCombo(combo);

@@ -5415,7 +5415,8 @@ public class PacketCreator {
 
     public static Packet givePirateBuff(List<Pair<BuffStat, Integer>> statups, int buffid, int duration) {
         OutPacket p = OutPacket.create(SendOpcode.GIVE_BUFF);
-        boolean infusion = buffid == Buccaneer.SPEED_INFUSION || buffid == ThunderBreaker.SPEED_INFUSION || buffid == Corsair.HEROS_WILL;
+        // 5221010 是船长的英雄意志，不是加速灌注，早年改名时被误留在这里
+        boolean infusion = buffid == Buccaneer.SPEED_INFUSION || buffid == ThunderBreaker.SPEED_INFUSION;
         writeLongMask(p, statups);
         p.writeShort(0);
         for (Pair<BuffStat, Integer> stat : statups) {
@@ -5430,7 +5431,8 @@ public class PacketCreator {
 
     public static Packet giveForeignPirateBuff(int cid, int buffid, int time, List<Pair<BuffStat, Integer>> statups) {
         OutPacket p = OutPacket.create(SendOpcode.GIVE_FOREIGN_BUFF);
-        boolean infusion = buffid == Buccaneer.SPEED_INFUSION || buffid == ThunderBreaker.SPEED_INFUSION || buffid == Corsair.HEROS_WILL;
+        // 5221010 是船长的英雄意志，不是加速灌注，早年改名时被误留在这里
+        boolean infusion = buffid == Buccaneer.SPEED_INFUSION || buffid == ThunderBreaker.SPEED_INFUSION;
         p.writeInt(cid);
         writeLongMask(p, statups);
         p.writeShort(0);

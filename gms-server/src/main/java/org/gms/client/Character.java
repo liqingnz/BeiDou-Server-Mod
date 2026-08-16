@@ -7284,8 +7284,12 @@ public class Character extends AbstractCharacterObject {
 
     public void resetBattleshipHp() {
         int bshipLevel = Math.max(getLevel() - 120, 0);  // thanks alex12 for noticing battleship HP issues for low-level players
-        this.battleshipHp = GameConfig.getServerInt("battleship_hp_per_skill_level") * getSkillLevel(SkillFactory.getSkill(Corsair.BATTLE_SHIP))
-                + (bshipLevel * GameConfig.getServerInt("battleship_hp_per_level"));
+        // 配置缺失时 GameConfig.getServerInt 返回 0，直接用会让战舰 0 耐久一召出来就碎，
+        // 因此非正数一律退回迁移脚本里的默认值
+        int hpPerSkillLevel = GameConfig.getServerInt("battleship_hp_per_skill_level");
+        int hpPerLevel = GameConfig.getServerInt("battleship_hp_per_level");
+        this.battleshipHp = (hpPerSkillLevel > 0 ? hpPerSkillLevel : 3000) * getSkillLevel(SkillFactory.getSkill(Corsair.BATTLE_SHIP))
+                + (bshipLevel * (hpPerLevel > 0 ? hpPerLevel : 200));
     }
 
     public void resetEnteredScript() {

@@ -86,9 +86,9 @@ public final class SpecialMoveHandler extends AbstractPacketHandler {
                 return;
             } else if (skillid != Corsair.BATTLE_SHIP) {
                 if (chr.gmLevel() > 2 && GameConfig.getServerBoolean("use_gm_no_skill_cooldown")) {
-                    // GM 免冷却便于调试。关掉这个开关，GM 就和玩家一样吃冷却
+                    // GM 免冷却便于调试。这里不能调 addCooldown(.., 0)——skillIsCooling 只看键在不在，
+                    // 到期条目要等每 1500ms 一轮的清理任务才移除，等于反而多了一段隐形冷却
                     c.sendPacket(PacketCreator.skillCooldown(skillid, 0));
-                    chr.addCooldown(skillid, currentServerTime(), 0);
                 } else {
                     int cooldownTime = effect.getCooldown();
                     if (StatEffect.isHerosWill(skillid) && GameConfig.getServerBoolean("use_fast_reuse_hero_will")) {
@@ -155,7 +155,7 @@ public final class SpecialMoveHandler extends AbstractPacketHandler {
                             chr.cancelMagicDoor();
                             skill.getEffect(skillLevel).applyTo(chr, pos);
                         } else {
-                            chr.message("Please wait 5 seconds before casting Mystic Door again.");
+                            chr.message(I18nUtil.getMessage("StatEffect.message4"));
                         }
                     } finally {
                         c.releaseClient();

@@ -1776,8 +1776,18 @@ public class StatEffect {
     }
 
     private boolean isExtraStance() {
-        // 黑暗附带的防击退在客户端没有自己的表现，补广播一次力量的特效让周围玩家看得见
-        return skill && sourceid == Marksman.BLIND && GameConfig.getServerInt("marksman_blind_stance") > 0;
+        // 黑暗附带的防击退在客户端没有自己的表现，补广播一次力量的特效让周围玩家看得见。
+        // 判定要读 statups 而不是实时配置——statups 在技能加载时就固化进了 SkillFactory 缓存，
+        // 后台热改配置只会让「有特效没防击退」或反过来
+        if (!skill || sourceid != Marksman.BLIND) {
+            return false;
+        }
+        for (Pair<BuffStat, Integer> p : statups) {
+            if (p.getLeft().equals(BuffStat.STANCE)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isCygnusFA() {

@@ -118,10 +118,9 @@ public class ExpeditionBossLog {
             weeklyReset.add(Calendar.DAY_OF_MONTH, -7);
         }
 
-        long deltaTime = now.getTimeInMillis() - weeklyReset.getTimeInMillis();
-        if (deltaTime < HOURS.toMillis(12)) {
-            ExpeditionBossLog.resetBossLogTable(true, weeklyReset);
-        }
+        // 不再只在「刚过重置点 12 小时内」才清。DELETE 是按 attempttime <= 最近一个已过去的周四
+        // 限定的，幂等且安全；带窗口的话，服务器停机跨过周四、周四中午之后才起来，上周记录会一直卡到下周四
+        ExpeditionBossLog.resetBossLogTable(true, weeklyReset);
 
         now.set(Calendar.HOUR_OF_DAY, 0);
         now.set(Calendar.MINUTE, 0);
