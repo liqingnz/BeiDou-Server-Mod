@@ -63,9 +63,8 @@ public class BossDmgAnalysisCommand extends Command {
             int maxHp = monster.getMaxHp();
             Map<Integer, Long> damages = monster.getTakenDamage();
 
-            // 一律走 dropMessage 进聊天框。原实现每人发一条 yellowMessage，那是屏幕顶部的提示条，
-            // 后一条会顶掉前一条，多人时实际只看得到最后一行
-            player.dropMessage(6, I18nUtil.getMessage("BossDmgAnalysisCommand.message2",
+            // 表头黄字、明细普通色，与同类的 @bosshp、@online 一致（两者都是聊天框内的文本）
+            player.yellowMessage(I18nUtil.getMessage("BossDmgAnalysisCommand.message2",
                     monster.getName(), formatPercent(monster.getHp(), maxHp)));
 
             List<Map.Entry<String, Long>> rows = new ArrayList<>();
@@ -79,13 +78,13 @@ public class BossDmgAnalysisCommand extends Command {
             rows.sort(Map.Entry.<String, Long>comparingByValue().reversed());
 
             for (Map.Entry<String, Long> row : rows) {
-                player.dropMessage(6, I18nUtil.getMessage("BossDmgAnalysisCommand.message3",
+                player.message(I18nUtil.getMessage("BossDmgAnalysisCommand.message3",
                         row.getKey(), formatPercent(row.getValue(), maxHp), formatDamage(row.getValue())));
             }
         }
 
         if (!found) {
-            player.dropMessage(6, I18nUtil.getMessage("BossDmgAnalysisCommand.message4"));
+            player.yellowMessage(I18nUtil.getMessage("BossDmgAnalysisCommand.message4"));
         }
     }
 

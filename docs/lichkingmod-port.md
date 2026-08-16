@@ -2198,7 +2198,7 @@ BeiDou 的 `FilePrinter` 已基本废弃（只剩几处注释掉的调用），�
 
 | # | LK | 本次 |
 |---|---|---|
-| 1 | **每个玩家发一条 `yellowMessage`** —— 那是屏幕顶部提示条，后一条顶掉前一条，多人时**实际只看得到最后一个人** | 全部走 `dropMessage(6, ...)` 进聊天框，可回滚查看 |
+| 1 | 表头 `dropMessage(6, ...)`、明细 `yellowMessage`，两种样式混用 | 统一成本仓库惯例：表头 `yellowMessage`（黄字），明细 `message()`——见 `@bosshp`、`@online` |
 | 2 | 亿/万 分段在余数为 0 时多吐一个 `0`：`100000000` → 「1亿0」，`250000000` → 「2亿5000万0」 | 只在余数非零时才拼末段 |
 | 3 | `long percent = damage * 100L / maxHp` 整数除法，**不足 1% 一律显示 0%** | 保留一位小数，`String.format(Locale.ROOT, "%.1f", ...)`；`Locale.ROOT` 不能省，否则某些区域小数点会变逗号 |
 | 4 | 地图上没有存活 BOSS 时**完全没有输出** | 补一条提示 |
@@ -2206,6 +2206,15 @@ BeiDou 的 `FilePrinter` 已基本废弃（只剩几处注释掉的调用），�
 | 6 | 全部硬编码中文（含 `setDescription`） | 走 i18n（`BossDmgAnalysisCommand.message1~6`） |
 | 7 | `damages.get(attacker.getId())` 每人查两次 | 查一次 |
 | 8 | 输出顺序 = `getAllPlayers()` 的顺序 | 按伤害降序 |
+
+> **⚠️ 复查更正**：第 1 条起初被我判成「`yellowMessage` 是屏幕顶部提示条，后一条顶掉前一条，
+> LK 多人时只看得到最后一个人」，**这是错的**。`yellowMessage` → `sendYellowTip` 发的是
+> `SET_WEEK_EVENT_MESSAGE` + `0xFF`，那是**聊天框里的黄字**，持久且会堆叠。
+> 仓库内两处反证：[`BossHpCommand`](../gms-server/src/main/java/org/gms/client/command/commands/gm1/BossHpCommand.java#L48)
+> 每只 BOSS 连发两条 `yellowMessage`（第二条是 100 字符血量条），
+> [`OnlineCommand`](../gms-server/src/main/java/org/gms/client/command/commands/gm0/OnlineCommand.java#L42)
+> 一次输出几十行。所以 LK 那里**没有功能缺陷**，只是表头与明细两种样式混用。
+> 这条同时给出了本仓库的输出惯例：**表头 `yellowMessage`，明细 `message()`**，本命令已按此统一。
 
 ##### 两处按运营决定，不是技术判断
 
