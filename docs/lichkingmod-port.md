@@ -826,7 +826,7 @@ BeiDou 要改接现有调度方式。
 |---|---|
 | `EventInstanceManager` | ✅ `distributeBossCertificate` / `distributePQClearReward` 两个发奖方法 |
 | `EventManager` | ❌ rejected，见下 |
-| `NPCConversationManager` | ⏸ 挪批次 7（`doGachapon(quantity)` 要连同 4 个 gacha 脚本一起取舍） |
+| `NPCConversationManager` | ✅ 批次 7 gachapon 工作包已落地（`doGachapon(quantity, ticketItemId)`）；`displayCharacterRanks` 零消费终局否决 |
 | `NPCScriptManager` | ❌ rejected，唯一改动是一段整体注释掉的 `createEmptyCMS` |
 | `QuestScriptManager` | — 清单里本来就是 `noise`（`git diff -w` 后无差异），计划书写错了 |
 | `MapScriptMethods` / `ReactorActionManager` | ❌ already-fixed（前者已是中文，后者 `dropRate` 已是 `float`） |
@@ -2102,7 +2102,30 @@ LK 的 `+0.1f` 是靠加宽迟滞带缓解，治标。
 | `@whatdropsfrom` | ✅ 半搬 | 吸收 `#v`/`#z` 物品图标富文本；按怪名搜索保留，不跟 LK 改成按怪 id（同批次 1 对 15 个指令 id 化的否决理由） |
 | `@whodrops` | ❌ already-fixed | 批次 5 已重定向脚本中心「当前地图掉落_物品查询」，LK 的掉率显示/空结果处理均被覆盖 |
 | **倍率券 float 化** | ✅ ported | LK 把 `Server.couponRates` 改 `Map<Integer, Float>`；BeiDou 全链 int → 一并改：`NxcouponsDO.rate`、`Server`、`Character`（expCoupon 三兄弟、`activeCouponRates`、4 个 getter）、`ExpLogger`（记录与落库列，照 V1.5.2 对 world_exp_rate 的同款先例）。V1000.1.7 改列 + 插 5211900/5360900 两张 1.5 倍券。**券要生效还需商城可购**（specialcashitems/commodity 归批次 8 商城组） |
-| **gachapon 16 文件**（15 城市类 + `Leafre` java-new） | ⏸ deferred | **BeiDou 运行时走 `GachaponService` + DB 奖池**（`doGachapon()` 硬编码路径已注释成死代码，池子带有效期/公共池/权重，gms-ui 可管理）。按文件搬是打在死代码上；正确形态：LK 奖池调整 → `gachapon_reward(_pool)` 数据迁移，`gacha 10x` → `GachaponService` 批量抽特性。与 `NPCConversationManager.doGachapon(quantity)`、4 个 gacha 脚本合成一个 **gachapon 工作包**，随第 3 项脚本组做 |
+| **gachapon 16 文件**（15 城市类 + `Leafre` java-new） | ✅ ported | 见下方「gachapon 工作包」 |
+
+#### gachapon 工作包 ✅ 已完成
+
+原本 deferred 的理由成立：**BeiDou 运行时走 `GachaponService` + DB 奖池**
+（`Gachapon.process()` 全仓库零调用，`doGachapon()` 的硬编码路径已注释成死代码；
+池子带有效期/公共池/权重，gms-ui 可管理），按文件搬 LK 的 15 个奖池类是打在死代码上。
+三个提交按「Java 特性 / 奖池数据 / 新扭蛋机」拆开：
+
+| 组 | 处置 | 说明 |
+|---|---|---|
+| `doGachapon(quantity)` + `gachapon.js` | ✅ ported | 连抽转成 `GachaponService.doGachapon(player, gachaponId, quantity, ticketItemId)`：逐抽校验券数与背包空位、抽不成不扣券、连抽汇总成一条对话而不刷聊天框。**券 ID 由脚本传入**，不像 LK 那样写死 5220000（否则远程扭蛋的 5451000 会被扣错）。脚本菜单加十连抽，地名从与 NPC ID 强耦合的硬编码数组换成客户端宏 `#m<mapid>#` |
+| 15 个城市奖池类 → `V1000.1.8` | ✅ ported | LK 的 base→HEAD 增量转数据迁移，198 删 + 407 增。**对齐前提逐项核对过**：BeiDou 的 `server/gachapon/*.java` 与 LK 基线 HeavenMS 2022 完全一致（只差 Cosmic 删掉的 `4006000`），`V1.4.0` 的种子 = 城市数组 + Global 数组合并。三条主线：①12 个城镇的**传奇档原本全空**（只有 Global 兜底的 4 项），LK 给每城配了专属椅子与稀有装备；②公共奖品把消耗类稀有品换成中等强化宝石/水晶——与 `V1000.1.5`「中等宝石可直接从矿石合成」是同一套设计，扭蛋成为制作系统的原料来源；③城镇池按主题重排（卷轴补齐 1%/10%/60% 配对、昭和男女澡堂 85→176 / 45→173、林中之城收窄 65 项） |
+| `Leafre.java` + 神木村扭蛋机 → `V1000.1.9` | ✅ ported | LK 按 mapId 取池，做法是把神木村的 `9200000` 换成 `9100100`；BeiDou 按 npcId 取池，照搬会抽出射手村的池子且平白删一个 NPC。改挂 **`9100111`**——`Npc.wz` 里有资源、`String.wz` 双层有名字、但没有任何地图放置，纯增量。`Map.wz/Map/Map2/240000000.img.xml` 新增 life 槽 23（LK 的 `fh=136` 在本仓库这份地图里是另一段，按 foothold 表重定位到同视觉位置的 `fh=10`） |
+| `MapleGachapon`（BeiDou `Gachapon`） | ⚠ partial | 只采 `LEAFRE` 枚举项与「名字列表从枚举派生」。**否决**：改按 mapId 索引（npcId 更精确，一图多机不冲突）、`cnName` 硬编码中文（走 `I18nUtil`）、档位权重 90/8/2→120/8/2（运营口味，gms-ui 可调）、注释掉玩具城扭蛋机 |
+| `gachaponInfo.js` / `GachaCommand` / `GachaListCommand` | ❌ rejected | LK 的改动全是硬编码汉化；BeiDou 三者都已走 i18n，且 `gachaponInfo.js` 查的是实时 DB 奖池，比 LK 的 Java 数组强 |
+| `gachaponold.js` / `gachaponRemote.js` / `9270043.js` | — | LK 未改动这三个。顺带处理：`gachaponRemote.js` 双层删掉死变量 `curMapName`；`9270043.js` 双层补上漏扣的券（该 NPC 目前未放置在任何地图、也没有奖池，属潜在问题） |
+
+**验证**：225 个新增道具逐个核对存在于 `wz` 与 `String.wz`；`V1000.1.8` 按种子模拟执行后，
+12×3 个池与 LK HEAD **逐项相等**（唯一差异是 pool 9 玩具城普通档少 87 项，
+属 BeiDou 种子既有缺口，动手前就存在）；`V1000.1.9` 反查公共奖品用的
+「12 个同档池都有」交集，已验证在三档上与 LK 的 Global 池逐项相等（32/9/7）。
+
+**遗留**：`Map.wz` 的改动需随 wz 批次同步到 BeiDou-Client（第 6 项）。
 
 ### 批次 8 — 皇家系统（最后决策）
 

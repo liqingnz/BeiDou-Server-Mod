@@ -60,7 +60,7 @@ src/client/command/CommandsExecutor.java	java	220	187	pending
 src/client/command/commands/gm0/BuyBackCommand.java	java	2	2	pending	
 src/client/command/commands/gm0/DisposeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm0/DropLimitCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm0/GachaCommand.java	java	10	6	pending	
+src/client/command/commands/gm0/GachaCommand.java	java	10	6	rejected	LK 改动是硬编码汉化 + 改按 mapId 索引；BeiDou 已走 I18nUtil 且输出格式（#v 图标 + #z 名）更好。批次7 已把 getLootNames/getLootIds 改为从枚举派生，顺带补上原先漏掉的玩具城与冰峰雪域
 src/client/command/commands/gm0/HelpCommand.java	java	1	1	pending	
 src/client/command/commands/gm0/JoinEventCommand.java	java	5	5	pending	
 src/client/command/commands/gm0/LeaveEventCommand.java	java	1	1	pending	
@@ -84,7 +84,7 @@ src/client/command/commands/gm2/BuffMapCommand.java	java	5	3	ported	补 ThunderB
 src/client/command/commands/gm2/ClearSavedLocationsCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/DcCommand.java	java	4	1	pending	
 src/client/command/commands/gm2/EmpowerMeCommand.java	java	1	1	ported	技能数组补 Hero.STANCE（1121002）。LK 用裸数字，按规则1改用常量
-src/client/command/commands/gm2/GachaListCommand.java	java	1	1	pending	
+src/client/command/commands/gm2/GachaListCommand.java	java	1	1	rejected	LK 改动只是给 setDescription 填中文；BeiDou 已是 I18nUtil.getMessage("GachaListCommand.message1")
 src/client/command/commands/gm2/IdCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/ItemCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/ItemDropCommand.java	java	1	1	pending	
@@ -514,7 +514,7 @@ src/scripting/item/ItemScriptManager.java	java	0	0	noise	仅格式化/空白改�
 src/scripting/item/ItemScriptMethods.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/map/MapScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/map/MapScriptMethods.java	java	10	10	already-fixed	gms-server/src/main/java/org/gms/scripting/map/MapScriptMethods.java:38 与 :139 :166 —— 改动只是把勋章提示译成中文，BeiDou 已是中文
-src/scripting/npc/NPCConversationManager.java	java	30	13	deferred	缓，挪至批次7：真增量只有 doGachapon(quantity) 的批量抽奖，它的四个消费方 gachapon.js / gachaponRemote.js / gachaponold.js / 9270043.js 全是批次7 的脚本，且 BeiDou 已有自己的 @gacha 体系，要连同脚本一起取舍。displayCharacterRanks 全仓库零消费，随本行一并终局否决；嘉年华场地文案属汉化。重启条件：批次7 处理 gachapon 系列脚本时
+src/scripting/npc/NPCConversationManager.java	java	30	13	ported	gachapon 工作包（批次7）：doGachapon(quantity) 转成 doGachapon(quantity, ticketItemId) + GachaponService 批量抽；券 ID 由脚本传入，不像 LK 那样写死 5220000。displayCharacterRanks 零消费，终局否决；嘉年华场地文案属汉化不搬
 src/scripting/npc/NPCScriptManager.java	java	9	0	rejected	唯一改动是新增一段被整体注释掉的 createEmptyCMS，其余是 javadoc 空行删除
 src/scripting/portal/PortalPlayerInteraction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/portal/PortalScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -551,21 +551,21 @@ src/server/events/gm/MapleSnowball.java	java	0	0	noise	仅格式化/空白改动
 src/server/expeditions/MapleExpedition.java	java	63	39	ported	统一 addMember/addMemberInt 的判定：检查搬进 addMemberInt（返回码4），addMember 改为委托+返回码映射，保持 BeiDou 的 i18n。【复查更正】初稿称此为「活的配额绕过 BUG」，不成立——addMemberInt 的唯一调用者 scripts/npc/2101014.js 用的是 ARIANT/ARIANT1/ARIANT2，三者都没有 BossLogEntry，attemptBoss 恒放行；而 7 个 BOSS NPC 脚本调的是本来就有检查的 addMember。此次重构是消除两个入口的判定分歧（预防性收敛），不是修复。批次7给BOSS脚本接配额时须处理 2101014.js:169 对返回码4的兜底。EXPEDITION_BOSSES 补克雷塞尔双眼（MobId 新增两个常量）。其余英文→中文硬编码与缩进为噪声
 src/server/expeditions/MapleExpeditionBossLog.java	java	17	9	ported	（1）新增 BALROG_NORMAL/KREXEL/SHOWA/YAOSENG 四个条目——此前无条目使 attemptBoss 直接放行。配套 V1000.0.14 把 bosslog_daily/weekly.bosstype 从 ENUM 改为 VARCHAR(32)：V1.0.3 的 ENUM 只有原五种，新名字严格模式下 INSERT 报错、非严格模式写空串，而 insertPlayerEntry 吞掉 SQLException 后 attemptBoss 仍返回 true，不改表等于白加。（2）PINKBEAN/SCARGA entries 1→2 取 LK 值。（3）新增 attemptBoss(cid, channel, String, log) 重载。（4）修两个真 BUG 且不跟 LK 写法：Calendar.HOUR 是12小时制不动 AM_PM，下午启动会把清空点算成中午、删掉当天上午记录 → 改 HOUR_OF_DAY；set(DAY_OF_WEEK,THURSDAY) 在周日到周三指向未来周四致判定恒真、整张周榜被删 → 回退到最近一个已过去的周四。复查后再去掉12小时窗口：DELETE 按 attempttime<=该周四限定，幂等安全，带窗口时停服跨过周四会让上周记录卡到下周四
 src/server/expeditions/MapleExpeditionType.java	java	26	7	ported	新增 KREXEL(2,30,50,255,5) 与 YAOSENG(1,6,100,255,5)（克雷塞尔仍缺两张 wz 地图，枚举先补齐给批次7用）；新增 getPartInfo() 但走 i18n（ExpeditionType.partInfo.size/level/time），人数一栏用 getMinSize() 而非原始字段。复查修正：时间那栏传的是 registrationMinutes（报名窗口，所有枚举都是5分钟）而非BOSS战时限，文案由「时间限制」改为「报名时限」/Registration window。LK 的 minSize 大改 rejected：纯调参，且 use_enable_solo_expeditions 是同一件事的更彻底做法。LK 重排枚举顺序不搬
-src/server/gachapon/ElNath.java	java	9	4	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/Ellinia.java	java	12	4	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/ElNath.java	java	9	4	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/Ellinia.java	java	12	4	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
 src/server/gachapon/GachaponItems.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/gachapon/Global.java	java	18	4	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/Henesys.java	java	6	4	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/KerningCity.java	java	13	6	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/Ludibrium.java	java	1	1	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/MapleGachapon.java	java	50	44	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/MushroomShrine.java	java	7	7	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/NautilusHarbor.java	java	4	1	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/NewLeafCity.java	java	12	4	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/Perion.java	java	5	5	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/ShowaSpaFemale.java	java	25	12	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/ShowaSpaMale.java	java	25	13	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
-src/server/gachapon/Sleepywood.java	java	12	21	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/Global.java	java	18	4	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/Henesys.java	java	6	4	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/KerningCity.java	java	13	6	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/Ludibrium.java	java	1	1	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/MapleGachapon.java	java	50	44	partial	gachapon 工作包（批次7）：只采 LEAFRE 枚举项与「奖池名列表从枚举派生」。否决 LK 改按 mapId 索引（BeiDou 按 npcId 取 DB 奖池更精确，一图多机也不冲突）、cnName 硬编码中文（走 I18nUtil）、档位权重 90/8/2->120/8/2（属运营口味，gms-ui 可调）、注释掉玩具城扭蛋机（BeiDou 保留）
+src/server/gachapon/MushroomShrine.java	java	7	7	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/NautilusHarbor.java	java	4	1	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/NewLeafCity.java	java	12	4	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/Perion.java	java	5	5	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/ShowaSpaFemale.java	java	25	12	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/ShowaSpaMale.java	java	25	13	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
+src/server/gachapon/Sleepywood.java	java	12	21	ported	gachapon 工作包（批次7）：LK 的奖池数组改动转成 V1000.1.8 数据迁移（198 删 + 407 增，已按种子模拟验证与 LK HEAD 逐项一致）；Java 侧奖池类仍只作数据来源
 src/server/life/ChangeableStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/Element.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MapleLifeFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -741,7 +741,7 @@ src/net/mailing/Verifier.java	java-new	30	0	deferred	同 MailManager，随邮箱
 src/net/server/handlers/VotePingBackHandler.java	java-new	52	0	rejected	LK 全仓库零引用的死代码：extends javax.xml.ws.spi.http.HttpHandler（JAX-WS SPI，JDK11+ 已从 JDK 移除，Java 21 下需额外依赖才编译得过），handle() 里 JSON 解析与 sendResponseHeaders 全被注释掉，只剩一句 System.out.println。真正记票的 UpdateVotePointTask 并不消费它。与 LichDebugCommand 同档
 src/net/server/task/UpdateVotePointTask.java	java-new	143	0	deferred	缓：它不消费 VotePingBackHandler，而是每 5 分钟主动 GET GTOP_PING_BACK_URL 拉 gtop100 的 XML 并解析 entry/pingusername 记票（LK 侧在 Server.java:932 注册）。三个阻塞：需真实 gtop100 站点注册（url 内含 siteid 与 pass）；其 SQL 的 and email is not null 就是「未绑定邮箱投票无效」这条规则，依赖已 deferred 的 MailManager；读写 accounts.lastVoteTime，BeiDou 无此列。另 LK 用 HeavenMS 的 TimerManager 自建调度，移植要改接 BeiDou 现有调度方式，属重写而非搬运。重启条件：确定接入投票站并拿到 siteid/pass + 邮箱验证方案定案
 src/server/MessageBoard.java	java-new	91	0	deferred	缓：本批决定跳过留言板，代码没写。前置已就绪（批次0 建的 message_board 表与 MessageBoardDO/MessageBoardMapper），BeiDou 两个语言层都无任何留言板实现。移植时要修的 LK 问题已查明：单例上的 LinkedList 非线程安全却被多频道并发读写；getMessages 的 SELECT 无 ORDER BY 却用 addFirst 装填，冷启动后顺序与内存态不一致；表名 messageboard 与 messageBoard 大小写混用，Linux MySQL 上会炸；淘汰旧留言的 DELETE 分支里 ps 在循环中反复赋值且未关闭；颜色控制码被拼进持久化内容且与 characterName 列重复。重启条件：决定要做留言板时
-src/server/gachapon/Leafre.java	java-new	74	0	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性；新增蛋机需奖池数据+NPC 脚本
+src/server/gachapon/Leafre.java	java-new	74	0	ported	gachapon 工作包（批次7）：类整体移入 org.gms.server.gachapon.Leafre；扭蛋机改挂 9100111（Npc.wz 已有资源、无地图放置），不照 LK 删掉神木村的 9200000；奖池见 V1000.1.9
 src/server/ultils/RoyalAccount.java	java-new	69	0	pending	
 HeavenMS_LichKingMod.iml	other	22	0	noise	IDE 工程文件
 build.xml	other	73	0	noise	Ant 构建脚本；BeiDou 用 Maven
@@ -1349,8 +1349,8 @@ scripts/npc/ThiefPassword.js	script	0	0	pending	含代码改动；只搬逻辑�
 scripts/npc/commands.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/detectMap.js	script	0	0	ported	gms-server/scripts/npc/detectMap.js 与 scripts-zh-CN/npc/detectMap.js —— 修了两处：getAllPlayers() 是 java.util.List，原实现按数组用 .length/[i]，列表永远为空；选项值用的是含自己在内的原下标，跳过自己后会选中别人
 scripts/npc/detected.js	script	0	0	ported	gms-server/scripts/npc/detected.js 与 scripts-zh-CN/npc/detected.js —— getText() 返回的 java.lang.String 在 GraalVM 下与数字松散比较不做数值转换，改 parseInt 严格比较；去掉「通过检测发1000点券」，那是一条刷点券的路子
-scripts/npc/gachapon.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/gachaponInfo.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/gachapon.js	script	0	0	ported	gachapon 工作包（批次7）：菜单加十连抽，地名从与 NPC ID 强耦合的硬编码数组改为客户端宏 #m<mapid>#；扣券与背包校验移到 Java 侧逐抽进行
+scripts/npc/gachaponInfo.js	script	0	0	rejected	LK 改动是硬编码汉化 + getCnName；BeiDou 该脚本已走 GachaponService 查实时奖池，比 LK 的 Java 硬编码数组强
 scripts/npc/mapleTV.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/scroll_generator.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/waterOfLife.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
