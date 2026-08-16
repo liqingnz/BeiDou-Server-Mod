@@ -38,6 +38,7 @@ function start() {
 
 function action(mode, type, selection) {
     if (mode == 1 && cm.haveItem(5220000)) {
+        cm.gainItem(5220000, -1);
         cm.doGachapon();
         cm.dispose();
     } else {

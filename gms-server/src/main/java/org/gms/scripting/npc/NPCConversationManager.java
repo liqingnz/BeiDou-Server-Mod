@@ -69,6 +69,7 @@ import org.gms.server.partyquest.AriantColiseum;
 import org.gms.server.partyquest.MonsterCarnival;
 import org.gms.server.partyquest.Pyramid;
 import org.gms.server.partyquest.Pyramid.PyramidMode;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 
 import java.awt.*;
@@ -443,6 +444,25 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
 
     public void doGachapon() {
         gachaponService.doGachapon(getPlayer(), npc);
+    }
+
+    /**
+     * 连抽。扣券在 {@link GachaponService} 里逐抽进行，脚本侧不要再扣一次。
+     *
+     * @param ticketItemId 消耗的券道具ID，由脚本传入（本地 5220000 / 远程 5451000）
+     */
+    public void doGachapon(int quantity, int ticketItemId) {
+        List<Integer> gained = gachaponService.doGachapon(getPlayer(), npc, quantity, ticketItemId);
+        if (gained.isEmpty()) {
+            return; // 一次都没抽成，中断原因已经提示过了
+        }
+
+        StringBuilder talkStr = new StringBuilder(I18nUtil.getMessage("GachaMessage.message2"));
+        talkStr.append("\r\n\r\n");
+        for (int itemId : gained) {
+            talkStr.append("#v").append(itemId).append("#   -  #z").append(itemId).append("#\r\n");
+        }
+        sendOk(talkStr.toString());
     }
 
     // public void doGachapon() {

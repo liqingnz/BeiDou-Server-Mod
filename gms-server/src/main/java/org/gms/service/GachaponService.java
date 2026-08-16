@@ -5,6 +5,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.gms.client.Character;
 import org.gms.client.inventory.Item;
+import org.gms.client.inventory.InventoryType;
 import org.gms.dao.entity.GachaponRewardDO;
 import org.gms.dao.entity.GachaponRewardPoolDO;
 import org.gms.dao.mapper.GachaponRewardMapper;
@@ -12,6 +13,7 @@ import org.gms.dao.mapper.GachaponRewardPoolMapper;
 import org.gms.model.dto.GachaponPoolSearchReqDTO;
 import org.gms.model.dto.GachaponPoolSearchRtnDTO;
 import org.gms.net.server.Server;
+import org.gms.scripting.AbstractPlayerInteraction;
 import org.gms.server.ItemInformationProvider;
 import org.gms.server.gachapon.Gachapon;
 import org.gms.server.life.LifeFactory;
@@ -39,6 +41,11 @@ public class GachaponService {
     @Autowired
     private GachaponRewardMapper gachaponRewardMapper;
 
+
+    /** 扭蛋奖池会产出的四类道具，批量抽奖前逐个校验空位 */
+    private static final InventoryType[] GACHAPON_INVENTORY_TYPES = {
+            InventoryType.EQUIP, InventoryType.USE, InventoryType.SETUP, InventoryType.ETC
+    };
 
     private static final HashMap<Integer, List<GachaponRewardDO>> poolRewardsCache = new HashMap<>();
     private static final ReadWriteLock lock = new ReentrantReadWriteLock(true);
@@ -199,13 +206,65 @@ public class GachaponService {
     }
 
     public void doGachapon(Character player, int gachaponId) {
+        GachaponRewardPoolDO pool = pickPool(player, gachaponId);
+        if (pool != null) {
+            doReward(player, pool, true);
+        }
+    }
+
+    /**
+     * 批量抽奖。每抽一次都先校验券数与背包空位，任一项不满足就停在那一抽，之前抽到的照常发放。
+     * 与单抽的 {@link #doGachapon(Character, int)} 不同，扣券由本方法负责，脚本侧不要再扣一次。
+     *
+     * @param quantity     抽取次数
+     * @param ticketItemId 消耗的券道具ID（快乐百宝券 5220000 / 远程快乐百宝券 5451000）
+     * @return 本次实际抽中的道具ID，顺序与抽取顺序一致；中断原因已由本方法直接提示玩家
+     */
+    public List<Integer> doGachapon(Character player, int gachaponId, int quantity, int ticketItemId) {
+        List<Integer> gained = new ArrayList<>(quantity);
+        AbstractPlayerInteraction api = player.getAbstractPlayerInteraction();
+        for (int i = 0; i < quantity; i++) {
+            if (!api.haveItem(ticketItemId, 1)) {
+                player.dropMessage(I18nUtil.getMessage("GachaMessage.message4"));
+                break;
+            }
+            // 奖池里四类道具都有，抽之前四个背包各留一格，避免抽到哪类都可能溢出
+            if (isAnyInventoryFull(player)) {
+                player.dropMessage(I18nUtil.getMessage("GachaMessage.message3"));
+                break;
+            }
+
+            GachaponRewardPoolDO pool = pickPool(player, gachaponId);
+            if (pool == null) {
+                break;
+            }
+            GachaponRewardDO reward = doReward(player, pool, false);
+            if (reward == null) {
+                break; // 奖池为空或背包放不下，没抽成就不扣券
+            }
+            api.gainItem(ticketItemId, (short) -1);
+            gained.add(reward.getItemId());
+        }
+        return gained;
+    }
+
+    private boolean isAnyInventoryFull(Character player) {
+        for (InventoryType type : GACHAPON_INVENTORY_TYPES) {
+            if (player.getInventory(type).isFull()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private GachaponRewardPoolDO pickPool(Character player, int gachaponId) {
         rLock.lock();
         try {
             List<GachaponRewardPoolDO> pools = getActivePools(gachaponId); // 已按ID排序
             if (pools.isEmpty()) {
                 player.message("百宝箱为空，请联系管理员，百宝箱id: " + gachaponId);
                 log.error("百宝箱奖池为空，百宝箱id:{} 抽奖人:[{}] {}", gachaponId, player.getId(), player.getName());
-                return;
+                return null;
             }
 
             int point; // 积分
@@ -238,7 +297,7 @@ public class GachaponService {
                 // 如果三个奖池的权重分别是 8 8 2 / 3 3 3或其他类似的组合，那么有近乎于0（但不等于0）的概率出现null的情况
                 target = pools.getFirst();
             }
-            doReward(player, target);
+            return target;
         } finally {
             rLock.unlock();
         }
@@ -249,12 +308,16 @@ public class GachaponService {
         return activePools.stream().flatMap(pool -> getRewards(pool.getId()).stream()).toList();
     }
 
-    private void doReward(Character player, GachaponRewardPoolDO pool) {
+    /**
+     * @param announce 是否逐条播报到聊天框。批量抽奖时由调用方汇总成一条对话，这里不再刷屏
+     * @return 抽中的奖励；奖池为空或背包放不下时返回 null
+     */
+    private GachaponRewardDO doReward(Character player, GachaponRewardPoolDO pool, boolean announce) {
         List<GachaponRewardDO> poolRewards = getPoolRewards(pool.getId());
         if (poolRewards.isEmpty()) {
             player.message("奖池为空，请联系管理员");
             log.error("百宝箱奖池为空，奖池id:{} 抽奖人:[{}] {}", pool.getId(), player.getId(), player.getName());
-            return;
+            return null;
         }
 
         int random = Randomizer.nextInt(poolRewards.size());
@@ -262,15 +325,18 @@ public class GachaponService {
         Item itemGained = player.getAbstractPlayerInteraction().gainItem(reward.getItemId(), reward.getQuantity(), true, true);
         // 修复背包满导致的空指针
         if (itemGained == null) {
-            return;
+            return null;
         }
-        String gachaponMessage = I18nUtil.getMessage("GachaMessage.message1",player.getMap().getMapName(),reward.getQuantity(),ItemInformationProvider.getInstance().getName(reward.getItemId()));
-        player.dropMessage(gachaponMessage);
+        if (announce) {
+            String gachaponMessage = I18nUtil.getMessage("GachaMessage.message1",player.getMap().getMapName(),reward.getQuantity(),ItemInformationProvider.getInstance().getName(reward.getItemId()));
+            player.dropMessage(gachaponMessage);
+        }
         Gachapon.log(player, reward.getItemId(), player.getMap().getMapName());
 
         if (pool.getNotification()) {
             Server.getInstance().broadcastMessage(player.getWorld(), PacketCreator.gachaponMessage(itemGained, player.getMap().getMapName(), player));
         }
+        return reward;
     }
 
     private List<GachaponRewardDO> getPoolRewards(Integer poolId) {

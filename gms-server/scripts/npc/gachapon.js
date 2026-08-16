@@ -26,12 +26,12 @@
 
 var status;
 var ticketId = 5220000;
-var mapName = ["Henesys", "Ellinia", "Perion", "Kerning City", "Sleepywood", "Mushroom Shrine", "Showa Spa (M)", "Showa Spa (F)", "Ludibrium", "New Leaf City", "El Nath", "Nautilus"];
 var curMapName = "";
 
 function start() {
     status = -1;
-    curMapName = mapName[(cm.getNpc() != 9100117 && cm.getNpc() != 9100109) ? (cm.getNpc() - 9100100) : cm.getNpc() == 9100109 ? 9 : 11];
+    // Let the client resolve the map name, instead of a hardcoded table tied to NPC ids.
+    curMapName = "#m" + cm.getMapId() + "#";
 
     action(1, 0, 0);
 }
@@ -47,17 +47,13 @@ function action(mode, type, selection) {
         }
         if (status == 0 && mode == 1) {
             if (cm.haveItem(ticketId)) {
-                cm.sendYesNo("You may use the " + curMapName + " Gachapon. Would you like to use your Gachapon ticket?");
+                cm.sendSimple("You may use the " + curMapName + " Gachapon. Make sure your inventories have free slots.\r\n\r\n#L1#Draw once#l\r\n#L10#Draw #rten#k times#l");
             } else {
                 cm.sendSimple("Welcome to the " + curMapName + " Gachapon. How may I help you?\r\n\r\n#L0#What is Gachapon?#l\r\n#L1#Where can you buy Gachapon tickets?#l");
             }
         } else if (status == 1 && cm.haveItem(ticketId)) {
-            if (cm.canHold(1302000) && cm.canHold(2000000) && cm.canHold(3010001) && cm.canHold(4000000)) { // One free slot in every inventory.
-                cm.gainItem(ticketId, -1);
-                cm.doGachapon();
-            } else {
-                cm.sendOk("Please have at least one slot in your #rEQUIP, USE, SET-UP, #kand #rETC#k inventories free.");
-            }
+            // Ticket charging and inventory checks happen per draw on the Java side.
+            cm.doGachapon(selection == 10 ? 10 : 1, ticketId);
             cm.dispose();
         } else if (status == 1) {
             if (selection == 0) {

@@ -26,12 +26,12 @@
 
 var status;
 var ticketId = 5220000;
-var mapName = ["射手村", "魔法密林", "勇士部落", "废弃都市", "林中之城", "蘑菇神社", "昭和澡堂（男）", "昭和澡堂（女）", "玩具城", "新叶城", "冰峰雪域", "诺特勒斯号"];
 var curMapName = "";
 
 function start() {
     status = -1;
-    curMapName = mapName[(cm.getNpc() != 9100117 && cm.getNpc() != 9100109) ? (cm.getNpc() - 9100100) : cm.getNpc() == 9100109 ? 9 : 11];
+    // 用客户端的地图名宏，省掉一张与 NPC ID 强耦合的硬编码地名表
+    curMapName = "#m" + cm.getMapId() + "#";
 
     action(1, 0, 0);
 }
@@ -47,17 +47,13 @@ function action(mode, type, selection) {
         }
         if (status == 0 && mode == 1) {
             if (cm.haveItem(ticketId)) {
-                cm.sendYesNo("你可以使用" + curMapName + "快乐百宝箱。你想要使用你的快乐百宝券吗？");
+                cm.sendSimple("你可以使用" + curMapName + "快乐百宝箱，请确保物品栏有足够的空位。\r\n\r\n#L1#抽一次#l\r\n#L10#抽#r十#k次#l");
             } else {
                 cm.sendSimple("欢迎来到" + curMapName + "快乐百宝箱。我可以为您做些什么呢？\r\n\r\n#L0#什么是快乐百宝箱？#l\r\n#L1#在哪里可以购买快乐百宝券？#l");
             }
         } else if (status == 1 && cm.haveItem(ticketId)) {
-            if (cm.canHold(1302000) && cm.canHold(2000000) && cm.canHold(3010001) && cm.canHold(4000000)) { // One free slot in every inventory.
-                cm.gainItem(ticketId, -1);
-                cm.doGachapon();
-            } else {
-                cm.sendOk("请确保你的#r装备、消耗、设置#k和#r其他#k物品栏中至少有一个空位。");
-            }
+            // 扣券与背包校验都在 Java 侧逐抽进行，这里不再预扣
+            cm.doGachapon(selection == 10 ? 10 : 1, ticketId);
             cm.dispose();
         } else if (status == 1) {
             if (selection == 0) {
