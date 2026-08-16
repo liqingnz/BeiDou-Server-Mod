@@ -111,24 +111,38 @@ public class EventRecallCoordinator {
         return entry != null && isRecallableEvent(entry.eim()) ? entry.eim() : null;
     }
 
+    /**
+     * 记下玩家掉出了哪个活动。
+     * <p>
+     * <b>还在同一个活动实例里时要保留 lastRecallAt</b>：不然「掉线→被召回→再掉线」的链条上，
+     * 每次掉线都会把冷却清零，配置的 recall_cooldown 在正常重复召回路径上等于不存在。
+     * 换了新活动实例才重新开始计时。
+     */
     public void storeEventInstance(int characterId, EventInstanceManager eim) {
-        if (GameConfig.getServerBoolean("use_enable_recall_event") && isRecallableEvent(eim)) {
-            eventHistory.put(characterId, new RecallEntry(eim, Server.getInstance().getCurrentTime(), 0));
+        if (!GameConfig.getServerBoolean("use_enable_recall_event") || !isRecallableEvent(eim)) {
+            return;
         }
+        long now = Server.getInstance().getCurrentTime();
+        eventHistory.compute(characterId, (id, prev) -> {
+            long lastRecallAt = prev != null && prev.eim() == eim ? prev.lastRecallAt() : 0;
+            return new RecallEntry(eim, now, lastRecallAt);
+        });
     }
 
     public void manageEventInstances() {
         if (!eventHistory.isEmpty()) {
-            List<Integer> toRemove = new LinkedList<>();
+            List<Entry<Integer, RecallEntry>> toRemove = new LinkedList<>();
 
             for (Entry<Integer, RecallEntry> eh : eventHistory.entrySet()) {
                 if (!isRecallableEvent(eh.getValue().eim())) {
-                    toRemove.add(eh.getKey());
+                    toRemove.add(eh);
                 }
             }
 
-            for (Integer r : toRemove) {
-                eventHistory.remove(r);
+            for (Entry<Integer, RecallEntry> r : toRemove) {
+                // 带值删除：扫描与删除之间，同一角色可能已经从另一个活动掉出并写了新条目，
+                // 只按 key 删会把那条新的也一起清掉
+                eventHistory.remove(r.getKey(), r.getValue());
             }
         }
     }

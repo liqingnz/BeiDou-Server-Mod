@@ -23,6 +23,7 @@ package org.gms.server.quest;
 
 import org.gms.client.Character;
 import org.gms.client.QuestStatus;
+import org.gms.client.inventory.Item;
 import org.gms.client.QuestStatus.Status;
 import org.gms.config.GameConfig;
 import org.gms.constants.game.DelayedQuestUpdate;
@@ -377,7 +378,13 @@ public class Quest {
             return;
         }
 
-        chr.getAbstractPlayerInteraction().gainItem(ItemId.HP_PILL_SMALL, (short) 1);
+        // 背包满时 gainItem 会返回 null，而任务已经完成、不可重复任务也没法重做——
+        // 这颗药丸就永久丢了。至少不能把「没发出去」记成发放成功
+        Item granted = chr.getAbstractPlayerInteraction().gainItem(ItemId.HP_PILL_SMALL, (short) 1, false, true);
+        if (granted == null) {
+            log.warn(I18nUtil.getLogMessage("Quest.warn.grantHpPill.msg1"), chr.getName(), chr.getId(), id);
+            return;
+        }
         log.info(I18nUtil.getLogMessage("Quest.info.grantHpPill.msg1"), chr.getName(), chr.getId(), id, ItemId.HP_PILL_SMALL);
     }
 

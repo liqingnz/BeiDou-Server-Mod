@@ -1664,11 +1664,21 @@ public class AbstractPlayerInteraction {
 
     /**
      * 往全服留言板写一条留言。
+     * <p>
+     * 事务边界在 {@code MessageBoardService.addMessage} 上，异常要穿出那层代理 Spring 才会回滚，
+     * 所以捕获点在这里而不在 service 内部。
      *
-     * @return 写入成功才返回 true。<b>脚本必须按返回值决定扣不扣钱</b>——内容超长或入库失败都会返回 false。
+     * @return 写入成功才返回 true。<b>脚本必须按返回值决定扣不扣钱</b>——内容为空、超长或入库失败都返回 false。
      */
     public boolean addMessageBoardEntry(String message) {
-        return messageBoardService.addMessage(getPlayer(), message);
+        try {
+            messageBoardService.addMessage(getPlayer(), message);
+            return true;
+        } catch (Exception e) {
+            log.error(I18nUtil.getLogMessage("MessageBoardService.addMessage.error1"),
+                    getPlayer().getName(), getPlayer().getId(), e);
+            return false;
+        }
     }
 
 

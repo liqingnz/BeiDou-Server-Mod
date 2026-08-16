@@ -2460,7 +2460,7 @@ LK 用 HeavenMS 的 `TimerManager` 自建调度，搬过来要改接 BeiDou 的�
 `MessageBoardDO`、`MessageBoardMapper`），零外部依赖，是 20 行里唯一能当场做完的。
 
 重写为 Spring `MessageBoardService`，脚本入口挂在 `AbstractPlayerInteraction` 上
-（`cm.getMessageBoard()` / `cm.addMessageBoardEntry(text)`）。修掉的 6 个问题：
+（`cm.getMessageBoard()` / `cm.addMessageBoardEntry(text)`）。修掉的 7 个问题：
 
 | # | 原实现 | 本次 |
 |---|---|---|
@@ -2468,7 +2468,13 @@ LK 用 HeavenMS 的 `TimerManager` 自建调度，搬过来要改接 BeiDou 的�
 | 2 | `getMessages` 的 `SELECT` 无 `ORDER BY` 却用 `addFirst` 装填，冷启动后顺序与内存态不一致 | 随 1 一并消失；排序统一按**自增 id** 而不是 `create_time`——`TIMESTAMP` 只到秒，同秒内多条分不出先后 |
 | 3 | 留言板为空时 `size() == 0` 恒真，每次调用都白查一次库 | 随 1 一并消失 |
 | 4 | 淘汰旧留言是「循环 `DELETE ... LIMIT 1`」，`ps` 每轮重新 prepare 且从不 close | 查出第 30 条的 id，一条 `DELETE ... WHERE id < ?` 解决 |
-| 5 | 颜色控制码 + 角色名拼进 `message` 入库，与 `character_name` 列重复；改名后历史留言显示旧名；40 字上限校验的是原文、入库的却是拼装串 | **只存原文**，名字与颜色码渲染时再拼。「留言时是否为 GM」是历史事实，单独用 `is_gm` 列记 |
+| 5 | 颜色控制码 + 角色名拼进 `message` 入库，与 `character_name` 列重复；40 字上限校验的是原文、入库的却是拼装串 | **只存原文**，名字与颜色码渲染时再拼，长度校验量的就是入库内容。「留言时是否为 GM」是历史事实，单独用 `is_gm` 列记 |
+| 7 | 玩家输入直接拼进 NPC 富文本，可注入 `#e#b` 与换行**伪造一整行 GM 样式的假留言**，`is_gm` 的视觉区分形同虚设 | 入库前剥掉 `#` 与所有 ISO 控制字符，清洗后再量长度 |
+
+> **展示名是快照，不是当前名**：`character_name` 存的是留言当时的角色名，改名后历史留言仍显示旧名。
+> 这是有意的——留言板是历史记录。此前本节把「改名显示旧名」列成了已修问题，属于表述错误，已更正。
+> **并发下「最多 30 条」是最终一致而非严格约束**：两个频道同时留言时，双方都基于当时的 30 行算阈值，
+> 可能短暂留下 31 行，下一次留言会修剪回去。留言板不需要严格上限，不为此加库级串行化。
 | 6 | `addMessage` 捕获 `SQLException` 后**仍返回 `true`**，脚本据此扣钱 —— **入库失败照样扣 50 万** | 失败返回 `false`，脚本先写库成功才扣钱；另补了空内容不可提交 |
 
 > 表名 `messageboard` / `messageBoard` 大小写混用（Linux MySQL 上会炸）在批次 0 建表时就不存在了 ——
@@ -2492,6 +2498,58 @@ LK 用 HeavenMS 的 `TimerManager` 自建调度，搬过来要改接 BeiDou 的�
 
 `deferred` **20 → 8**，且剩下 8 行全部有认领批次与解锁条件。
 批次 6 自身产生的 `deferred` 归零。
+
+#### 批次 6 复查修正（审查范围 `57ef59e00..8c794542e`）
+
+外部静态审查报了 11 条，逐条复核后 **9 条成立并已修，1 条不成立，1 条转为决策项**。
+
+##### 🔴 最严重的一条：G16 的家族过继**从来没有执行过**
+
+`family_character.cid` 上有 `ON DELETE CASCADE`
+（[V1.0.49__some_alter.sql](../gms-server/src/main/resources/db/migration/V1.0.49__some_alter.sql#L8)），
+而 `deleteCharacterById` 里 `charactersMapper.deleteById(cid)` 排在 `reparentFamilyJuniors(cid)` **前面**。
+characters 一删，`family_character` 那行被数据库连带删掉，过继方法查不到 `self` 直接返回 ——
+**整个修复是死代码**，删族长仍然会留下无主家族（只是 `FamilyService` 的判空挡住了 NPE）。
+
+顺带暴露出算法本身也不成立，一并重写：
+
+| 问题 | 修法 |
+|---|---|
+| 调用点在删 characters 之后 | 移到之前 |
+| 家族树是**二叉**的（`FamilyEntry.juniors` 定长 2），无脑把所有下级挂到同一上级会超容。`addJunior` 拒绝时 `setSenior` 已经把 `this.senior` 赋好了 —— **子认父、父不认子**，内存树静默不一致 | 先查新上级已用名额，只在 `2 - used` 个空位内挂接 |
+| 删族长时两个下级都变成 `seniorid = 0`，`loadAllFamilies` 对每个都调 `setLeader`，**最后一行胜出**，族长不确定、家族静默分裂 | 只提拔**一个**下级当新族长（按 cid 升序，结果确定），另一个挂到新族长名下 |
+| 族长那行的 `precepts`（家训）没有转移 | 随位置一起转移给新族长 |
+| `reptosenior` 没清零，与 `FamilyEntry.setSenior` 的语义（`updateDBChangeFamily` 里 `reptosenior = 0`）不一致 | 一并清零 |
+
+> **已知限制（明确不做）**：只做「就近挂接」，**不做二叉树重排**。名额不够时剩余下级维持 `seniorid` 悬空，
+> 行为与本方法引入前一致，`FamilyService` 的判空能兜住，但那棵子树会脱离统计。
+> 这种情况会打 warn 并列出角色 id 供人工处理。完整的树重排是另一个课题，不在移植范围内。
+
+##### 其余 8 条已修
+
+| 位置 | 问题 | 修法 |
+|---|---|---|
+| `EventRecallCoordinator.storeEventInstance` | 每次掉线都把 `lastRecallAt` 重置为 0，**`recall_cooldown` 在「掉线→召回→再掉线」这条正常路径上等于不存在** | 改用 `compute`；还在同一个 `EventInstanceManager` 里就保留原 `lastRecallAt`，换了活动才重新计时 |
+| `EventRecallCoordinator.manageEventInstances` | 先收集 key 再按 key 删；扫描与删除之间同一角色若从新活动掉出，新条目会被误删 | 改带值删除 `remove(key, entry)` |
+| `MessageBoardService.addMessage` | 方法上有 `@Transactional` 却在内部 catch 住异常返回 false —— Spring 看到正常返回**照样提交 insert**，于是 trim 失败时留言进库、脚本因收到 false 不扣钱，**白送一条** | 事务边界留在 service、异常穿出代理；捕获点移到 `AbstractPlayerInteraction`。（不能拆成同类内的两个方法——自调用绕过代理，`@Transactional` 根本不生效） |
+| `MessageBoardService` | 玩家输入直接进 NPC 富文本，可注入 `#e#b` + 换行**伪造 GM 留言行** | 入库前剥掉 `#` 与 ISO 控制字符，清洗后再量长度 |
+| `Quest.grantHpPill` | `gainItem` 在 USE 栏满时静默失败，而任务已完成、不可重复任务无法重做 —— 药丸**永久丢失**却记了成功日志 | 改用返回 `Item` 的重载，`null` 时打 warn 不记成功 |
+| `Character.dispel` | 免驱散只列了冒险家的 `Magician.MAGIC_GUARD` 与 `Beginner.ECHO_OF_HERO`，**炎术士 / Evan 的魔法盾、骑士团 / 战神 / Evan 的英雄回声照样被驱散** | 抽成 `isUndispellableSkill`，覆盖四条职业线全部 7 个 id |
+| `RecallCommand` | `StringUtil.isNumeric` 的正则是 `-?\d+(\.\d+)?`，**放行小数和超 int 范围的长数字**，`parseInt` 照样抛异常 | 去掉 isNumeric，直接 try/catch `NumberFormatException` |
+| §7 本节 | 把「改名后显示旧名」写成了已修问题，实际仍显示留言时的名字 | 更正为「展示名是快照」，并补记「30 条上限是最终一致」 |
+
+##### 1 条不成立：留言板脚本的硬编码文案
+
+审查认为 `9800001.js` 里的 `sendYesNo/sendGetText/sendOk` 文案违反 CLAUDE.md 第 2 条。**不成立**：
+脚本层的 i18n 机制就是 `scripts/`（英文）+ `scripts-<lang>/`（语言覆盖）这套目录分层，
+CLAUDE.md 的 wz/脚本加载一节写得很清楚。仓库里 **722 个 NPC 脚本没有任何一个调用 i18n API**，
+两套 9800001.js 正是按这个约定分别写的中英文本。第 2 条约束的是服务端 Java 代码。
+
+##### 1 条转为决策项：角色名字节上限
+
+审查不赞成把「12 字节容量」实现成「最多 11 字节」，指出 `>= 12` 拒绝的不只是 12 位 ASCII，
+**六个汉字（12 字节）也会被拒**。这个副作用属实，但取值是 G16 决策时定的「照搬原实现」，
+留给运营重新裁定，代码未改。
 
 ### 批次 7 — 数据类
 

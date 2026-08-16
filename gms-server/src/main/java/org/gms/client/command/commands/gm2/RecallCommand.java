@@ -30,7 +30,6 @@ import org.gms.net.server.PlayerStorage;
 import org.gms.net.server.coordinator.world.EventRecallCoordinator;
 import org.gms.scripting.event.EventInstanceManager;
 import org.gms.util.I18nUtil;
-import org.gms.util.StringUtil;
 
 public class RecallCommand extends Command {
     {
@@ -45,11 +44,17 @@ public class RecallCommand extends Command {
             return;
         }
 
-        // GM 手上通常只有名字；纯数字则按角色 id 再找一次
+        // GM 手上通常只有名字；纯数字则按角色 id 再找一次。
+        // 不能只靠 StringUtil.isNumeric 把关——它的正则是 -?\d+(\.\d+)?，
+        // 既放行小数（"1.5"）也放行超出 int 范围的长数字，两种都会让 parseInt 抛异常
         PlayerStorage storage = c.getChannelServer().getPlayerStorage();
         Character victim = storage.getCharacterByName(params[0]);
-        if (victim == null && StringUtil.isNumeric(params[0])) {
-            victim = storage.getCharacterById(Integer.parseInt(params[0]));
+        if (victim == null) {
+            try {
+                victim = storage.getCharacterById(Integer.parseInt(params[0]));
+            } catch (NumberFormatException ignored) {
+                // 不是角色名也不是合法角色 id，下面统一报「找不到」
+            }
         }
         if (victim == null) {
             player.dropMessage(6, I18nUtil.getMessage("RecallCommand.message3", params[0]));

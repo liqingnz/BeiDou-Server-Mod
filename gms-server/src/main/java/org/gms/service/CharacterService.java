@@ -291,10 +291,12 @@ public class CharacterService {
         areaInfoMapper.deleteByQuery(QueryWrapper.create().where(AREA_INFO_D_O.CHARID.eq(cid)));
         // 删除monsterbook
         monsterbookMapper.deleteByQuery(QueryWrapper.create().where(MONSTERBOOK_D_O.CHARID.eq(cid)));
+        // 家族过继必须排在删 characters 之前：family_character.cid 上有
+        // ON DELETE CASCADE（V1.0.49__some_alter.sql），characters 一删，这里就查不到被删者那行了
+        reparentFamilyJuniors(cid);
         // 删除characters
         charactersMapper.deleteById(cid);
-        // 删除family_character：先把下级过继给被删角色的上级，再删他自己那行
-        reparentFamilyJuniors(cid);
+        // 删除family_character（cid 的外键是 ON DELETE CASCADE，上一步通常已经带走，这里兜底）
         familyCharacterMapper.deleteByQuery(QueryWrapper.create().where(FAMILY_CHARACTER_D_O.CID.eq(cid)));
         // 删除famelog
         famelogMapper.deleteByQuery(QueryWrapper.create().where(FAMELOG_D_O.CHARACTERID_TO.eq(cid).or(FAMELOG_D_O.CHARACTERID.eq(cid))));
@@ -347,16 +349,32 @@ public class CharacterService {
     }
 
     /**
-     * 删角色前把他在家族里的下级过继给他的上级，保证家族树不断链。
+     * 家族树是<b>二叉</b>的：{@link org.gms.client.FamilyEntry} 里 {@code juniors} 定长 2。
+     */
+    private static final int FAMILY_JUNIOR_CAPACITY = 2;
+
+    /**
+     * 删角色前把他在家族里的下级重新挂接，保证家族树不断链。<b>必须在删 characters 之前调用</b>——
+     * {@code family_character.cid} 上有 {@code ON DELETE CASCADE}，characters 一删这里就什么都查不到了。
      * <p>
-     * 只删被删角色自己那行的话，下级的 {@code seniorid} 会指向一个已经不存在的角色：
+     * 不处理的话，下级的 {@code seniorid} 会指向一个已经不存在的角色：
      * {@code FamilyService.loadAllFamilies} 找不到 senior 就把他们丢进 unmatchedJuniors 且永远匹配不上；
      * 更要命的是<b>被删的如果是族长</b>，整个家族再没有任何一行 {@code seniorid <= 0}，
-     * {@code family.getLeader()} 返回 null，收尾那句 {@code getLeader().doFullCount()} 直接 NPE，
-     * 服务器启动时整个家族系统的加载就断在这里。
+     * {@code family.getLeader()} 返回 null，收尾那句 {@code getLeader().doFullCount()} 直接 NPE。
      * <p>
-     * 过继之后：删普通成员，他的下级挂到他上级名下，树仍连通；删族长，他的下级 seniorid 变成 0，
-     * 其中一个会成为新族长（{@code loadAllFamilies} 按 {@code seniorid <= 0} 判定），家族不至于无主。
+     * 挂接规则，两条硬约束都必须守住：
+     * <ol>
+     *   <li><b>一个家族最多一个根</b>。{@code loadAllFamilies} 对每个 {@code seniorid <= 0} 的行都调
+     *       {@code setLeader}，多于一个就会「最后一行胜出」，族长不确定、家族静默分裂。
+     *       所以删族长时只提拔一个下级当新族长，另一个挂到新族长名下。</li>
+     *   <li><b>新上级的下级数不能超过 {@value #FAMILY_JUNIOR_CAPACITY}</b>。超了 {@code FamilyEntry.addJunior}
+     *       会拒绝，而 {@code setSenior} 在拒绝前已经把 {@code this.senior} 赋好了 —— 子认父、父不认子，
+     *       内存树静默不一致、人数统计也错。</li>
+     * </ol>
+     * <p>
+     * <b>已知限制</b>：这里只做「就近挂接」，不做二叉树重排。名额不够时剩下的下级维持原样（{@code seniorid}
+     * 悬空），行为与本方法引入前一致 —— {@code FamilyService} 那道判空能兜住，但那棵子树会脱离统计。
+     * 这种情况会打 warn 并列出角色 id，需要人工处理。真要做完整重排是另一个课题。
      */
     private void reparentFamilyJuniors(int cid) {
         FamilyCharacterDO self = familyCharacterMapper.selectOneByQuery(
@@ -365,9 +383,60 @@ public class CharacterService {
             return;     // 不在任何家族里
         }
 
+        // 按 cid 升序取，保证同样的数据每次跑出同样的结果，不依赖 selectAll 的返回顺序
+        List<FamilyCharacterDO> juniors = familyCharacterMapper.selectListByQuery(
+                QueryWrapper.create().where(FAMILY_CHARACTER_D_O.SENIORID.eq(cid))
+                        .orderBy(FAMILY_CHARACTER_D_O.CID.asc()));
+        if (juniors.isEmpty()) {
+            return;
+        }
+
         int newSeniorId = Optional.ofNullable(self.getSeniorid()).orElse(0);
-        FamilyCharacterDO update = FamilyCharacterDO.builder().seniorid(newSeniorId).build();
-        familyCharacterMapper.updateByQuery(update, QueryWrapper.create().where(FAMILY_CHARACTER_D_O.SENIORID.eq(cid)));
+        List<Integer> placed = new ArrayList<>();
+        if (newSeniorId <= 0) {
+            // 被删的是族长：提拔第一个下级当新族长，其余挂到新族长名下。
+            // precepts（家训）挂在族长那一行上，要跟着位置一起转移，否则家族公告凭空消失
+            int newLeaderId = juniors.get(0).getCid();
+            familyCharacterMapper.updateByQuery(
+                    FamilyCharacterDO.builder().seniorid(0).reptosenior(0).precepts(self.getPrecepts()).build(),
+                    QueryWrapper.create().where(FAMILY_CHARACTER_D_O.CID.eq(newLeaderId)));
+            placed.add(newLeaderId);
+            placeWithinCapacity(newLeaderId, juniors.subList(1, juniors.size()), placed);
+        } else {
+            placeWithinCapacity(newSeniorId, juniors, placed);
+        }
+
+        List<Integer> stranded = juniors.stream().map(FamilyCharacterDO::getCid)
+                .filter(id -> !placed.contains(id)).toList();
+        if (!stranded.isEmpty()) {
+            log.warn(I18nUtil.getLogMessage("CharacterService.reparentFamilyJuniors.warn1"), cid, stranded);
+        }
+    }
+
+    /**
+     * 在 {@code newSeniorId} 的剩余名额内挂接下级，放不下的留给调用方记账。
+     */
+    private void placeWithinCapacity(int newSeniorId, List<FamilyCharacterDO> juniors, List<Integer> placed) {
+        long used = familyCharacterMapper.selectCountByQuery(
+                QueryWrapper.create().where(FAMILY_CHARACTER_D_O.SENIORID.eq(newSeniorId)));
+        int free = (int) (FAMILY_JUNIOR_CAPACITY - used);
+        if (free <= 0) {
+            return;
+        }
+        moveJuniorsTo(newSeniorId, juniors.subList(0, Math.min(free, juniors.size())), placed);
+    }
+
+    private void moveJuniorsTo(int newSeniorId, List<FamilyCharacterDO> juniors, List<Integer> placed) {
+        if (juniors.isEmpty()) {
+            return;
+        }
+        List<Integer> ids = juniors.stream().map(FamilyCharacterDO::getCid).toList();
+        // reptosenior 一并清零：换了上级之后，攒给旧上级的声望不该带过去，
+        // 这也是 FamilyEntry.setSenior 的语义（见 updateDBChangeFamily 里的 reptosenior = 0）
+        familyCharacterMapper.updateByQuery(
+                FamilyCharacterDO.builder().seniorid(newSeniorId).reptosenior(0).build(),
+                QueryWrapper.create().where(FAMILY_CHARACTER_D_O.CID.in(ids)));
+        placed.addAll(ids);
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)

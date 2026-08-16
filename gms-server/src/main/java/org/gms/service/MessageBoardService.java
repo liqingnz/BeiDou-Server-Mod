@@ -42,30 +42,51 @@ public class MessageBoardService {
 
     /**
      * 写一条留言，并把超出 {@link #MESSAGE_SIZE} 的旧留言删掉。
+     * <p>
+     * <b>异常故意不在这里 catch</b>，要让它穿出事务代理，Spring 才会回滚。在事务方法内部捕获再
+     * {@code return false}，Spring 看到的是正常返回，insert 照样提交 —— 结果是 trim 失败时留言进了库、
+     * 调用方却因为收到 false 不扣钱，白送一条。调用方
+     * {@code AbstractPlayerInteraction.addMessageBoardEntry} 负责兜住异常并转成 false。
      *
-     * @return 写入成功返回 true；内容超长或入库失败返回 false。<b>调用方要按返回值决定扣不扣钱</b>——
-     * 原实现无论如何都返回 true，DB 抛异常时玩家照样被扣掉留言费。
+     * @throws IllegalArgumentException 内容为空或超长
      */
     @Transactional(rollbackFor = Exception.class)
-    public boolean addMessage(Character chr, String message) {
-        if (message == null || message.isBlank() || message.length() > CHARACTER_LIMIT) {
-            return false;
+    public void addMessage(Character chr, String message) {
+        String sanitized = sanitize(message);
+        if (sanitized.isEmpty() || sanitized.length() > CHARACTER_LIMIT) {
+            throw new IllegalArgumentException("message board entry rejected, length=" + sanitized.length());
         }
 
-        try {
-            messageBoardMapper.insertSelective(MessageBoardDO.builder()
-                    .characterId(chr.getId())
-                    .characterName(chr.getName())
-                    .message(message)
-                    .isGm(chr.isGM())
-                    .createTime(new Date())
-                    .build());
-            trimOldMessages();
-            return true;
-        } catch (Exception e) {
-            log.error(I18nUtil.getLogMessage("MessageBoardService.addMessage.error1"), chr.getName(), chr.getId(), e);
-            return false;
+        messageBoardMapper.insertSelective(MessageBoardDO.builder()
+                .characterId(chr.getId())
+                .characterName(chr.getName())
+                .message(sanitized)
+                .isGm(chr.isGM())
+                .createTime(new Date())
+                .build());
+        trimOldMessages();
+    }
+
+    /**
+     * 留言原文会被直接拼进 NPC 富文本，必须先把控制字符清掉。
+     * <p>
+     * 不清的话，普通玩家输入 {@code #e#b} 加换行就能在留言板上伪造出一行 GM 样式的假留言，
+     * {@code is_gm} 那点视觉区分形同虚设；{@code #L..#} 之类还会插进 NPC 的可选择链接。
+     * 长度校验放在清洗<b>之后</b>，量的是真正入库的内容。
+     */
+    private static String sanitize(String message) {
+        if (message == null) {
+            return "";
         }
+        StringBuilder sb = new StringBuilder(message.length());
+        message.codePoints().forEach(cp -> {
+            // 全限定名是必须的：本文件 import 的 Character 是 org.gms.client.Character
+            if (cp == '#' || java.lang.Character.isISOControl(cp)) {
+                return;     // '#' 是 NPC 富文本的控制码前缀，换行/回车等一并去掉
+            }
+            sb.appendCodePoint(cp);
+        });
+        return sb.toString().trim();
     }
 
     /**

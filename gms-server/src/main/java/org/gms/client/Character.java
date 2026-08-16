@@ -2448,6 +2448,19 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
+    /**
+     * 驱散时保留的技能。魔法盾与英雄的回声掉了基本等于秒死，所以豁免。
+     * <p>
+     * 四条职业线的同名技能 id 各不相同，必须全部列出：只判冒险家那两个的话，
+     * 炎术士、Evan 的魔法盾和骑士团、战神、Evan 的英雄回声照样会被驱散，
+     * 同一个机制在不同职业上表现不一致。
+     */
+    private static boolean isUndispellableSkill(int sourceId) {
+        return sourceId == Magician.MAGIC_GUARD || sourceId == BlazeWizard.MAGIC_GUARD || sourceId == Evan.MAGIC_GUARD
+                || sourceId == Beginner.ECHO_OF_HERO || sourceId == Noblesse.ECHO_OF_HERO
+                || sourceId == Legend.ECHO_OF_HERO || sourceId == Evan.ECHO_OF_HERO;
+    }
+
     public void dispel() {
         if (!(GameConfig.getServerBoolean("use_undispel_holy_shield") && this.hasActiveBuff(Bishop.HOLY_SHIELD))) {
             List<BuffStatValueHolder> mbsvhList = getAllStatups();
@@ -2455,7 +2468,7 @@ public class Character extends AbstractCharacterObject {
                 if (mbsvh.effect.isSkill()) {
                     // 魔法盾与英雄的回声不随驱散消失：法师被驱散后若连魔法盾一起掉，基本等于秒死
                     int buffId = mbsvh.effect.getBuffSourceId();
-                    if (buffId != Aran.COMBO_ABILITY && buffId != Magician.MAGIC_GUARD && buffId != Beginner.ECHO_OF_HERO) { // check discovered thanks to Croosade dev team
+                    if (buffId != Aran.COMBO_ABILITY && !isUndispellableSkill(buffId)) { // check discovered thanks to Croosade dev team
                         cancelEffect(mbsvh.effect, false, mbsvh.startTime);
                     }
                 }
