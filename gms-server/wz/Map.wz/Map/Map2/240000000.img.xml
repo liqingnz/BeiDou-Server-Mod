@@ -672,6 +672,19 @@
       <int name="rx0" value="-458"/>
       <int name="rx1" value="-358"/>
     </imgdir>
+    <imgdir name="23">
+      <string name="type" value="n"/>
+      <string name="id" value="9100111"/>
+      <int name="x" value="-420"/>
+      <int name="y" value="-216"/>
+      <int name="mobTime" value="0"/>
+      <int name="f" value="0"/>
+      <int name="hide" value="0"/>
+      <int name="fh" value="10"/>
+      <int name="cy" value="-208"/>
+      <int name="rx0" value="-440"/>
+      <int name="rx1" value="-400"/>
+    </imgdir>
   </imgdir>
   <imgdir name="reactor">
   </imgdir>

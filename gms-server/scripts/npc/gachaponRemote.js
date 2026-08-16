@@ -26,13 +26,9 @@
 
 var status;
 var ticketId = 5451000;
-var mapName = ["Henesys", "Ellinia", "Perion", "Kerning City", "Sleepywood", "Mushroom Shrine", "Showa Spa (M)", "Showa Spa (F)", "New Leaf City", "Nautilus"];
-var curMapName = "";
 
 function start() {
     status = -1;
-    curMapName = mapName[(cm.getNpc() != 9100117 && cm.getNpc() != 9100109) ? (cm.getNpc() - 9100100) : cm.getNpc() == 9100109 ? 8 : 9];
-
     action(1, 0, 0);
 }
 

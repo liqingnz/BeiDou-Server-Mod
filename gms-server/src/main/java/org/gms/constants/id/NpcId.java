@@ -30,6 +30,7 @@ public class NpcId {
     public static final int GACHAPON_LUDIBRIUM = 9100108;
     public static final int GACHAPON_NLC = 9100109;
     public static final int GACHAPON_EL_NATH = 9100110;
+    public static final int GACHAPON_LEAFRE = 9100111;
     public static final int GACHAPON_NAUTILUS = 9100117;
 
     public static final int GACHAPON_MIN = GACHAPON_HENESYS;

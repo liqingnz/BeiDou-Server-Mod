@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.gms.server.ItemInformationProvider;
 import org.gms.util.Randomizer;
 
+import java.util.Arrays;
+
 /**
  * @author Alan (SharpAceX)
  */
@@ -43,19 +45,20 @@ public class Gachapon {
 
     public enum GachaponType {
 
-        GLOBAL(-1, -1, -1, -1, new Global()),
-        HENESYS(NpcId.GACHAPON_HENESYS, 90, 8, 2, new Henesys()),
-        ELLINIA(NpcId.GACHAPON_ELLINIA, 90, 8, 2, new Ellinia()),
-        PERION(NpcId.GACHAPON_PERION, 90, 8, 2, new Perion()),
-        KERNING_CITY(NpcId.GACHAPON_KERNING, 90, 8, 2, new KerningCity()),
-        SLEEPYWOOD(NpcId.GACHAPON_SLEEPYWOOD, 90, 8, 2, new Sleepywood()),
-        MUSHROOM_SHRINE(NpcId.GACHAPON_MUSHROOM_SHRINE, 90, 8, 2, new MushroomShrine()),
-        SHOWA_SPA_MALE(NpcId.GACHAPON_SHOWA_MALE, 90, 8, 2, new ShowaSpaMale()),
-        SHOWA_SPA_FEMALE(NpcId.GACHAPON_SHOWA_FEMALE, 90, 8, 2, new ShowaSpaFemale()),
-        LUDIBRIUM(NpcId.GACHAPON_LUDIBRIUM, 90, 8, 2, new Ludibrium()),
-        NEW_LEAF_CITY(NpcId.GACHAPON_NLC, 90, 8, 2, new NewLeafCity()),
-        EL_NATH(NpcId.GACHAPON_EL_NATH, 90, 8, 2, new ElNath()),
-        NAUTILUS_HARBOR(NpcId.GACHAPON_NAUTILUS, 90, 8, 2, new NautilusHarbor());
+        GLOBAL(-1, -1, -1, -1, null, new Global()),
+        HENESYS(NpcId.GACHAPON_HENESYS, 90, 8, 2, "GachaCommand.message2", new Henesys()),
+        ELLINIA(NpcId.GACHAPON_ELLINIA, 90, 8, 2, "GachaCommand.message3", new Ellinia()),
+        PERION(NpcId.GACHAPON_PERION, 90, 8, 2, "GachaCommand.message4", new Perion()),
+        KERNING_CITY(NpcId.GACHAPON_KERNING, 90, 8, 2, "GachaCommand.message5", new KerningCity()),
+        SLEEPYWOOD(NpcId.GACHAPON_SLEEPYWOOD, 90, 8, 2, "GachaCommand.message6", new Sleepywood()),
+        MUSHROOM_SHRINE(NpcId.GACHAPON_MUSHROOM_SHRINE, 90, 8, 2, "GachaCommand.message7", new MushroomShrine()),
+        SHOWA_SPA_MALE(NpcId.GACHAPON_SHOWA_MALE, 90, 8, 2, "GachaCommand.message8", new ShowaSpaMale()),
+        SHOWA_SPA_FEMALE(NpcId.GACHAPON_SHOWA_FEMALE, 90, 8, 2, "GachaCommand.message9", new ShowaSpaFemale()),
+        LUDIBRIUM(NpcId.GACHAPON_LUDIBRIUM, 90, 8, 2, "GachaCommand.message15", new Ludibrium()),
+        NEW_LEAF_CITY(NpcId.GACHAPON_NLC, 90, 8, 2, "GachaCommand.message10", new NewLeafCity()),
+        EL_NATH(NpcId.GACHAPON_EL_NATH, 90, 8, 2, "GachaCommand.message16", new ElNath()),
+        LEAFRE(NpcId.GACHAPON_LEAFRE, 90, 8, 2, "GachaCommand.message17", new Leafre()),
+        NAUTILUS_HARBOR(NpcId.GACHAPON_NAUTILUS, 90, 8, 2, "GachaCommand.message11", new NautilusHarbor());
 
         private static final GachaponType[] values = GachaponType.values();
 
@@ -65,13 +68,16 @@ public class Gachapon {
         private final int common;
         private final int uncommon;
         private final int rare;
+        /** i18n 键；GLOBAL 是兜底奖池、不对应任何扭蛋机，为 null */
+        private final String nameKey;
 
-        GachaponType(int npcid, int c, int u, int r, GachaponItems g) {
+        GachaponType(int npcid, int c, int u, int r, String nameKey, GachaponItems g) {
             this.npcId = npcid;
             this.gachapon = g;
             this.common = c;
             this.uncommon = u;
             this.rare = r;
+            this.nameKey = nameKey;
         }
 
         private int getTier() {
@@ -105,34 +111,17 @@ public class Gachapon {
             return null;
         }
 
+        /** 真实存在的扭蛋机，按枚举顺序，不含兜底的 GLOBAL */
+        private static GachaponType[] machines() {
+            return Arrays.stream(values).filter(g -> g.nameKey != null).toArray(GachaponType[]::new);
+        }
+
         public static String[] getLootNames() {
-            return new String[]{
-                    I18nUtil.getMessage("GachaCommand.message2"),
-                    I18nUtil.getMessage("GachaCommand.message3"),
-                    I18nUtil.getMessage("GachaCommand.message4"),
-                    I18nUtil.getMessage("GachaCommand.message5"),
-                    I18nUtil.getMessage("GachaCommand.message6"),
-                    I18nUtil.getMessage("GachaCommand.message7"),
-                    I18nUtil.getMessage("GachaCommand.message8"),
-                    I18nUtil.getMessage("GachaCommand.message9"),
-                    I18nUtil.getMessage("GachaCommand.message10"),
-                    I18nUtil.getMessage("GachaCommand.message11")
-            };
+            return Arrays.stream(machines()).map(g -> I18nUtil.getMessage(g.nameKey)).toArray(String[]::new);
         }
 
         public static int[] getLootIds() {
-            return new int[]{
-                    NpcId.GACHAPON_HENESYS,
-                    NpcId.GACHAPON_ELLINIA,
-                    NpcId.GACHAPON_PERION,
-                    NpcId.GACHAPON_KERNING,
-                    NpcId.GACHAPON_SLEEPYWOOD,
-                    NpcId.GACHAPON_MUSHROOM_SHRINE,
-                    NpcId.GACHAPON_SHOWA_MALE,
-                    NpcId.GACHAPON_SHOWA_FEMALE,
-                    NpcId.GACHAPON_NLC,
-                    NpcId.GACHAPON_NAUTILUS
-            };
+            return Arrays.stream(machines()).mapToInt(GachaponType::getNpcId).toArray();
         }
     }
 

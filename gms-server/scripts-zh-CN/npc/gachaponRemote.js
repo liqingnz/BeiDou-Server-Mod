@@ -26,13 +26,9 @@
 
 var status;
 var ticketId = 5451000;
-var mapName = ["射手村", "魔法密林", "勇士部落", "废弃都市", "林中之城", "蘑菇神社", "昭和澡堂（男）", "昭和澡堂（女）", "新叶城", "诺特勒斯号"];
-var curMapName = "";
 
 function start() {
     status = -1;
-    curMapName = mapName[(cm.getNpc() != 9100117 && cm.getNpc() != 9100109) ? (cm.getNpc() - 9100100) : cm.getNpc() == 9100109 ? 8 : 9];
-
     action(1, 0, 0);
 }
 
