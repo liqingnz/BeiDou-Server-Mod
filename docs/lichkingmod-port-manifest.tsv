@@ -358,7 +358,7 @@ src/net/server/channel/handlers/PetExcludeItemsHandler.java	java	0	0	noise	仅�
 src/net/server/channel/handlers/PetFoodHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/PetLootHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/PlayerInteractionHandler.java	java	16	13	pending	
-src/net/server/channel/handlers/PlayerLoggedinHandler.java	java	8	3	pending	
+src/net/server/channel/handlers/PlayerLoggedinHandler.java	java	8	3	ported	判定下沉到 EventRecallCoordinator.recallEventInstance 后，本文件的召回调用点无需改动。LK 侧另两处：未使用的 import client.command.commands.gm4.LichDebugCommand（批次5残留）为噪声；GM 登录广播改中文，BeiDou :402 早已是中文，已是同等状态。记录不做：该行硬编码中文违反规则2，属存量且不在本次改动行上
 src/net/server/channel/handlers/PlayerMapTransitionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/QuestActionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/QuickslotKeyMappedModifiedHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -416,7 +416,7 @@ src/net/server/coordinator/partysearch/PartySearchCharacter.java	java	0	0	noise	
 src/net/server/coordinator/partysearch/PartySearchEchelon.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/coordinator/partysearch/PartySearchStorage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/coordinator/session/MapleSessionCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/coordinator/world/MapleEventRecallCoordinator.java	java	9	2	pending	
+src/net/server/coordinator/world/MapleEventRecallCoordinator.java	java	9	2	ported	召回后不再 remove 条目（改为可重复召回、由冷却约束），并加入掉线时刻与上次召回时刻。不照搬 LK 的实现，两处从数据结构上改掉：（1）LK 另开一张 lastRecallTime map，只 put 从不 remove 也不在 manageEventInstances 清理范围内，是按角色 id 无限增长的内存泄漏——这里把两个时间戳并进 RecallEntry record，交给已有的清理任务回收。（2）LK 用 player.getLastLogoutTime() 判断掉线多久，BeiDou 没有这个东西（lastLogoutTime 只是 characters 表一列，logOff 写入从不读回内存）——改用 storedAt，因为 storeEventInstance 正是在 EventInstanceManager.playerDisconnected 里调用的，那就是掉出活动的时刻，语义比登出时刻更准。判定整个下沉到 recallEventInstance，用 CAS(replace) 避免并发重复召回。另加 peekEventInstance 供 GM 指令使用（不受时限冷却约束、不计冷却）。已知取舍已写进 javadoc：v83 客户端退出游戏与网络掉线都是直接关 socket（同走 Client.channelInactive），服务端无法区分，故脱战重登也会被放回活动；异常状态本身不会被刷掉（playerdiseases 表持久化剩余时长，登录时重新施加），收益有限，当前有意接受
 src/net/server/coordinator/world/MapleInviteCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/coordinator/world/MapleMonsterAggroCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/guild/MapleAlliance.java	java	1	1	pending	
@@ -720,7 +720,7 @@ src/client/command/commands/gm1/WhoDrops2Command.java	java-new	103	0	already-fix
 src/client/command/commands/gm2/CosPreviewCommand.java	java-new	119	0	ported	org/gms/client/command/commands/gm2/CosPreviewCommand.java；默认走 Salon.js，LK 遍历分支保留需显式传参
 src/client/command/commands/gm2/ItemDropTimedCommand.java	java-new	111	0	ported	org/gms/client/command/commands/gm2/ItemDropCommand.java；不新开指令。LK 版是 HeavenMS ItemDropCommand 的整份复制，逐行比对后唯一的功能增量就是给非宠物道具 setExpiration，因此改为既有 @drop 的可选第三参（有效期分钟数，沿用 LK 的 1440 上限），加解析保护。LK 宠物分支把同一个「分钟」参数当天数用，语义自相矛盾，未跟；LK 注释掉的 setOwner 与 gmLevel 判据由 4 改 3 也未跟，保留 BeiDou 现状
 src/client/command/commands/gm2/PatrolCommand.java	java-new	118	0	ported	org/gms/client/command/commands/gm2/PatrolCommand.java；巡逻队列挪进 CommandManager 修多GM互抢，递归改循环
-src/client/command/commands/gm2/RecallCommand.java	java-new	85	0	pending	
+src/client/command/commands/gm2/RecallCommand.java	java-new	85	0	ported	新增 @recall（gm2，V1000.0.17 注册 command_info）。不照搬 LK 那版：85 行里 40 行是注释掉的旧实现（不搬）；4 条硬编码中文改走 i18n（RecallCommand.message1~5）；Integer.parseInt 无 try/catch，GM 输错就 NumberFormatException，改为先按角色名查、纯数字再按 id 查（用 StringUtil.isNumeric，与同目录 DcCommand 同款写法）
 src/client/command/commands/gm4/DeleteAccountCommand.java	java-new	108	0	already-fixed	org/gms/service/CharacterService.java:548 deleteAccount 已实现且严格优于 LK 版：@Transactional、逐个角色先下线再删、清 8 张账号级关联表以及 ExtendValue 的三种账号级类型；LK 版无事务，只删 hwidaccounts/quickslotkeymapped/storages/accounts 四张，照搬会留孤儿数据。入口已挂在 org/gms/controller/AccountController.java:79，不再另做游戏内 GM 指令
 src/client/command/commands/gm4/DeleteCharacterCommand.java	java-new	95	0	already-fixed	org/gms/service/CharacterService.java:524 deleteCharacterWithOnlineCheck 已实现（在线先下线再删，离线直接删）。CLAUDE.md 点名的 deleteCharacterEntry NPE 风险由同文件:535 safeDeleteCharacterEntry 兜住，LK 版没有这个兜底。入口已挂在 org/gms/controller/CharacterController.java:68，不再另做游戏内 GM 指令
 src/client/command/commands/gm4/DropProEquipCommand.java	java-new	90	0	rejected	不建独立类。与 ProEquipCommand 逐字重复，唯一区别是 spawnItemDrop 而非 addFromDrop，已合并成 @proequip 的第三个参数 drop（见 org/gms/client/command/commands/gm4/ProEquipCommand.java）

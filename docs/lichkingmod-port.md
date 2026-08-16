@@ -1085,7 +1085,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G9** ✅ | 技能平衡 | `MapleStatEffect`、`AranComboHandler`、`SpecialMoveHandler`、`gm2/BuffMapCommand`、`gm2/EmpowerMeCommand`、`constants/skills/Corsair`、`AssignAPProcessor` | `aran_combo_last_time`、`aran_combo_gm_bonus`、`battleship_hp_per_skill_level`、`battleship_hp_per_level`、`battleship_stance`、`mana_reflection_stance`、`marksman_blind_stance`、`use_gm_no_skill_cooldown`、`fast_reuse_hero_will_divisor` |
 | **G10** ✅ | 等级上限 | `constants/game/GameConstants` | `max_level_cap`、`cygnus_max_level_cap` |
 | **G11** ✅ | 自动喂药重复消耗 | `PetAutoPotHandler`、`PetAutopotProcessor` | — |
-| **G12** | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
+| **G12** ✅ | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
 | **G13** | 雇佣商店存续天数 | `maps/HiredMerchant` | `merchant_expire_time` |
 | **G14** | `@analysis` BOSS 伤害占比 | `gm0/BossDmgAnalysisCommand`（批次 1 挪来） | — |
 | **G15** | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`quest/requirements/MinLevelRequirement`、`UseItemHandler` | — |
@@ -2057,6 +2057,72 @@ LK 的 `+0.1f` 是靠加宽迟滞带缓解，治标。
 没有 701000000 / 702000000 / 702070400 / 701010322 的条目，`MapFactory.loadPlaceName` 回退空串，
 `@goto` 列表会渲染成 `'shanghai' - #b#k`。中文部署（本仓库默认）不受影响。
 补英文名要动 `wz/String.wz`，**按既定约定 img.xml 类改动统一留到 wz 批次**，届时一并处理。
+
+#### G12 — 活动召回限制 ✅ 已完成
+
+前提：`use_enable_recall_event` 在 BeiDou **默认 `false`**（[V1.7.0:91](../gms-server/src/main/resources/db/migration/V1.7.0__create_game_config.sql#L91)），整套功能默认关闭。
+
+##### LK 的实现有两个缺陷，从数据结构上改掉
+
+| LK | 问题 | 本次做法 |
+|---|---|---|
+| 另开一张 `lastRecallTime` map 做冷却 | **只 put 从不 remove**，也不在 `manageEventInstances()` 清理范围内 —— 按角色 id 无限增长的**内存泄漏** | 两个时间戳并进 `RecallEntry` record，交给已有清理任务一并回收 |
+| 用 `player.getLastLogoutTime()` 判断掉线多久 | **BeiDou 没有这个东西**。`lastLogoutTime` 只是 `characters` 表一列，`logOff()` 写进去、**从不读回内存**，`Character` 上没有 getter | 改用 `storedAt`。`storeEventInstance` 正是在 [`EventInstanceManager.playerDisconnected`](../gms-server/src/main/java/org/gms/scripting/event/EventInstanceManager.java#L604) 里调用的，那就是**掉出活动**的时刻，比「登出时刻」更贴近语义 |
+
+判定整个下沉到 `recallEventInstance()`（handler 侧零改动），用 `replace` 做 CAS 避免并发重复召回；
+另加 `peekEventInstance()` 供 GM 指令用——不受时限与冷却约束，也不计入冷却。
+
+LK 用同一个 `MAX_RECALL_TIME` 同时当时限和冷却，这里按计划书拆成两个键，默认值相同 = 行为等价但可分开调。
+
+##### 「remove → get」的取舍（已确认收下）
+
+召回成功后条目**不再删除**（原实现是 `remove`，一次性）。保留的理由：GM 的 `@recall` 需要历史还在，
+登录时序出岔子时还能补救；重复召回由冷却约束，条目在活动结束后由 `manageEventInstances()` 回收。
+
+##### ⚠️ 已知取舍：脱战重登不受惩罚
+
+**v83 客户端退出游戏与网络掉线都是直接关 socket**，同走 [`Client.channelInactive`](../gms-server/src/main/java/org/gms/client/Client.java#L270) →
+`closeMapleSession()` → `disconnect()`，服务端**没有任何区分信号**（`inTransition` 只区分换频道/进商城）。
+
+所以「快死了先退游戏、再登回来」的玩家也会在时限内被放回活动 —— **召回等于免掉了脱战应有的代价**。
+
+**当前有意接受这个行为**，未做额外限制。收益其实有限，因为异常状态并不会被刷掉：
+
+| 环节 | 位置 |
+|---|---|
+| 存盘写 `playerdiseases`，存的是**剩余时长** `length - (now - startTime)` | [Character.java:2486](../gms-server/src/main/java/org/gms/client/Character.java#L2486)、[:7337](../gms-server/src/main/java/org/gms/client/Character.java#L7337) |
+| 登录读回塞进 `PlayerBuffStorage` | [CharacterService.java:422](../gms-server/src/main/java/org/gms/service/CharacterService.java#L422) |
+| `silentApplyDiseases` 重新施加 + 补发 debuff 包 | [PlayerLoggedinHandler:246](../gms-server/src/main/java/org/gms/net/server/channel/handlers/PlayerLoggedinHandler.java#L246)、[:409](../gms-server/src/main/java/org/gms/net/server/channel/handlers/PlayerLoggedinHandler.java#L409) |
+
+即：**被魅惑退出再登回来，人还是被魅惑的**，剩余时间、HP、所在地图都不变。冷却同理走 `cooldowns` 表。
+
+将来若要收紧，两条现成路子：把 `max_recall_time` 调短（真掉线重连约 1–2 分钟）；
+或加「掉线时身上带异常状态则不予自动召回」的判定，让这类玩家只能由 GM 手动放回。
+取舍已写进 `EventRecallCoordinator` 的 javadoc 与 `V1000.0.17` 的注释。
+
+##### `RecallCommand`（新指令）
+
+LK 那版 85 行里 **40 行是注释掉的旧实现**，另有三个问题，都没照搬：
+
+| LK | 本次 |
+|---|---|
+| 4 条硬编码中文 | 走 i18n（`RecallCommand.message1~5`） |
+| `Integer.parseInt(params[0])` 无 try/catch，GM 输错就抛 `NumberFormatException` | 先按角色名查，纯数字再按 id 查（`StringUtil.isNumeric`，与同目录 `DcCommand` 同款） |
+| 只接受数字角色 ID | 名字优先 —— GM 手上有的是名字 |
+
+配套 `command_info` 注册（批次 1 关键发现：新指令靠表注册而非代码），`syntax = recall`，`default_level = 2`。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `EventRecallCoordinator.java` | `RecallEntry` record、时限/冷却判定、CAS、`peekEventInstance` |
+| `RecallCommand.java`（新） | `@recall` |
+| `V1000.0.17__insert_recall_config_and_command.sql` | 2 个配置键 + zh/en 各 2 条 `lang_resources` + 1 条 `command_info` |
+| `message_{zh_CN,en_US}.properties` | `RecallCommand.message1~5` |
+
+`PlayerLoggedinHandler` 零改动（判定已下沉）。LK 该文件里的未使用 import
+`gm4.LichDebugCommand`（批次 5 残留）与 GM 登录广播改中文（BeiDou 早已是中文）均为噪声。
 
 ### 批次 7 — 数据类
 
