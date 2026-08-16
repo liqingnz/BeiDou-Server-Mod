@@ -8180,6 +8180,19 @@ public class Character extends AbstractCharacterObject {
         return ret;
     }
 
+    /**
+     * 永久提升血/魔上限，给「血液精华」这类道具用。
+     * <p>
+     * {@link AbstractCharacterObject#addMaxMPMaxHP} 是 {@code protected}，同包外够不着，
+     * 所以在这里开一个公开入口。{@code silent = false}，改动要即时下发给客户端。
+     * <p>
+     * 注意 {@code clientMaxHp} 在 {@code changeHpMpPool} 里被钳在 30000，内部 {@code maxHp}
+     * 却不封顶——超过之后客户端血条与服务端实际值会对不上，调用方要自己控制总量。
+     */
+    public void addMaxHpMpExternal(int maxHpIncrease, int maxMpIncrease) {
+        addMaxMPMaxHP(maxHpIncrease, maxMpIncrease, false);
+    }
+
     public boolean applyHpMpChange(int hpCon, int hpchange, int mpchange) {
         boolean zombify = hasDisease(Disease.ZOMBIFY);
 

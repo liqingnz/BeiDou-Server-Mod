@@ -25,6 +25,7 @@ import org.gms.client.Character;
 import org.gms.client.Client;
 import org.gms.client.Disease;
 import org.gms.client.inventory.InventoryType;
+import org.gms.client.Job;
 import org.gms.client.inventory.Item;
 import org.gms.client.inventory.manipulator.InventoryManipulator;
 import org.gms.config.GameConfig;
@@ -73,6 +74,14 @@ public final class UseItemHandler extends AbstractPacketHandler {
                 chr.dispelDebuff(Disease.CURSE);
                 remove(c, slot);
                 return;
+            } else if (itemId == ItemId.HP_PILL_LARGE) {
+                applyHpPill(chr, 500, 100, 400);
+                remove(c, slot);
+                return;
+            } else if (itemId == ItemId.HP_PILL_SMALL) {
+                applyHpPill(chr, 10, 2, 8);
+                remove(c, slot);
+                return;
             } else if (ItemConstants.isTownScroll(itemId)) {
                 int banMap = chr.getMapId();
                 int banSp = chr.getMap().findClosestPlayerSpawnpoint(chr.getPosition()).getId();
@@ -108,6 +117,25 @@ public final class UseItemHandler extends AbstractPacketHandler {
                     mse.applyTo(player);
                 }
             }
+        }
+    }
+
+    /**
+     * 血液精华：永久提升血/魔上限。法师系拿一部分血换较多的魔，其余职业全给血。
+     * <p>
+     * 新手职业吃了没有任何效果——原实现只排除了 0（初心者）和 1000（骑士团新手），
+     * <b>漏了 2000（战神新手）</b>，这里改用 {@code isBeginnerJob()}，它三个都覆盖。
+     * <p>
+     * 药丸不走 wz 的 spec，效果全写在这里，所以调用点必须自己 return，不能落到下面的通用道具流程。
+     */
+    private void applyHpPill(Character chr, int hpGain, int mageHpGain, int mageMpGain) {
+        if (chr.isBeginnerJob()) {
+            return;
+        }
+        if (chr.getJob().isA(Job.MAGICIAN) || chr.getJob().isA(Job.BLAZEWIZARD1)) {
+            chr.addMaxHpMpExternal(mageHpGain, mageMpGain);
+        } else {
+            chr.addMaxHpMpExternal(hpGain, 0);
         }
     }
 

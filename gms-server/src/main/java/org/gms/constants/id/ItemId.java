@@ -52,6 +52,11 @@ public class ItemId {
     public static final int SORCERERS_POTION = 2022337;
     public static final int RUSSELLONS_PILLS = 2022198;
 
+    // 血液精华：吃掉永久提升血/魔上限，效果写死在 UseItemHandler 而不是 wz 的 spec 里。
+    // 注意这两个 id 不是原版物品，需要 wz 补上 Item.wz/Consume/0200.img 与 String.wz/Consume.img 才能真正到手
+    public static final int HP_PILL_LARGE = 2000100;
+    public static final int HP_PILL_SMALL = 2000101;
+
     // Environment
     public static final int RED_BEAN_PORRIDGE = 2022001;
     public static final int SOFT_WHITE_BUN = 2022186;

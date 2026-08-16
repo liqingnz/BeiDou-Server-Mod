@@ -393,7 +393,7 @@ src/net/server/channel/handlers/UseCatchItemHandler.java	java	0	0	noise	仅格�
 src/net/server/channel/handlers/UseChairHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/UseGachaExpHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/UseHammerHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/UseItemHandler.java	java	18	0	pending	
+src/net/server/channel/handlers/UseItemHandler.java	java	18	0	ported	批次6-G15：血液精华 2000100/2000101 永久加血魔上限。改用 isBeginnerJob() 修掉 LK 漏排除 2000（战神新手）；职业判定改 Job.isA
 src/net/server/channel/handlers/UseMapleLifeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/UseMountFoodHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/UseOwlOfMinervaHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -635,7 +635,7 @@ src/server/partyquest/MonsterCarnival.java	java	0	0	noise	仅格式化/空白改
 src/server/partyquest/MonsterCarnivalParty.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/partyquest/PartyQuest.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/partyquest/Pyramid.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/quest/MapleQuest.java	java	24	0	pending	
+src/server/quest/MapleQuest.java	java	24	0	ported	批次6-G15：完成不可重复任务发小血液精华，配置 use_quest_hp_pill 默认关（全清 +22900 血上限，客户端上限只有 30000）；use_debug 任务开始/完成提示走 i18n；LK 死变量 overLevel30 不搬
 src/server/quest/MapleQuestActionType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/MapleQuestRequirementType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/actions/BuffAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -664,7 +664,7 @@ src/server/quest/requirements/JobRequirement.java	java	0	0	noise	仅格式化/�
 src/server/quest/requirements/MapleQuestRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/requirements/MaxLevelRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/requirements/MesoRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/quest/requirements/MinLevelRequirement.java	java	3	0	pending	
+src/server/quest/requirements/MinLevelRequirement.java	java	3	0	rejected	批次6-G15：LK 加的 getMinLevel() 只服务于被注释掉的等级门槛，活代码无调用方。按 A2 不实现门槛，故不引入这个死访问器
 src/server/quest/requirements/MinTamenessRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/requirements/MobRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/requirements/MonsterBookCountRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）

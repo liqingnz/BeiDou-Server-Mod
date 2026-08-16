@@ -1088,7 +1088,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G12** ✅ | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
 | **G13** ✅ | 雇佣商店存续天数 | `maps/HiredMerchant`、`world/World`（仅存续判定一处） | `merchant_expire_time` |
 | **G14** ✅ | `@analysis` BOSS 伤害占比 | `gm2/BossDmgAnalysisCommand`（批次 1 挪来，权限从 gm0 收到 gm2） | — |
-| **G15** | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`quest/requirements/MinLevelRequirement`、`UseItemHandler` | — |
+| **G15** ✅ | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`UseItemHandler`、`client/Character`（公开入口） | `use_quest_hp_pill`（默认关，**且依赖 wz**） |
 | **G16** | `client/Character`（钩子汇聚点，**按组拆散**） | `client/MapleCharacter` 一个文件同时属于 G2/G3/G7/G9/G10/G11 | — |
 
 批次 4 挪进来的两项仍是 `deferred`，跟 **G4** 一起决策（收工时必须把这两行改掉，
@@ -2241,6 +2241,84 @@ BeiDou 的 `FilePrinter` 已基本废弃（只剩几处注释掉的调用），�
 | `gm2/BossDmgAnalysisCommand.java`（新） | `@analysis` |
 | `V1000.0.19__insert_command_info_analysis.sql` | 1 条 `command_info` |
 | `message_{zh_CN,en_US}.properties` | `BossDmgAnalysisCommand.message1~6` |
+
+#### G15 — 任务奖励 / HP 药丸 ✅ java 侧完成（**wz 未补，功能尚未生效**）
+
+名字看着小，实际是四件互不相干的事，而且撞上一个硬前提。
+
+##### 🔴 硬前提：两个药丸物品在 BeiDou 的 wz 里不存在
+
+`2000100`（血液精华）/ `2000101`（血液精华（小））**是 LK 自己造的物品**，而且就在本次区间内造的：
+
+```
+git show b0671161:wz/Item.wz/Consume/0200.img.xml → 无 020001xx
+LK 当前                                            → 有 02000100、02000101
+BeiDou wz/ 与 wz-zh-CN/                            → 都没有
+```
+
+按「img.xml 放最后」的约定，本组只做 java 侧，**物品补齐前整条链不生效**。
+两个 wz 文件的清单行已记下具体要补什么。另注意 LK 把 `tradeBlock` 写成了
+`<string value="1"/>` 而非原版的 `<int value="1"/>`，补 wz 时要确认 `ItemInformationProvider` 认不认。
+
+##### balance 量级（决定了默认必须关）
+
+LK 的逻辑是**每完成一个非重复任务白送一颗小药丸**，吃掉永久 +10 最大 HP（法师 +2HP/+8MP）。
+
+BeiDou 的 wz 里 `QuestInfo.img` 有 **2819** 个任务条目，`Check.img` 带 `interval`（可重复）的 **528** 个
+—— 约 **2290 个不可重复任务**：
+
+| | 全清后永久收益 |
+|---|---|
+| 非法师 | **+22,900 最大 HP** |
+| 法师 | +4,580 HP / +18,320 MP |
+
+而 [`AbstractCharacterObject:266`](../gms-server/src/main/java/org/gms/client/AbstractCharacterObject.java#L266) 把
+`clientMaxHp` 钳在 **30000**。等于光做任务就能顶满血上限，AP 加血完全失去意义。
+
+LK 自己也犹豫过 —— 门槛是**注释掉的**：`//  && overLevel30 && chr.getLevel() > 70`，
+`overLevel30` 因此是个**永远为 false、从未被读的死变量**。
+**运营决定按 LK 活代码原样移植（不加等级门槛），配置 `use_quest_hp_pill` 默认关。**
+
+##### 四件事的落点
+
+| | 内容 | 本次做法 |
+|---|---|---|
+| **A** | `Quest.complete` 完成任务送药丸 | 抽成 `grantHpPill(chr)`，`use_quest_hp_pill` 默认 `false`；可重复任务不给（否则刷重复任务无限堆血上限） |
+| **B** | `UseItemHandler` 吃药丸永久加上限 | 抽成 `applyHpPill(chr, hp, mageHp, mageMp)`；新增 `ItemId.HP_PILL_LARGE/SMALL` 常量 |
+| **C** | `use_debug` 时提示任务开始/完成 | 照运营决定**直接发给玩家**（`dropMessage(5, ...)`），但文案走 i18n |
+| **D** | `MinLevelRequirement.getMinLevel()` | **不搬** —— 它只服务于被注释掉的等级门槛，活代码无调用方；A 既然不做门槛，加了就是死访问器 |
+
+##### 修掉的 LK 问题
+
+- **`isBeginnerJob()` 替代 `id != 0 && id != 1000`**：LK 只排除了初心者(0) 和骑士团新手(1000)，
+  **漏了 2000（战神新手）** —— 战神新手吃药丸能白拿 +500 血。BeiDou 的
+  [`Character.isBeginnerJob()`](../gms-server/src/main/java/org/gms/client/Character.java#L5703) 三个都覆盖。
+- **法师判定改 `Job.isA`**：`isA(Job.MAGICIAN) || isA(Job.BLAZEWIZARD1)` 与 LK 的
+  `id/100 == 2 || id/100 == 12` **完全等价**（`isA` 在 `basebranch % 10 == 0` 时退化为 `id/100` 比较），
+  但用的是本仓库的既有惯例。
+- **`startReqs.containsKey(INTERVAL)` 替代遍历**：`startReqs` 是按类型索引的 `EnumMap`，
+  查键即可，同文件 :255 已经是这个写法。行为完全一致。
+
+##### 新增的公开入口
+
+`AbstractCharacterObject.addMaxMPMaxHP` 是 `protected`，`UseItemHandler` 不在同包够不着，
+所以在 `Character` 上加了 `addMaxHpMpExternal(int, int)`（LK 也是这么干的，只是它落在 G16 那个钩子汇聚文件里）。
+javadoc 里记了 `clientMaxHp` 钳 30000 而内部 `maxHp` 不封顶这件事 —— 超过之后客户端血条与服务端实际值会对不上。
+
+> LK 的 `MapleStatEffect` 里还有一套「从 wz 的 `hpMax`/`mpMax` 字段永久加池子」的机制，
+> **不在本次区间内**（`b0671161` 之前就有），所以 G9 没漏。BeiDou 的 `StatEffect` 也完全没有这两个字段。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `Quest.java` | `grantHpPill`；`forceStart`/`forceComplete` 的 `use_debug` 提示 |
+| `UseItemHandler.java` | 两个药丸分支 + `applyHpPill` |
+| `Character.java` | `addMaxHpMpExternal` 公开入口 |
+| `ItemId.java` | `HP_PILL_LARGE`、`HP_PILL_SMALL` |
+| `V1000.0.20__insert_game_config_quest_hp_pill.sql` | 1 个配置键 + zh/en 各 1 条 `lang_resources` |
+| `message_{zh_CN,en_US}.properties` | `Quest.message1~2` |
+| `log_{zh_CN,en_US}.properties` | `Quest.info.grantHpPill.msg1` |
 
 ### 批次 7 — 数据类
 
