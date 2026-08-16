@@ -34,7 +34,8 @@ var clearMap = 270050300;
 var minMapId = 270050100;
 var maxMapId = 270050300;
 
-var eventTime = 140;     // 140 minutes
+var eventTime = 360;     // LK: extended to 6 hours (c56cbe31)
+var countDown = 5;       // LK: wave countdown shortened from 15s to 5s
 
 const maxLobbies = 1;
 
@@ -91,7 +92,7 @@ function setEventRewards(eim) {
 
 function afterSetup(eim) {
     eim.dropMessage(5, "The first wave will start within 15 seconds, prepare yourselves.");
-    eim.schedule("startWave", 15 * 1000);
+    eim.schedule("startWave", countDown * 1000);
 }
 
 function setup(channel) {
@@ -152,12 +153,13 @@ function playerDead(eim, player) {
 
     eim.setIntProperty("fallenPlayers", count);
 
-    if (count == 5) {
+    // LK: death allowance raised from 5 to 12 (6315da27), warning thresholds moved accordingly
+    if (count == 12) {
         eim.dropMessage(5, "[Expedition] Too many players have fallen, Pink Bean is now deemed undefeatable; the expedition is over.");
         end(eim);
-    } else if (count == 4) {
+    } else if (count == 8) {
         eim.dropMessage(5, "[Expedition] Pink Bean is growing stronger than ever, last stand mode everyone!");
-    } else if (count == 3) {
+    } else if (count == 4) {
         eim.dropMessage(5, "[Expedition] Casualty count is starting to get out of control. Battle with care.");
     }
 }
@@ -249,6 +251,8 @@ function monsterKilled(mob, eim) {
         eim.showClearEffect(mob.getMap().getId());
         mob.getMap().killAllMonsters();
         eim.clearPQ();
+        // LK: boss certificates by damage share, 15 each, below 8% gets nothing (item 3100000 wz lands with task #4)
+        eim.distributeBossCertificate(mob, 3100000, 15, 8);
 
         var ch = eim.getIntProperty("channel");
         mob.getMap().broadcastPinkBeanVictory(ch);
@@ -272,7 +276,7 @@ function monsterKilled(mob, eim) {
                 eim.setIntProperty("stage", stage);
 
                 eim.dropMessage(5, "The next wave will start within 15 seconds, prepare yourselves.");
-                eim.schedule("startWave", 15 * 1000);
+                eim.schedule("startWave", countDown * 1000);
             }
         }
     }

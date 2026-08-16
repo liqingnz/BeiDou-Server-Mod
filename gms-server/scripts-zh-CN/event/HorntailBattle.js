@@ -34,7 +34,7 @@ var clearMap = 240050600;
 var minMapId = 240060000;
 var maxMapId = 240060200;
 
-var eventTime = 120;     // 120 minutes
+var eventTime = 180;     // LK：上调至 180 分钟
 
 const maxLobbies = 1;
 
@@ -128,7 +128,16 @@ function setup(channel) {
 
 function playerEntry(eim, player) {
     eim.dropMessage(5, "[远征队] " + player.getName() + " 已进入地图。");
-    var map = eim.getMapInstance(entryMap);
+    // LK：重连/补员按已击破的龙头数回到对应阶段地图，不用从第一关重走
+    var stage = eim.getIntProperty("defeatedHead");
+    var map;
+    if (stage >= 2) {
+        map = eim.getMapInstance(maxMapId);
+    } else if (stage == 1) {
+        map = eim.getMapInstance(240060100);
+    } else {
+        map = eim.getMapInstance(entryMap);
+    }
     player.changeMap(map, map.getPortal(0));
     //开启伤害记录
     if(GameConfig.getServerBoolean("damage_ranking")) {
@@ -208,6 +217,8 @@ function monsterKilled(mob, eim) {
         eim.showClearEffect(mob.getMap().getId());
         eim.broadcastDamageRanking();  // BOSS死亡时通报
         eim.clearPQ();
+        // LK：BOSS 凭证按伤害占比发放，6 张、低于 9% 不发（凭证 3100000 wz 待任务 #4）
+        eim.distributeBossCertificate(mob, 3100000, 6, 9);
 
         eim.dispatchRaiseQuestMobCount(8810018, 240060200);
         mob.getMap().broadcastHorntailVictory();

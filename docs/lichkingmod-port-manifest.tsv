@@ -821,7 +821,7 @@ scripts/event/HenesysPQ.js	script	0	0	pending	含代码改动；只搬逻辑不�
 scripts/event/HolidayPQ_1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/HolidayPQ_2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/HolidayPQ_3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/event/HorntailBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/HorntailBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min + 重连按 defeatedHead 回对应阶段图（defeatedHead 机制 Cosmic 已有）
 scripts/event/HorntailPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/KerningPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/KerningTrain.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -834,11 +834,11 @@ scripts/event/MagatiaPQ_A.js	script	0	0	pending	含代码改动；只搬逻辑�
 scripts/event/MagatiaPQ_Z.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/OrbisPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/PapulatusBattle.js	script	0	0	ported	批次7：接 G7 配额（预检 attemptBoss(name,false) + 进场 logBossAttempt 两段式，修掉 LK 预检即扣次的缺陷）+ 任务7104 门槛 + 凭证按伤害分发（3100000 wz 待任务#4）；等级上限不搬（max_level_cap 已兜住）
-scripts/event/PinkBeanBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/PinkBeanBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限360min + 波次倒计时15s→5s + 阵亡容忍5→12（警告线8/4）
 scripts/event/PiratePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/RescueGaga.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/ScargaBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/ShowaBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/ScargaBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min + 通关箱奖励清空改走掉落（V1000.1.2/1.3）；getEligibleParty+任务4576门槛与消费方 npc/9270037 一起做
+scripts/event/ShowaBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min
 scripts/event/Subway.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/TD_Battle1.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/TD_Battle2.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -846,7 +846,7 @@ scripts/event/TD_Battle3.js	script	0	0	pending	含代码改动；只搬逻辑不
 scripts/event/TD_Battle4.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/TD_Battle5.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/TreasurePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/ZakumBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/ZakumBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限240min；人数/等级上限不搬（config 已兜住）
 scripts/event/ZakumPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/item/killarmush.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/item/removethorns.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1715,7 +1715,7 @@ scripts/reactor/8091004.js	script	0	0	noise	改动可证明只落在字符串字
 scripts/reactor/8098000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/CentipedeBattle.js	script-new	0	0	already-fixed	gms-server/scripts-zh-CN/event/WuGongPQ.js:5 —— 同一场蜈蚣战，进出场地图（701010323/701010320/701010322）与BOSS（9600009）逐项相同，入口同为 npc/9310006.js。BeiDou 版另有难度倍率、掉落表与 GameConfig 人数/等级解限，比 LK 版完整
 scripts/event/KrexelBattle.js	script-new	0	0	deferred	缓，挪至批次7：整条克雷塞尔线依赖 BeiDou 缺失的两张地图 wz（Map5/541020700 与 541020800，LK 基线自带故不在本清单分母内）、新增的 ExpeditionType.KREXEL 与 ExpeditionBossLog 条目（批次6），以及 distributeBossCertificate 用的 BOSS凭证 3100000（Item.wz/Install/0310.img.xml，见附录D）。重启条件：批次7 补齐上述 wz 且批次6 敲定远征类型枚举
-scripts/event/YaoSengBattle.js	script-new	0	0	already-fixed	gms-server/scripts-zh-CN/event/YaoSengPQ.js:5 —— 同一场妖僧战，进出场地图（702060000/702070400）与BOSS（9600025）相同，入口 npc/9310006.js 与 9310039.js。另：LK 侧 YaoSengBattle 全仓库零引用，本身就是死脚本
+scripts/event/YaoSengBattle.js	script-new	0	0	already-fixed	gms-server/scripts-zh-CN/event/YaoSengPQ.js:5 —— 同一场妖僧战，BeiDou 版更完整且 LK 侧此文件零引用；批次7 已把 LK 的凭证（1张@20%）与每周4次配额（YAOSENG，两段式）接进 YaoSengPQ.js
 scripts/npc/1002103.js	script-new	0	0	rejected	正文是 LK 自造的一句寒暄「同学，想了解一下冒险学院吗？」，没有任何功能。而 1002103 在 Quest.wz/Check.img.xml 里出现 5 次，是任务NPC，给它挂一个只 sendOk 就 dispose 的脚本是净损失
 scripts/npc/1022007 .js	script-new	0	0	rejected	文件名带空格，是 LK 的笔误；内容是 NPC 2010000（Master Sergeant Fox，天空之城兑换）的脚本被错存成 1022007 这个id。BeiDou 已有正确归位的 scripts/npc/2010000.js
 scripts/npc/1022101_test.js	script-new	0	0	rejected	作者自用的兑换脚本试验稿，文案中英混杂（"are you sure you have..." 后半句突然变中文），兑换表是 2000000 蓝药换 1472053 武器这种随手填的测试数据。正式版是 scripts/npc/1022101.js（清单 script 档）

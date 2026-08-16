@@ -34,7 +34,7 @@ var clearMap = 801040101;
 var minMapId = 801040100;
 var maxMapId = 801040101;
 
-var eventTime = 60;     // 60 minutes for boss stg
+var eventTime = 180;     // LK: raised to 180 minutes
 
 const maxLobbies = 1;
 
@@ -212,6 +212,8 @@ function monsterKilled(mob, eim) {
     if (isTheBoss(mob)) {
         eim.showClearEffect();
         eim.clearPQ();
+        // LK: boss certificates by damage share, 4 each, below 10% gets nothing (item 3100000 wz lands with task #4)
+        eim.distributeBossCertificate(mob, 3100000, 4, 10);
     }
 }
 

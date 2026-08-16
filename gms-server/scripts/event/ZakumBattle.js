@@ -34,7 +34,7 @@ var clearMap = 211042400;
 var minMapId = 280030000;
 var maxMapId = 280030000;
 
-var eventTime = 120;     // 120 minutes
+var eventTime = 240;     // LK: raised to 240 minutes
 
 const maxLobbies = 1;
 
@@ -204,6 +204,8 @@ function monsterKilled(mob, eim) {
         eim.setIntProperty("defeatedBoss", 1);
         eim.showClearEffect(mob.getMap().getId());
         eim.clearPQ();
+        // LK: boss certificates by damage share, 3 each, below 10% gets nothing (item 3100000 wz lands with task #4)
+        eim.distributeBossCertificate(mob, 3100000, 3, 10);
 
         mob.getMap().broadcastZakumVictory();
     }

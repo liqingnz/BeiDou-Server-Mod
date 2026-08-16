@@ -34,7 +34,7 @@ var clearMap = 801040101;
 var minMapId = 801040100;
 var maxMapId = 801040101;
 
-var eventTime = 60;     // 60 minutes for boss stg
+var eventTime = 180;     // LK：上调至 180 分钟
 
 const maxLobbies = 1;
 
@@ -199,6 +199,8 @@ function monsterKilled(mob, eim) {
     if (isTheBoss(mob)) {
         eim.showClearEffect();
         eim.clearPQ();
+        // LK：BOSS 凭证按伤害占比发放，4 张、低于 10% 不发（凭证 3100000 wz 待任务 #4）
+        eim.distributeBossCertificate(mob, 3100000, 4, 10);
     }
 }
 

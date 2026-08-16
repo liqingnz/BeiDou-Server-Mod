@@ -34,7 +34,7 @@ var clearMap = 240050600;
 var minMapId = 240060000;
 var maxMapId = 240060200;
 
-var eventTime = 120;     // 120 minutes
+var eventTime = 180;     // LK: raised to 180 minutes
 
 const maxLobbies = 1;
 
@@ -122,7 +122,16 @@ function setup(channel) {
 
 function playerEntry(eim, player) {
     eim.dropMessage(5, "[Expedition] " + player.getName() + " has entered the map.");
-    var map = eim.getMapInstance(entryMap);
+    // LK: rejoining players are warped to the stage matching the number of defeated heads
+    var stage = eim.getIntProperty("defeatedHead");
+    var map;
+    if (stage >= 2) {
+        map = eim.getMapInstance(maxMapId);
+    } else if (stage == 1) {
+        map = eim.getMapInstance(240060100);
+    } else {
+        map = eim.getMapInstance(entryMap);
+    }
     player.changeMap(map, map.getPortal(0));
 }
 
@@ -216,6 +225,8 @@ function monsterKilled(mob, eim) {
         eim.setIntProperty("defeatedBoss", 1);
         eim.showClearEffect(mob.getMap().getId());
         eim.clearPQ();
+        // LK: boss certificates by damage share, 6 each, below 9% gets nothing (item 3100000 wz lands with task #4)
+        eim.distributeBossCertificate(mob, 3100000, 6, 9);
 
         eim.dispatchRaiseQuestMobCount(8810018, 240060200);
         mob.getMap().broadcastHorntailVictory();

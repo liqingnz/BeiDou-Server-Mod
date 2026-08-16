@@ -34,7 +34,7 @@ var clearMap = 211042400;
 var minMapId = 280030000;
 var maxMapId = 280030000;
 
-var eventTime = 120;     // 120 minutes
+var eventTime = 240;     // LK：上调至 240 分钟
 
 const maxLobbies = 1;
 
@@ -232,6 +232,8 @@ function monsterKilled(mob, eim) {
         eim.showClearEffect(mob.getMap().getId());
         eim.broadcastDamageRanking();
         eim.clearPQ();
+        // LK：BOSS 凭证按伤害占比发放，3 张、低于 10% 不发（凭证 3100000 wz 待任务 #4）
+        eim.distributeBossCertificate(mob, 3100000, 3, 10);
 
         mob.getMap().broadcastZakumVictory();
     }

@@ -34,7 +34,8 @@ var clearMap = 270050300;
 var minMapId = 270050100;
 var maxMapId = 270050300;
 
-var eventTime = 140;     // 140 minutes
+var eventTime = 360;     // LK：品克缤时限延长至 6 小时（c56cbe31）
+var countDown = 5;       // LK：波次开始倒计时从 15 秒缩至 5 秒
 
 const maxLobbies = 1;
 
@@ -97,7 +98,7 @@ function setEventRewards(eim) {
 
 function afterSetup(eim) {
     eim.dropMessage(5, "第一波攻击将在15秒后开始，请做好准备。");
-    eim.schedule("startWave", 15 * 1000);
+    eim.schedule("startWave", countDown * 1000);
 }
 
 function setup(channel) {
@@ -158,12 +159,13 @@ function playerDead(eim, player) {
 
     eim.setIntProperty("fallenPlayers", count);
 
-    if (count == 5) {
+    // LK：阵亡容忍从 5 提高到 12（6315da27「增加PB可阵亡次数」），警告线相应后移
+    if (count == 12) {
         eim.dropMessage(5, "[远征队] 太多队员阵亡，品克缤现在被视为不可战胜，远征结束。");
         end(eim);
-    } else if (count == 4) {
+    } else if (count == 8) {
         eim.dropMessage(5, "[远征队] 品克缤变得比以往更强大，大家进入背水一战模式！");
-    } else if (count == 3) {
+    } else if (count == 4) {
         eim.dropMessage(5, "[远征队] 伤亡人数开始失控，请小心战斗。");
     }
 }
@@ -255,6 +257,8 @@ function monsterKilled(mob, eim) {
         eim.showClearEffect(mob.getMap().getId());
         mob.getMap().killAllMonsters();
         eim.clearPQ();
+        // LK：BOSS 凭证按伤害占比发放，15 张、低于 8% 不发（凭证 3100000 wz 待任务 #4）
+        eim.distributeBossCertificate(mob, 3100000, 15, 8);
 
         var ch = eim.getIntProperty("channel");
         mob.getMap().broadcastPinkBeanVictory(ch);
@@ -278,7 +282,7 @@ function monsterKilled(mob, eim) {
                 eim.setIntProperty("stage", stage);
 
                 eim.dropMessage(5, "下一波攻击将在15秒后开始，请做好准备。");
-                eim.schedule("startWave", 15 * 1000);
+                eim.schedule("startWave", countDown * 1000);
             }
         }
     }

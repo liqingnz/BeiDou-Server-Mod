@@ -34,7 +34,7 @@ var clearMap = 551030100;
 var minMapId = 551030200;
 var maxMapId = 551030200;
 
-var eventTime = 60;     // 60 minutes for boss stg
+var eventTime = 180;     // LK: raised to 180 minutes
 
 const maxLobbies = 1;
 
@@ -78,8 +78,10 @@ function setEventRewards(eim) {
     var itemSet, itemQty, evLevel, expStages, mesoStages;
 
     evLevel = 1;    //Rewards at clear PQ
-    itemSet = [1102145, 1102084, 1102085, 1102086, 1102087, 1052165, 1052166, 1052167, 1402013, 1332030, 1032030, 1032070, 4003000, 4000030, 4006000, 4006001, 4005000, 4005001, 4005002, 4005003, 4005004, 2022016, 2022263, 2022264, 2022015, 2022306, 2022307, 2022306, 2022113];
-    itemQty = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 50, 120, 120, 4, 4, 4, 4, 2, 125, 125, 125, 30, 30, 30, 30, 30];
+    // LK 4dc346e6: clear-box rewards removed, moved to direct boss drops
+    // (saga equips/potions written to drop_data of 9420544/9420549 by V1000.1.2/1.3)
+    itemSet = [];
+    itemQty = [];
     eim.setEventRewards(evLevel, itemSet, itemQty);
 
     expStages = [];    //bonus exp given on CLEAR stage signal
@@ -198,6 +200,8 @@ function monsterKilled(mob, eim) {
         if (killed == 1) {
             eim.showClearEffect();
             eim.clearPQ();
+            // LK: after both bosses fall, certificates by damage share, 3 each, below 10% gets nothing (item 3100000 wz lands with task #4)
+            eim.distributeBossCertificate(mob, 3100000, 3, 10);
         }
 
         eim.setIntProperty("defeatedBoss", killed + 1);

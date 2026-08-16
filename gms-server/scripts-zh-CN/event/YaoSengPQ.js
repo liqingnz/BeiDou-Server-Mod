@@ -108,7 +108,8 @@ function getEligibleParty(party) {
         for (var i = 0; i < party.size(); i++) {
             var ch = partyList[i];
 
-            if (ch.getMapId() == recruitMap && ch.getLevel() >= minLevel && ch.getLevel() <= maxLevel) {
+            // LK：妖僧每周 4 次配额（YAOSENG 条目，G7）；第二参 false 只预检不扣次，进场时由 eim.logBossAttempt 扣
+            if (ch.getMapId() == recruitMap && ch.getLevel() >= minLevel && ch.getLevel() <= maxLevel && ch.attemptBoss("YAOSENG", false)) {
                 if (ch.isLeader()) {
                     hasLeader = true;
                 }
@@ -204,6 +205,7 @@ function respawnStages(eim) {
  * @param {Character} player - 玩家角色。
  */
 function playerEntry(eim, player) {
+    eim.logBossAttempt(player, "YAOSENG");    // 真正进场才扣周次数
     var map = eim.getMapInstance(entryMap);
     player.changeMap(map, map.getPortal(0));
 }
@@ -387,6 +389,8 @@ function monsterKilled(mob, eim) {
             var dropper = eim.getPlayers().get(0);
             mapObj.spawnItemDropList(BossDropList,mob,dropper,mob.getPosition());
             clearPQ(eim);
+            // LK：BOSS 凭证按伤害占比发放，1 张、低于 20% 不发（凭证 3100000 wz 待任务 #4）
+            eim.distributeBossCertificate(mob, 3100000, 1, 20);
         }
     } catch (err) {
         console.error(err);
