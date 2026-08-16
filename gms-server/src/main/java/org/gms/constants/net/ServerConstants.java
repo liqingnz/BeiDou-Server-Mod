@@ -16,12 +16,16 @@ public class ServerConstants {
             "习近平", "毛泽东", "胡锦涛", "邓小平", "江泽民", "共产党"};
 
     /**
-     * 角色名的最大字节数（按 GBK 计）。中文客户端出包用 GBK，一个汉字两字节。
+     * 角色名的字节数上限（按 GBK 计，取<b>开区间</b>：名字必须严格小于这个值）。
+     * 中文客户端出包用 GBK，一个汉字两字节。
      * <p>
-     * 注意这道检查<b>同时收紧了纯 ASCII 名</b>：正则允许 12 位，但字节上限 11 会把第 12 位挡掉。
-     * 这是照搬原实现的取值，要放宽把它调到 13 即可（{@code characters.name} 是 VARCHAR(13)）。
+     * 取 13 即「最多 12 字节」，正好对齐 {@code characters.name} 的 VARCHAR(13)，
+     * 也让 12 位 ASCII 名与 6 个汉字的名字都能通过 —— 与角色名正则的 {2,12} 上限一致。
+     * <p>
+     * 原实现取的是 12（即最多 11 字节），那会把第 12 位 ASCII 和正好六个汉字的名字一起挡掉，
+     * 比正则本身还严。这里按运营决定放宽。
      */
-    public static final int MAX_CHARACTER_NAME_BYTES = 12;
+    public static final int MAX_CHARACTER_NAME_BYTES = 13;
 
     public static final String BEI_DOU_VERSION = "1.12";
     public static final String BEI_DOU_BUILD_TIME = "2026-05-31 16:03:25";
