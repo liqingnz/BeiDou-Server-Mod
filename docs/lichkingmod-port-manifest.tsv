@@ -872,7 +872,7 @@ scripts/npc/1012105.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1012112.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012113.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012114.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1012117.js	script	0	0	rejected	亨内西美发店随机发型。LK 换成自定义大列表：男发 41 款、女发 43 款在 BeiDou 的 Character.wz 里一款都没有；脸型 41 款缺 31 款。属批次 8 的 Character.wz 点装资源，用户已决定整批跳过。脚本里 pushIfItemExists 会挡住不存在的 ID 所以不会崩，但发型那项会列不出任何款式
+scripts/npc/1012117.js	script	0	0	rejected	亨内西美发店随机发型。LK 换成自定义大列表：男发 41 款、女发 43 款在 BeiDou 的 Character.wz 里一款都没有；脸型 41 款缺 31 款。属批次 8 的 Character.wz 点装资源，用户已决定整批跳过。脚本里 pushIfItemExists 会挡住不存在的 ID 所以不会崩，但发型那项会列不出任何款式。原文封存在 docs/lkport-parked/
 scripts/npc/1012118.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012119.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/10200.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1024,7 +1024,7 @@ scripts/npc/2020011.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字�
 scripts/npc/2020013.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2023000.js	script	0	0	rejected	new Array vs 字面量数组；BeiDou 提示里多给出发地并多一段对话
 scripts/npc/2030000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2030006.js	script	0	0	rejected	三转问答试炼（冰峰雪域圣石）。LK 把 39 题的冒险岛常识题库换成 5 道自家服务器的题（经验倍率、QQ 群号、1+1=、遇到BUG向Lich报告），无可移植内容。试炼连问 5 题正好用光他的题库，虽不崩但每个玩家永远是同样 5 题；他还删了生成序数的 generateQuestionHeading()，并留了个「第 N 个问题.。」的标点错
+scripts/npc/2030006.js	script	0	0	rejected	三转问答试炼（冰峰雪域圣石）。LK 把 39 题的冒险岛常识题库换成 5 道自家服务器的题（经验倍率、QQ 群号、1+1=、遇到BUG向Lich报告），无可移植内容。试炼连问 5 题正好用光他的题库，虽不崩但每个玩家永远是同样 5 题；他还删了生成序数的 generateQuestionHeading()，并留了个「第 N 个问题.。」的标点错。原文封存在 docs/lkport-parked/
 scripts/npc/2030006_old.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2030008.js	script	0	0	rejected	新增「已完成 100201 后，30 个 4000082 反复换 2 个火焰之眼」的可重复兑换。BeiDou 现有路径是一次性锻造 5 个，之后走 NPC 2082014 的商店按 6000 万金币购买——不是死路，属经济向调参，需要时再开
 scripts/npc/2030010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
