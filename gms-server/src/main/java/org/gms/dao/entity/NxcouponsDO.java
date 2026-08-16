@@ -32,7 +32,7 @@ public class NxcouponsDO implements Serializable {
 
     private Integer couponid;
 
-    private Integer rate;
+    private Float rate;
 
     private Integer activeday;
 

@@ -397,6 +397,9 @@ public class MapFactory {
             builder.append("HalloweenGL");
         } else if (mapid >= 683000000 && mapid < 684000000) {
             builder.append("event");
+        } else if (mapid >= 700000000 && mapid < MapId.MUSHROOM_SHRINE) {
+            // 中国地图段的名字在 String.wz/Map.img 的 chinese 节点（zh-CN 覆盖层提供），不落 etc
+            builder.append("chinese");
         } else if (mapid >= MapId.MUSHROOM_SHRINE && mapid < 900000000) {
             if ((mapid >= 889100000 && mapid < 889200000)) {
                 builder.append("etc");

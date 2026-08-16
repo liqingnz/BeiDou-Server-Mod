@@ -2093,6 +2093,17 @@ LK 的 `+0.1f` 是靠加宽迟滞带缓解，治标。
 | nxcoupons 1.5 倍经验/掉落券 | LK 把 `Server.couponRates` 改成 `Map<Integer, Float>` 并手工 ALTER rate 为 float；BeiDou 实体与列均为 int，直接插 1.5 会截断 | Java 尾巴（连 NxcouponsDO / Server.java 一起） |
 | 中国怪掉落（9600008–9600026） | BeiDou V1.7.3 东方神舟每只 21–73 行，远比 LK 6–13 行完整，整段 rejected；唯一遗留：LK 清空 9600026（妖僧分身）掉落防刷，BeiDou 保留 60 行 | YaoSeng 脚本组复核分身是否应掉落 |
 
+#### 第 2 项 Java 尾巴（22 行）✅ 已完成
+
+| 组 | 处置 | 说明 |
+|---|---|---|
+| `MonsterDropEntry` + `MonsterInformationProvider` | ✅ ported | `isDistinctive` 字段、`retrieveDrop` 读列、多件掉落判定加 `\|\| isDistinctive`（PKB 的 2–4 个祝福/混沌靠它逐个滚） |
+| `MapleMapFactory`（BeiDou `MapFactory`） | ✅ 半搬 | 7 亿段→`chinese` 采纳（zh-CN String.wz 已有该节点，原先落 `etc` 查不到名字）；`singapore`→`SG` **rejected**——BeiDou 两层 String.wz 均无 `SG` 节点，那是配 LK 自家 String.wz 的改法 |
+| `@whatdropsfrom` | ✅ 半搬 | 吸收 `#v`/`#z` 物品图标富文本；按怪名搜索保留，不跟 LK 改成按怪 id（同批次 1 对 15 个指令 id 化的否决理由） |
+| `@whodrops` | ❌ already-fixed | 批次 5 已重定向脚本中心「当前地图掉落_物品查询」，LK 的掉率显示/空结果处理均被覆盖 |
+| **倍率券 float 化** | ✅ ported | LK 把 `Server.couponRates` 改 `Map<Integer, Float>`；BeiDou 全链 int → 一并改：`NxcouponsDO.rate`、`Server`、`Character`（expCoupon 三兄弟、`activeCouponRates`、4 个 getter）、`ExpLogger`（记录与落库列，照 V1.5.2 对 world_exp_rate 的同款先例）。V1000.1.7 改列 + 插 5211900/5360900 两张 1.5 倍券。**券要生效还需商城可购**（specialcashitems/commodity 归批次 8 商城组） |
+| **gachapon 16 文件**（15 城市类 + `Leafre` java-new） | ⏸ deferred | **BeiDou 运行时走 `GachaponService` + DB 奖池**（`doGachapon()` 硬编码路径已注释成死代码，池子带有效期/公共池/权重，gms-ui 可管理）。按文件搬是打在死代码上；正确形态：LK 奖池调整 → `gachapon_reward(_pool)` 数据迁移，`gacha 10x` → `GachaponService` 批量抽特性。与 `NPCConversationManager.doGachapon(quantity)`、4 个 gacha 脚本合成一个 **gachapon 工作包**，随第 3 项脚本组做 |
+
 ### 批次 8 — 皇家系统（最后决策）
 
 `server/ultils/RoyalAccount`（+69）、`RoyalCommand`（+114）、`royal_accounts` 表、

@@ -21,7 +21,7 @@ public class ExpLogger {
     private static final short EXP_LOGGER_THREAD_SLEEP_DURATION_SECONDS = 60;
     private static final short EXP_LOGGER_THREAD_SHUTDOWN_WAIT_DURATION_MINUTES = 5;
 
-    public record ExpLogRecord(float worldExpRate, int expCoupon, long gainedExp, int currentExp,Timestamp expGainTime, int charid) {}
+    public record ExpLogRecord(float worldExpRate, float expCoupon, long gainedExp, int currentExp,Timestamp expGainTime, int charid) {}
 
     public static void putExpLogRecord(ExpLogRecord expLogRecord) {
         try {
@@ -45,7 +45,7 @@ public class ExpLogger {
             expLoggerQueue.drainTo(drainedExpLogs);
             for (ExpLogRecord expLogRecord : drainedExpLogs) {
                 ps.setFloat(1, expLogRecord.worldExpRate);
-                ps.setInt(2, expLogRecord.expCoupon);
+                ps.setFloat(2, expLogRecord.expCoupon);
                 ps.setLong(3, expLogRecord.gainedExp);
                 ps.setInt(4, expLogRecord.currentExp);
                 ps.setTimestamp(5, expLogRecord.expGainTime);

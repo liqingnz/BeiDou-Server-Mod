@@ -78,8 +78,8 @@ src/client/command/commands/gm0/UptimeCommand.java	java	0	0	noise	仅格式化/�
 src/client/command/commands/gm1/BossHpCommand.java	java	1	1	pending	
 src/client/command/commands/gm1/GotoCommand.java	java	12	5	pending	
 src/client/command/commands/gm1/MobHpCommand.java	java	1	1	pending	
-src/client/command/commands/gm1/WhatDropsFromCommand.java	java	33	16	pending	
-src/client/command/commands/gm1/WhoDropsCommand.java	java	28	17	pending	
+src/client/command/commands/gm1/WhatDropsFromCommand.java	java	33	16	ported	批次7：吸收 #v/#z 物品图标富文本；保留按怪名搜索，不跟 LK 改按 id（同批次1的 id 化否决理由）
+src/client/command/commands/gm1/WhoDropsCommand.java	java	28	17	already-fixed	批次5已重定向脚本中心「当前地图掉落_物品查询」，LK 的掉率显示/空结果改进均被覆盖
 src/client/command/commands/gm2/BuffMapCommand.java	java	5	3	ported	补 ThunderBreaker.SPEED_INFUSION 与 Hero.MAPLE_WARRIOR 两个 buff。LK 抄的是裸数字，按规则1改用常量。setDescription 那行 BeiDou 已走 I18nUtil，不动
 src/client/command/commands/gm2/ClearSavedLocationsCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/DcCommand.java	java	4	1	pending	
@@ -551,26 +551,26 @@ src/server/events/gm/MapleSnowball.java	java	0	0	noise	仅格式化/空白改动
 src/server/expeditions/MapleExpedition.java	java	63	39	ported	统一 addMember/addMemberInt 的判定：检查搬进 addMemberInt（返回码4），addMember 改为委托+返回码映射，保持 BeiDou 的 i18n。【复查更正】初稿称此为「活的配额绕过 BUG」，不成立——addMemberInt 的唯一调用者 scripts/npc/2101014.js 用的是 ARIANT/ARIANT1/ARIANT2，三者都没有 BossLogEntry，attemptBoss 恒放行；而 7 个 BOSS NPC 脚本调的是本来就有检查的 addMember。此次重构是消除两个入口的判定分歧（预防性收敛），不是修复。批次7给BOSS脚本接配额时须处理 2101014.js:169 对返回码4的兜底。EXPEDITION_BOSSES 补克雷塞尔双眼（MobId 新增两个常量）。其余英文→中文硬编码与缩进为噪声
 src/server/expeditions/MapleExpeditionBossLog.java	java	17	9	ported	（1）新增 BALROG_NORMAL/KREXEL/SHOWA/YAOSENG 四个条目——此前无条目使 attemptBoss 直接放行。配套 V1000.0.14 把 bosslog_daily/weekly.bosstype 从 ENUM 改为 VARCHAR(32)：V1.0.3 的 ENUM 只有原五种，新名字严格模式下 INSERT 报错、非严格模式写空串，而 insertPlayerEntry 吞掉 SQLException 后 attemptBoss 仍返回 true，不改表等于白加。（2）PINKBEAN/SCARGA entries 1→2 取 LK 值。（3）新增 attemptBoss(cid, channel, String, log) 重载。（4）修两个真 BUG 且不跟 LK 写法：Calendar.HOUR 是12小时制不动 AM_PM，下午启动会把清空点算成中午、删掉当天上午记录 → 改 HOUR_OF_DAY；set(DAY_OF_WEEK,THURSDAY) 在周日到周三指向未来周四致判定恒真、整张周榜被删 → 回退到最近一个已过去的周四。复查后再去掉12小时窗口：DELETE 按 attempttime<=该周四限定，幂等安全，带窗口时停服跨过周四会让上周记录卡到下周四
 src/server/expeditions/MapleExpeditionType.java	java	26	7	ported	新增 KREXEL(2,30,50,255,5) 与 YAOSENG(1,6,100,255,5)（克雷塞尔仍缺两张 wz 地图，枚举先补齐给批次7用）；新增 getPartInfo() 但走 i18n（ExpeditionType.partInfo.size/level/time），人数一栏用 getMinSize() 而非原始字段。复查修正：时间那栏传的是 registrationMinutes（报名窗口，所有枚举都是5分钟）而非BOSS战时限，文案由「时间限制」改为「报名时限」/Registration window。LK 的 minSize 大改 rejected：纯调参，且 use_enable_solo_expeditions 是同一件事的更彻底做法。LK 重排枚举顺序不搬
-src/server/gachapon/ElNath.java	java	9	4	pending	
-src/server/gachapon/Ellinia.java	java	12	4	pending	
+src/server/gachapon/ElNath.java	java	9	4	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/Ellinia.java	java	12	4	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
 src/server/gachapon/GachaponItems.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/gachapon/Global.java	java	18	4	pending	
-src/server/gachapon/Henesys.java	java	6	4	pending	
-src/server/gachapon/KerningCity.java	java	13	6	pending	
-src/server/gachapon/Ludibrium.java	java	1	1	pending	
-src/server/gachapon/MapleGachapon.java	java	50	44	pending	
-src/server/gachapon/MushroomShrine.java	java	7	7	pending	
-src/server/gachapon/NautilusHarbor.java	java	4	1	pending	
-src/server/gachapon/NewLeafCity.java	java	12	4	pending	
-src/server/gachapon/Perion.java	java	5	5	pending	
-src/server/gachapon/ShowaSpaFemale.java	java	25	12	pending	
-src/server/gachapon/ShowaSpaMale.java	java	25	13	pending	
-src/server/gachapon/Sleepywood.java	java	12	21	pending	
+src/server/gachapon/Global.java	java	18	4	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/Henesys.java	java	6	4	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/KerningCity.java	java	13	6	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/Ludibrium.java	java	1	1	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/MapleGachapon.java	java	50	44	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/MushroomShrine.java	java	7	7	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/NautilusHarbor.java	java	4	1	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/NewLeafCity.java	java	12	4	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/Perion.java	java	5	5	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/ShowaSpaFemale.java	java	25	12	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/ShowaSpaMale.java	java	25	13	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
+src/server/gachapon/Sleepywood.java	java	12	21	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性
 src/server/life/ChangeableStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/Element.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MapleLifeFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MapleMonster.java	java	35	31	ported	org/gms/server/life/Monster.java；本文件两处改动：getTakenDamage() 访问器批次5已移植（返回拷贝且拷贝动作放在 lockMonster() 内）；distributePartyExperience 的蹭经验判定 rejected —— 原实现把整套 IntervalBuilder 换成单条件「比怪低 N 级且不是击杀者」，而 BeiDou 的区间方案在每个维度都不弱：区间以每个出过伤害的队员等级为中心各加一段并自动合并，所以任何出过力的人都豁免（原实现只豁免最后一击那个人，更窄）；两个可调半径 exp_split_level_interval / exp_split_leech_interval 对单一 EXP_MOB_LEECH_INTERVAL；且原实现在基线里就把等级上界改成了 300，等于删掉反代练的那一半闸门。partyParticipation 只由 takenDamage 构建（Monster.java:617），里面只有真正打过怪的人，故「出力即豁免」成立。连带 killerId 参数不需要传进来
-src/server/life/MapleMonsterInformationProvider.java	java	4	3	pending	
+src/server/life/MapleMonsterInformationProvider.java	java	4	3	ported	批次7：retrieveDrop 读 distinctive 列；多件掉落判定加 isDistinctive
 src/server/life/MapleMonsterStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MapleNPCStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MaplePlayerNPC.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -579,7 +579,7 @@ src/server/life/MobAttackInfo.java	java	0	0	noise	仅格式化/空白改动（gi
 src/server/life/MobAttackInfoFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MobSkill.java	java	3	0	already-fixed	Cosmic 已把 int switch 重构为 MobSkillType 枚举，157 早就在：MobSkillType.java:46 的 SEAL_SKILL(157) 与 MobSkill.java:253 的 case SEAL_SKILL。且比 LK 走得更远——LK 只塞状态，BeiDou 还接了消费方 Monster.java:1498（真的拦下怪物放技能）与 AbstractPlayerInteraction.java:1287
 src/server/life/MobSkillFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/life/MonsterDropEntry.java	java	3	1	pending	
+src/server/life/MonsterDropEntry.java	java	3	1	ported	批次7：加 isDistinctive 字段（列由 V1000.1.1 建）
 src/server/life/MonsterGlobalDropEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MonsterListener.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/SpawnPoint.java	java	15	2	ported	org/gms/server/life/SpawnPoint.java；单个刷怪点容量由写死的 1 改为 mob_spawn_point_capacity（默认 2），BOSS 点恒为 1；BOSS 重生时间 ±20% 随机化。修原实现三处：不加 private Monster mob 字段——那是有状态的实例对象，每个刷怪点常驻一份而 getMonster() 每次又 new 一只新的，存着的那只永远用不上，改为构造时取一次 final boolean boss；Math.random() 改 Randomizer.nextDouble()（前者是全局共享 Random，刷怪定时器多线程调用会争用同一个种子）；去掉 Java 9 起已废弃的 new Double(double)，乘 1000 改用该文件既有的 SECONDS.toMillis。另原实现最终态把 MOB_COUNT_MULTIPLIER 注释掉写死 2，这里取回配置形态
@@ -601,7 +601,7 @@ src/server/maps/MapleGenericPortal.java	java	0	0	noise	仅格式化/空白改动
 src/server/maps/MapleHiredMerchant.java	java	5	2	pending	
 src/server/maps/MapleKite.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MapleMap.java	java	91	40	pending	
-src/server/maps/MapleMapFactory.java	java	3	1	pending	
+src/server/maps/MapleMapFactory.java	java	3	1	ported	批次7：加 7亿段→chinese（zh-CN String.wz 已有该节点）；singapore→SG rejected（BeiDou 两层 String.wz 均无 SG 节点）
 src/server/maps/MapleMapItem.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MapleMapManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MapleMapObject.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -741,7 +741,7 @@ src/net/mailing/Verifier.java	java-new	30	0	deferred	同 MailManager，随邮箱
 src/net/server/handlers/VotePingBackHandler.java	java-new	52	0	rejected	LK 全仓库零引用的死代码：extends javax.xml.ws.spi.http.HttpHandler（JAX-WS SPI，JDK11+ 已从 JDK 移除，Java 21 下需额外依赖才编译得过），handle() 里 JSON 解析与 sendResponseHeaders 全被注释掉，只剩一句 System.out.println。真正记票的 UpdateVotePointTask 并不消费它。与 LichDebugCommand 同档
 src/net/server/task/UpdateVotePointTask.java	java-new	143	0	deferred	缓：它不消费 VotePingBackHandler，而是每 5 分钟主动 GET GTOP_PING_BACK_URL 拉 gtop100 的 XML 并解析 entry/pingusername 记票（LK 侧在 Server.java:932 注册）。三个阻塞：需真实 gtop100 站点注册（url 内含 siteid 与 pass）；其 SQL 的 and email is not null 就是「未绑定邮箱投票无效」这条规则，依赖已 deferred 的 MailManager；读写 accounts.lastVoteTime，BeiDou 无此列。另 LK 用 HeavenMS 的 TimerManager 自建调度，移植要改接 BeiDou 现有调度方式，属重写而非搬运。重启条件：确定接入投票站并拿到 siteid/pass + 邮箱验证方案定案
 src/server/MessageBoard.java	java-new	91	0	deferred	缓：本批决定跳过留言板，代码没写。前置已就绪（批次0 建的 message_board 表与 MessageBoardDO/MessageBoardMapper），BeiDou 两个语言层都无任何留言板实现。移植时要修的 LK 问题已查明：单例上的 LinkedList 非线程安全却被多频道并发读写；getMessages 的 SELECT 无 ORDER BY 却用 addFirst 装填，冷启动后顺序与内存态不一致；表名 messageboard 与 messageBoard 大小写混用，Linux MySQL 上会炸；淘汰旧留言的 DELETE 分支里 ps 在循环中反复赋值且未关闭；颜色控制码被拼进持久化内容且与 characterName 列重复。重启条件：决定要做留言板时
-src/server/gachapon/Leafre.java	java-new	74	0	pending	
+src/server/gachapon/Leafre.java	java-new	74	0	deferred	并入 gachapon 工作包（批次7脚本组）：BeiDou 运行时走 GachaponService+DB 奖池，硬编码路径已是死代码；LK 奖池调整应转 gachapon 数据迁移、10连抽转 GachaponService 特性；新增蛋机需奖池数据+NPC 脚本
 src/server/ultils/RoyalAccount.java	java-new	69	0	pending	
 HeavenMS_LichKingMod.iml	other	22	0	noise	IDE 工程文件
 build.xml	other	73	0	noise	Ant 构建脚本；BeiDou 用 Maven

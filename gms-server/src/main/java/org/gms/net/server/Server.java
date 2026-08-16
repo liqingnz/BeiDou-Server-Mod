@@ -102,7 +102,7 @@ public class Server {
     }
 
     private static final Set<Integer> activeFly = new HashSet<>();
-    private static final Map<Integer, Integer> couponRates = new HashMap<>(30);
+    private static final Map<Integer, Float> couponRates = new HashMap<>(30);
     private static final List<Integer> activeCoupons = new LinkedList<>();
     private ChannelDependencies channelDependencies;
 
@@ -557,7 +557,7 @@ public class Server {
         return Math.max(0, nextDay.getTimeInMillis() - System.currentTimeMillis());
     }
 
-    public Map<Integer, Integer> getCouponRates() {
+    public Map<Integer, Float> getCouponRates() {
         return couponRates;
     }
 

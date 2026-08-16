@@ -126,7 +126,7 @@ public class MonsterInformationProvider {
             multiDrops = new LinkedList<>();
 
             for (MonsterDropEntry mde : list) {
-                if (ItemConstants.isEquipment(mde.itemId) && mde.Maximum > 1) {
+                if ((ItemConstants.isEquipment(mde.itemId) || mde.isDistinctive) && mde.Maximum > 1) {
                     multiDrops.add(mde);
 
                     int rnd = Randomizer.rand(mde.Minimum, mde.Maximum);
@@ -163,12 +163,12 @@ public class MonsterInformationProvider {
         final List<MonsterDropEntry> ret = new LinkedList<>();
 
         try (Connection con = DatabaseConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT itemid, chance, minimum_quantity, maximum_quantity, questid FROM drop_data WHERE dropperid = ?")) {
+             PreparedStatement ps = con.prepareStatement("SELECT itemid, chance, minimum_quantity, maximum_quantity, questid, distinctive FROM drop_data WHERE dropperid = ?")) {
             ps.setInt(1, monsterId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    ret.add(new MonsterDropEntry(rs.getInt("itemid"), rs.getInt("chance"), rs.getInt("minimum_quantity"), rs.getInt("maximum_quantity"), rs.getShort("questid")));
+                    ret.add(new MonsterDropEntry(rs.getInt("itemid"), rs.getInt("chance"), rs.getInt("minimum_quantity"), rs.getInt("maximum_quantity"), rs.getShort("questid"), rs.getBoolean("distinctive")));
                 }
             }
         } catch (SQLException e) {

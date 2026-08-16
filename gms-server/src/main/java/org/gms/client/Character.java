@@ -219,7 +219,7 @@ public class Character extends AbstractCharacterObject {
     private float mesoRate = 1;
     @Getter
     private float dropRate = 1;
-    private int expCoupon = 1, mesoCoupon = 1, dropCoupon = 1;
+    private float expCoupon = 1, mesoCoupon = 1, dropCoupon = 1;
     @Getter
     @Setter
     private int omokwins;
@@ -354,7 +354,7 @@ public class Character extends AbstractCharacterObject {
     private final Set<MapObject> visibleMapObjects = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Map<Skill, SkillEntry> skills = new LinkedHashMap<>();
     private final Map<Integer, Integer> activeCoupons = new LinkedHashMap<>();
-    private final Map<Integer, Integer> activeCouponRates = new LinkedHashMap<>();
+    private final Map<Integer, Float> activeCouponRates = new LinkedHashMap<>();
     private final EnumMap<BuffStat, BuffStatValueHolder> effects = new EnumMap<>(BuffStat.class);
     private final Map<BuffStat, Byte> buffEffectsCount = new LinkedHashMap<>();
     private final Map<Disease, Long> diseaseExpires = new LinkedHashMap<>();
@@ -4654,7 +4654,7 @@ public class Character extends AbstractCharacterObject {
         return mobExpRate;
     }
 
-    public int getCouponExpRate() {
+    public float getCouponExpRate() {
         return expCoupon;
     }
 
@@ -4662,7 +4662,7 @@ public class Character extends AbstractCharacterObject {
         return expRate / (expCoupon * getWorldServer().getExpRate());
     }
 
-    public int getCouponDropRate() {
+    public float getCouponDropRate() {
         return dropCoupon;
     }
 
@@ -4675,7 +4675,7 @@ public class Character extends AbstractCharacterObject {
         return (dropRate / w.getDropRate()) * w.getBossDropRate();
     }
 
-    public int getCouponMesoRate() {
+    public float getCouponMesoRate() {
         return mesoCoupon;
     }
 
@@ -6144,7 +6144,7 @@ public class Character extends AbstractCharacterObject {
         dropCoupon = 1;
     }
 
-    private int getCouponMultiplier(int couponId) {
+    private float getCouponMultiplier(int couponId) {
         return activeCouponRates.get(couponId);
     }
 
@@ -6186,7 +6186,8 @@ public class Character extends AbstractCharacterObject {
                 }
             }
         } else {
-            int maxExpRate = 1, maxDropRate = 1, maxExpCouponId = -1, maxDropCouponId = -1;
+            int maxExpCouponId = -1, maxDropCouponId = -1;
+            float maxExpRate = 1, maxDropRate = 1;
 
             for (Entry<Integer, Integer> coupon : activeCoupons.entrySet()) {
                 int couponId = coupon.getKey();
@@ -6227,7 +6228,7 @@ public class Character extends AbstractCharacterObject {
         activeCoupons.clear();
         activeCouponRates.clear();
 
-        Map<Integer, Integer> coupons = Server.getInstance().getCouponRates();
+        Map<Integer, Float> coupons = Server.getInstance().getCouponRates();
         List<Integer> active = Server.getInstance().getActiveCoupons();
 
         for (Item it : cashItems) {

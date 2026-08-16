@@ -65,7 +65,8 @@ public class WhatDropsFromCommand extends Command {
                         }
                         // 计算精度丢失的问题
                         float chance = Math.max(1000000F / drop.chance / (!MonsterInformationProvider.getInstance().isBoss(mobId) ? player.getDropRate() : player.getBossDropRate()), 1);
-                        output.append("- ").append(name).append(" (1/").append((int) chance).append(")\r\n");
+                        // #v 物品图标 + #z 物品名，客户端富文本渲染（LK ac7830b5 的显示改进；保留按怪名搜索，不跟 LK 改成按 id）
+                        output.append("- #v").append(drop.itemId).append("##z").append(drop.itemId).append("# (1/").append((int) chance).append(")\r\n");
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
