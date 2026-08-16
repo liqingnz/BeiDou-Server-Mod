@@ -884,7 +884,7 @@ scripts/npc/1022000.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/1022001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1022003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1022004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1022101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1022101.js	script	0	0	rejected	LK 把快乐村传送 NPC「Rooney」整个换成枫叶兑换商。Rooney 是快乐村 209000000 唯一入口且放置在 23 张地图（其余碰该图的 NPC 都在里面，是出口），照搬等于圣诞活动区失联。四档兑换货币里 3100000/3100001/3101001 三档数据缺失，奖池另有椅子 3010121/3010135 缺。原文封存在 docs/lkport-parked/。可捞的一块是「枫叶换职业武器」（30 件武器 Character.wz 全有、货币 4001126 也有），但要挂新 NPC 并加 Map.wz 放置，归第 6 项
 scripts/npc/1022104.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1022105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032000.js	script	0	0	rejected	只把变量名 mesos 改成中文标识符「金币」
