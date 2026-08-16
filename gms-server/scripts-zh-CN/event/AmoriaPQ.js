@@ -304,6 +304,8 @@ function giveRandomEventReward(eim, player) {
 function clearPQ(eim) {
     eim.stopEventTimer();
     eim.setEventCleared();
+    // 通关发组队凭证
+    eim.distributePQClearReward(3100001, 1);
 }
 
 function monsterKilled(mob, eim) {}

@@ -59,7 +59,7 @@ function action(mode, type, selection) {
                     return;
                 }
 
-                cm.sendSimple("#e#b<组队任务：女神之塔>\r\n#k#n" + em.getProperty("party") + "\r\n\r\n你想要组建或加入一个团队来解决#b女神之塔#k的谜题吗？让你的#b队伍领袖#k与我交谈或者自己组建一个队伍。#b\r\n#L0#我想参加组队任务。\r\n#L1#我想" + (cm.getPlayer().isRecvPartySearchInviteEnabled() ? "禁用" : "启用") + "组队搜索。\r\n#L2#我想了解更多细节。\r\n#L3#我想要领取奖励。");
+                cm.sendSimple("#e#b<组队任务：女神之塔>\r\n#k#n" + em.getProperty("party") + "\r\n\r\n你想要组建或加入一个团队来解决#b女神之塔#k的谜题吗？让你的#b队伍领袖#k与我交谈或者自己组建一个队伍。#b\r\n#L0#我想参加组队任务。\r\n#L1#我想" + (cm.getPlayer().isRecvPartySearchInviteEnabled() ? "禁用" : "启用") + "组队搜索。\r\n#L2#我想了解更多细节。\r\n#L3#我想要领取奖励。\r\n#L4#我想先看看通关奖励。");
             } else if (status == 1) {
                 if (selection == 0) {
                     if (cm.getParty() == null) {
@@ -87,6 +87,8 @@ function action(mode, type, selection) {
                 } else if (selection == 2) {
                     cm.sendOk("#e#b<女神之塔组队任务>#k#n\r\n我们的女神已经失踪了一段时间，有传言说她最后一次被看到是在女神之塔内。此外，我们的圣地已经被精灵们的压倒性力量夺取，这些生物最近一直在奥比斯的边缘徘徊。他们的领袖，皮克西爸爸，目前掌握着王位，可能知道她的下落，因此我们迫切需要找到一支由勇敢的英雄组成的队伍，冲进去夺回我们的圣地并拯救她。如果你的团队能够包含每个职业（战士，魔法师，弓箭手，飞侠和海盗），你们将得到我的祝福来帮助你们战斗。你们会帮助我们吗？");
                     cm.dispose();
+                } else if (selection == 4) {
+                    cm.sendPrev(em.getProperty("reward"));
                 } else {
                     cm.sendSimple("那么，你想要获得什么奖品？\r\n#b#L0#给我女神手镯。\r\n");
                 }

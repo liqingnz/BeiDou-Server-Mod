@@ -298,6 +298,8 @@ function giveRandomEventReward(eim, player) {
 function clearPQ(eim) {
     eim.stopEventTimer();
     eim.setEventCleared();
+    // PQ clear certificate
+    eim.distributePQClearReward(3100001, 1);
 }
 
 function monsterKilled(mob, eim) {}

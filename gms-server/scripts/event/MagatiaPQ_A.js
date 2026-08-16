@@ -38,8 +38,28 @@ var eventTime = 45;     // 45 minutes
 
 const maxLobbies = 1;
 
+// Hoisted to module scope so setRewardList() renders exactly the pool that gets handed out.
+var evLevel, itemSet, itemQty;
+evLevel = 1;    //Rewards at clear PQ
+itemSet = [2000003, 2000002, 2000004, 2000005, 2022003, 1032016, 1032015, 1032014, 2041212, 2041020, 2040502, 2041016, 2044701, 2040301, 2043201, 2040501, 2040704, 2044001, 2043701, 2040803, 1102026, 1102028, 1102029];
+itemQty = [100, 100, 20, 10, 50, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+
+// Renders the clear-reward pool into a property the PQ NPC shows on demand.
+function setRewardList() {
+    var sendStr = "Clearing this party quest awards one of the following:\r\n\r\n";
+    for (var i = 0; i < itemSet.length; i++) {
+        sendStr += "#v" + itemSet[i] + "# #z" + itemSet[i] + "#";
+        if (itemQty[i] > 1) {
+            sendStr += " x " + itemQty[i];
+        }
+        sendStr += "\r\n";
+    }
+    em.setProperty("reward", sendStr);
+}
+
 function init() {
     setEventRequirements();
+    setRewardList();
 }
 
 function getMaxLobbies() {
@@ -75,11 +95,8 @@ function setEventExclusives(eim) {
 }
 
 function setEventRewards(eim) {
-    var itemSet, itemQty, evLevel, expStages;
+    var expStages;
 
-    evLevel = 1;    //Rewards at clear PQ
-    itemSet = [2000003, 2000002, 2000004, 2000005, 2022003, 1032016, 1032015, 1032014, 2041212, 2041020, 2040502, 2041016, 2044701, 2040301, 2043201, 2040501, 2040704, 2044001, 2043701, 2040803, 1102026, 1102028, 1102029];
-    itemQty = [100, 100, 20, 10, 50, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
     eim.setEventRewards(evLevel, itemSet, itemQty);
 
     expStages = [0, 10000, 20000, 0, 20000, 20000, 0, 0];    //bonus exp given on CLEAR stage signal
@@ -413,6 +430,8 @@ function giveRandomEventReward(eim, player) {
 function clearPQ(eim) {
     eim.stopEventTimer();
     eim.setEventCleared();
+    // PQ clear certificate
+    eim.distributePQClearReward(3100001, 1);
 }
 
 function monsterKilled(mob, eim) {

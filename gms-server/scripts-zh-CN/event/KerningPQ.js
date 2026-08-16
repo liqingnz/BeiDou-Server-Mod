@@ -44,8 +44,28 @@ if(GameConfig.getServerBoolean("use_enable_party_level_limit_lift")) {  //如果
     minLevel = 1 , maxLevel = 999;
 }
 
+// 提到模块作用域，让 setRewardList() 渲染出与实际发放完全一致的奖池
+var evLevel, itemSet, itemQty;
+evLevel = 1;    //Rewards at clear PQ
+itemSet = [2040505, 2040514, 2040502, 2040002, 2040602, 2040402, 2040802, 1032009, 1032004, 1032005, 1032006, 1032007, 1032010, 1032002, 1002026, 1002089, 1002090, 2000003, 2000001, 2000002, 2000006, 2022003, 2022000, 2000004, 4003000, 4010000, 4010001, 4010002, 4010003, 4010004, 4010005, 4010006, 4010007, 4020000, 4020001, 4020002, 4020003, 4020004, 4020005, 4020006, 4020007, 4020008];
+itemQty = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 80, 80, 80, 50, 5, 15, 15, 30, 15, 15, 15, 15, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 3];
+
+// 把通关奖池渲染成一段文本，供 PQ NPC 的「预览任务奖励」菜单读取
+function setRewardList() {
+    var sendStr = "通关本次组队任务后可获得以下奖励之一:\r\n\r\n";
+    for (var i = 0; i < itemSet.length; i++) {
+        sendStr += "#v" + itemSet[i] + "# #z" + itemSet[i] + "#";
+        if (itemQty[i] > 1) {
+            sendStr += " x " + itemQty[i];
+        }
+        sendStr += "\r\n";
+    }
+    em.setProperty("reward", sendStr);
+}
+
 function init() {
     setEventRequirements();
+    setRewardList();
 }
 
 function getMaxLobbies() {
@@ -81,11 +101,8 @@ function setEventExclusives(eim) {
 }
 
 function setEventRewards(eim) {
-    var itemSet, itemQty, evLevel, expStages;
+    var expStages;
 
-    evLevel = 1;    //Rewards at clear PQ
-    itemSet = [2040505, 2040514, 2040502, 2040002, 2040602, 2040402, 2040802, 1032009, 1032004, 1032005, 1032006, 1032007, 1032010, 1032002, 1002026, 1002089, 1002090, 2000003, 2000001, 2000002, 2000006, 2022003, 2022000, 2000004, 4003000, 4010000, 4010001, 4010002, 4010003, 4010004, 4010005, 4010006, 4010007, 4020000, 4020001, 4020002, 4020003, 4020004, 4020005, 4020006, 4020007, 4020008];
-    itemQty = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 80, 80, 80, 50, 5, 15, 15, 30, 15, 15, 15, 15, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 3];
     eim.setEventRewards(evLevel, itemSet, itemQty);
 
     expStages = [100, 200, 400, 800, 1500];    //bonus exp given on CLEAR stage signal
@@ -231,6 +248,8 @@ function giveRandomEventReward(eim, player) {
 function clearPQ(eim) {
     eim.stopEventTimer();
     eim.setEventCleared();
+    // 通关发组队凭证
+    eim.distributePQClearReward(3100001, 1);
 }
 
 function monsterKilled(mob, eim) {}

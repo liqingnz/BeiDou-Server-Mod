@@ -782,7 +782,7 @@ tools/MapleSkillbookChanceFetcher/MapleSkillbookChanceFetcher.iml	other	11	0	noi
 tools/MapleSkillbookStackUpdate/MapleSkillbookStackUpdate.iml	other	11	0	noise	IDE 工程文件
 tools/MapleWorldmapChecker/MapleWorldmapChecker.iml	other	11	0	noise	IDE 工程文件
 tools/SpiderDropFetcher/SpiderDropFetcher.iml	other	11	0	noise	IDE 工程文件
-scripts/event/AmoriaPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/AmoriaPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：只采通关发组队凭证 3100001。LK 无 setRewardList（这两个 PQ 没有对应的预览 NPC）。不采阈值调参与 dropMessage 注释掉的内容削减
 scripts/event/AreaBossDyle.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/AreaBossEliza1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/AreaBossFaust1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -805,7 +805,7 @@ scripts/event/BalrogBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / m
 scripts/event/BalrogBattle_Easy.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/Boats.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/BossRushPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/CWKPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/CWKPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：只采通关发组队凭证 3100001。LK 无 setRewardList（这两个 PQ 没有对应的预览 NPC）。不采阈值调参与 dropMessage 注释掉的内容削减
 scripts/event/CafePQ_1.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/CafePQ_2.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/CafePQ_3.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
@@ -823,16 +823,16 @@ scripts/event/HolidayPQ_2.js	script	0	0	noise	改动可证明只落在字符串�
 scripts/event/HolidayPQ_3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/HorntailBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min + 重连按 defeatedHead 回对应阶段图（defeatedHead 机制 Cosmic 已有）
 scripts/event/HorntailPQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
-scripts/event/KerningPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/KerningPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）
 scripts/event/KerningTrain.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/LatanicaBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/LudiMazePQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
-scripts/event/LudiPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/LudiPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）
 scripts/event/MK_PrimeMinister.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/MK_PrimeMinister2.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
-scripts/event/MagatiaPQ_A.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/MagatiaPQ_Z.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/OrbisPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/MagatiaPQ_A.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）
+scripts/event/MagatiaPQ_Z.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）
+scripts/event/OrbisPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）
 scripts/event/PapulatusBattle.js	script	0	0	ported	批次7：接 G7 配额（预检 attemptBoss(name,false) + 进场 logBossAttempt 两段式，修掉 LK 预检即扣次的缺陷）+ 任务7104 门槛 + 凭证按伤害分发（3100000 wz 待任务#4）；等级上限不搬（max_level_cap 已兜住）
 scripts/event/PinkBeanBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限360min + 波次倒计时15s→5s + 阵亡容忍5→12（警告线8/4）
 scripts/event/PiratePQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
@@ -1013,7 +1013,7 @@ scripts/npc/2012021.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字�
 scripts/npc/2012022.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012025.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
-scripts/npc/2013000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2013000.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：新增「预览通关奖励」菜单项，读 em.getProperty("reward")（由对应 PQ 脚本的 setRewardList() 写入）。译文与其余改动不搬
 scripts/npc/2020000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2020002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2020005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1047,7 +1047,7 @@ scripts/npc/2040027.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2040028.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040030.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040031.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2040034.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040034.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：新增「预览通关奖励」菜单项，读 em.getProperty("reward")（由对应 PQ 脚本的 setRewardList() 写入）。译文与其余改动不搬
 scripts/npc/2040035.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040036.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040037.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1154,8 +1154,8 @@ scripts/npc/2111019.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字�
 scripts/npc/2111026.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2112000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2112001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2112003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2112004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2112003.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：新增「预览通关奖励」菜单项，读 em.getProperty("reward")（由对应 PQ 脚本的 setRewardList() 写入）。译文与其余改动不搬
+scripts/npc/2112004.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：新增「预览通关奖励」菜单项，读 em.getProperty("reward")（由对应 PQ 脚本的 setRewardList() 写入）。译文与其余改动不搬
 scripts/npc/2112005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2112006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2112007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1206,7 +1206,7 @@ scripts/npc/9010002.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9010003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9010004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9010021.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9020000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9020000.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：新增「预览通关奖励」菜单项，读 em.getProperty("reward")（由对应 PQ 脚本的 setRewardList() 写入）。译文与其余改动不搬
 scripts/npc/9020001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9020002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9030000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）

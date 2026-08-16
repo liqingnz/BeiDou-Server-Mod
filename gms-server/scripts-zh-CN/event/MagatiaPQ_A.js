@@ -44,8 +44,28 @@ if(GameConfig.getServerBoolean("use_enable_party_level_limit_lift")) {  //如果
     minLevel = 1 , maxLevel = 999;
 }
 
+// 提到模块作用域，让 setRewardList() 渲染出与实际发放完全一致的奖池
+var evLevel, itemSet, itemQty;
+evLevel = 1;    //Rewards at clear PQ
+itemSet = [2000003, 2000002, 2000004, 2000005, 2022003, 1032016, 1032015, 1032014, 2041212, 2041020, 2040502, 2041016, 2044701, 2040301, 2043201, 2040501, 2040704, 2044001, 2043701, 2040803, 1102026, 1102028, 1102029];
+itemQty = [100, 100, 20, 10, 50, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+
+// 把通关奖池渲染成一段文本，供 PQ NPC 的「预览任务奖励」菜单读取
+function setRewardList() {
+    var sendStr = "通关本次组队任务后可获得以下奖励之一:\r\n\r\n";
+    for (var i = 0; i < itemSet.length; i++) {
+        sendStr += "#v" + itemSet[i] + "# #z" + itemSet[i] + "#";
+        if (itemQty[i] > 1) {
+            sendStr += " x " + itemQty[i];
+        }
+        sendStr += "\r\n";
+    }
+    em.setProperty("reward", sendStr);
+}
+
 function init() {
     setEventRequirements();
+    setRewardList();
 }
 
 function getMaxLobbies() {
@@ -81,11 +101,8 @@ function setEventExclusives(eim) {
 }
 
 function setEventRewards(eim) {
-    var itemSet, itemQty, evLevel, expStages;
+    var expStages;
 
-    evLevel = 1;    //Rewards at clear PQ
-    itemSet = [2000003, 2000002, 2000004, 2000005, 2022003, 1032016, 1032015, 1032014, 2041212, 2041020, 2040502, 2041016, 2044701, 2040301, 2043201, 2040501, 2040704, 2044001, 2043701, 2040803, 1102026, 1102028, 1102029];
-    itemQty = [100, 100, 20, 10, 50, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
     eim.setEventRewards(evLevel, itemSet, itemQty);
 
     expStages = [0, 10000, 20000, 0, 20000, 20000, 0, 0];    //bonus exp given on CLEAR stage signal
@@ -419,6 +436,8 @@ function giveRandomEventReward(eim, player) {
 function clearPQ(eim) {
     eim.stopEventTimer();
     eim.setEventCleared();
+    // 通关发组队凭证
+    eim.distributePQClearReward(3100001, 1);
 }
 
 function monsterKilled(mob, eim) {

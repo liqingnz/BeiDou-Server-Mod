@@ -62,7 +62,7 @@ function action(mode, type, selection) {
                     return;
                 }
 
-                cm.sendSimple("#e#b<组队任务：第一伴奏>\r\n#k#n" + em.getProperty("party") + "\r\n\r\n你和你的队伍成员一起完成任务怎么样？在这里，你会遇到障碍和问题，如果没有出色的团队合作，你是无法完成的。如果你想尝试，请告诉你的#b队伍领袖#k来找我谈谈。#b\r\n#L0#我想参加组队任务。\r\n#L1#我想" + (cm.getPlayer().isRecvPartySearchInviteEnabled() ? "关闭" : "开启") + "组队搜索。\r\n#L2#我想了解更多细节。");
+                cm.sendSimple("#e#b<组队任务：第一伴奏>\r\n#k#n" + em.getProperty("party") + "\r\n\r\n你和你的队伍成员一起完成任务怎么样？在这里，你会遇到障碍和问题，如果没有出色的团队合作，你是无法完成的。如果你想尝试，请告诉你的#b队伍领袖#k来找我谈谈。#b\r\n#L0#我想参加组队任务。\r\n#L1#我想" + (cm.getPlayer().isRecvPartySearchInviteEnabled() ? "关闭" : "开启") + "组队搜索。\r\n#L2#我想了解更多细节。\r\n#L3#我想先看看通关奖励。");
             }
         } else if (status == 1) {
             if (state == 1) {
@@ -92,6 +92,8 @@ function action(mode, type, selection) {
                     var psState = cm.getPlayer().toggleRecvPartySearchInvite();
                     cm.sendOk("你的组队搜索状态现在是：#b" + (psState ? "启用" : "禁用") + "#k。想要改变状态时随时找我谈谈。");
                     cm.dispose();
+                } else if (selection == 3) {
+                    cm.sendPrev(em.getProperty("reward"));
                 } else {
                     cm.sendOk("#e#b<组队任务：第一伴奏>#k#n\r\n在完成这个组队任务的子目标时，你的队伍必须通过许多障碍和谜题。与你的团队协调合作，以便进一步前进，击败最终BOSS，并收集掉落物品以获得奖励和额外阶段的机会。");
                     cm.dispose();
