@@ -133,6 +133,14 @@ export default {
 
   'account.player.give': 'give',
 
+  'account.player.favorite.open': 'Pick from favorites',
+  'account.player.favorite.add': 'Add to favorites',
+  'account.player.favorite.title.item': 'Favorite Items',
+  'account.player.favorite.title.equip': 'Favorite Equips',
+  'account.player.favorite.empty':
+    'No favorites yet. Click the star next to the item ID to add one.',
+  'account.player.favorite.delete.confirm': 'Remove this from favorites?',
+
   'account.list.charList.title': 'Character List',
   'account.list.charList.column.id': 'ID',
   'account.list.charList.column.name': 'Name',

@@ -164,7 +164,23 @@
           v-if="formData.type === 5 || formData.type === 6"
           :label="$t('account.player.form.id')"
         >
-          <a-input-number v-model="formData.id" @change="itemChanged" />
+          <a-space>
+            <a-input-number v-model="formData.id" @change="itemChanged" />
+            <a-tooltip :content="$t('account.player.favorite.open')">
+              <a-button @click="openFavoriteClick">
+                <template #icon>
+                  <icon-apps />
+                </template>
+              </a-button>
+            </a-tooltip>
+            <a-tooltip :content="$t('account.player.favorite.add')">
+              <a-button :disabled="!formData.id" @click="addFavoriteClick">
+                <template #icon>
+                  <icon-star />
+                </template>
+              </a-button>
+            </a-tooltip>
+          </a-space>
         </a-form-item>
         <a-form-item
           v-if="
@@ -299,6 +315,10 @@
         </a-form-item>
       </a-form>
     </a-modal>
+    <favorite-item-modal
+      ref="favoriteItemModalRef"
+      @select="favoriteSelected"
+    />
   </div>
 </template>
 
@@ -314,6 +334,8 @@
     GiveForm,
     givePlayerSrc,
   } from '@/api/player';
+  import { addFavoriteItem } from '@/api/favoriteItem';
+  import FavoriteItemModal from '@/views/account/player/favoriteItem.vue';
 
   const { t } = useI18n();
   const { loading, setLoading } = useLoading(false);
@@ -406,31 +428,34 @@
 
   const globalGiveClick = () => {
     giveFormTitle.value = '全服发放资源';
+    // 道具/自定义装备使用频率最高，置于列表首位
     typeOptions.value = [
+      { value: 5, label: t('account.player.item') },
+      { value: 6, label: t('account.player.equip') },
       { value: 0, label: t('account.player.nxCredit') },
       { value: 1, label: t('account.player.nxPrepaid') },
       { value: 2, label: t('account.player.maplePoint') },
       { value: 3, label: t('account.player.mesos') },
       { value: 4, label: t('account.player.exp') },
-      { value: 5, label: t('account.player.item') },
-      { value: 6, label: t('account.player.equip') },
     ];
     formData.value.worldId = undefined;
     formData.value.playerId = 0;
     formData.value.player = undefined;
+    formData.value.type = 5;
     giveFormVisible.value = true;
   };
 
   const giveClick = (data: any) => {
     giveFormTitle.value = '发放资源';
+    // 道具/自定义装备使用频率最高，置于列表首位
     typeOptions.value = [
+      { value: 5, label: t('account.player.item') },
+      { value: 6, label: t('account.player.equip') },
       { value: 0, label: t('account.player.nxCredit') },
       { value: 1, label: t('account.player.nxPrepaid') },
       { value: 2, label: t('account.player.maplePoint') },
       { value: 3, label: t('account.player.mesos') },
       { value: 4, label: t('account.player.exp') },
-      { value: 5, label: t('account.player.item') },
-      { value: 6, label: t('account.player.equip') },
       { value: 7, label: t('account.player.expRate') },
       { value: 8, label: t('account.player.mesosRate') },
       { value: 9, label: t('account.player.dropRate') },
@@ -443,7 +468,7 @@
       worldId: data.world,
       playerId: data.id,
       player: data.name,
-      type: 0,
+      type: 5,
       id: undefined,
       quantity: undefined,
       rate: undefined,
@@ -473,6 +498,35 @@
     try {
       await givePlayerSrc(formData.value);
       Message.success(t('message.success'));
+    } catch {
+      // 错误提示由 axios 响应拦截器统一弹出，此处只保证弹窗不关闭
+    } finally {
+      setLoading(false);
+    }
+    // 返回 false 阻止弹窗关闭，便于连续发放
+    return false;
+  };
+
+  const favoriteItemModalRef = ref();
+  const openFavoriteClick = () => {
+    favoriteItemModalRef.value.init(formData.value.type);
+  };
+
+  const favoriteSelected = (itemId: number) => {
+    formData.value.id = itemId;
+    itemChanged();
+  };
+
+  const addFavoriteClick = async () => {
+    setLoading(true);
+    try {
+      await addFavoriteItem(
+        formData.value.type as number,
+        formData.value.id as number
+      );
+      Message.success(t('message.success'));
+    } catch {
+      // 重复收藏、物品不存在等由响应拦截器提示
     } finally {
       setLoading(false);
     }

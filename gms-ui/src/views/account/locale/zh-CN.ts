@@ -130,6 +130,13 @@ export default {
 
   'account.player.give': '发放',
 
+  'account.player.favorite.open': '从常用物品中选择',
+  'account.player.favorite.add': '加入常用物品',
+  'account.player.favorite.title.item': '常用物品',
+  'account.player.favorite.title.equip': '常用装备',
+  'account.player.favorite.empty': '还没有常用物品，可在道具ID旁点击星标添加',
+  'account.player.favorite.delete.confirm': '确定从常用物品中移除？',
+
   'account.list.charList.title': '角色列表',
   'account.list.charList.column.id': 'ID',
   'account.list.charList.column.name': '角色名',
