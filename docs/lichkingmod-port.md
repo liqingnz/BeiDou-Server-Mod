@@ -2114,6 +2114,30 @@ if (GameConfig.getServerBoolean("use_enable_party_level_limit_lift")) {
 > `use_enable_party_level_limit_lift` 两个开关**静默失效**，PQ 回落到写死的原版阈值。
 > 已记录，未修——修它属于 BeiDou 自身的双层一致性问题，不在 LK 移植范围内。
 
+##### 撞车类：LK 与 BeiDou 各自独立做过同一 NPC（12 个，全部 rejected）
+
+这类不是「LK 改了 BeiDou 没改」，而是**两边分别写了同一个 ID 的脚本**。判据是拿
+LK HEAD 与 **BeiDou 现版**做结构比对（抹掉字符串/注释/空白），而不是看 LK 自己的 diff。
+
+**东方神舟（7 亿段）5 个**——LK 和 BeiDou 各自做了一套中国区：
+
+| 脚本 | 结论 |
+|---|---|
+| `npc/9310004.js` | 蜈蚣入口守卫，同目标图 701010321。BeiDou 兼顾 4103/8512 两个版本的任务、支持资格证明道具 4031289、带重复进入开关；LK 只查 `isQuestStarted(8512)`，还带个零调用的 `generateSelectionMenu` |
+| `npc/9310005.js` | 黑羊守卫，同目标图 701010322。BeiDou 走任务模式（任务 4109 + 完成后自动 reset）、显示收集进度、可指定落点；LK 直接扣 50 黑羊毛，等价于 BeiDou 的 `QuestMode=false` 分支 |
+| `npc/9310007.js` | 出口脚本，与 BeiDou 完全等价（同出口图 701010320） |
+| `npc/9310044.js` | 妖僧副本出口，与 BeiDou 完全等价（同出口图 702070400） |
+| `npc/9310013.js` | Perion ↔ 上海摆渡。LK 用一个 NPC 放两张图、按 `getMapId()` 分支；**BeiDou 拆成两个 NPC 各管一向**——`9310000` 在 Perion 飞 701000000、`9310013` 在 701000100 飞回 Perion，往返齐全（已核对 wz 放置与两图均存在）。照搬要往 Perion 的 `Map.wz` 再塞一个 9310013，结果是 Perion 出现两个功能相同的飞行员 |
+
+**LK 新增但 BeiDou 上游已有的 7 个**：`quest/3305`、`quest/3306`、`reactor/2619003–2619005`
+与 BeiDou 版逐行同构、只差译文；`quest/2233`、`quest/2234` 的 LK 版是 13 行 stub，
+BeiDou 是带 `isQuestActive` 守卫与多段对话的完整状态机（2233 的经验 2400 vs LK 3000 属数值口味）。
+
+> **一处方法论修正**：早先给脚本排优先级时，对 **LK 新增文件**用的是「LK 自己的 diff 行数」，
+> 而新增文件没有 before 态，整份文件都会被计成新增，于是 `3305/3306`（各 30 行）、
+> `2233/2234`、`2619xxx` 被排进了待办前列。正确的比较对象是 **BeiDou 现有的同名文件**——
+> 按这个标准，这 7 个全部是零收益。
+
 **`reactor/2401000.js` 从这批里单独拎出来当 bug 修。** 它跟 PQ 限制无关，是召唤暗黑龙王
 本体时**重置**副本计时器：
 

@@ -1329,17 +1329,17 @@ scripts/npc/9270037.js	script	0	0	ported	批次7 美容券统一：造型券→5
 scripts/npc/9270038.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270041.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270047.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9310004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9310005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310004.js	script	0	0	rejected	东方神舟撞车：LK 与 BeiDou 各自独立做了蜈蚣入口守卫，同目标图 701010321。BeiDou 更完整——兼顾 4103/8512 两个版本的任务、支持资格证明道具 4031289 进入、带重复进入/是否扣券开关、用地图名宏；LK 只查 isQuestStarted(8512)，还带个零调用的 generateSelectionMenu
+scripts/npc/9310005.js	script	0	0	rejected	东方神舟撞车：黑羊守卫，同目标图 701010322、同退出图 701010320。BeiDou 走任务模式（任务 4109 + 完成后自动 reset）、显示收集进度、可指定落点传送门 h000；LK 只是直接扣 50 个黑羊毛，等价于 BeiDou 的 QuestMode=false 分支
 scripts/npc/9310006.js	script	0	0	rejected	BeiDou 版（@Magical-H 东方神舟框架）更完整：组队/等级/赤珠任务校验俱全；LK 版是单人 startInstance + 60 行死注释
-scripts/npc/9310007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9310013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310007.js	script	0	0	rejected	东方神舟撞车：出口脚本，与 BeiDou 完全等价（同出口图 701010320）。BeiDou 版用 #m<mapid># 地图名宏，走 sendYesNoLevel 模板
+scripts/npc/9310013.js	script	0	0	rejected	东方神舟撞车：Perion 与上海之间的摆渡。LK 用一个 NPC 放在两张图上、按 getMapId() 分支；BeiDou 拆成两个 NPC 各管一向——9310000 在 Perion(102000000) 飞 701000000，9310013 在 701000100 飞回 Perion，往返齐全（已核对 wz 放置与两张图均存在）。照搬要往 Perion 的 Map.wz 再塞一个 9310013，结果是 Perion 出现两个功能相同的飞行员。票价 2000 vs LK 20000 属定价口味
 scripts/npc/9310031.js	script	0	0	ported	批次7：上海滩美发店助理小叶子（随机造型/染发，通用普通券 5159001/5159005）；BeiDou 原为空壳。券的 wz 数据本批一并补齐
 scripts/npc/9310032.js	script	0	0	ported	批次7：上海滩美发店老板丢夫人（指定造型/染发，通用高级券 5159000/5159004）；BeiDou 原为空壳
 scripts/npc/9310036.js	script	0	0	ported	批次7：少林寺整形院长芸萍（指定脸型，通用高级券 5159002）；BeiDou 原为空壳。换脸保留玩家瞳色
 scripts/npc/9310037.js	script	0	0	ported	批次7：少林寺整形助理如花（随机脸型，通用普通券 5159003）；BeiDou 原为空壳
 scripts/npc/9310039.js	script	0	0	rejected	BeiDou 版走通用组队副本框架（YaoSengPQ + 任务8534 + 防远程开启）；LK 版改用远征队系统，且 getEventManager 传的 YaosengBattle 与文件名 YaoSengBattle.js 大小写不符，其 startInstance 分支本身是断的。妖僧每周4次配额已在本批接进 YaoSengPQ.js
-scripts/npc/9310044.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9310044.js	script	0	0	rejected	东方神舟撞车：妖僧副本（少林密室）出口脚本，与 BeiDou 完全等价（同出口图 702070400）。BeiDou 版用地图名宏
 scripts/npc/9310050.js	script	0	0	already-fixed	两版同为 sendStorage(9310050) 仓库调用，逐字等价
 scripts/npc/9900000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9977777.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1598,8 +1598,8 @@ scripts/quest/21757.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/quest/2197.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2230.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2232.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/quest/2233.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/quest/2234.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/2233.js	script	0	0	rejected	LK 版是 13 行 stub（只判 getReputation()>999 就发 3000 经验）；BeiDou 是完整状态机——带 isQuestActive 守卫、多段对话、发 2400 经验。BeiDou 更完整，经验 2400 vs 3000 属数值口味
+scripts/quest/2234.js	script	0	0	rejected	LK 版是 13 行 stub；BeiDou 是完整状态机，且判定条件与 LK 等价（getTotalReputation()>=2000 且 getReputation()<=500），经验同为 3000
 scripts/quest/2245.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2251.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/quest/2257.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1638,8 +1638,8 @@ scripts/quest/29908.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/quest/29909.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/quest/3301.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/3303.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/quest/3305.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/quest/3306.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/3305.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上游已有同名脚本，抹掉字符串后与 LK 版逐行同构，只差译文
+scripts/quest/3306.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上游已有同名脚本，抹掉字符串后与 LK 版逐行同构，只差译文
 scripts/quest/3314.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/3320.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/3321.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1701,9 +1701,9 @@ scripts/reactor/2401000.js	script	0	0	ported	restartEventTimer 60 -> 180 分钟�
 scripts/reactor/2406000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/2408002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/2408003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/reactor/2619003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/reactor/2619004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/reactor/2619005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2619003.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上游已有同名脚本，与 LK 版逐行同构（同为 rm.weakenAreaBoss(6090004, ...)），只差播报译文
+scripts/reactor/2619004.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上游已有同名脚本，与 LK 版逐行同构，只差播报译文
+scripts/reactor/2619005.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上游已有同名脚本，与 LK 版逐行同构，只差播报译文
 scripts/reactor/5411000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/5511000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/reactor/5511001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
