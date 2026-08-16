@@ -45,9 +45,14 @@ public class MessageBoardDO implements Serializable {
     private String characterName;
 
     /**
-     * 留言内容，含颜色控制码
+     * 留言内容原文，不含角色名与颜色控制码
      */
     private String message;
+
+    /**
+     * 留言时作者是否为GM，仅用于渲染高亮
+     */
+    private Boolean isGm;
 
     /**
      * 留言时间

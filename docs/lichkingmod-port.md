@@ -2424,6 +2424,75 @@ family.getLeader().doFullCount();
 | `message_{zh_CN,en_US}.properties` | `Character.levelUp.maxLevelBroadcast` |
 | `log_{zh_CN,en_US}.properties` | `FamilyService.loadAllFamilies.warn1` |
 
+#### 批次 6 收尾 — 清 `deferred`（20 → 8）
+
+`deferred` 不算处理完。收工前把此前四个批次积压的 20 行逐条复核，按依赖聚成 5 簇。
+**12 行终局结清，8 行正式移交后续批次并写明解锁条件。**
+
+##### C1 · 邮箱验证体系（8 行）→ 全部 `rejected`
+
+`net/mailing/{MailManager, MailConst, Verifier}`、`gm0/VerifyEmailCommand`、`gm0/ChangePasswordCommand`、
+`gm4/SendMailCommand`、`npc/verifyEmail.js`、`npc/changePassword.js`
+
+这是**站外 SMTP 电子邮件**，不是站内信，要真实邮件服务凭据。否决的两条实质理由：
+
+- BeiDou 已有网页端改密码（`AccountService.updateAccountByUser`），闸门是**旧密码**。
+- LK 的 `@changepassword` 唯一闸门就是邮箱验证码 —— 脚本第一步那个算术码是**自显自验**的，
+  没有任何鉴权作用。砍掉邮箱直接搬，等于**任何人在一台已登录的客户端上都能改走账号密码**，
+  比现有的旧密码闸门更弱。
+
+账号找回将来真要做，按 BeiDou 自己的 JWT / `AuthTokenFilter` 体系写，比移植这版干净。
+
+##### C2 · 投票奖励（2 行）→ 全部 `rejected`
+
+`net/server/task/UpdateVotePointTask`、`gm4/UpdateVoteCommand`
+
+它是「接入 gtop100 这一**特定站点**」的运营集成，不是通用功能。四个阻塞叠在一起：
+需要真实站点注册（URL 内嵌 siteid 与 pass）；SQL 里的 `and email is not null` 就是
+「未绑定邮箱投票无效」，**依赖已否决的 C1**；读写 `accounts.lastVoteTime`，**BeiDou 无此列**；
+LK 用 HeavenMS 的 `TimerManager` 自建调度，搬过来要改接 BeiDou 的调度，属重写而非移植。
+
+点数读写 BeiDou 已有 `gm0/ReadPointsCommand` 与 `gm3/GiveVpCommand`。
+
+##### C3 · 全服留言板（2 行）→ `ported`
+
+`server/MessageBoard` + `npc/9800001.js`。前置批次 0 就绪（`message_board` 表、
+`MessageBoardDO`、`MessageBoardMapper`），零外部依赖，是 20 行里唯一能当场做完的。
+
+重写为 Spring `MessageBoardService`，脚本入口挂在 `AbstractPlayerInteraction` 上
+（`cm.getMessageBoard()` / `cm.addMessageBoardEntry(text)`）。修掉的 6 个问题：
+
+| # | 原实现 | 本次 |
+|---|---|---|
+| 1 | 单例上一个裸 `LinkedList` 被多频道并发读写 | **去掉缓存**，每次开板直接查库。留言板是低频 NPC 交互，30 行查询是毫秒级 |
+| 2 | `getMessages` 的 `SELECT` 无 `ORDER BY` 却用 `addFirst` 装填，冷启动后顺序与内存态不一致 | 随 1 一并消失；排序统一按**自增 id** 而不是 `create_time`——`TIMESTAMP` 只到秒，同秒内多条分不出先后 |
+| 3 | 留言板为空时 `size() == 0` 恒真，每次调用都白查一次库 | 随 1 一并消失 |
+| 4 | 淘汰旧留言是「循环 `DELETE ... LIMIT 1`」，`ps` 每轮重新 prepare 且从不 close | 查出第 30 条的 id，一条 `DELETE ... WHERE id < ?` 解决 |
+| 5 | 颜色控制码 + 角色名拼进 `message` 入库，与 `character_name` 列重复；改名后历史留言显示旧名；40 字上限校验的是原文、入库的却是拼装串 | **只存原文**，名字与颜色码渲染时再拼。「留言时是否为 GM」是历史事实，单独用 `is_gm` 列记 |
+| 6 | `addMessage` 捕获 `SQLException` 后**仍返回 `true`**，脚本据此扣钱 —— **入库失败照样扣 50 万** | 失败返回 `false`，脚本先写库成功才扣钱；另补了空内容不可提交 |
+
+> 表名 `messageboard` / `messageBoard` 大小写混用（Linux MySQL 上会炸）在批次 0 建表时就不存在了 ——
+> BeiDou 用 `message_board` 且走 Mapper。第 5 条要的 `is_gm` 列直接改了
+> `V1000.0.2` 的建表语句（该迁移从未在任何环境执行过），没有另开 `ALTER`。
+
+##### C4 / C5 · 移交后续批次（8 行，保持 `deferred`）
+
+这 8 行**硬阻塞在批次 6 拿不到的东西上**，不是决策问题。清单 evidence 已统一改写成
+`【认领：批次N】+ 解锁条件` 的格式：
+
+| 认领 | 行 | 解锁条件 |
+|---|---|---|
+| **批次 7** | `event/KrexelBattle.js`、`portal/treeboss00.js`、`npc/9270045.js`、`reactor/5411001.js` | 补齐地图 `541020700`/`541020800`、`Reactor.wz/5411001.img`、BOSS 凭证 `3100000`。远征侧 `ExpeditionType.KREXEL` 与 `ExpeditionBossLog` 条目 **G7 已就位** |
+| **批次 7** | `portal/mahavira_enter.js` | 脚本名只出现在 LK 改过的 `Map7/702050000.img.xml` 里，BeiDou 同名文件无 portal script 字段，单独搬不会被触发 |
+| **批次 7** | `npc/9000036_accessory.js` | 与主体 `npc/9000036.js` 是一套；另需先确认入口——LK 全仓库无任何地方 `openNpc` 到这个脚本名 |
+| **批次 7** | `scripting/npc/NPCConversationManager.java` | 真增量只有 `doGachapon(quantity)`，四个消费方全是批次 7 脚本，且 BeiDou 已有自己的 `@gacha` 体系 |
+| **批次 8** | `npc/under_maintenance.js` | 正文只剩「功能维护中」，真逻辑（皇家月卡日奖励）被 LK 自己注释掉了 |
+
+##### 收尾后的账
+
+`deferred` **20 → 8**，且剩下 8 行全部有认领批次与解锁条件。
+批次 6 自身产生的 `deferred` 归零。
+
 ### 批次 7 — 数据类
 
 1. `sql/db_drops.sql`、`db_LichKingMod.sql` 里的 `drop_data` 与 `shopitems` 调整 → 转成 Flyway 迁移

@@ -34,6 +34,7 @@ import org.gms.constants.id.NpcId;
 import org.gms.constants.inventory.ItemConstants;
 import org.gms.constants.string.ExtendType;
 import org.gms.dao.entity.ExtendValueDO;
+import org.gms.manager.ServerManager;
 import org.gms.model.pojo.SkillEntry;
 import org.gms.net.server.Server;
 import org.gms.net.server.guild.Guild;
@@ -43,6 +44,7 @@ import org.gms.scripting.event.EventInstanceManager;
 import org.gms.scripting.event.EventManager;
 import org.gms.scripting.npc.NPCScriptManager;
 import org.gms.server.ItemInformationProvider;
+import org.gms.service.MessageBoardService;
 import org.gms.server.Marriage;
 import org.gms.server.TimerManager;
 import org.gms.server.expeditions.Expedition;
@@ -71,6 +73,8 @@ import static java.util.concurrent.TimeUnit.DAYS;
 public class AbstractPlayerInteraction {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractPlayerInteraction.class);
+
+    private static final MessageBoardService messageBoardService = ServerManager.getApplicationContext().getBean(MessageBoardService.class);
 
     /**
      * 进行中的测谎，key 是被测角色id。登记入口只有 putIfAbsent 一处，同一目标同时只能有一场。
@@ -1649,6 +1653,22 @@ public class AbstractPlayerInteraction {
     public int getOnlineTime()
     {
         return getPlayer().getCurrentOnlineTime();
+    }
+
+    /**
+     * 全服留言板的展示文本，最新的在最上面。
+     */
+    public String getMessageBoard() {
+        return messageBoardService.getMessages();
+    }
+
+    /**
+     * 往全服留言板写一条留言。
+     *
+     * @return 写入成功才返回 true。<b>脚本必须按返回值决定扣不扣钱</b>——内容超长或入库失败都会返回 false。
+     */
+    public boolean addMessageBoardEntry(String message) {
+        return messageBoardService.addMessage(getPlayer(), message);
     }
 
 

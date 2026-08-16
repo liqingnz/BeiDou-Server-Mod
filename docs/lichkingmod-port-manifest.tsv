@@ -514,7 +514,7 @@ src/scripting/item/ItemScriptManager.java	java	0	0	noise	仅格式化/空白改�
 src/scripting/item/ItemScriptMethods.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/map/MapScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/map/MapScriptMethods.java	java	10	10	already-fixed	gms-server/src/main/java/org/gms/scripting/map/MapScriptMethods.java:38 与 :139 :166 —— 改动只是把勋章提示译成中文，BeiDou 已是中文
-src/scripting/npc/NPCConversationManager.java	java	30	13	deferred	缓，挪至批次7：真增量只有 doGachapon(quantity) 的批量抽奖，它的四个消费方 gachapon.js / gachaponRemote.js / gachaponold.js / 9270043.js 全是批次7 的脚本，且 BeiDou 已有自己的 @gacha 体系，要连同脚本一起取舍。displayCharacterRanks 全仓库零消费，随本行一并终局否决；嘉年华场地文案属汉化。重启条件：批次7 处理 gachapon 系列脚本时
+src/scripting/npc/NPCConversationManager.java	java	30	13	deferred	【认领：批次7】真增量只有 doGachapon(quantity) 批量抽奖，四个消费方 gachapon.js/gachaponRemote.js/gachaponold.js/9270043.js 全是批次7脚本，且BeiDou已有自己的@gacha体系，要连同脚本一起取舍。displayCharacterRanks 全仓库零消费，随本行一并终局否决
 src/scripting/npc/NPCScriptManager.java	java	9	0	rejected	唯一改动是新增一段被整体注释掉的 createEmptyCMS，其余是 javadoc 空行删除
 src/scripting/portal/PortalPlayerInteraction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/portal/PortalScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -707,7 +707,7 @@ src/tools/packets/Fishing.java	java	3	4	pending
 src/tools/packets/Wedding.java	java	21	8	pending	
 src/client/command/commands/CommandManager.java	java-new	89	6	ported	org/gms/client/command/commands/CommandManager.java；改并发容器。三个 setWorldXxxRate 确定不补 —— 唯一的消费方 RateEventCommand 已 rejected。批次4 追加三处：clearItemSold 供 RetrieveCommand 清空出售记录（并发容器不接受 null 值，用不了原实现的 set(id, null)）；registerRunningCommandIfAbsent 原子登记，给 GMBot 这种 key 是目标角色而非发起者自己的指令用；cancelRunningCommands 改为先原子 remove 再 cancel，原先先查后删会在并发下取消掉别人刚登记的新任务
 src/client/command/commands/gm0/BossDmgAnalysisCommand.java	java-new	75	0	ported	批次6-G14：改写为 gm2/BossDmgAnalysisCommand。修掉亿万分段多吐0、百分比整数除法；补无BOSS提示、按伤害降序、全量i18n；输出统一为表头yellowMessage+明细message()（同 @bosshp/@online）
-src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	deferred	缓：LK 版的安全闸门就是邮箱验证码（脚本第一步的算术码是自显自验，无鉴权作用），去掉邮箱等于任何人在已登录客户端上都能改账号密码。BeiDou 已有网页端改密码（AccountService.updateAccountByUser:101，闸门为旧密码）。重启条件：邮箱验证方案定案，或决定改用旧密码闸门做游戏内入口
+src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	rejected	批次6收尾终局否决：唯一闸门是邮箱验证码（脚本首步算术码自显自验无鉴权作用），去掉邮箱等于任何人在已登录客户端上都能改走账号密码，比BeiDou网页端的旧密码闸门更弱
 src/client/command/commands/gm0/DetectCommand.java	java-new	78	0	ported	gms-server/src/main/java/org/gms/client/command/commands/gm0/DetectCommand.java + V1000.0.5 注册；判定与处罚在 AbstractPlayerInteraction.detectPlayer，参数落成 V1000.0.6 的五个 game_config 键，use_player_detect 默认关闭
 src/client/command/commands/gm0/MapDropsCommand.java	java-new	88	0	ported	org/gms/client/command/commands/gm0/MapDropsCommand.java；退化为入口，逻辑复用 scripts-zh-CN/BeiDouSpecial/当前地图掉落_当前地图.js
 src/client/command/commands/gm0/QianDaoCommand.java	java-new	86	0	already-fixed	gms-server/scripts-zh-CN/BeiDouSpecial/每日签到.js:26 已实现每日签到（角色级，走 ExtendValue 的 daily 类型自动重置，发道具 2430033）。LK 版是账号级发点券，粒度不同但功能重叠，且其实现是坏的：oneDay 被写成 10000 毫秒（真正的 24 小时被注释掉）、两行调试用 dropMessage 残留会直接打给玩家、并把签到时间存进 accounts.lastVoteTime 与投票系统抢同一列，而 BeiDou 的 AccountsDO 根本没有这一列。如需账号级签到应走 ExtendValue 的 ACCOUNT_EXTEND_DAILY 另立新需求，不是移植
@@ -715,7 +715,7 @@ src/client/command/commands/gm0/RedeemCommand.java	java-new	90	0	pending
 src/client/command/commands/gm0/RetrieveCommand.java	java-new	84	0	ported	org/gms/client/command/commands/gm0/RetrieveCommand.java；配套给 CommandManager 加 clearItemSold —— 原实现用 set(id, null) 清空，而批次1 已把那些 map 换成 ConcurrentHashMap，put 空值会直接抛异常。另修两处：改为整批预检背包空间再扣钱（原实现先扣钱、忽略 addFromDrop 返回值，背包满时钱扣了物品没进包、记录还被清空）；逐件按自身背包类型分支（原实现只要清单里有一件装备就把全部当装备处理）。发放一律走 addFromDrop 发原物品对象 —— 原实现对非装备用 addById(c, itemId, quantity)，那个重载新建的是 owner=null/flag=0/expiration=-1 的干净物品，而 Shop.canSell:174 只校验数量不看这些字段，两条指令又都是 gm0，普通玩家可靠 @sellinv+@retrieve 洗掉 USE/ETC 的 UNTRADEABLE、SANDBOX 标记并把限时物品变永久。预检用 checkSpaceProgressively 并按背包类型分别累加 usedSlots（checkSpace 对装备只判断还有没有一格，逐件问会得出一格能放五件的错误结论），非装备还先按 itemId+flag+owner 聚合再检查（清单一个原背包格一条记录，逐条问会让每条都看到同一份剩余堆叠容量而低估格数）。发放逐件检查返回值，放不下的留在记录里待重试并把待付金额清零，不再二次收费
 src/client/command/commands/gm0/RollCommand.java	java-new	51	0	ported	org/gms/client/command/commands/gm0/RollCommand.java
 src/client/command/commands/gm0/SellInvCommand.java	java-new	101	9	ported	org/gms/client/command/commands/gm0/SellInvCommand.java；三分支合并，格数上限改用 Inventory.getSlotLimit()
-src/client/command/commands/gm0/VerifyEmailCommand.java	java-new	45	0	deferred	缓：依赖 MailManager。重启条件：邮箱验证方案定案后
+src/client/command/commands/gm0/VerifyEmailCommand.java	java-new	45	0	rejected	批次6收尾终局否决：随 MailManager
 src/client/command/commands/gm1/WhoDrops2Command.java	java-new	103	0	already-fixed	scripts-zh-CN/BeiDouSpecial/当前地图掉落_物品查询.js 已实现且更完善；既有 WhoDropsCommand.java:45 改为指向该脚本
 src/client/command/commands/gm2/CosPreviewCommand.java	java-new	119	0	ported	org/gms/client/command/commands/gm2/CosPreviewCommand.java；默认走 Salon.js，LK 遍历分支保留需显式传参
 src/client/command/commands/gm2/ItemDropTimedCommand.java	java-new	111	0	ported	org/gms/client/command/commands/gm2/ItemDropCommand.java；不新开指令。LK 版是 HeavenMS ItemDropCommand 的整份复制，逐行比对后唯一的功能增量就是给非宠物道具 setExpiration，因此改为既有 @drop 的可选第三参（有效期分钟数，沿用 LK 的 1440 上限），加解析保护。LK 宠物分支把同一个「分钟」参数当天数用，语义自相矛盾，未跟；LK 注释掉的 setOwner 与 gmLevel 判据由 4 改 3 也未跟，保留 BeiDou 现状
@@ -729,18 +729,18 @@ src/client/command/commands/gm4/LichDebugCommand.java	java-new	58	7	rejected	作
 src/client/command/commands/gm4/MobRateCommand.java	java-new	52	0	ported	org/gms/client/command/commands/gm4/MobRateCommand.java；写 YamlConfig 静态字段改为 GameConfig.update（照 gm5/ShowMoveLifeCommand 的既有写法，只改内存不落库，重启回 game_config 表的值，持久修改走 gms-ui——比原实现好，那个静态字段后台根本看不见）。去掉原实现硬编码的下限 0.7：该值恰好等于 MOB_SPAWN_BASE_RATE 的默认值，意味着永远调不低，显然非本意，改为不得为负。第二个参数改为可选；加 NumberFormatException 保护；[Debug] 硬编码改 I18nUtil；删末尾多余的 return。指令注册见 db/lkport/V1000.0.10
 src/client/command/commands/gm4/ProEquipCommand.java	java-new	89	0	ported	org/gms/client/command/commands/gm4/ProEquipCommand.java；合并了 DropProEquipCommand（第三参 drop 切换 spawnItemDrop/addFromDrop），不建两个类。与既有 gm4 ProItemCommand 互补故两条都保留：ProItem 把全属性设为定值，本指令在原属性上加值且原本为 0 的项保持 0，保留装备特性。默认加成取 equip_stat_randomize_range。修原实现的 short 溢出：原写法 Math.max(0, x>0 ? x+statGain : 0) 只防负不防上溢，@proequip <id> 30000 会绕成负数，改为先在 int 域相加再钳到 Short.MAX_VALUE；另加 NumberFormatException 保护。指令注册见 db/lkport/V1000.0.8
 src/client/command/commands/gm4/RateEventCommand.java	java-new	88	0	rejected	不搬。BeiDou 已有 gm4 的 ExpRate/DropRate/MesoRate/QuestRate/BossDropRate 五个倍率指令，LK 版只是给它们套了「改完起个定时器改回去」；而 BeiDou 的 GameConfig 本身热重载、改 world 倍率会即时写回 World 对象，限时活动应走 GameConfig + gms-ui 后台，靠内存态定时器控制的话活动期间重启就丢状态、后台看到的还是旧值。连带结论：批次1 遗留未移植的 CommandManager.setWorldExpRate/QuestRate/DropRate 三个方法确定不补（World 也确实没有 setQuestRate）
-src/client/command/commands/gm4/SendMailCommand.java	java-new	51	0	deferred	缓：函数体只有 3 行有效代码，全部逻辑在 MailManager.sendMapleLandMailTOSingleUser，而 net/mailing/MailManager 已在批次2 deferred；它还 import 了 net/server/task/UpdateVotePointTask（批次3 deferred）。注意这是站外电子邮件，不是游戏内站内信。重启条件：邮箱验证方案定案后随 MailManager 一并
-src/client/command/commands/gm4/UpdateVoteCommand.java	java-new	49	0	deferred	缓：整个投票奖励系统暂缓。BeiDou 已有 gm0/ReadPointsCommand 与 gm3/GiveVpCommand 管点数读写，Client.votePoints/voteTime 是 HeavenMS 上游就有（LK 侧该段只被格式化提交触碰，无逻辑改动）；LK 真正新增的是三条运营策略——衰减因子 NX_DECLINE_FACTOR、进商城领取豁免衰减、未绑定邮箱投票无效，最后一条依赖已 deferred 的 net/mailing/MailManager。重启条件：确定是否接入外部投票站 + 衰减策略定案 + 邮箱验证方案定案
+src/client/command/commands/gm4/SendMailCommand.java	java-new	51	0	rejected	批次6收尾终局否决：随 MailManager（另依赖同被否决的 UpdateVotePointTask）
+src/client/command/commands/gm4/UpdateVoteCommand.java	java-new	49	0	rejected	批次6收尾终局否决：随 UpdateVotePointTask。点数读写BeiDou已有 gm0/ReadPointsCommand 与 gm3/GiveVpCommand
 src/client/command/commands/gm5/ReloadConfigCommand.java	java-new	40	0	rejected	不搬。函数体只有一句 YamlConfig.fromFile("config.yaml")，而 BeiDou 没有 YamlConfig，配置走 GameConfig 单例 + game_config 表，GameConfig 的 update/remove/add 本身就是热重载，gms-ui 后台改完即时生效，不需要一个重载指令
 src/client/command/commands/gm5/RoyalCommand.java	java-new	114	0	pending	
 src/client/command/commands/gm5/TestScriptCommand.java	java-new	58	0	ported	org/gms/client/command/commands/gm5/TestScriptCommand.java
 src/constants/string/CNLanguageConstants.java	java-new	41	0	pending	
-src/net/mailing/MailConst.java	java-new	15	0	deferred	同 MailManager，随邮箱验证方案一并决定
-src/net/mailing/MailManager.java	java-new	131	0	deferred	缓：需先定邮箱验证与 BeiDou 既有 JWT/AuthTokenFilter 鉴权体系如何协调。重启条件：确定邮箱验证的定位（仅游戏内绑定 or 参与登录鉴权）后
-src/net/mailing/Verifier.java	java-new	30	0	deferred	同 MailManager，随邮箱验证方案一并决定
+src/net/mailing/MailConst.java	java-new	15	0	rejected	批次6收尾终局否决：随 MailManager
+src/net/mailing/MailManager.java	java-new	131	0	rejected	批次6收尾终局否决：站外SMTP邮件，需运营邮件服务凭据；BeiDou已有JWT/AuthTokenFilter鉴权体系，账号找回真要做按自身体系写比移植这版干净
+src/net/mailing/Verifier.java	java-new	30	0	rejected	批次6收尾终局否决：随 MailManager
 src/net/server/handlers/VotePingBackHandler.java	java-new	52	0	rejected	LK 全仓库零引用的死代码：extends javax.xml.ws.spi.http.HttpHandler（JAX-WS SPI，JDK11+ 已从 JDK 移除，Java 21 下需额外依赖才编译得过），handle() 里 JSON 解析与 sendResponseHeaders 全被注释掉，只剩一句 System.out.println。真正记票的 UpdateVotePointTask 并不消费它。与 LichDebugCommand 同档
-src/net/server/task/UpdateVotePointTask.java	java-new	143	0	deferred	缓：它不消费 VotePingBackHandler，而是每 5 分钟主动 GET GTOP_PING_BACK_URL 拉 gtop100 的 XML 并解析 entry/pingusername 记票（LK 侧在 Server.java:932 注册）。三个阻塞：需真实 gtop100 站点注册（url 内含 siteid 与 pass）；其 SQL 的 and email is not null 就是「未绑定邮箱投票无效」这条规则，依赖已 deferred 的 MailManager；读写 accounts.lastVoteTime，BeiDou 无此列。另 LK 用 HeavenMS 的 TimerManager 自建调度，移植要改接 BeiDou 现有调度方式，属重写而非搬运。重启条件：确定接入投票站并拿到 siteid/pass + 邮箱验证方案定案
-src/server/MessageBoard.java	java-new	91	0	deferred	缓：本批决定跳过留言板，代码没写。前置已就绪（批次0 建的 message_board 表与 MessageBoardDO/MessageBoardMapper），BeiDou 两个语言层都无任何留言板实现。移植时要修的 LK 问题已查明：单例上的 LinkedList 非线程安全却被多频道并发读写；getMessages 的 SELECT 无 ORDER BY 却用 addFirst 装填，冷启动后顺序与内存态不一致；表名 messageboard 与 messageBoard 大小写混用，Linux MySQL 上会炸；淘汰旧留言的 DELETE 分支里 ps 在循环中反复赋值且未关闭；颜色控制码被拼进持久化内容且与 characterName 列重复。重启条件：决定要做留言板时
+src/net/server/task/UpdateVotePointTask.java	java-new	143	0	rejected	批次6收尾终局否决：是"接入gtop100这一特定站点"的运营集成而非通用功能。需真实siteid/pass；依赖已否决的邮箱验证；accounts.lastVoteTime 列BeiDou没有；调度要改接BeiDou方式属重写。将来真要接投票站按BeiDou自身体系写
+src/server/MessageBoard.java	java-new	91	0	ported	批次6收尾：重写为 Spring MessageBoardService + AbstractPlayerInteraction 两个脚本入口。去缓存（消除并发/顺序/空表白查三个坑）、按自增id排序、颜色码与角色名不入库改渲染时拼、单条DELETE替代循环泄漏、入库失败返回false不再骗调用方扣钱
 src/server/gachapon/Leafre.java	java-new	74	0	pending	
 src/server/ultils/RoyalAccount.java	java-new	69	0	pending	
 HeavenMS_LichKingMod.iml	other	22	0	noise	IDE 工程文件
@@ -1341,6 +1341,7 @@ scripts/npc/9310037.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/9310039.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9310044.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9310050.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9800001.js	script	0	0	ported	批次6收尾：随 MessageBoard 落到 scripts/ 与 scripts-zh-CN/ 两套。修掉原脚本"入库失败仍扣钱"与空内容可提交
 scripts/npc/9900000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9977777.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/MagatiaPassword.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1714,22 +1715,21 @@ scripts/reactor/8091003.js	script	0	0	noise	改动可证明只落在字符串字
 scripts/reactor/8091004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/8098000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/CentipedeBattle.js	script-new	0	0	already-fixed	gms-server/scripts-zh-CN/event/WuGongPQ.js:5 —— 同一场蜈蚣战，进出场地图（701010323/701010320/701010322）与BOSS（9600009）逐项相同，入口同为 npc/9310006.js。BeiDou 版另有难度倍率、掉落表与 GameConfig 人数/等级解限，比 LK 版完整
-scripts/event/KrexelBattle.js	script-new	0	0	deferred	缓，挪至批次7：整条克雷塞尔线依赖 BeiDou 缺失的两张地图 wz（Map5/541020700 与 541020800，LK 基线自带故不在本清单分母内）、新增的 ExpeditionType.KREXEL 与 ExpeditionBossLog 条目（批次6），以及 distributeBossCertificate 用的 BOSS凭证 3100000（Item.wz/Install/0310.img.xml，见附录D）。重启条件：批次7 补齐上述 wz 且批次6 敲定远征类型枚举
+scripts/event/KrexelBattle.js	script-new	0	0	deferred	【认领：批次7】解锁条件：补齐 Map5/541020700 与 541020800 两张地图 wz、Reactor.wz/5411001.img、BOSS凭证 3100000（Item.wz/Install/0310.img.xml，附录D）。远征类型 ExpeditionType.KREXEL 与 ExpeditionBossLog 条目批次6-G7 已就位
 scripts/event/YaoSengBattle.js	script-new	0	0	already-fixed	gms-server/scripts-zh-CN/event/YaoSengPQ.js:5 —— 同一场妖僧战，进出场地图（702060000/702070400）与BOSS（9600025）相同，入口 npc/9310006.js 与 9310039.js。另：LK 侧 YaoSengBattle 全仓库零引用，本身就是死脚本
 scripts/npc/1002103.js	script-new	0	0	rejected	正文是 LK 自造的一句寒暄「同学，想了解一下冒险学院吗？」，没有任何功能。而 1002103 在 Quest.wz/Check.img.xml 里出现 5 次，是任务NPC，给它挂一个只 sendOk 就 dispose 的脚本是净损失
 scripts/npc/1022007 .js	script-new	0	0	rejected	文件名带空格，是 LK 的笔误；内容是 NPC 2010000（Master Sergeant Fox，天空之城兑换）的脚本被错存成 1022007 这个id。BeiDou 已有正确归位的 scripts/npc/2010000.js
 scripts/npc/1022101_test.js	script-new	0	0	rejected	作者自用的兑换脚本试验稿，文案中英混杂（"are you sure you have..." 后半句突然变中文），兑换表是 2000000 蓝药换 1472053 武器这种随手填的测试数据。正式版是 scripts/npc/1022101.js（清单 script 档）
-scripts/npc/9000036_accessory.js	script-new	0	0	deferred	缓，挪至批次7：工作人员E 的饰品分支，与主体 scripts/npc/9000036.js（清单 script 档，+102 逻辑行）是一套，拆开搬没有意义。另：LK 全仓库没有任何地方 openNpc 到这个脚本名，得先确认它的入口是不是随主体一起改的
-scripts/npc/9270045.js	script-new	0	0	deferred	缓，挪至批次7：内容是「离开这里」传送到 541020700，而该地图 BeiDou 没有（同 KrexelBattle.js）。搬过来会把玩家送进不存在的地图
-scripts/npc/9800001.js	script-new	0	0	deferred	缓：留言板的唯一入口脚本（留言收 50 万金币），随 src/server/MessageBoard.java 一并暂缓。BeiDou 两个语言层都没有。重启条件同 MessageBoard；届时要按 §3.5 同时落到 scripts/ 与 scripts-zh-CN/ 两套
-scripts/npc/changePassword.js	script-new	0	0	deferred	随 ChangePasswordCommand 一并暂缓
+scripts/npc/9000036_accessory.js	script-new	0	0	deferred	【认领：批次7】工作人员E的饰品分支，与主体 scripts/npc/9000036.js（script档，+102逻辑行）是一套，拆开搬没有意义。另需先确认入口：LK全仓库无任何地方 openNpc 到这个脚本名
+scripts/npc/9270045.js	script-new	0	0	deferred	【认领：批次7】"离开这里"传送到 541020700，该地图BeiDou没有。现在搬会把玩家送进不存在的地图。随 KrexelBattle.js
+scripts/npc/changePassword.js	script-new	0	0	rejected	批次6收尾终局否决：随 ChangePasswordCommand
 scripts/npc/npcTemplate.js	script-new	0	0	rejected	NPC 脚本模板，BeiDou 已有自己的脚本写法（sendNextLevel/sendSelectLevel 那套），模板不通用
 scripts/npc/testScript.js	script-new	0	0	rejected	作者自用的排版试验稿：status 0 打一段 #i#t#c 混排就 dispose，status 1 之后是从 detected.js 整段复制来的死代码（永远走不到）
-scripts/npc/under_maintenance.js	script-new	0	0	deferred	缓，挪至批次8：正文只有一句「功能维护中」，真正的逻辑（cm.redeemDailyRoyalReward 领皇家月卡日奖励）连同 sendYesNo 一起被 LK 注释掉了。随皇家系统一并决策
-scripts/npc/verifyEmail.js	script-new	0	0	deferred	随 VerifyEmailCommand 一并暂缓
-scripts/portal/mahavira_enter.js	script-new	0	0	deferred	缓，挪至批次7：这个 portal 脚本名只出现在 LK 改过的 wz/Map.wz/Map/Map7/702050000.img.xml 里，BeiDou 同名文件没有任何 portal script 字段，脚本单独搬过来不会被触发。随该 wz 行一并处理
-scripts/portal/treeboss00.js	script-new	0	0	deferred	缓，挪至批次7：克雷塞尔入口，portal 脚本挂在缺失的 Map5/541020700 上，随 KrexelBattle.js 一并处理
-scripts/reactor/5411001.js	script-new	0	0	deferred	缓，挪至批次7：召唤克雷塞尔的反应堆，本体 Reactor.wz/5411001.img.xml 就在附录D 的缺失清单里，且所在地图 541020800 同样缺失。随 KrexelBattle.js 一并处理
+scripts/npc/under_maintenance.js	script-new	0	0	deferred	【认领：批次8】正文只剩一句"功能维护中"，真逻辑（cm.redeemDailyRoyalReward 领皇家月卡日奖励）连同 sendYesNo 一起被LK自己注释掉了。随皇家系统一并决策
+scripts/npc/verifyEmail.js	script-new	0	0	rejected	批次6收尾终局否决：随 VerifyEmailCommand
+scripts/portal/mahavira_enter.js	script-new	0	0	deferred	【认领：批次7】脚本名只出现在LK改过的 wz/Map.wz/Map/Map7/702050000.img.xml 里，BeiDou同名文件无 portal script 字段，单独搬不会被触发。随该wz行一并处理
+scripts/portal/treeboss00.js	script-new	0	0	deferred	【认领：批次7】克雷塞尔入口 portal，挂在缺失的 Map5/541020700 上。随 KrexelBattle.js
+scripts/reactor/5411001.js	script-new	0	0	deferred	【认领：批次7】召唤克雷塞尔的反应堆，本体 Reactor.wz/5411001.img.xml 在附录D缺失清单里，所在地图 541020800 同样缺失。随 KrexelBattle.js
 sql/db_LichKingMod.sql	sql	492	0	pending	需转成 Flyway 迁移，不能直接跑
 sql/db_LichKingMod_patch.sql	sql	765	0	pending	需转成 Flyway 迁移，不能直接跑
 sql/db_database.sql	sql	73	73	pending	需转成 Flyway 迁移，不能直接跑
