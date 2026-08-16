@@ -80,10 +80,10 @@ src/client/command/commands/gm1/GotoCommand.java	java	12	5	pending
 src/client/command/commands/gm1/MobHpCommand.java	java	1	1	pending	
 src/client/command/commands/gm1/WhatDropsFromCommand.java	java	33	16	pending	
 src/client/command/commands/gm1/WhoDropsCommand.java	java	28	17	pending	
-src/client/command/commands/gm2/BuffMapCommand.java	java	5	3	pending	
+src/client/command/commands/gm2/BuffMapCommand.java	java	5	3	ported	补 ThunderBreaker.SPEED_INFUSION 与 Hero.MAPLE_WARRIOR 两个 buff。LK 抄的是裸数字，按规则1改用常量。setDescription 那行 BeiDou 已走 I18nUtil，不动
 src/client/command/commands/gm2/ClearSavedLocationsCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/DcCommand.java	java	4	1	pending	
-src/client/command/commands/gm2/EmpowerMeCommand.java	java	1	1	pending	
+src/client/command/commands/gm2/EmpowerMeCommand.java	java	1	1	ported	技能数组补 Hero.STANCE（1121002）。LK 用裸数字，按规则1改用常量
 src/client/command/commands/gm2/GachaListCommand.java	java	1	1	pending	
 src/client/command/commands/gm2/IdCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/ItemCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -166,7 +166,7 @@ src/client/processor/action/SpawnPetProcessor.java	java	0	0	noise	仅格式化/�
 src/client/processor/npc/DueyProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/processor/npc/FredrickProcessor.java	java	2	2	pending	
 src/client/processor/npc/StorageProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/processor/stat/AssignAPProcessor.java	java	3	3	pending	
+src/client/processor/stat/AssignAPProcessor.java	java	3	3	rejected	LK 实质改动只有升级 HP 随机区间 +2（飞侠/弓箭手 14-18→16-20、海盗 16-20→18-22），纯数值口味且照搬会失效：BeiDou 重写过 calcHpChange，随机分支被反成 useRandomizeHpmpGain && usedAPReset（AssignAPProcessor.java:860），升级永远走固定值、只有洗点卷才随机，抄进 randomMin/Max 影响的是洗点而非升级。查出的两个 BeiDou 侧问题（不在移植范围，已记入 §7）：随机分支反向；洗点 HP 疑似双算——:856 与 :865 都加了 resetValue，而同文件 calcMpChange 没有这个额外分支
 src/client/processor/stat/AssignSPProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/status/MonsterStatus.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/status/MonsterStatusEffect.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -192,7 +192,7 @@ src/constants/skills/Bowmaster.java	java	0	0	noise	仅格式化/空白改动（g
 src/constants/skills/Brawler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/skills/Buccaneer.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/skills/ChiefBandit.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/constants/skills/Corsair.java	java	1	1	pending	
+src/constants/skills/Corsair.java	java	1	1	already-fixed	5221010 已由 SPEED_INFUSION 改名为 HEROS_WILL：Corsair.java:41。LK 该文件其余改动为 javadoc 空行
 src/constants/skills/Crossbowman.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/skills/Crusader.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/skills/DarkKnight.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -273,7 +273,7 @@ src/net/server/channel/handlers/AcceptFamilyHandler.java	java	0	0	noise	仅格�
 src/net/server/channel/handlers/AdminChatHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AdminCommandHandler.java	java	1	1	pending	
 src/net/server/channel/handlers/AllianceOperationHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/AranComboHandler.java	java	12	1	pending	
+src/net/server/channel/handlers/AranComboHandler.java	java	12	1	ported	3 秒断连窗口 → aran_combo_last_time（默认3=原值）；GM 连击加成 → aran_combo_gm_bonus（默认5，0=关）；满连后每次命中按满级续期 combo buff（原实现 100 连以上不再触发任何 case，只能等自然过期）。额外加了 LK 没有的 Short.MAX_VALUE 钳位——combo 是 short 且满连后不再清零，长时间连击会绕成负数
 src/net/server/channel/handlers/AutoAggroHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AutoAssignHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/BBSOperationHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -377,7 +377,7 @@ src/net/server/channel/handlers/SkillBookHandler.java	java	0	0	noise	仅格式�
 src/net/server/channel/handlers/SkillMacroHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/SnowballHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/SpawnPetHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/SpecialMoveHandler.java	java	8	2	pending	
+src/net/server/channel/handlers/SpecialMoveHandler.java	java	8	2	ported	GM 免冷却 → use_gm_no_skill_cooldown（默认true）；英雄意志快速重用除数原硬编码 60（LK 是 10）→ fast_reuse_hero_will_divisor，默认 60 保持 BeiDou 现状，代码用 Math.max(1,..) 兜除零。其余为 tab→space 与英文提示改中文（BeiDou 该处已走 I18nUtil，SpecialMoveHandler.java:77），噪声
 src/net/server/channel/handlers/SpouseChatHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/StorageHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/SummonDamageHandler.java	java	1	1	pending	
@@ -532,7 +532,7 @@ src/server/MapleShop.java	java	4	2	pending
 src/server/MapleShopFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MapleShopItem.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MapleSkillbookInformationProvider.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/MapleStatEffect.java	java	20	5	pending	
+src/server/MapleStatEffect.java	java	20	5	ported	（1）真 BUG：isHerosWill() 漏了 Corsair.HEROS_WILL，导致船长的英雄意志不解除异常状态（isCureAllAbnormalStatus→StatEffect.java:955），已补；同时 isInfusion() 里残留的 Corsair 已删——Cosmic 改名只改了一半，LK 这两行是本批唯一「LK 比 BeiDou 对」的地方。（2）战舰/魔力反射/神射手黑暗的额外防击退落成 battleship_stance=30、mana_reflection_stance=30、marksman_blind_stance=100（V1000.0.13），0=恢复原版；配套 isExtraStance() 广播 Hero.STANCE 特效。战舰那条经查不是死代码——StatEffect.java:1376 会把被 MONSTER_RIDING 覆盖的 statups 还原。（3）USE_ULTRA_RECOVERY 条件对调纯短路顺序，噪声不搬。（4）LK 把时空门提示改成硬编码中文，违反规则2 不搬；改为补 StatEffect.message1~3 三个 i18n 键（中英各3条）
 src/server/MapleStorage.java	java	1	1	pending	
 src/server/MapleStorageInventory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MapleTrade.java	java	22	22	pending	

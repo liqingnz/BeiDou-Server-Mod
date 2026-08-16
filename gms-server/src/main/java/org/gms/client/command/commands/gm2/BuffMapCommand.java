@@ -27,6 +27,8 @@ import org.gms.client.Character;
 import org.gms.client.Client;
 import org.gms.client.SkillFactory;
 import org.gms.client.command.Command;
+import org.gms.constants.skills.Hero;
+import org.gms.constants.skills.ThunderBreaker;
 import org.gms.util.I18nUtil;
 
 public class BuffMapCommand extends Command {
@@ -41,6 +43,8 @@ public class BuffMapCommand extends Command {
         SkillFactory.getSkill(9101002).getEffect(SkillFactory.getSkill(9101002).getMaxLevel()).applyTo(player, true);
         SkillFactory.getSkill(9101003).getEffect(SkillFactory.getSkill(9101003).getMaxLevel()).applyTo(player, true);
         SkillFactory.getSkill(9101008).getEffect(SkillFactory.getSkill(9101008).getMaxLevel()).applyTo(player, true);
+        SkillFactory.getSkill(ThunderBreaker.SPEED_INFUSION).getEffect(SkillFactory.getSkill(ThunderBreaker.SPEED_INFUSION).getMaxLevel()).applyTo(player, true);
+        SkillFactory.getSkill(Hero.MAPLE_WARRIOR).getEffect(SkillFactory.getSkill(Hero.MAPLE_WARRIOR).getMaxLevel()).applyTo(player, true);
         SkillFactory.getSkill(1005).getEffect(SkillFactory.getSkill(1005).getMaxLevel()).applyTo(player, true);
 
     }

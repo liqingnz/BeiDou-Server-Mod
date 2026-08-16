@@ -85,13 +85,20 @@ public final class SpecialMoveHandler extends AbstractPacketHandler {
             if (chr.skillIsCooling(skillid)) {
                 return;
             } else if (skillid != Corsair.BATTLE_SHIP) {
-                int cooldownTime = effect.getCooldown();
-                if (StatEffect.isHerosWill(skillid) && GameConfig.getServerBoolean("use_fast_reuse_hero_will")) {
-                    cooldownTime /= 60;
-                }
+                if (chr.gmLevel() > 2 && GameConfig.getServerBoolean("use_gm_no_skill_cooldown")) {
+                    // GM 免冷却便于调试。关掉这个开关，GM 就和玩家一样吃冷却
+                    c.sendPacket(PacketCreator.skillCooldown(skillid, 0));
+                    chr.addCooldown(skillid, currentServerTime(), 0);
+                } else {
+                    int cooldownTime = effect.getCooldown();
+                    if (StatEffect.isHerosWill(skillid) && GameConfig.getServerBoolean("use_fast_reuse_hero_will")) {
+                        // 除数为 0 会抛 ArithmeticException，配置写歪也得兜住
+                        cooldownTime /= Math.max(1, GameConfig.getServerInt("fast_reuse_hero_will_divisor"));
+                    }
 
-                c.sendPacket(PacketCreator.skillCooldown(skillid, cooldownTime));
-                chr.addCooldown(skillid, currentServerTime(), SECONDS.toMillis(cooldownTime));
+                    c.sendPacket(PacketCreator.skillCooldown(skillid, cooldownTime));
+                    chr.addCooldown(skillid, currentServerTime(), SECONDS.toMillis(cooldownTime));
+                }
             }
         }
         if (skillid == Hero.MONSTER_MAGNET || skillid == Paladin.MONSTER_MAGNET || skillid == DarkKnight.MONSTER_MAGNET) { // Monster Magnet

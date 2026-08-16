@@ -1082,7 +1082,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G6** | 怪物技能与怪打怪 | `life/MobSkill`（157 封技能）、`MobDamageMobHandler`、`maps/MapleReactor` | ✅ java 侧完成（wz 留 pending） |
 | **G7** | 远征次数配额 | `expeditions/{Expedition, ExpeditionType, ExpeditionBossLog}`、`world/PartyCharacter` | — |
 | **G8** | 反外挂 / 误封 | `autoban/{AutobanManager, AutobanFactory}`、`AbstractDealDamageHandler`、`CloseRange`/`Magic`/`Ranged`/`Summon` 四个伤害 handler | — |
-| **G9** | 技能平衡 | `MapleStatEffect`、`AranComboHandler`、`SpecialMoveHandler`、`gm2/BuffMapCommand`、`gm2/EmpowerMeCommand`、`constants/skills/Corsair`、`AssignAPProcessor` | `aran_combo_last_time`、`battleship_hp_factor` |
+| **G9** ✅ | 技能平衡 | `MapleStatEffect`、`AranComboHandler`、`SpecialMoveHandler`、`gm2/BuffMapCommand`、`gm2/EmpowerMeCommand`、`constants/skills/Corsair`、`AssignAPProcessor` | `aran_combo_last_time`、`aran_combo_gm_bonus`、`battleship_hp_per_skill_level`、`battleship_hp_per_level`、`battleship_stance`、`mana_reflection_stance`、`marksman_blind_stance`、`use_gm_no_skill_cooldown`、`fast_reuse_hero_will_divisor` |
 | **G10** | 等级上限 | `constants/game/GameConstants` | `max_level_cap`、`cygnus_max_level_cap` |
 | **G11** | 自动喂药重复消耗 | `PetAutoPotHandler`、`PetAutopotProcessor` | — |
 | **G12** | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
@@ -1660,6 +1660,99 @@ HP/exp 是两套口味不是修复，届时建议**只改 `level 81 → 187` 一
 | `V1000.0.12__insert_game_config_mob_damage_mob.sql` | 1 个键 + zh/en 两条 `lang_resources` |
 
 无新增指令、无 i18n 变动。
+
+#### G9 — 技能平衡 ✅ 已完成
+
+7 个文件、12 个实质子项：**8 项写了代码，2 项 already-fixed，2 项 rejected。**
+
+##### ⭐ 本批唯一「LK 比 BeiDou 对」的地方：船长的英雄意志
+
+盘点阶段第 3 条的预判，读全链路后证实成立：
+
+| 位置 | 现状 | 后果 |
+|---|---|---|
+| [StatEffect.java:672](../gms-server/src/main/java/org/gms/server/StatEffect.java#L672) `SPEED_INFUSION` case 组 | 已经没有 Corsair | ✅ Cosmic 改名时修对了一半 |
+| [:1707](../gms-server/src/main/java/org/gms/server/StatEffect.java#L1707) `isHerosWill()` | **漏了** Corsair | ❌ `isCureAllAbnormalStatus()` 返回 false → [:955](../gms-server/src/main/java/org/gms/server/StatEffect.java#L955) 不解除异常状态。**船长的英雄意志实际是个空技能** |
+| [:1750](../gms-server/src/main/java/org/gms/server/StatEffect.java#L1750) `isInfusion()` | **还列着** `Corsair.HEROS_WILL` | 语义错误（statups 为空所以暂未致害） |
+
+两处都已修正。LK 的写法是把旧 case 注释掉留在原地，这里直接删并写明原因，不留死代码。
+**正向副作用**：修完后 `use_fast_reuse_hero_will` 开始对船长生效，之前一直漏。
+
+##### 三处额外防击退（STANCE）—— 落成配置
+
+LK 给三个技能塞了 `BuffStat.STANCE`，全部落成 Integer 配置，**0 = 不附加、恢复原版**：
+
+| 键 | 默认 | 说明 |
+|---|---|---|
+| `battleship_stance` | 30 | **经查不是死代码。** [:1376](../gms-server/src/main/java/org/gms/server/StatEffect.java#L1376) `localstatups = statups` 专为战舰把被 [:1328](../gms-server/src/main/java/org/gms/server/StatEffect.java#L1328) 覆盖掉的 statups 还原回来，STANCE 能发到客户端 |
+| `mana_reflection_stance` | 30 | 直加 |
+| `marksman_blind_stance` | 100 | **100 = 黑暗期间完全免击退**，三条里最猛。配套 `isExtraStance()` 广播一次 `Hero.STANCE` 特效（客户端对这个防击退没有自己的表现） |
+
+##### 逐项处置
+
+| 文件 | 处置 | 要点 |
+|---|---|---|
+| `constants/skills/Corsair` | **already-fixed** | `HEROS_WILL` 重命名 BeiDou 已有，其余是 javadoc 空行 |
+| `MapleStatEffect` | **ported** | 见上两节；`USE_ULTRA_RECOVERY` 条件对调是纯短路顺序，噪声不搬 |
+| `AranComboHandler` | **ported** | 3 秒窗口 → `aran_combo_last_time`（默认 3 = 原值）；GM 加成 → `aran_combo_gm_bonus`（默认 5）；**满连后续期**——原实现 100 连以上不再命中任何 case，buff 只能等自然过期 |
+| `SpecialMoveHandler` | **ported** | GM 免冷却 → `use_gm_no_skill_cooldown`（默认 true，LK 没给开关，是我加的）；快速重用除数 → `fast_reuse_hero_will_divisor`，**默认 60 保持 BeiDou 现状**（LK 是 10，更保守，不覆盖） |
+| `gm2/BuffMapCommand` | **ported** | 补加速灌注 + 枫叶勇士 |
+| `gm2/EmpowerMeCommand` | **ported** | 补力量（`Hero.STANCE`） |
+| `AssignAPProcessor` | **rejected** | 见下 |
+
+LK 三处 buff 用的都是裸数字（`15111005` / `1121000` / `1121002`），按规则 1 改用
+`ThunderBreaker.SPEED_INFUSION` / `Hero.MAPLE_WARRIOR` / `Hero.STANCE` 常量。
+
+##### 战舰血量：唯一默认跟 LK 的一项
+
+[`Character.resetBattleshipHp`](../gms-server/src/main/java/org/gms/client/Character.java#L7285) 原为
+`400 * 技能等级 + (超120等级 * 200)`。LK 把 `400` **硬编码成 3000**（7.5×）却只把 `200` 参数化，很不一致；
+这里两个都参数化：`battleship_hp_per_skill_level`（默认 **3000**，按用户决定跟 LK；调回 400 即原版）、
+`battleship_hp_per_level`（默认 **200** = 原值）。
+
+##### `AssignAPProcessor` 为什么 rejected —— 顺带查出 BeiDou 两个问题
+
+LK 实质改动只有 3 行：升级 HP 随机区间 +2（飞侠/弓箭手 `rand(14,18)→rand(16,20)`、海盗 `rand(16,20)→rand(18,22)`）。
+纯数值口味，而且**照搬会失效甚至反向**——BeiDou 重写过 `calcHpChange`，两处结构性差异：
+
+1. **随机分支被反了。** 上游是「升级→随机，洗点→固定」；BeiDou
+   [:860](../gms-server/src/main/java/org/gms/client/processor/stat/AssignAPProcessor.java#L860) 写的是
+   `useRandomizeHpmpGain && usedAPReset`，**升级永远走固定值，只有洗点卷才随机**。
+   把 LK 的数字抄进 `randomMin/Max` 影响的是洗点，不是 LK 想要的升级。
+2. **洗点 HP 疑似双算。** [:856](../gms-server/src/main/java/org/gms/client/processor/stat/AssignAPProcessor.java#L856)
+   在 `usedAPReset` 时 `MaxHP += resetValue`，[:865](../gms-server/src/main/java/org/gms/client/processor/stat/AssignAPProcessor.java#L865)
+   又 `MaxHP += usedAPReset ? resetValue : baseValue`——战士洗点 20+20=40，上游是 20。
+   **同文件 `calcMpChange` 没有这个额外分支**（[:941-963](../gms-server/src/main/java/org/gms/client/processor/stat/AssignAPProcessor.java#L941)），
+   HP/MP 不对称，倾向判 BUG 而非「洗血卷轴额外加成」的设计。
+
+> 两条都是 BeiDou 自身的事，**不在移植范围，本次只记录不动手**（用户已决定）。
+> 第 2 条一旦修改会直接改变玩家已有的洗点收益，动手前需单独评估。
+>
+> 同文件 [:714/:747](../gms-server/src/main/java/org/gms/client/processor/stat/AssignAPProcessor.java#L714)
+> 有 `"无法重新分配AP"`、`"[重置卷轴] 最大HP +"` 等硬编码中文，违反规则 2，同为 BeiDou 存量，一并记录。
+
+##### 顺手补的 i18n 缺口
+
+LK 把时空门提示改成硬编码中文（且原文有错别字「再斜坡」），**照搬违反规则 2 → rejected**。
+但这暴露 BeiDou 侧 [StatEffect.java:1082/1084/1086](../gms-server/src/main/java/org/gms/server/StatEffect.java#L1082)
+三条时空门提示全是硬编码英文，已改为 `StatEffect.message1~3`（中英各 3 条）。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `StatEffect.java` | 英雄意志两处修正、三处 STANCE + `addExtraStance()`/`isExtraStance()`、时空门 i18n |
+| `AranComboHandler.java` | 断连窗口配置化、GM 加成、满连续期、`Short.MAX_VALUE` 钳位 |
+| `SpecialMoveHandler.java` | GM 免冷却、快速重用除数配置化（`Math.max(1,..)` 兜除零） |
+| `BuffMapCommand.java` / `EmpowerMeCommand.java` | 各补 buff，改用技能常量 |
+| `Character.java` | `resetBattleshipHp` 两个系数配置化 |
+| `V1000.0.13__insert_game_config_skill_balance.sql` | 9 个键 + zh/en 各 9 条 `lang_resources` |
+| `message_{zh_CN,en_US}.properties` | `StatEffect.message1~3` |
+
+LK 没有、BeiDou 侧主动加的两处保险（LK 均无）：`AranComboHandler` 的 `short` 溢出钳位
+（满连后 combo 不再清零，长时间连击会绕成负数）、`SpecialMoveHandler` 的除零兜底。
+
+无新增指令（两个 GM 指令 BeiDou 已在 `command_info` 中注册）。
 
 ### 批次 7 — 数据类
 

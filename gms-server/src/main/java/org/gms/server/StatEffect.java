@@ -110,6 +110,7 @@ import org.gms.server.maps.Summon;
 import org.gms.server.maps.SummonMovementType;
 import org.gms.server.partyquest.CarnivalFactory;
 import org.gms.server.partyquest.CarnivalFactory.MCSkill;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 import org.gms.util.Pair;
 
@@ -506,10 +507,15 @@ public class StatEffect {
                 case Evan.ECHO_OF_HERO:
                     statups.add(new Pair<>(BuffStat.ECHO_OF_HERO, ret.x));
                     break;
+                case Corsair.BATTLE_SHIP:
+                    // 战舰的 statups 会在 applyBuffEffect 里被 MONSTER_RIDING 分支覆盖后又还原回来，
+                    // 所以这里加的防击退能发到客户端；battleship_stance 配 0 即恢复原样
+                    statups.add(new Pair<>(BuffStat.MONSTER_RIDING, sourceid));
+                    addExtraStance(statups, GameConfig.getServerInt("battleship_stance"));
+                    break;
                 case Beginner.MONSTER_RIDER:
                 case Noblesse.MONSTER_RIDER:
                 case Legend.MONSTER_RIDER:
-                case Corsair.BATTLE_SHIP:
                 case Beginner.SPACESHIP:
                 case Noblesse.SPACESHIP:
                 case Beginner.YETI_MOUNT1:
@@ -593,6 +599,7 @@ public class StatEffect {
                 case ILArchMage.MANA_REFLECTION:
                 case Bishop.MANA_REFLECTION:
                     statups.add(new Pair<>(BuffStat.MANA_REFLECTION, 1));
+                    addExtraStance(statups, GameConfig.getServerInt("mana_reflection_stance"));
                     break;
                 case Bishop.HOLY_SHIELD:
                     statups.add(new Pair<>(BuffStat.HOLY_SHIELD, x));
@@ -632,6 +639,7 @@ public class StatEffect {
                     break;
                 case Marksman.BLIND:
                     statups.add(new Pair<>(BuffStat.BLIND, x));
+                    addExtraStance(statups, GameConfig.getServerInt("marksman_blind_stance"));
                     monsterStatus.put(MonsterStatus.ACC, x);
                     break;
                 case Bowmaster.SHARP_EYES:
@@ -1079,11 +1087,12 @@ public class StatEffect {
                 InventoryManipulator.addFromDrop(applyto.getClient(), new Item(ItemId.MAGIC_ROCK, (short) 0, (short) 1), false);
 
                 if (door.getOwnerId() == -3) {
-                    applyto.dropMessage(5, "Mystic Door cannot be cast far from a spawn point. Nearest one is at " + door.getDoorStatus().getRight() + "pts " + door.getDoorStatus().getLeft());
+                    applyto.dropMessage(5, I18nUtil.getMessage("StatEffect.message1",
+                            String.valueOf(door.getDoorStatus().getRight()), String.valueOf(door.getDoorStatus().getLeft())));
                 } else if (door.getOwnerId() == -2) {
-                    applyto.dropMessage(5, "Mystic Door cannot be cast on a slope, try elsewhere.");
+                    applyto.dropMessage(5, I18nUtil.getMessage("StatEffect.message2"));
                 } else {
-                    applyto.dropMessage(5, "There are no door portals available for the town at this moment. Try again later.");
+                    applyto.dropMessage(5, I18nUtil.getMessage("StatEffect.message3"));
                 }
 
                 applyto.cancelBuffStats(BuffStat.SOULARROW);  // cancel door buff
@@ -1337,6 +1346,9 @@ public class StatEffect {
         if (primary) {
             localDuration = alchemistModifyVal(applyfrom, localDuration, false);
             applyto.getMap().broadcastMessage(applyto, PacketCreator.showBuffEffect(applyto.getId(), sourceid, 1, (byte) 3), false);
+        }
+        if (isExtraStance()) {
+            applyto.getMap().broadcastMessage(applyto, PacketCreator.showBuffEffect(applyto.getId(), Hero.STANCE, 1, (byte) 3), false);
         }
         if (localstatups.size() > 0) {
             Packet buff = null;
@@ -1717,6 +1729,7 @@ public class StatEffect {
             case NightLord.HEROS_WILL:
             case Shadower.HEROS_WILL:
             case Buccaneer.PIRATES_RAGE:
+            case Corsair.HEROS_WILL:   // 5221010 曾被误当作加速灌注，漏进这张表会让船长的英雄意志不解除异常状态
             case Aran.HEROS_WILL:
                 return true;
 
@@ -1748,7 +1761,23 @@ public class StatEffect {
     }
 
     private boolean isInfusion() {
-        return skill && (sourceid == Buccaneer.SPEED_INFUSION || sourceid == Corsair.HEROS_WILL || sourceid == ThunderBreaker.SPEED_INFUSION);
+        // 5221010 在 Cosmic 里已由 SPEED_INFUSION 改名为 HEROS_WILL，这里是当初漏改的另一半：
+        // 它是英雄的意志而不是加速灌注，留在这里会让船长的意志走海盗 buff 包
+        return skill && (sourceid == Buccaneer.SPEED_INFUSION || sourceid == ThunderBreaker.SPEED_INFUSION);
+    }
+
+    /**
+     * 战舰 / 魔力反射 / 黑暗额外附带的防击退。数值取自配置，0 表示不附加、维持原有表现。
+     */
+    private static void addExtraStance(List<Pair<BuffStat, Integer>> statups, int stance) {
+        if (stance > 0) {
+            statups.add(new Pair<>(BuffStat.STANCE, stance));
+        }
+    }
+
+    private boolean isExtraStance() {
+        // 黑暗附带的防击退在客户端没有自己的表现，补广播一次力量的特效让周围玩家看得见
+        return skill && sourceid == Marksman.BLIND && GameConfig.getServerInt("marksman_blind_stance") > 0;
     }
 
     private boolean isCygnusFA() {
