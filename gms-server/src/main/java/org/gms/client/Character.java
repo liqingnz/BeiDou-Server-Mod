@@ -4938,7 +4938,10 @@ public class Character extends AbstractCharacterObject {
             return getMaxClassLevel();
         }
 
-        return GameConstants.getJobMaxLevel(job);
+        // 必须与全局上限取小。否则把 max_level_cap 调到低于某个转职门槛时（比如 100），
+        // 三转角色的 getMaxLevel 仍是 120，而 levelUp 用 getMaxClassLevel 钳在 100——
+        // 于是每次攒够经验都会再走一遍 levelUp，级别不动却又发一轮 AP/SP/HP/MP，成了无限刷属性
+        return Math.min(getMaxClassLevel(), GameConstants.getJobMaxLevel(job));
     }
 
     public int getMeso() {

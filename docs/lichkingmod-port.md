@@ -2037,6 +2037,27 @@ LK 的 `+0.1f` 是靠加宽迟滞带缓解，治标。
 | `ItemConstants.java` | `isPotion` 扩展 |
 | `V1000.0.16__insert_game_config_level_cap_and_world_name.sql` | 3 个键 + zh/en 各 3 条 `lang_resources` |
 
+#### G10/G11 复查修正
+
+交叉复查提了 6 条（含重叠），去重后 **4 条成立**，其中一条正打在 G10 自己的主题上。
+
+| # | 问题 | 处置 |
+|---|---|---|
+| 1 | **等级上限还有第三处硬编码。** [`getJobMaxLevel`](../gms-server/src/main/java/org/gms/constants/game/GameConstants.java#L495) 的 `case 3: return 120;` —— 骑士团在 v83 的终点职业**就是三转**（DAWNWARRIOR3 = 1111，`getJobBranch` 算出 `2 + 1 = 3`），根本走不到已经配置化的 `default` 分支（那里是四转，1112 玩家拿不到）。于是 `use_enforce_job_level_range` 一开，骑士团上限从 155 退回硬编码 120，两条路径必然矛盾 | `case 3` 改为 `(job.getId()/1000 == 1) ? getCygnusMaxLevel() : 120`。冒险家三转的 120 是**四转门槛**（语义正确，保留），骑士团三转的 120 是**等级上限**（必须走配置） |
+| 2 | **`getMaxLevel()` 没和全局上限取小 → 无限刷属性。** `max_level_cap` 调到低于某个转职门槛（如 100）时，三转角色 `getMaxLevel()` 仍是 120，[经验闸门](../gms-server/src/main/java/org/gms/client/Character.java#L2983) `level < getMaxLevel()` 放行；而 `levelUp()` 用 `getMaxClassLevel()` 钳在 100。结果每次攒够经验都再走一遍 `levelUp` —— **等级不动，却又发一轮 AP/SP/HP/MP** | 改为 `Math.min(getMaxClassLevel(), getJobMaxLevel(job))`。这个洞是本次改动引入的：原先两边都是硬编码 200，取不取 min 无所谓 |
+| 3 | **等级配置没有协议上界。** 角色等级在 `PacketCreator` 三处以 `writeByte` 发出，配到 256 客户端会绕回 0 | 抽出 `clampLevelCap`，上界钳 `MAX_LEVEL_PROTOCOL_CAP = 255`，迁移脚本注释与配置说明都标了范围 |
+| 4 | **中文大区名在英文客户端变问号。** [`ByteBufOutPacket.writeString`](../gms-server/src/main/java/org/gms/net/packet/ByteBufOutPacket.java#L79) 按账号语言选字符集，en-US 是 **US-ASCII**，`枫之大陆MapleLand` 会编成 `????MapleLand`，频道名同理 | `getWorldName` 增加 `toClientEncodable`：丢掉当前字符集编不出的字符而不是让它变问号。中文客户端看到全名，英文客户端看到 **`MapleLand`**；全被丢光则回落 `WORLD_NAMES` 原名 |
+
+顺带把本次 diff 摸到的两条硬编码日志迁到 i18n（规则 2）：
+`Client.removePartyPlayer.warn1`、`Storage.loadOrCreateFromDB.error1`。
+
+##### 记录但未做
+
+**en-US 部署下四张中文特有地图的 `@goto` 显示空名。** `wz/String.wz/Map.img.xml`（英文基础层）
+没有 701000000 / 702000000 / 702070400 / 701010322 的条目，`MapFactory.loadPlaceName` 回退空串，
+`@goto` 列表会渲染成 `'shanghai' - #b#k`。中文部署（本仓库默认）不受影响。
+补英文名要动 `wz/String.wz`，**按既定约定 img.xml 类改动统一留到 wz 批次**，届时一并处理。
+
 ### 批次 7 — 数据类
 
 1. `sql/db_drops.sql`、`db_LichKingMod.sql` 里的 `drop_data` 与 `shopitems` 调整 → 转成 Flyway 迁移

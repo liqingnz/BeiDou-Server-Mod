@@ -4,6 +4,7 @@ import org.gms.client.Disease;
 import org.gms.client.Job;
 import org.gms.config.GameConfig;
 import org.gms.constants.id.MapId;
+import org.gms.constants.string.CharsetConstants;
 import org.gms.constants.skills.Aran;
 import org.gms.provider.*;
 import org.gms.provider.wz.WZFiles;
@@ -11,7 +12,9 @@ import org.gms.server.maps.FieldLimit;
 import org.gms.server.maps.MapleMap;
 import org.gms.server.quest.Quest;
 import org.gms.util.Pair;
+import org.gms.util.ThreadLocalUtil;
 
+import java.nio.charset.CharsetEncoder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
@@ -499,7 +502,10 @@ public class GameConstants {
                 return 70;   // 2nd job
 
             case 3:
-                return 120;   // 3rd job
+                // 冒险家三转的 120 是「四转门槛」；骑士团在 v83 到三转就到头了（四转 1112 玩家拿不到），
+                // 对他们来说这个 120 是真正的等级上限，必须走配置，否则打开 use_enforce_job_level_range
+                // 之后骑士团会从 getMaxClassLevel 的配置值退回硬编码 120
+                return (job.getId() / 1000 == 1) ? getCygnusMaxLevel() : 120;   // 3rd job
 
             default:
                 // 4th job: cygnus is 120, rest is 200
@@ -512,17 +518,29 @@ public class GameConstants {
      * 打开时才走到，默认路径是 {@code Character.getMaxClassLevel()}，两边必须取同一个配置。
      */
     public static int getMaxLevel() {
-        int cap = GameConfig.getServerInt("max_level_cap");
-        return cap > 0 ? cap : 200;
+        return clampLevelCap(GameConfig.getServerInt("max_level_cap"), 200);
     }
 
     /**
      * 骑士团（Cygnus）的等级上限，见 {@link #getMaxLevel()} 的说明。
      */
     public static int getCygnusMaxLevel() {
-        int cap = GameConfig.getServerInt("cygnus_max_level_cap");
-        return cap > 0 ? cap : 120;
+        return clampLevelCap(GameConfig.getServerInt("cygnus_max_level_cap"), 120);
     }
+
+    /**
+     * 等级上限的取值范围。非正数（含配置缺失时 GameConfig 返回的 0）回落到原硬编码值；
+     * 上界 255 是协议限制——角色等级在多处以 writeByte 发给客户端，256 会绕回 0。
+     */
+    private static int clampLevelCap(int configured, int fallback) {
+        if (configured <= 0) {
+            return fallback;
+        }
+        return Math.min(configured, MAX_LEVEL_PROTOCOL_CAP);
+    }
+
+    /** 等级在封包里是单字节，超过这个值客户端显示会绕回。 */
+    public static final int MAX_LEVEL_PROTOCOL_CAP = 255;
 
     /**
      * 大区显示名。优先取 {@code world.N.world_name} 配置，缺失时回落到 {@link #WORLD_NAMES}。
@@ -532,11 +550,33 @@ public class GameConstants {
         if (worldId >= 0 && worldId < WORLD_NAMES.length) {
             String configured = GameConfig.getWorldString(worldId, "world_name");
             if (configured != null && !configured.isBlank()) {
-                return configured;
+                String encodable = toClientEncodable(configured);
+                return encodable.isBlank() ? WORLD_NAMES[worldId] : encodable;
             }
             return WORLD_NAMES[worldId];
         }
         return String.valueOf(worldId);
+    }
+
+    /**
+     * 丢掉当前客户端字符集编不出来的字符。服务器列表是玩家登录前唯一能看到的文字，
+     * 而英文客户端用的是 US-ASCII——直接把中文名发过去只会变成一串问号。
+     * 例：中文客户端看到「枫之大陆MapleLand」，英文客户端看到「MapleLand」。
+     */
+    private static String toClientEncodable(String value) {
+        CharsetEncoder encoder = CharsetConstants.getCharset(ThreadLocalUtil.getClientLang()).newEncoder();
+        if (encoder.canEncode(value)) {
+            return value;
+        }
+
+        StringBuilder sb = new StringBuilder(value.length());
+        value.codePoints().forEach(cp -> {
+            String ch = new String(Character.toChars(cp));
+            if (encoder.canEncode(ch)) {
+                sb.append(ch);
+            }
+        });
+        return sb.toString().trim();
     }
 
     public static int getSkillBook(final int job) {

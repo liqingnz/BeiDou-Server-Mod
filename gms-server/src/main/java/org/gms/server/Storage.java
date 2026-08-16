@@ -31,6 +31,7 @@ import org.gms.provider.DataProviderFactory;
 import org.gms.provider.DataTool;
 import org.gms.provider.wz.WZFiles;
 import org.gms.util.DatabaseConnection;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 import org.gms.util.Pair;
 
@@ -100,7 +101,7 @@ public class Storage {
 
             return ret;
         } catch (SQLException ex) { // exceptions leading to deploy null storages found thanks to Jefe
-            log.error("SQL error occurred when trying to load storage for accId {}, world {}", id, GameConstants.getWorldName(world), ex);
+            log.error(I18nUtil.getLogMessage("Storage.loadOrCreateFromDB.error1"), id, GameConstants.getWorldName(world), ex);
             throw new RuntimeException(ex);
         }
     }

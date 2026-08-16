@@ -1310,7 +1310,7 @@ public class Client extends ChannelInboundHandlerAdapter {
         for (World w : Server.getInstance().getWorlds()) {
             for (Character chr : w.getPlayerStorage().getAllCharacters()) {
                 if (accid == chr.getAccountId()) {
-                    log.warn("玩家 {} 已从世界 {} 中删除。可能存在重复尝试。", chr.getName(), GameConstants.getWorldName(w.getId()));
+                    log.warn(I18nUtil.getLogMessage("Client.removePartyPlayer.warn1"), chr.getName(), GameConstants.getWorldName(w.getId()));
                     chr.getClient().forceDisconnect();
                     w.getPlayerStorage().removePlayer(chr.getId());
                 }
