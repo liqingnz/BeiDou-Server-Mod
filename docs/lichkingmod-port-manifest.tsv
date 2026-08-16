@@ -1686,12 +1686,12 @@ scripts/quest/8237.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/quest/8238.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/2110000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/2111001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/reactor/2119001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/reactor/2119002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/reactor/2119003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/reactor/2119004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/reactor/2119005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/reactor/2119006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2119001.js	script	0	0	rejected	BeiDou 上游已是同一改法（weakenAreaBoss + state 守卫），且保留了 AGPL 头与文档注释；LK 版留有注释掉的死代码
+scripts/reactor/2119002.js	script	0	0	rejected	BeiDou 上游已是同一改法（weakenAreaBoss + state 守卫），且保留了 AGPL 头与文档注释；LK 版留有注释掉的死代码
+scripts/reactor/2119003.js	script	0	0	rejected	BeiDou 上游已是同一改法（weakenAreaBoss + state 守卫），且保留了 AGPL 头与文档注释；LK 版留有注释掉的死代码
+scripts/reactor/2119004.js	script	0	0	rejected	BeiDou 上游已是同一改法（weakenAreaBoss + state 守卫），且保留了 AGPL 头与文档注释；LK 版留有注释掉的死代码
+scripts/reactor/2119005.js	script	0	0	rejected	BeiDou 上游已是同一改法（weakenAreaBoss + state 守卫），且保留了 AGPL 头与文档注释；LK 版留有注释掉的死代码
+scripts/reactor/2119006.js	script	0	0	rejected	BeiDou 上游已是同一改法（weakenAreaBoss + state 守卫），且保留了 AGPL 头与文档注释；LK 版留有注释掉的死代码
 scripts/reactor/2200002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/2201004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/2221000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）

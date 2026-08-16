@@ -2264,6 +2264,23 @@ LK 的改动是把家族创建费用从写死的 `1500000` 换成
 > 英文层 `selection == 2` 的族长判定（`getGuildRank() != 1`）与中文层（`> 2`，副族长也可）不一致，
 > **不动**：这是 BeiDou 中文层自己的放宽，LK 侧同样是 `!= 1`，与本次移植无关。
 
+#### reactor 组（`2119001–2119006`）❌ 全部 rejected
+
+LK 把这 6 个反应堆从「按次扣血」改成「一击削弱区域 BOSS」。逐个比对 **LK HEAD vs BeiDou 现版**
+（不是 LK 自己的 diff）后，6 个的逻辑 BeiDou 上游**一字不差地已经有了**：
+
+| | LK 基线 | LK HEAD | BeiDou 现版 |
+|---|---|---|---|
+| `2119001–2119003` 死亡之森墓碑 | `rm.hitMonsterWithReactor(6090000, 14)` | `hit()` 加 `getState() !== 0` 守卫 + `rm.weakenAreaBoss(6090000, …)` | 同左，另有地图名与 MSEA 出处的文档注释 |
+| `2119004–2119006` 雪女祭坛 | `hit()` 里 `hitMonsterWithReactor(6090001, 4)` + 随机 `setEventState` | 逻辑挪进 `act()` 调 `rm.weakenAreaBoss(6090001, …)` | 同左 |
+
+反过来 BeiDou 版更干净：LK 把旧调用留成注释（`2119004–2119006` 连整个 `hit()` 都是注释掉不删），
+且**把 AGPL 版权头整段替换成了自己的署名注释**——按 CLAUDE.md 第 6 条这段本来就不能照搬。
+`2119001/2/3` 在 BeiDou 侧仅差文档注释里的「死亡之森 II/III/IV」，`2119004/5/6` 三份逐字节相同。
+
+至此 reactor 类全部收口：`2401000` 已作 bug 修（计时器 60→180），
+`2619003–2619005` 属「LK 新增但 BeiDou 上游已有」那 7 个，本组 6 个 rejected。
+
 ### 批次 8 — 皇家系统（最后决策）
 
 `server/ultils/RoyalAccount`（+69）、`RoyalCommand`（+114）、`royal_accounts` 表、
