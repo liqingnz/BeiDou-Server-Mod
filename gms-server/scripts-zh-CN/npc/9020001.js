@@ -67,10 +67,15 @@ function clearStage(stage, eim, curMap) {
     eim.linkToNextStage(stage, "kpq", curMap);  //opens the portal to the next map
 }
 
+/* 返回 1 表示组合对上了，-1 表示站上去的人数本身就不对，0 表示人数对但位置不对。
+   把 -1 和 0 分开是关键：否则人数不够（或太多）的队伍只会被告知「换个组合试试」，
+   那是条死路。第 2/3/4 关的每个组合都恰好要求 3 个位置有人。 */
+var REQUIRED_ON_PLATFORMS = 3;
+
 function rectangleStages(eim, property, areaCombos, areaRects) {
     const GameConfig = Java.type('org.gms.config.GameConfig');
     if(GameConfig.getServerBoolean("use_enable_stage_skip") && eim.getPlayerCount() == 1){
-        return true;
+        return 1;   // 单人跳关在数人头之前就短路返回
     }
     var c = eim.getProperty(property);
     if (c == null) {
@@ -83,21 +88,27 @@ function rectangleStages(eim, property, areaCombos, areaRects) {
     // get player placement
     var players = eim.getPlayers();
     var playerPlacement = [0, 0, 0, 0, 0, 0];
+    var onPlatforms = 0;
 
     for (var i = 0; i < eim.getPlayerCount(); i++) {
         for (var j = 0; j < areaRects.length; j++) {
             if (areaRects[j].contains(players.get(i).getPosition())) {
+                onPlatforms++;
                 playerPlacement[j] += 1;
                 break;
             }
         }
     }
 
+    if (onPlatforms != REQUIRED_ON_PLATFORMS) {
+        return -1;
+    }
+
     var curCombo = areaCombos[c];
-    var accept = true;
+    var accept = 1;
     for (var j = 0; j < curCombo.length; j++) {
         if (curCombo[j] != playerPlacement[j]) {
-            accept = false;
+            accept = 0;
             break;
         }
     }
@@ -198,9 +209,12 @@ function action(mode, type, selection) {
                 } else {
                     var accept = rectangleStages(eim, stgProperty, stgCombos, stgAreas);
 
-                    if (accept) {
+                    if (accept == 1) {
                         clearStage(stage, eim, curMap);
                         cm.sendNext("请赶紧前往下一个阶段，传送门已经打开了！");
+                    } else if (accept == -1) {
+                        eim.showWrongEffect();
+                        cm.sendNext("必须正好有 #r3#k 名队员挂在绳子上——不多不少。确认一下都是谁在上面，然后再来找我。");
                     } else {
                         eim.showWrongEffect();
                         cm.sendNext("看起来你还没有找到正确的绳子。请考虑不同的组合。只允许3名成员挂在绳子上，如果你挂太低，它可能不算作答案，所以请记住这一点。继续努力！");
@@ -224,9 +238,12 @@ function action(mode, type, selection) {
                 } else {
                     var accept = rectangleStages(eim, stgProperty, stgCombos, stgAreas);
 
-                    if (accept) {
+                    if (accept == 1) {
                         clearStage(stage, eim, curMap);
                         cm.sendNext("请赶紧前往下一个阶段，传送门已经打开了！");
+                    } else if (accept == -1) {
+                        eim.showWrongEffect();
+                        cm.sendNext("必须正好有 #r3#k 名队员站在平台上——不多不少。确认一下都是谁在上面，然后再来找我。");
                     } else {
                         eim.showWrongEffect();
                         cm.sendNext("看起来你还没有找到正确的平台。请考虑不同的组合。只允许在3名成员站在平台上，如果你站得太靠边它可能不算作答案，所以请记住这一点。继续努力！");
@@ -250,9 +267,12 @@ function action(mode, type, selection) {
                 } else {
                     var accept = rectangleStages(eim, stgProperty, stgCombos, stgAreas);
 
-                    if (accept) {
+                    if (accept == 1) {
                         clearStage(stage, eim, curMap);
                         cm.sendNext("请赶紧前往下一个阶段，传送门已经打开了！");
+                    } else if (accept == -1) {
+                        eim.showWrongEffect();
+                        cm.sendNext("必须正好有 #r3#k 名队员站在木桶上——不多不少。确认一下都是谁在上面，然后再来找我。");
                     } else {
                         eim.showWrongEffect();
                         cm.sendNext("看起来你还没有找到第3个木桶。请考虑不同的木桶组合。只允许3名成员站在木桶上，如果你站得太靠边，它可能不算作答案，所以请记住这一点。继续努力！");

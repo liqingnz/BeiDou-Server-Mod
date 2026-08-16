@@ -872,7 +872,7 @@ scripts/npc/1012105.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1012112.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012113.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012114.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1012117.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1012117.js	script	0	0	rejected	亨内西美发店随机发型。LK 换成自定义大列表：男发 41 款、女发 43 款在 BeiDou 的 Character.wz 里一款都没有；脸型 41 款缺 31 款。属批次 8 的 Character.wz 点装资源，用户已决定整批跳过。脚本里 pushIfItemExists 会挡住不存在的 ID 所以不会崩，但发型那项会列不出任何款式
 scripts/npc/1012118.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012119.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/10200.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1024,7 +1024,7 @@ scripts/npc/2020011.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字�
 scripts/npc/2020013.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2023000.js	script	0	0	rejected	new Array vs 字面量数组；BeiDou 提示里多给出发地并多一段对话
 scripts/npc/2030000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2030006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2030006.js	script	0	0	rejected	三转问答试炼（冰峰雪域圣石）。LK 把 39 题的冒险岛常识题库换成 5 道自家服务器的题（经验倍率、QQ 群号、1+1=、遇到BUG向Lich报告），无可移植内容。试炼连问 5 题正好用光他的题库，虽不崩但每个玩家永远是同样 5 题；他还删了生成序数的 generateQuestionHeading()，并留了个「第 N 个问题.。」的标点错
 scripts/npc/2030006_old.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2030008.js	script	0	0	rejected	新增「已完成 100201 后，30 个 4000082 反复换 2 个火焰之眼」的可重复兑换。BeiDou 现有路径是一次性锻造 5 个，之后走 NPC 2082014 的商店按 6000 万金币购买——不是死路，属经济向调参，需要时再开
 scripts/npc/2030010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1207,7 +1207,7 @@ scripts/npc/9010003.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9010004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9010021.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9020000.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：新增「预览通关奖励」菜单项，读 em.getProperty("reward")（由对应 PQ 脚本的 setRewardList() 写入）。译文与其余改动不搬
-scripts/npc/9020001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9020001.js	script	0	0	partial	KPQ 关卡 NPC。采纳 LK 区分「人数不对」与「站错位置」：rectangleStages 返回值从 boolean 改成 1/0/-1，人数不对时给专门提示（原先一律说「你们还没找对那 3 个」，是条死路）。已验证第 2/3/4 关的 4/10/20 个组合全部恰好要 3 人，且 BeiDou 的单人跳关是在数人头之前 early return，两者不冲突。否决 LK 删掉 use_enable_stage_skip 单人跳关开关与 importPackage/new Array 那套老写法
 scripts/npc/9020002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9030000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9040000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1282,7 +1282,7 @@ scripts/npc/9201071.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201072.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201073.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201082.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201083.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201083.js	script	0	0	rejected	BeiDou 是新叶城的一句话闲聊 NPC。LK 改成高科技合成台（2070018+4031917+1亿金币→2070016），但他自己在 start() 里无条件 sendOk+dispose，把整个菜单注释掉了，action() 那 40 行永远走不到——LK 那边这功能本身就是关着的
 scripts/npc/9201093.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201094.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201095.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文

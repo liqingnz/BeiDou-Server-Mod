@@ -66,10 +66,17 @@ function clearStage(stage, eim, curMap) {
     eim.linkToNextStage(stage, "kpq", curMap);  //opens the portal to the next map
 }
 
+/* Returns 1 when the platforms match the drawn combination, -1 when the wrong number of
+   players is standing on them at all, 0 when the count is right but the platforms are not.
+   Telling -1 apart from 0 is the whole point: otherwise a party that simply has too few
+   (or too many) people up there gets told to try other platforms, which is a dead end.
+   Every combination in stages 2/3/4 asks for exactly 3 occupied platforms. */
+var REQUIRED_ON_PLATFORMS = 3;
+
 function rectangleStages(eim, property, areaCombos, areaRects) {
     const GameConfig = Java.type('org.gms.config.GameConfig');
     if(GameConfig.getServerBoolean("use_enable_stage_skip") && eim.getPlayerCount() == 1){
-        return true;
+        return 1;   // solo skip short-circuits before any head counting
     }
     var c = eim.getProperty(property);
     if (c == null) {
@@ -82,21 +89,27 @@ function rectangleStages(eim, property, areaCombos, areaRects) {
     // get player placement
     var players = eim.getPlayers();
     var playerPlacement = [0, 0, 0, 0, 0, 0];
+    var onPlatforms = 0;
 
     for (var i = 0; i < eim.getPlayerCount(); i++) {
         for (var j = 0; j < areaRects.length; j++) {
             if (areaRects[j].contains(players.get(i).getPosition())) {
+                onPlatforms++;
                 playerPlacement[j] += 1;
                 break;
             }
         }
     }
 
+    if (onPlatforms != REQUIRED_ON_PLATFORMS) {
+        return -1;
+    }
+
     var curCombo = areaCombos[c];
-    var accept = true;
+    var accept = 1;
     for (var j = 0; j < curCombo.length; j++) {
         if (curCombo[j] != playerPlacement[j]) {
-            accept = false;
+            accept = 0;
             break;
         }
     }
@@ -199,9 +212,12 @@ function action(mode, type, selection) {
                 } else {
                     var accept = rectangleStages(eim, stgProperty, stgCombos, stgAreas);
 
-                    if (accept) {
+                    if (accept == 1) {
                         clearStage(stage, eim, curMap);
                         cm.sendNext("Please hurry on to the next stage, the portal opened!");
+                    } else if (accept == -1) {
+                        eim.showWrongEffect();
+                        cm.sendNext("Exactly #r3#k of you have to be " + nthverb + "ing on the " + nthobj + " -- no more, no fewer. Check who is up there, then talk to me again.");
                     } else {
                         eim.showWrongEffect();
                         cm.sendNext("It looks like you haven't found the 3 " + nthobj + " just yet. Please think of a different combination of " + nthobj + ". Only 3 are allowed to " + nthverb + " on " + nthobj + ", and if you " + nthpos + " it may not count as an answer, so please keep that in mind. Keep going!");
@@ -226,9 +242,12 @@ function action(mode, type, selection) {
                 } else {
                     var accept = rectangleStages(eim, stgProperty, stgCombos, stgAreas);
 
-                    if (accept) {
+                    if (accept == 1) {
                         clearStage(stage, eim, curMap);
                         cm.sendNext("Please hurry on to the next stage, the portal opened!");
+                    } else if (accept == -1) {
+                        eim.showWrongEffect();
+                        cm.sendNext("Exactly #r3#k of you have to be " + nthverb + "ing on the " + nthobj + " -- no more, no fewer. Check who is up there, then talk to me again.");
                     } else {
                         eim.showWrongEffect();
                         cm.sendNext("It looks like you haven't found the 3 " + nthobj + " just yet. Please think of a different combination of " + nthobj + ". Only 3 are allowed to " + nthverb + " on " + nthobj + ", and if you " + nthpos + " it may not count as an answer, so please keep that in mind. Keep going!");
@@ -253,9 +272,12 @@ function action(mode, type, selection) {
                 } else {
                     var accept = rectangleStages(eim, stgProperty, stgCombos, stgAreas);
 
-                    if (accept) {
+                    if (accept == 1) {
                         clearStage(stage, eim, curMap);
                         cm.sendNext("Please hurry on to the next stage, the portal opened!");
+                    } else if (accept == -1) {
+                        eim.showWrongEffect();
+                        cm.sendNext("Exactly #r3#k of you have to be " + nthverb + "ing on the " + nthobj + " -- no more, no fewer. Check who is up there, then talk to me again.");
                     } else {
                         eim.showWrongEffect();
                         cm.sendNext("It looks like you haven't found the 3 " + nthobj + " just yet. Please think of a different combination of " + nthobj + ". Only 3 are allowed to " + nthverb + " on " + nthobj + ", and if you " + nthpos + " it may not count as an answer, so please keep that in mind. Keep going!");
