@@ -147,7 +147,15 @@ public class PartyCharacter {
      * 给脚本用：不经过远征队对象直接按 BOSS 名查次数配额，并记一次尝试。
      */
     public boolean attemptBoss(String bossName) {
-        return ExpeditionBossLog.attemptBoss(id, channel, bossName, true);
+        return attemptBoss(bossName, true);
+    }
+
+    /**
+     * log 为 false 时仅做资格预检、不消耗次数；实例真正开起来后再由
+     * EventInstanceManager.logBossAttempt 扣次。与 Expedition 注册预检/出发记次的两段式一致。
+     */
+    public boolean attemptBoss(String bossName, boolean log) {
+        return ExpeditionBossLog.attemptBoss(id, channel, bossName, log);
     }
 
 }

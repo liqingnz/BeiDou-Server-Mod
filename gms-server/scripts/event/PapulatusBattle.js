@@ -96,7 +96,10 @@ function getEligibleParty(party) {      //selects, from the given party, the tea
         for (var i = 0; i < party.size(); i++) {
             var ch = partyList[i];
 
-            if (ch.getMapId() == recruitMap && ch.getLevel() >= minLevel && ch.getLevel() <= maxLevel) {
+            // LK: entering requires quest 7104 completed (status 2) and a remaining daily attempt;
+            // attemptBoss with log=false only pre-checks, the attempt is logged on entry via eim.logBossAttempt
+            if (ch.getMapId() == recruitMap && ch.getLevel() >= minLevel && ch.getLevel() <= maxLevel
+                    && ch.getPlayer().getQuestStatus(7104) == 2 && ch.attemptBoss("PAPULATUS", false)) {
                 if (ch.isLeader()) {
                     hasLeader = true;
                 }
@@ -132,6 +135,7 @@ function afterSetup(eim) {
 function respawnStages(eim) {}
 
 function playerEntry(eim, player) {
+    eim.logBossAttempt(player, "PAPULATUS");    // daily attempt is consumed on actual entry
     var map = eim.getMapInstance(entryMap);
     player.changeMap(map, map.getPortal(0));
 }
@@ -222,6 +226,9 @@ function monsterKilled(mob, eim) {
     if (isPapulatus(mob)) {
         eim.showClearEffect();
         eim.clearPQ();
+        // LK: boss certificates are distributed by damage share, below 20% gets nothing
+        // (certificate 3100000 wz is on the appendix D missing list, lands with task #4)
+        eim.distributeBossCertificate(mob, 3100000, 1, 20);
     }
 }
 

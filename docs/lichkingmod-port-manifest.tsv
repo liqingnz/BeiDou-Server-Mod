@@ -833,7 +833,7 @@ scripts/event/MK_PrimeMinister2.js	script	0	0	pending	含代码改动；只搬�
 scripts/event/MagatiaPQ_A.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/MagatiaPQ_Z.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/OrbisPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/PapulatusBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/PapulatusBattle.js	script	0	0	ported	批次7：接 G7 配额（预检 attemptBoss(name,false) + 进场 logBossAttempt 两段式，修掉 LK 预检即扣次的缺陷）+ 任务7104 门槛 + 凭证按伤害分发（3100000 wz 待任务#4）；等级上限不搬（max_level_cap 已兜住）
 scripts/event/PinkBeanBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/PiratePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/RescueGaga.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1369,7 +1369,7 @@ scripts/portal/MD_remember.js	script	0	0	noise	改动可证明只落在字符串
 scripts/portal/MD_roundTable.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/MD_sand.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/MD_treasure.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/portal/Populatus00.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/Populatus00.js	script	0	0	already-fixed	BeiDou 已是本地化同逻辑版本，LK 改动仅汉化+死注释
 scripts/portal/TD_Boss_enter.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/TD_MC_enterboss2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/TD_MC_first.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）

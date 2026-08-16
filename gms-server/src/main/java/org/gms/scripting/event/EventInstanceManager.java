@@ -39,6 +39,7 @@ import org.gms.server.StatEffect;
 import org.gms.server.ThreadManager;
 import org.gms.server.TimerManager;
 import org.gms.server.expeditions.Expedition;
+import org.gms.server.expeditions.ExpeditionBossLog;
 import org.gms.server.life.LifeFactory;
 import org.gms.server.life.Monster;
 import org.gms.server.life.NPC;
@@ -874,6 +875,17 @@ public class EventInstanceManager {
             }
             chr.getAbstractPlayerInteraction().gainItem(itemId, quantity, true);
         }
+    }
+
+    /**
+     * 记一次 BOSS 挑战次数。给 BOSS 战脚本在 playerEntry 里调用：
+     * 资格预检走 PartyCharacter.attemptBoss(name, false) 不消耗次数，实例真正开起来、
+     * 玩家进场时才在这里扣，startInstance 失败不会白烧次数——与 Expedition
+     * 注册预检/出发记次的两段式一致（LichKingMod 原脚本在 getEligibleParty 里就把次数
+     * 扣掉了，其注释里的 triggerAttemptBoss 设想即本方法）。
+     */
+    public void logBossAttempt(Character chr, String bossName) {
+        ExpeditionBossLog.attemptBoss(chr.getId(), chr.getClient().getChannel(), bossName, true);
     }
 
     /**

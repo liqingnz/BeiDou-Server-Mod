@@ -102,7 +102,10 @@ function getEligibleParty(party) {      //selects, from the given party, the tea
         for (var i = 0; i < party.size(); i++) {
             var ch = partyList[i];
 
-            if (ch.getMapId() == recruitMap && ch.getLevel() >= minLevel && ch.getLevel() <= maxLevel) {
+            // LK：挑战闹钟需完成任务 7104（状态 2 = 已完成）且当日还有挑战次数；
+            // attemptBoss 第二参 false 只预检不扣次，进场时由 eim.logBossAttempt 扣
+            if (ch.getMapId() == recruitMap && ch.getLevel() >= minLevel && ch.getLevel() <= maxLevel
+                    && ch.getPlayer().getQuestStatus(7104) == 2 && ch.attemptBoss("PAPULATUS", false)) {
                 if (ch.isLeader()) {
                     hasLeader = true;
                 }
@@ -138,6 +141,7 @@ function afterSetup(eim) {
 function respawnStages(eim) {}
 
 function playerEntry(eim, player) {
+    eim.logBossAttempt(player, "PAPULATUS");    // 真正进场才扣当日次数
     var map = eim.getMapInstance(entryMap);
     player.changeMap(map, map.getPortal(0));
 }
@@ -228,6 +232,8 @@ function monsterKilled(mob, eim) {
     if (isPapulatus(mob)) {
         eim.showClearEffect();
         eim.clearPQ();
+        // LK：BOSS 凭证按伤害占比发放，伤害不足 20% 不发（凭证 3100000 的 wz 在附录 D 缺失清单，待任务 #4 补齐）
+        eim.distributeBossCertificate(mob, 3100000, 1, 20);
     }
 }
 
