@@ -81,8 +81,12 @@ public class MessageBoardService {
         StringBuilder sb = new StringBuilder(message.length());
         message.codePoints().forEach(cp -> {
             // 全限定名是必须的：本文件 import 的 Character 是 org.gms.client.Character
-            if (cp == '#' || java.lang.Character.isISOControl(cp)) {
-                return;     // '#' 是 NPC 富文本的控制码前缀，换行/回车等一并去掉
+            // '#' 是 NPC 富文本的控制码前缀；ISOControl 覆盖 C0/C1（含换行回车）；
+            // FORMAT 覆盖零宽空格 U+200B、BOM U+FEFF、RLO U+202E 这类不可见字符——
+            // 它们伪造不了 GM 行，但能拼出「看着全空却收了 50 万」或视觉倒序的留言
+            if (cp == '#' || java.lang.Character.isISOControl(cp)
+                    || java.lang.Character.getType(cp) == java.lang.Character.FORMAT) {
+                return;
             }
             sb.appendCodePoint(cp);
         });

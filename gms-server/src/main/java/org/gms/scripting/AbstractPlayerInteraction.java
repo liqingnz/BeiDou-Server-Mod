@@ -1674,6 +1674,10 @@ public class AbstractPlayerInteraction {
         try {
             messageBoardService.addMessage(getPlayer(), message);
             return true;
+        } catch (IllegalArgumentException e) {
+            // 内容为空或超长是玩家的普通输入错误，而且因为失败不扣钱、重试免费，
+            // 不能和真正的 DB 故障共用 ERROR + 堆栈，否则谁都能零成本刷错误日志
+            return false;
         } catch (Exception e) {
             log.error(I18nUtil.getLogMessage("MessageBoardService.addMessage.error1"),
                     getPlayer().getName(), getPlayer().getId(), e);

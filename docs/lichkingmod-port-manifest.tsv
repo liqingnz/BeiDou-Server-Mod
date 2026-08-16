@@ -740,7 +740,7 @@ src/net/mailing/MailManager.java	java-new	131	0	rejected	批次6收尾终局否�
 src/net/mailing/Verifier.java	java-new	30	0	rejected	批次6收尾终局否决：随 MailManager
 src/net/server/handlers/VotePingBackHandler.java	java-new	52	0	rejected	LK 全仓库零引用的死代码：extends javax.xml.ws.spi.http.HttpHandler（JAX-WS SPI，JDK11+ 已从 JDK 移除，Java 21 下需额外依赖才编译得过），handle() 里 JSON 解析与 sendResponseHeaders 全被注释掉，只剩一句 System.out.println。真正记票的 UpdateVotePointTask 并不消费它。与 LichDebugCommand 同档
 src/net/server/task/UpdateVotePointTask.java	java-new	143	0	rejected	批次6收尾终局否决：是"接入gtop100这一特定站点"的运营集成而非通用功能。需真实siteid/pass；依赖已否决的邮箱验证；accounts.lastVoteTime 列BeiDou没有；调度要改接BeiDou方式属重写。将来真要接投票站按BeiDou自身体系写
-src/server/MessageBoard.java	java-new	91	0	ported	批次6收尾：重写为 Spring MessageBoardService + AbstractPlayerInteraction 两个脚本入口。去缓存（消除并发/顺序/空表白查三个坑）、按自增id排序、颜色码与角色名不入库改渲染时拼、单条DELETE替代循环泄漏、入库失败返回false不再骗调用方扣钱
+src/server/MessageBoard.java	java-new	91	0	ported	批次6收尾：重写为 Spring MessageBoardService + AbstractPlayerInteraction 两个脚本入口。去缓存（消除并发/顺序/空表白查三个坑）、按自增id排序、颜色码与角色名不入库改渲染时拼、单条DELETE替代循环泄漏、入库失败返回false不再骗调用方扣钱、入库前剥控制码防伪造GM行。注意：NPC 9800001 的 wz（String.wz/Npc.img + Map9/910000000 摆放）BeiDou 缺失，补齐前功能不可达
 src/server/gachapon/Leafre.java	java-new	74	0	pending	
 src/server/ultils/RoyalAccount.java	java-new	69	0	pending	
 HeavenMS_LichKingMod.iml	other	22	0	noise	IDE 工程文件
@@ -1341,7 +1341,7 @@ scripts/npc/9310037.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/9310039.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9310044.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9310050.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9800001.js	script	0	0	ported	批次6收尾：随 MessageBoard 落到 scripts/ 与 scripts-zh-CN/ 两套。修掉原脚本"入库失败仍扣钱"与空内容可提交
+scripts/npc/9800001.js	script	0	0	ported	批次6收尾：随 MessageBoard 落到 scripts/ 与 scripts-zh-CN/ 两套。修掉原脚本"入库失败仍扣钱"与空内容可提交。注意：NPC 本体 wz 未补，脚本暂无入口触发
 scripts/npc/9900000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9977777.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/MagatiaPassword.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）

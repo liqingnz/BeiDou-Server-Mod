@@ -401,9 +401,9 @@ public class CharacterService {
                     FamilyCharacterDO.builder().seniorid(0).reptosenior(0).precepts(self.getPrecepts()).build(),
                     QueryWrapper.create().where(FAMILY_CHARACTER_D_O.CID.eq(newLeaderId)));
             placed.add(newLeaderId);
-            placeWithinCapacity(newLeaderId, juniors.subList(1, juniors.size()), placed);
+            placeWithinCapacity(cid, newLeaderId, juniors.subList(1, juniors.size()), placed);
         } else {
-            placeWithinCapacity(newSeniorId, juniors, placed);
+            placeWithinCapacity(cid, newSeniorId, juniors, placed);
         }
 
         List<Integer> stranded = juniors.stream().map(FamilyCharacterDO::getCid)
@@ -415,10 +415,16 @@ public class CharacterService {
 
     /**
      * 在 {@code newSeniorId} 的剩余名额内挂接下级，放不下的留给调用方记账。
+     *
+     * @param deletingCid 正在被删除的角色。<b>必须从名额统计里排除</b>：本方法跑在删 characters 之前，
+     *                    非族长路径下被删者自己那行的 seniorid 恰好就是 {@code newSeniorId}，
+     *                    不排除就会把他即将腾出的位置算成占用，每次删「有下级的普通成员」都少挂一个下级，
+     *                    把「名额不够才悬空」这条已知限制放大成常态。
      */
-    private void placeWithinCapacity(int newSeniorId, List<FamilyCharacterDO> juniors, List<Integer> placed) {
+    private void placeWithinCapacity(int deletingCid, int newSeniorId, List<FamilyCharacterDO> juniors, List<Integer> placed) {
         long used = familyCharacterMapper.selectCountByQuery(
-                QueryWrapper.create().where(FAMILY_CHARACTER_D_O.SENIORID.eq(newSeniorId)));
+                QueryWrapper.create().where(FAMILY_CHARACTER_D_O.SENIORID.eq(newSeniorId))
+                        .and(FAMILY_CHARACTER_D_O.CID.ne(deletingCid)));
         int free = (int) (FAMILY_JUNIOR_CAPACITY - used);
         if (free <= 0) {
             return;

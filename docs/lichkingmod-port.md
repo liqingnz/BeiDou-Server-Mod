@@ -2458,8 +2458,20 @@ LK 用 HeavenMS 的 `TimerManager` 自建调度，搬过来要改接 BeiDou 的�
 
 ##### C3 · 全服留言板（2 行）→ `ported`
 
-`server/MessageBoard` + `npc/9800001.js`。前置批次 0 就绪（`message_board` 表、
-`MessageBoardDO`、`MessageBoardMapper`），零外部依赖，是 20 行里唯一能当场做完的。
+`server/MessageBoard` + `npc/9800001.js`。数据库前置批次 0 就绪（`message_board` 表、
+`MessageBoardDO`、`MessageBoardMapper`），java 与脚本侧当场做完。
+
+> **⚠️ 与 G15 同类的 wz 依赖，收尾时漏记，终审复查补上**：本节原先写的「零外部依赖」是**错的**。
+> **NPC 9800001 在 BeiDou 的两层 wz 里都不存在**，功能目前不可达：
+>
+> | 缺什么 | 核实 |
+> |---|---|
+> | `String.wz/Npc.img.xml` 的 `9800001`「留言板」条目 | `wz/` 与 `wz-zh-CN/` 均 0 命中；LK 侧有 |
+> | `Map.wz/Map/Map9/910000000.img.xml`（自由市场入口）的 life 摆放 | BeiDou 0 命中；LK 侧有 |
+> | 客户端 `Npc.wz` 的形象 img | 两边服务端 wz 都没有该文件，属客户端资源 |
+>
+> 全仓库无任何 `openNpc(9800001)`，没有 wz 数据 GM 也召不出来。**处理方式对齐 G15**：
+> java 侧已就位，这两个 wz 文件的清单行已注明它们是留言板的入口，批次 7 处理时补齐即可生效。
 
 重写为 Spring `MessageBoardService`，脚本入口挂在 `AbstractPlayerInteraction` 上
 （`cm.getMessageBoard()` / `cm.addMessageBoardEntry(text)`）。修掉的 7 个问题：
@@ -2523,9 +2535,15 @@ characters 一删，`family_character` 那行被数据库连带删掉，过继�
 | 族长那行的 `precepts`（家训）没有转移 | 随位置一起转移给新族长 |
 | `reptosenior` 没清零，与 `FamilyEntry.setSenior` 的语义（`updateDBChangeFamily` 里 `reptosenior = 0`）不一致 | 一并清零 |
 
-> **已知限制（明确不做）**：只做「就近挂接」，**不做二叉树重排**。名额不够时剩余下级维持 `seniorid` 悬空，
-> 行为与本方法引入前一致，`FamilyService` 的判空能兜住，但那棵子树会脱离统计。
-> 这种情况会打 warn 并列出角色 id 供人工处理。完整的树重排是另一个课题，不在移植范围内。
+> **已知限制（明确不做）**：
+> 1. 只做「就近挂接」，**不做二叉树重排**。名额不够时剩余下级维持 `seniorid` 悬空，
+>    行为与本方法引入前一致，`FamilyService` 的判空能兜住，但那棵子树会脱离统计，会打 warn 列出角色 id。
+> 2. **过继只写 DB，运行中服务器的内存树不更新**。GM 后台在线删角色后，`World.families` 里被删者的
+>    `FamilyEntry` 仍在、下级仍认他当上级、声望照旧流向已删角色，**要重启才对齐**。
+>    修复瞄准的主症状（启动 NPE）是加载期问题，DB 侧修复足以解决。
+> 3. `placeWithinCapacity` 的 count 与 update 之间没有行锁，而 `FamilyEntry.join()/fork()` 走裸 JDBC、
+>    在这套事务体系之外。窗口极窄，最坏结果是 DB 里出现 3 个同 senior 的行，下次启动被 `addJunior` 拒收
+>    第三个，退化成上面第 1 条的悬空情形，由判空兜住。
 
 ##### 其余 8 条已修
 
@@ -2553,6 +2571,45 @@ CLAUDE.md 的 wz/脚本加载一节写得很清楚。仓库里 **722 个 NPC 脚
 **六个汉字（正好 12 字节）也会被拒**。该副作用属实，**运营已裁定放宽**：
 `MAX_CHARACTER_NAME_BYTES` 从 12 改为 **13**（开区间，即最多 12 字节），
 对齐 `characters.name VARCHAR(13)` 与角色名正则的 `{2,12}`，12 位 ASCII 与 6 个汉字都放行。
+
+#### 批次 6 终审修正（审查范围 `57ef59e00..bc516593e`）
+
+第三轮终审确认前一轮 9 条修正全部真实生效、4 条「不搬 LK / 反修 LK」的判断全部成立、
+对脚本 i18n 的驳回也获认同。本轮新报 2 个实质问题 + 5 条低优先级，**全部已修**。
+
+##### 🔴 新发现 1：名额统计把被删者自己算进去了，普通成员删除时永远少挂一个下级
+
+`placeWithinCapacity` 的 `used = count(seniorid = newSeniorId)` 跑在删 characters **之前**
+（这正是上一轮刻意保证的顺序），于是非族长路径下**被删者自己那行的 `seniorid` 恰好就是 `newSeniorId`**，
+必然被计入 `used`。他马上就要被级联删掉、腾出一个名额，`free = 2 - used` 却没把这个位置算回来。
+
+| 家族形态 | 删 A 时的实际结果 | 应有结果 |
+|---|---|---|
+| S→A→(B, C)，S 只有 A 一个下级 | `used=1`，`free=1` → B 挂上、**C 悬空打 warn** | S 空出两位，B、C 都该挂上 |
+| S→(A, D)，A 有一个下级 B | `used=2`，`free=0` → **B 直接悬空** | 实际有 1 个空位 |
+
+也就是说**每删一个「有下级的普通成员」都会少挂一个**，把「名额不够才悬空」这条已知限制放大成了常态。
+修法：count 查询排除被删角色（`.and(CID.ne(deletingCid))`）。族长提拔路径不受影响
+（被删者自己那行 `seniorid <= 0`，本来就不会被计入新族长的名额）。
+
+##### 🔴 新发现 2：留言板功能当前不可达，而收尾记录写的是「零外部依赖」
+
+与 G15 的血液精华完全同类的 wz 依赖，收尾时漏记。详见上面 C3 一节补入的表格 ——
+**NPC 9800001 在 BeiDou 两层 wz 里都不存在**，`String.wz/Npc.img.xml` 条目与
+`Map9/910000000.img.xml` 的 life 摆放都缺，全仓库也没有 `openNpc(9800001)`。
+两个 wz 文件的清单行已注明它们是留言板入口，处理方式对齐 G15。
+
+##### 其余 5 条已修
+
+| 位置 | 问题 | 修法 |
+|---|---|---|
+| `UseItemHandler.applyHpPill` | 法师判定沿用原实现的 `id/100 == 2 \|\| == 12`，**Evan（2200 系）拿的是战士待遇**；且 `isBeginnerJob()` 只覆盖 0/1000/2000，**漏了 Evan 新手 2001** | 法师判定改用仓库既有的 `getJobStyle() == Job.MAGICIAN`（它把三条法师线统一归类）；新手排除单独补 `Job.EVAN`。不直接改 `isBeginnerJob()` —— 初心者经验、自动加点等多处在用，扩语义要单独评估 |
+| `AbstractPlayerInteraction.addMessageBoardEntry` | 超长留言这种普通输入错误也走 `log.error` + 堆栈，而失败不扣钱、重试免费，**玩家可零成本刷错误日志** | `IllegalArgumentException` 单独 catch 不打日志，其余才 ERROR |
+| `MessageBoardService.sanitize` | 只剥 `#` 与 ISO 控制字符，漏了 Cf 类格式字符：U+200B 能拼出「看着全空却收了 50 万」的留言（`trim()` 不剥零宽空格），U+202E 能让文本视觉倒序 | 过滤条件加 `getType(cp) == FORMAT` |
+| `ServerConstants.BLOCKED_NAMES` | 匹配是 `name.toLowerCase().contains(...)`，但数组里 `FREDRICK`/`GameMaster`/`Scania`/`AsiaSoft` **含大写，永远匹配不中**（存量问题，但本次改的就是这个数组） | 条目统一小写；`GameMaster` 与已有的 `gamemaster` 重复，去重 |
+| §7 家族一节 | 已知限制只写了「不做二叉重排」 | 补记「过继只写 DB，运行中删除要重启才对齐内存树」与「count→update 之间无行锁，`FamilyEntry.join/fork` 走裸 JDBC 在事务体系外」 |
+
+> 终审还提示：新增屏蔽词里的单字「操」会误伤「曹操」这类合法名。这属运营已裁定的取舍，未改。
 
 ### 批次 7 — 数据类
 

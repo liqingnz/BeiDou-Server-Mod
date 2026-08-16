@@ -8,9 +8,13 @@ public class ServerConstants {
     //Debug Variables
     public static int[] DEBUG_VALUES = new int[10];             // Field designed for packet testing purposes
 
-    public static final String[] BLOCKED_NAMES = {"admin", "owner", "moderator", "intern", "donor", "administrator", "FREDRICK", "help", "helper", "alert", "notice", "maplestory", "fuck", "wizet", "fucking", "negro", "fuk", "fuc", "penis", "pussy", "asshole", "gay",
+    /**
+     * 角色名屏蔽词。{@code Character.canCreateChar} 是拿 {@code name.toLowerCase().contains(...)} 匹配的，
+     * <b>所以条目必须全小写</b>——原先的 FREDRICK / GameMaster / Scania / AsiaSoft 含大写字母，永远匹配不中。
+     */
+    public static final String[] BLOCKED_NAMES = {"admin", "owner", "moderator", "intern", "donor", "administrator", "fredrick", "help", "helper", "alert", "notice", "maplestory", "fuck", "wizet", "fucking", "negro", "fuk", "fuc", "penis", "pussy", "asshole", "gay",
             "nigger", "homo", "suck", "cum", "shit", "shitty", "condom", "security", "official", "rape", "nigga", "sex", "tit", "boner", "orgy", "clit", "asshole", "fatass", "bitch", "support", "gamemaster", "cock", "gaay", "gm",
-            "operate", "master", "sysop", "party", "GameMaster", "community", "message", "event", "test", "meso", "Scania", "yata", "AsiaSoft", "henesys",
+            "operate", "master", "sysop", "party", "community", "message", "event", "test", "meso", "scania", "yata", "asiasoft", "henesys",
             // 中文屏蔽词：冒充管理/系统的、脏字、以及会与大区名混淆的片段
             "管理", "艹", "操", "嬲", "活动", "贱", "点券", "妖王", "之大陆",
             "习近平", "毛泽东", "胡锦涛", "邓小平", "江泽民", "共产党"};
