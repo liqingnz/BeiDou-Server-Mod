@@ -814,10 +814,10 @@ scripts/event/CafePQ_5.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLe
 scripts/event/CafePQ_6.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/DelliBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/ElementalBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
-scripts/event/EllinPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/ElnathPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/GuildQuest.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/HenesysPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/EllinPQ.js	script	0	0	partial	五个 PQ 的 LK 改动完全同构，四类全是已判过的：①通关发组队凭证 3100001——按既有做法加注释掉的调用与说明（wz 随任务 #4 补齐后统一放开）；②getMaxLobbies() 改成他们 fork 的 setLobbyRange()，BeiDou 的 Java 不认；③把 Java.to(eligible, PartyCharacter[]) 去掉直接 return JS 数组，GraalVM 下会报类型错；④人数/等级阈值写死（maxLevel 一律 200），BeiDou 已做成 GameConfig 开关。本文件另有 minPlayers 4→3、maxLevel 55→200
+scripts/event/ElnathPQ.js	script	0	0	partial	五个 PQ 的 LK 改动完全同构，四类全是已判过的：①通关发组队凭证 3100001——按既有做法加注释掉的调用与说明（wz 随任务 #4 补齐后统一放开）；②getMaxLobbies() 改成他们 fork 的 setLobbyRange()，BeiDou 的 Java 不认；③把 Java.to(eligible, PartyCharacter[]) 去掉直接 return JS 数组，GraalVM 下会报类型错；④人数/等级阈值写死（maxLevel 一律 200），BeiDou 已做成 GameConfig 开关。本文件另有 maxLevel 255→200
+scripts/event/GuildQuest.js	script	0	0	partial	五个 PQ 的 LK 改动完全同构，四类全是已判过的：①通关发组队凭证 3100001——按既有做法加注释掉的调用与说明（wz 随任务 #4 补齐后统一放开）；②getMaxLobbies() 改成他们 fork 的 setLobbyRange()，BeiDou 的 Java 不认；③把 Java.to(eligible, PartyCharacter[]) 去掉直接 return JS 数组，GraalVM 下会报类型错；④人数/等级阈值写死（maxLevel 一律 200），BeiDou 已做成 GameConfig 开关。本文件另有 maxLevel 255→200
+scripts/event/HenesysPQ.js	script	0	0	partial	五个 PQ 的 LK 改动完全同构，四类全是已判过的：①通关发组队凭证 3100001——按既有做法加注释掉的调用与说明（wz 随任务 #4 补齐后统一放开）；②getMaxLobbies() 改成他们 fork 的 setLobbyRange()，BeiDou 的 Java 不认；③把 Java.to(eligible, PartyCharacter[]) 去掉直接 return JS 数组，GraalVM 下会报类型错；④人数/等级阈值写死（maxLevel 一律 200），BeiDou 已做成 GameConfig 开关。本文件另有 maxLevel 255→200
 scripts/event/HolidayPQ_1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/HolidayPQ_2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/HolidayPQ_3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -845,7 +845,7 @@ scripts/event/TD_Battle2.js	script	0	0	rejected	LK 改的是 minPlayers->1 / max
 scripts/event/TD_Battle3.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/TD_Battle4.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/TD_Battle5.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
-scripts/event/TreasurePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/TreasurePQ.js	script	0	0	partial	五个 PQ 的 LK 改动完全同构，四类全是已判过的：①通关发组队凭证 3100001——按既有做法加注释掉的调用与说明（wz 随任务 #4 补齐后统一放开）；②getMaxLobbies() 改成他们 fork 的 setLobbyRange()，BeiDou 的 Java 不认；③把 Java.to(eligible, PartyCharacter[]) 去掉直接 return JS 数组，GraalVM 下会报类型错；④人数/等级阈值写死（maxLevel 一律 200），BeiDou 已做成 GameConfig 开关。本文件另有 minPlayers 4→3、maxLevel 255→200
 scripts/event/ZakumBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限240min；人数/等级上限不搬（config 已兜住）。凭证 3100000 的发放已注释（同上缺 wz），wz 补齐后取消注释
 scripts/event/ZakumPQ.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/item/killarmush.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）

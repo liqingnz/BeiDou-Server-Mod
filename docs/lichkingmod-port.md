@@ -2600,6 +2600,25 @@ LK 把返回值改成三态，人数不对时单独提示。采纳，并逐条�
 以及 `importPackage(java.awt)` + 裸 `new Rectangle(...)` 这套 Nashorn 老写法
 ——BeiDou 已改成 `const Rectangle = Java.type('java.awt.Rectangle')`。
 
+##### 五个 PQ（`EllinPQ`/`HenesysPQ`/`TreasurePQ`/`ElnathPQ`/`GuildQuest`）⚠ partial
+
+先做了一次横扫，五个文件的 LK 改动**完全同构**，四类全是已判过的类别：
+
+| 差异 | BeiDou | LK | 处置 |
+|---|---|---|---|
+| 通关发组队凭证 `3100001` | 无 | 五个都发 | ✅ 按既有做法补上**注释掉的调用 + 说明**，wz 随任务 #4 补齐后统一放开 |
+| 大厅 API | `getMaxLobbies()` | `setLobbyRange()` | ❌ 后者是 LK fork 的 API，BeiDou 的 Java 不认 |
+| 合格队伍返回值 | `Java.to(eligible, Java.type('...PartyCharacter[]'))` | 直接 `return eligible` | ❌ GraalVM 不会自动转数组，照搬会报类型错（Nashorn 时代才能这么写） |
+| 人数/等级阈值 | 走 GameConfig 开关 | 写死（`maxLevel` 一律 200） | ❌ 已判类别，见上文「PQ 阈值那 23 个」 |
+
+各文件另有的阈值改动：`EllinPQ` 人数 4→3 且 `maxLevel` 55→200；
+`TreasurePQ` 人数 4→3 且 255→200；`HenesysPQ`/`ElnathPQ`/`GuildQuest` 均 255→200。
+
+**凭证注释点全仓库统计**：本次 +10，累计 **24 处已注释、0 处仍在发**。
+
+> 横扫同时复核了「GameConfig 门只在 `scripts-zh-CN/` 层」这个此前记录的 BeiDou 自身缺口：
+> 五个文件**全部**是中文层有、英文层无，与先前结论一致。
+
 > **必须一并移植的前置**：`ItemInformationProvider` 中为支持新发型/脸型扩大的 ID 段判断，
 > 否则点装不显示。**批次 6 盘点时查证过，三条里已有两条不成立**：
 >
