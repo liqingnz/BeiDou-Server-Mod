@@ -232,8 +232,10 @@ function monsterKilled(mob, eim) {
     if (isPapulatus(mob)) {
         eim.showClearEffect();
         eim.clearPQ();
-        // LK：BOSS 凭证按伤害占比发放，伤害不足 20% 不发（凭证 3100000 的 wz 在附录 D 缺失清单，待任务 #4 补齐）
-        eim.distributeBossCertificate(mob, 3100000, 1, 20);
+        // BOSS 凭证 3100000 目前在 BeiDou 不存在：整个 Item.wz/Install/0310.img.xml 缺失
+        // （清单 wz-missing，附录 D），名字也不在 String.wz/Ins.img.xml。
+        // 现在发出去只是一件无名无图标的道具，所以先注释掉；wz 随任务 #4 补齐后取消注释即可。
+        // eim.distributeBossCertificate(mob, 3100000, 1, 20);
     }
 }
 

@@ -251,8 +251,10 @@ function monsterKilled(mob, eim) {
         eim.showClearEffect(mob.getMap().getId());
         mob.getMap().killAllMonsters();
         eim.clearPQ();
-        // LK: boss certificates by damage share, 15 each, below 8% gets nothing (item 3100000 wz lands with task #4)
-        eim.distributeBossCertificate(mob, 3100000, 15, 8);
+        // Item 3100000 does not exist in BeiDou yet: Item.wz/Install/0310.img.xml is missing
+        // entirely (manifest wz-missing, appendix D) and the name is absent from String.wz/Ins.img.xml.
+        // Handing it out now yields a nameless, icon-less item, so keep it commented out.
+        // eim.distributeBossCertificate(mob, 3100000, 15, 8);
 
         var ch = eim.getIntProperty("channel");
         mob.getMap().broadcastPinkBeanVictory(ch);

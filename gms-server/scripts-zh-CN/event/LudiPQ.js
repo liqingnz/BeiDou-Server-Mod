@@ -285,10 +285,12 @@ function giveRandomEventReward(eim, player) {
 function clearPQ(eim) {
     eim.stopEventTimer();
     eim.setEventCleared();
-    // 通关发组队凭证
     // 阿尔泰碎片
     eim.distributePQClearReward(4001198, 2);
-    eim.distributePQClearReward(3100001, 1);
+    // 组队凭证 3100001 目前在 BeiDou 不存在：整个 Item.wz/Install/0310.img.xml 缺失
+    // （清单 wz-missing，附录 D），名字也不在 String.wz/Ins.img.xml。
+    // 现在发出去只是一件无名无图标的道具，所以先注释掉；wz 随任务 #4 补齐后取消注释即可。
+    // eim.distributePQClearReward(3100001, 1);
 
     eim.startEventTimer(1 * 60000);
     eim.warpEventTeam(922011000);

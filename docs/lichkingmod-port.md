@@ -922,6 +922,18 @@ BeiDou 版另有难度倍率、掉落表、多大厅并发，以及按 `use_enab
 它在 `Item.wz/Install/0310.img.xml` 里，正好在附录 D 的缺失清单上。所以那 8 个调用它的批次 7
 BOSS 脚本，也得等 wz 补齐才有意义。
 
+> **2026-08-17 处置**：这类「代码已接线、道具还不存在」的调用**一律注释掉**，不留在生效路径上。
+> 现在发出去只是一件无名无图标的道具，既骗玩家也让问题难被发现。涉及 27 处：
+>
+> | 凭证 | 调用 | 处 |
+> |---|---|---|
+> | `3100000` BOSS凭证 | `distributeBossCertificate` | 13（6 个 BOSS 脚本 × 2 层 + `YaoSengPQ` 仅 zh-CN） |
+> | `3100001` 组队凭证 | `distributePQClearReward` | 14（7 个 PQ × 2 层） |
+>
+> 每处都保留了三行说明注释，写明缺的是哪两个 wz（`Item.wz/Install/0310.img.xml` 整份缺失、
+> 名字在 `String.wz/Ins.img.xml`），wz 随第 4 项补齐后取消注释即可。
+> `LudiPQ` 另发的阿尔泰碎片 `4001198` **不在此列**——该道具 BeiDou 已有，保持生效。
+
 `portal/mahavira_enter.js` 同理但成因不同：这个脚本名只出现在 LK **改过**的
 `wz/Map.wz/Map/Map7/702050000.img.xml` 里，BeiDou 的同名文件没有任何 `portal script` 字段。
 脚本单独搬过来永远不会被触发，得跟那一行 wz 一起处理。

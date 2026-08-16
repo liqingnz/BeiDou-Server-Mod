@@ -217,8 +217,10 @@ function monsterKilled(mob, eim) {
         eim.showClearEffect(mob.getMap().getId());
         eim.broadcastDamageRanking();  // BOSS死亡时通报
         eim.clearPQ();
-        // LK：BOSS 凭证按伤害占比发放，6 张、低于 9% 不发（凭证 3100000 wz 待任务 #4）
-        eim.distributeBossCertificate(mob, 3100000, 6, 9);
+        // BOSS 凭证 3100000 目前在 BeiDou 不存在：整个 Item.wz/Install/0310.img.xml 缺失
+        // （清单 wz-missing，附录 D），名字也不在 String.wz/Ins.img.xml。
+        // 现在发出去只是一件无名无图标的道具，所以先注释掉；wz 随任务 #4 补齐后取消注释即可。
+        // eim.distributeBossCertificate(mob, 3100000, 6, 9);
 
         eim.dispatchRaiseQuestMobCount(8810018, 240060200);
         mob.getMap().broadcastHorntailVictory();

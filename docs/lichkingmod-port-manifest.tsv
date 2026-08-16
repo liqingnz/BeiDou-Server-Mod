@@ -782,7 +782,7 @@ tools/MapleSkillbookChanceFetcher/MapleSkillbookChanceFetcher.iml	other	11	0	noi
 tools/MapleSkillbookStackUpdate/MapleSkillbookStackUpdate.iml	other	11	0	noise	IDE 工程文件
 tools/MapleWorldmapChecker/MapleWorldmapChecker.iml	other	11	0	noise	IDE 工程文件
 tools/SpiderDropFetcher/SpiderDropFetcher.iml	other	11	0	noise	IDE 工程文件
-scripts/event/AmoriaPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：只采通关发组队凭证 3100001。LK 无 setRewardList（这两个 PQ 没有对应的预览 NPC）。不采阈值调参与 dropMessage 注释掉的内容削减
+scripts/event/AmoriaPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：只采通关发组队凭证 3100001。LK 无 setRewardList（这两个 PQ 没有对应的预览 NPC）。不采阈值调参与 dropMessage 注释掉的内容削减。凭证 3100001 的发放已注释（BeiDou 缺 Item.wz/Install/0310.img.xml 与 String.wz/Ins.img.xml 条目），wz 补齐后取消注释
 scripts/event/AreaBossDyle.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/AreaBossEliza1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/AreaBossFaust1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -805,7 +805,7 @@ scripts/event/BalrogBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / m
 scripts/event/BalrogBattle_Easy.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/Boats.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/BossRushPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/CWKPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：只采通关发组队凭证 3100001。LK 无 setRewardList（这两个 PQ 没有对应的预览 NPC）。不采阈值调参与 dropMessage 注释掉的内容削减
+scripts/event/CWKPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：只采通关发组队凭证 3100001。LK 无 setRewardList（这两个 PQ 没有对应的预览 NPC）。不采阈值调参与 dropMessage 注释掉的内容削减。凭证 3100001 的发放已注释（BeiDou 缺 Item.wz/Install/0310.img.xml 与 String.wz/Ins.img.xml 条目），wz 补齐后取消注释
 scripts/event/CafePQ_1.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/CafePQ_2.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/CafePQ_3.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
@@ -821,24 +821,24 @@ scripts/event/HenesysPQ.js	script	0	0	pending	含代码改动；只搬逻辑不�
 scripts/event/HolidayPQ_1.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/HolidayPQ_2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/HolidayPQ_3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/event/HorntailBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min + 重连按 defeatedHead 回对应阶段图（defeatedHead 机制 Cosmic 已有）
+scripts/event/HorntailBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min + 重连按 defeatedHead 回对应阶段图（defeatedHead 机制 Cosmic 已有）。凭证 3100000 的发放已注释（同上缺 wz），wz 补齐后取消注释
 scripts/event/HorntailPQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
-scripts/event/KerningPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）
+scripts/event/KerningPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）。凭证 3100001 的发放已注释（BeiDou 缺 Item.wz/Install/0310.img.xml 与 String.wz/Ins.img.xml 条目），wz 补齐后取消注释
 scripts/event/KerningTrain.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/LatanicaBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/LudiMazePQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
-scripts/event/LudiPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）
+scripts/event/LudiPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）。凭证 3100001 的发放已注释（BeiDou 缺 Item.wz/Install/0310.img.xml 与 String.wz/Ins.img.xml 条目），wz 补齐后取消注释
 scripts/event/MK_PrimeMinister.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/MK_PrimeMinister2.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
-scripts/event/MagatiaPQ_A.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）
-scripts/event/MagatiaPQ_Z.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）
-scripts/event/OrbisPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）
-scripts/event/PapulatusBattle.js	script	0	0	ported	批次7：接 G7 配额（预检 attemptBoss(name,false) + 进场 logBossAttempt 两段式，修掉 LK 预检即扣次的缺陷）+ 任务7104 门槛 + 凭证按伤害分发（3100000 wz 待任务#4）；等级上限不搬（max_level_cap 已兜住）
-scripts/event/PinkBeanBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限360min + 波次倒计时15s→5s + 阵亡容忍5→12（警告线8/4）
+scripts/event/MagatiaPQ_A.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）。凭证 3100001 的发放已注释（BeiDou 缺 Item.wz/Install/0310.img.xml 与 String.wz/Ins.img.xml 条目），wz 补齐后取消注释
+scripts/event/MagatiaPQ_Z.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）。凭证 3100001 的发放已注释（BeiDou 缺 Item.wz/Install/0310.img.xml 与 String.wz/Ins.img.xml 条目），wz 补齐后取消注释
+scripts/event/OrbisPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）。凭证 3100001 的发放已注释（BeiDou 缺 Item.wz/Install/0310.img.xml 与 String.wz/Ins.img.xml 条目），wz 补齐后取消注释
+scripts/event/PapulatusBattle.js	script	0	0	ported	批次7：接 G7 配额（预检 attemptBoss(name,false) + 进场 logBossAttempt 两段式，修掉 LK 预检即扣次的缺陷）+ 任务7104 门槛 + 凭证按伤害分发（3100000 wz 待任务#4）；等级上限不搬（max_level_cap 已兜住）。凭证 3100000 的发放已注释（同上缺 wz），wz 补齐后取消注释
+scripts/event/PinkBeanBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限360min + 波次倒计时15s→5s + 阵亡容忍5→12（警告线8/4）。凭证 3100000 的发放已注释（同上缺 wz），wz 补齐后取消注释
 scripts/event/PiratePQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
 scripts/event/RescueGaga.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
-scripts/event/ScargaBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min + 通关箱奖励清空改走掉落（V1000.1.2/1.3）；getEligibleParty+任务4576门槛与消费方 npc/9270037 一起做
-scripts/event/ShowaBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min
+scripts/event/ScargaBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min + 通关箱奖励清空改走掉落（V1000.1.2/1.3）；getEligibleParty+任务4576门槛与消费方 npc/9270037 一起做。凭证 3100000 的发放已注释（同上缺 wz），wz 补齐后取消注释
+scripts/event/ShowaBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min。凭证 3100000 的发放已注释（同上缺 wz），wz 补齐后取消注释
 scripts/event/Subway.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/TD_Battle1.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/TD_Battle2.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
@@ -846,7 +846,7 @@ scripts/event/TD_Battle3.js	script	0	0	rejected	LK 改的是 minPlayers->1 / max
 scripts/event/TD_Battle4.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/TD_Battle5.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/TreasurePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/ZakumBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限240min；人数/等级上限不搬（config 已兜住）
+scripts/event/ZakumBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限240min；人数/等级上限不搬（config 已兜住）。凭证 3100000 的发放已注释（同上缺 wz），wz 补齐后取消注释
 scripts/event/ZakumPQ.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/item/killarmush.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/item/removethorns.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
