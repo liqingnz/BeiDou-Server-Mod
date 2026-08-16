@@ -30,7 +30,9 @@ function act() {
         rm.getReactor().getMap().spawnHorntailOnGroundBelow(new java.awt.Point(71, 260));
 
         var eim = rm.getEventInstance();
-        eim.restartEventTimer(60 * 60000);
+        // Keep in sync with eventTime in event/HorntailBattle.js, otherwise summoning
+        // the boss cuts the instance from 180 minutes back down to 60.
+        eim.restartEventTimer(180 * 60000);
     }
     rm.mapMessage(6, "From the depths of his cave, here comes Horntail!");
 }

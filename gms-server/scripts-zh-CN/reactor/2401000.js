@@ -30,7 +30,9 @@ function act() {
         rm.getReactor().getMap().spawnHorntailOnGroundBelow(new java.awt.Point(71, 260));
 
         var eim = rm.getEventInstance();
-        eim.restartEventTimer(60 * 60000);
+        // 与 event/HorntailBattle.js 的 eventTime 保持一致，否则召唤本体反而把
+        // 副本时限从 180 分钟砍回 60 分钟
+        eim.restartEventTimer(180 * 60000);
     }
     rm.mapMessage(6, "洞穴深处传来震天咆哮，暗黑龙王破岩而出！")
 }

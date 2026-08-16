@@ -2070,6 +2070,61 @@ LK 的 `+0.1f` 是靠加宽迟滞带缓解，治标。
 > 迁移编号分段：批次 6 用 `V1000.0.x`，批次 7 用 `V1000.1.x`，避免抢号；
 > 批次 7 收尾（批次 6 合并后）把 lkport 迁移压缩为单文件（用户 2026-08-16 要求，仅 lkport，不动上游 `db/migration/`）。
 
+#### 第 2 项脚本组 · 全量分层（2026-08-17）
+
+对当时剩余的 207 个 `pending` 脚本做了**全量**（非抽样）分层。判据可复现：把每一对增删行里
+的字符串字面量与行注释抹掉、再抹掉空白后比较，若两侧完全相同即判为「纯译文」；
+对剩下的，再看结构差异行是否只落在 PQ 的人数/等级/时限阈值常量上。
+
+| 层 | 数量 | 处置 |
+|---|---|---|
+| 纯译文 | 44 | ❌ rejected —— 按 §4.1 的约定不搬译文 |
+| PQ 阈值调参 | 23 | ❌ rejected —— 详见下表 |
+| 怪物嘉年华等级 | 4 | ❌ rejected —— 用户 2026-08-17 决定不做 |
+| 暗黑龙王计时器 | 1 | ✅ ported —— 实为 bug，见下 |
+| 调参 + 其他混合 | 13 | 仍 pending，只取非调参部分 |
+| 真功能改动 | 122 | 仍 pending（结构差异 ≥5 行的 62 个是主体） |
+
+**PQ 阈值那 23 个不是「不搬」，是「BeiDou 已有更好实现」。** LK 把 `minPlayers` 改 1、
+`maxLevel` 由 255 改 200，都是写死；BeiDou 把这两个量做成了运营可热切的开关，
+`scripts-zh-CN/event/*.js` 里统一带这段：
+
+```js
+const GameConfig = Java.type('org.gms.config.GameConfig');
+minPlayers = GameConfig.getServerBoolean("use_enable_solo_expeditions") ? 1 : minPlayers;
+if (GameConfig.getServerBoolean("use_enable_party_level_limit_lift")) {
+    minLevel = 1, maxLevel = 999;
+}
+```
+
+（配置项见 `V1.8.3`，`V1.8.5` 把 `use_enable_party_level_limit_lift` 默认值改为 false。）
+
+其中 3 个 LK 改的是**中间值**，上述开关覆盖不到（开=1/999，关=原版），仍判 rejected
+但理由是口味而非已实现——真要这个手感应新增 GameConfig 项，而不是改脚本常量：
+
+| 脚本 | LK 改动 | BeiDou 现状 |
+|---|---|---|
+| `event/HorntailPQ.js` | minPlayers 6→**2** | 6（solo 开关只能到 1） |
+| `event/LudiMazePQ.js` | maxLevel 70→**80** | 70 |
+| `event/PiratePQ.js` | maxLevel 100→**200** | 100 |
+
+> **顺带查出的 BeiDou 自身缺口（与 LK 移植无关）**：上面那段 GameConfig 门
+> **只存在于 `scripts-zh-CN/`，英文基础层 `scripts/` 完全没有**。
+> 也就是说服务器跑 `gms.service.language=en-US` 时，`use_enable_solo_expeditions` 与
+> `use_enable_party_level_limit_lift` 两个开关**静默失效**，PQ 回落到写死的原版阈值。
+> 已记录，未修——修它属于 BeiDou 自身的双层一致性问题，不在 LK 移植范围内。
+
+**`reactor/2401000.js` 从这批里单独拎出来当 bug 修。** 它跟 PQ 限制无关，是召唤暗黑龙王
+本体时**重置**副本计时器：
+
+| | LK 基线 | LK HEAD | BeiDou 移植前 | 本次 |
+|---|---|---|---|---|
+| `event/HorntailBattle.js` `eventTime` | 120 分 | 180 分 | **180 分**（已移植） | 180 分 |
+| `reactor/2401000.js` `restartEventTimer` | 60 分 | 240 分 | **60 分** | **180 分** |
+
+移植前的状态是：进副本给 180 分钟，一召唤本体反被砍回 60 分钟——上一轮 BOSS 组移植
+留下的半截。补成 180 与副本时长一致，**不照抄 LK 的 240**（LK 自己那边 180/240 也不自洽）。
+
 #### 第 1 项 sql → Flyway ✅ 已完成（V1000.1.1–.6）
 
 4 个 sql 文件的真实构成与「drop_data 与 shopitems 调整」的原始描述出入较大，逐段判定如下：

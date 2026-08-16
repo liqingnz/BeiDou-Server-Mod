@@ -801,19 +801,19 @@ scripts/event/AreaBossTimer1.js	script	0	0	noise	改动可证明只落在字符�
 scripts/event/AreaBossTimer2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/AreaBossTimer3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/AreaBossZeno.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/event/BalrogBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/BalrogBattle_Easy.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/BalrogBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/BalrogBattle_Easy.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/Boats.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/BossRushPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/CWKPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/CafePQ_1.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/CafePQ_2.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/CafePQ_3.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/CafePQ_4.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/CafePQ_5.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/CafePQ_6.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/DelliBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/ElementalBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/CafePQ_1.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/CafePQ_2.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/CafePQ_3.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/CafePQ_4.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/CafePQ_5.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/CafePQ_6.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/DelliBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/ElementalBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/EllinPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/ElnathPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/GuildQuest.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -822,37 +822,37 @@ scripts/event/HolidayPQ_1.js	script	0	0	noise	改动可证明只落在字符串�
 scripts/event/HolidayPQ_2.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/HolidayPQ_3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/HorntailBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min + 重连按 defeatedHead 回对应阶段图（defeatedHead 机制 Cosmic 已有）
-scripts/event/HorntailPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/HorntailPQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
 scripts/event/KerningPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/KerningTrain.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/event/LatanicaBattle.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/LudiMazePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/LatanicaBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/LudiMazePQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
 scripts/event/LudiPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/MK_PrimeMinister.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/MK_PrimeMinister2.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/MK_PrimeMinister.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/MK_PrimeMinister2.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/MagatiaPQ_A.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/MagatiaPQ_Z.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/OrbisPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/PapulatusBattle.js	script	0	0	ported	批次7：接 G7 配额（预检 attemptBoss(name,false) + 进场 logBossAttempt 两段式，修掉 LK 预检即扣次的缺陷）+ 任务7104 门槛 + 凭证按伤害分发（3100000 wz 待任务#4）；等级上限不搬（max_level_cap 已兜住）
 scripts/event/PinkBeanBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限360min + 波次倒计时15s→5s + 阵亡容忍5→12（警告线8/4）
-scripts/event/PiratePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/RescueGaga.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/PiratePQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
+scripts/event/RescueGaga.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/ScargaBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min + 通关箱奖励清空改走掉落（V1000.1.2/1.3）；getEligibleParty+任务4576门槛与消费方 npc/9270037 一起做
 scripts/event/ShowaBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限180min
 scripts/event/Subway.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/TD_Battle1.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/TD_Battle2.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/TD_Battle3.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/TD_Battle4.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/event/TD_Battle5.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/TD_Battle1.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/TD_Battle2.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/TD_Battle3.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/TD_Battle4.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
+scripts/event/TD_Battle5.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/TreasurePQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/event/ZakumBattle.js	script	0	0	ported	批次7：凭证按伤害占比发放（3100000 wz 待任务#4） + 时限240min；人数/等级上限不搬（config 已兜住）
-scripts/event/ZakumPQ.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/event/ZakumPQ.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/item/killarmush.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/item/removethorns.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/map/onUserEnter/dojang_Msg.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/map/onUserEnter/explorationPoint.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1002000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1002000.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/1002002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1002003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1002004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -894,7 +894,7 @@ scripts/npc/1032003.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1032004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1032008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032008.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/1032009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1032102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -924,7 +924,7 @@ scripts/npc/1061006.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1061007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1061009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1061010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1061012.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1061012.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/1061014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1061018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1061100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -949,7 +949,7 @@ scripts/npc/1092000.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1092007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1092008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1092010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1092014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1092014.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/1092015.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1092018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1092090.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -975,8 +975,8 @@ scripts/npc/1104101.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1104102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1104103.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1104104.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1200003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/1200004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1200003.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/1200004.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/1202000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1202009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1202010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -984,7 +984,7 @@ scripts/npc/1204001.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1209000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1209002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1209003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/12101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/12101.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/1300001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1300006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1300013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -994,34 +994,34 @@ scripts/npc/2010000.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/2010001.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/2010002.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/2010003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2010005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2010005.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2010007.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2010008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2010009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2012001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012001.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2012002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2012006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2012007.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/2012008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012009.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/2012012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2012013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012013.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2012014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012015.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2012021.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012021.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2012022.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2012025.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2012025.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2013000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2020000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2020002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2020005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2020008.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2020009.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2020010.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2020011.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2020013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2020008.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/2020009.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/2020010.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/2020011.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/2020013.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2023000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2030000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2030006.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1039,7 +1039,7 @@ scripts/npc/2040016.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/2040019.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/2040020.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040021.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2040022.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040022.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2040024.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2040025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040026.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1061,10 +1061,10 @@ scripts/npc/2040044.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2040045.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040046.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040047.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2040048.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040048.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2040050.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2040052.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2041000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040052.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/2041000.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2041001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2041007.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/2041009.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
@@ -1074,10 +1074,10 @@ scripts/npc/2041023.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/2041024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2041025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2041029.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2042000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2042001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2042002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2042005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2042000.js	script	0	0	rejected	怪物嘉年华等级区间 cpqMaxLvl，BeiDou 两层都是写死的原版值、GameConfig 未覆盖。2026-08-17 决定保持原版不做；若日后要 LK 的 70/100 手感，应补 cpq_min_level/cpq_max_level 配置项
+scripts/npc/2042001.js	script	0	0	rejected	怪物嘉年华等级区间 cpqMaxLvl，BeiDou 两层都是写死的原版值、GameConfig 未覆盖。2026-08-17 决定保持原版不做；若日后要 LK 的 70/100 手感，应补 cpq_min_level/cpq_max_level 配置项
+scripts/npc/2042002.js	script	0	0	rejected	怪物嘉年华等级区间 cpqMaxLvl，BeiDou 两层都是写死的原版值、GameConfig 未覆盖。2026-08-17 决定保持原版不做；若日后要 LK 的 70/100 手感，应补 cpq_min_level/cpq_max_level 配置项
+scripts/npc/2042005.js	script	0	0	rejected	怪物嘉年华等级区间 cpqMaxLvl，BeiDou 两层都是写死的原版值、GameConfig 未覆盖。2026-08-17 决定保持原版不做；若日后要 LK 的 70/100 手感，应补 cpq_min_level/cpq_max_level 配置项
 scripts/npc/2050014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2050015.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2050016.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1096,7 +1096,7 @@ scripts/npc/2081300.js	script	0	0	pending	含代码改动；只搬逻辑不搬�
 scripts/npc/2081400.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2081500.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2082000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/2082001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2082001.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2082002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2082003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2082004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1107,7 +1107,7 @@ scripts/npc/2083002.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2083004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2083006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2090004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2090005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2090005.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2090100.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/2090101.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/2090102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1139,7 +1139,7 @@ scripts/npc/2102001.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2102002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2103000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/2103002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2110005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2110005.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2111000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2111003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2111008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1148,9 +1148,9 @@ scripts/npc/2111010.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2111013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2111014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2111015.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2111017.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2111017.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2111018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2111019.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2111019.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2111026.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2112000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2112001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1221,9 +1221,9 @@ scripts/npc/9103003.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9105004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9110002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9120003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9120010.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120010.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9120013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9120015.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120015.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9120023.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9120100.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/9120101.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
@@ -1254,16 +1254,16 @@ scripts/npc/9201017.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201018.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/9201019.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/9201022.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201023.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201023.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9201024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201025.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201026.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201027.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201039.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201043.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201044.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201045.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201047.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201044.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/9201045.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/9201047.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9201048.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201051.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201052.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1290,15 +1290,15 @@ scripts/npc/9201096.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201097.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9201099.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201101.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201101.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9201102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201106.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201113.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201123.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201124.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201125.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201126.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201127.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201123.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/9201124.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/9201125.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/9201126.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/9201127.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9201128.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201129.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201130.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1351,7 +1351,7 @@ scripts/npc/detectMap.js	script	0	0	ported	gms-server/scripts/npc/detectMap.js �
 scripts/npc/detected.js	script	0	0	ported	gms-server/scripts/npc/detected.js 与 scripts-zh-CN/npc/detected.js —— getText() 返回的 java.lang.String 在 GraalVM 下与数字松散比较不做数值转换，改 parseInt 严格比较；去掉「通过检测发1000点券」，那是一条刷点券的路子
 scripts/npc/gachapon.js	script	0	0	ported	gachapon 工作包（批次7）：菜单加十连抽，地名从与 NPC ID 强耦合的硬编码数组改为客户端宏 #m<mapid>#；扣券与背包校验移到 Java 侧逐抽进行
 scripts/npc/gachaponInfo.js	script	0	0	rejected	LK 改动是硬编码汉化 + getCnName；BeiDou 该脚本已走 GachaponService 查实时奖池，比 LK 的 Java 硬编码数组强
-scripts/npc/mapleTV.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/mapleTV.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/scroll_generator.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/waterOfLife.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/Depart_ToKerning.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1384,7 +1384,7 @@ scripts/portal/advice06.js	script	0	0	noise	改动可证明只落在字符串字
 scripts/portal/advice07.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/advice08.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/advice09.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/portal/adviceMap.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/adviceMap.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/portal/apqClosed.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/apqDoor.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/aranTutorGuide0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1513,7 +1513,7 @@ scripts/quest/20010.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/quest/20011.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/20012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/20013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/quest/20016.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/20016.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/quest/20017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/20100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/20101.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1582,7 +1582,7 @@ scripts/quest/21733.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/quest/21734.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/21735.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/21736.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/quest/21738.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/21738.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/quest/21739.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/21740.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/21741.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1629,7 +1629,7 @@ scripts/quest/2333.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/quest/2334.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/2335.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/29900.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/quest/29901.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/29901.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/quest/29902.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/29903.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/29906.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
@@ -1665,7 +1665,7 @@ scripts/quest/6030.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/quest/6031.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/6032.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/8185.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/quest/8189.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/quest/8189.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/quest/8219.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/8221.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/8223.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1697,7 +1697,7 @@ scripts/reactor/2201004.js	script	0	0	noise	改动可证明只落在字符串字
 scripts/reactor/2221000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/2221001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/2221002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/reactor/2401000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/2401000.js	script	0	0	ported	restartEventTimer 60 -> 180 分钟，与已移植的 event/HorntailBattle.js 的 eventTime=180 对齐（原状是进副本给 180 分钟、召唤本体反被砍回 60）。不照抄 LK 的 240，那与 LK 自己的 HorntailBattle 180 也不自洽
 scripts/reactor/2406000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/2408002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/2408003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
