@@ -330,7 +330,7 @@ src/net/server/channel/handlers/MakerSkillHandler.java	java	0	0	noise	仅格式�
 src/net/server/channel/handlers/MesoDropHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/MobBanishPlayerHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/MobDamageMobFriendlyHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/MobDamageMobHandler.java	java	3	2	pending	
+src/net/server/channel/handlers/MobDamageMobHandler.java	java	3	2	ported	LK 写死 buffAmplifier=2.5 抬高 calcMaxDamage 的天花板。搬为配置 mob_damage_mob_max_damage_rate（V1000.0.12，默认 1.5）。这个系数只抬「服务端愿意接受的上限」，不提高实际伤害——伤害数值来自客户端包。唯一触发路径是 Corsair.HYPNOTIZE（StatEffect.java:761 是全仓库唯一写 INERTMOB 的地方）
 src/net/server/channel/handlers/MonsterCarnivalHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/MoveDragonHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/MoveLifeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -577,7 +577,7 @@ src/server/life/MaplePlayerNPC.java	java	0	0	noise	仅格式化/空白改动（g
 src/server/life/MaplePlayerNPCFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MobAttackInfo.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MobAttackInfoFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/life/MobSkill.java	java	3	0	pending	
+src/server/life/MobSkill.java	java	3	0	already-fixed	Cosmic 已把 int switch 重构为 MobSkillType 枚举，157 早就在：MobSkillType.java:46 的 SEAL_SKILL(157) 与 MobSkill.java:253 的 case SEAL_SKILL。且比 LK 走得更远——LK 只塞状态，BeiDou 还接了消费方 Monster.java:1498（真的拦下怪物放技能）与 AbstractPlayerInteraction.java:1287
 src/server/life/MobSkillFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MonsterDropEntry.java	java	3	1	pending	
 src/server/life/MonsterGlobalDropEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -612,7 +612,7 @@ src/server/maps/MapleMist.java	java	0	0	noise	仅格式化/空白改动（git di
 src/server/maps/MaplePlayerShop.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MaplePlayerShopItem.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MaplePortal.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/maps/MapleReactor.java	java	3	1	pending	
+src/server/maps/MapleReactor.java	java	3	1	already-fixed	LK 的 isInEndState 改法 BeiDou 已有且逐字符相同，见 Reactor.java:412-415，连变量名都一样
 src/server/maps/MapleReactorFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MapleReactorStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MapleSummon.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）

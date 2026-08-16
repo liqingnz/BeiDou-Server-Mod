@@ -1079,7 +1079,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G3** | 组队蹭经验判定 | `life/MapleMonster`、`tools/IntervalBuilder` | `exp_mob_leech_interval` |
 | **G4** | **Godly 装备属性 + 装备成长等级门槛 + 堆叠上限** | `MapleItemInformationProvider`、`inventory/Equip` | `equip_stat_randomize_range`、`item_max_slot`、`elemental_weapon_use_default_lvlup` |
 | **G5** | 白医卷轴 / 制作 | `ScrollHandler`、`MakerProcessor`、`MakerItemFactory` | ✅ 已完成 |
-| **G6** | 怪物技能与怪打怪 | `life/MobSkill`（157 封技能）、`MobDamageMobHandler`、`maps/MapleReactor` | — |
+| **G6** | 怪物技能与怪打怪 | `life/MobSkill`（157 封技能）、`MobDamageMobHandler`、`maps/MapleReactor` | ✅ java 侧完成（wz 留 pending） |
 | **G7** | 远征次数配额 | `expeditions/{Expedition, ExpeditionType, ExpeditionBossLog}`、`world/PartyCharacter` | — |
 | **G8** | 反外挂 / 误封 | `autoban/{AutobanManager, AutobanFactory}`、`AbstractDealDamageHandler`、`CloseRange`/`Magic`/`Ranged`/`Summon` 四个伤害 handler | — |
 | **G9** | 技能平衡 | `MapleStatEffect`、`AranComboHandler`、`SpecialMoveHandler`、`gm2/BuffMapCommand`、`gm2/EmpowerMeCommand`、`constants/skills/Corsair`、`AssignAPProcessor` | `aran_combo_last_time`、`battleship_hp_factor` |
@@ -1547,6 +1547,119 @@ LK 新增 `getMakerRecipe` 读 `Etc.wz/ItemMake.img`，把 `MakerItemFactory` �
 | `message_{zh_CN,en_US}.properties` | +11 键 × 2 |
 
 无新增指令。`MakerItemFactory.java` 未改。
+
+#### G6 — 怪物技能 / 反应堆 ✅ 已完成（java 侧）
+
+三个 java 文件里两个是 `already-fixed`，只有一个真要动。**这组真正的东西在 wz 里，
+按决定 img.xml 类文件统一推到最后处理，本节只结 java。**
+
+##### 逐条判定
+
+| # | 项 | 判定 | 依据 |
+|---|---|---|---|
+| 1 | `MobSkill` case 157 → `SEAL_SKILL` | ⬜ already-fixed | 见下 |
+| 2 | `MapleReactor` 结束态判定 | ⬜ already-fixed | 见下 |
+| 3 | `MobDamageMobHandler` 的 `buffAmplifier` | ✅ ported（**参数化，默认 1.5**） | 见下 |
+| 4 | `MobDamageMobFriendlyHandler` | ⬜ noise | 删 javadoc 一个空 `*` 行 |
+| 5 | `MobSkillFactory` | ⬜ noise | 多加一个空行 |
+| 6 | `wz/Skill.wz/MobSkill.img.xml` | ⏸ 留 pending | 见「wz 侧的发现」，本批不动 |
+
+##### 项 1 — 157 已在，且 BeiDou 走得更远
+
+Cosmic 把 `MobSkill` 的 `int` switch 整体重构成了 `MobSkillType` 枚举：
+
+- [MobSkillType.java:46](../gms-server/src/main/java/org/gms/server/life/MobSkillType.java#L46) `SEAL_SKILL(157),`
+- [MobSkill.java:253](../gms-server/src/main/java/org/gms/server/life/MobSkill.java#L253) `case SEAL_SKILL -> stats.put(MonsterStatus.SEAL_SKILL, x);`
+
+LK 只是把状态塞进 map，BeiDou 还接了消费方——
+[Monster.java:1498](../gms-server/src/main/java/org/gms/server/life/Monster.java#L1498) 的
+`isBuffed(MonsterStatus.SEAL_SKILL)` 真的会拦下怪物放技能，
+[AbstractPlayerInteraction.java:1287](../gms-server/src/main/java/org/gms/scripting/AbstractPlayerInteraction.java#L1287)
+还开放给脚本。
+
+##### 项 2 — 逐字符相同
+
+LK 的 `byte nextState = …; boolean isInEndState = nextState < this.state;` 在
+[Reactor.java:412-415](../gms-server/src/main/java/org/gms/server/maps/Reactor.java#L412) 已有，
+连变量名都一样。上游同源，不是 LK 独有。
+
+##### 项 3 — 两边各修了一半的同一个 BUG
+
+唯一触发路径是 **`Corsair.HYPNOTIZE`**——
+[StatEffect.java:761](../gms-server/src/main/java/org/gms/server/StatEffect.java#L761)
+是全仓库唯一写 `MonsterStatus.INERTMOB` 的地方。被控制的怪打其他怪时，客户端把伤害报上来，
+服务端用 `calcMaxDamage` 估一个上限做反外挂钳位。那套估算式是 OdinMS 留下的，**估低了**。
+
+| | 误封禁 | 合法伤害被砍 | 日志刷屏 |
+|---|---|---|---|
+| BeiDou 引入本改动前 | ✅ 已止（注释掉 `AutobanFactory.DAMAGE_HACK.alert`） | ❌ 仍砍到 1.0× 天花板 | ❌ 每次命中一条 `warn` |
+| LK | ✅ 已止（天花板 ×2.5） | ✅ 大部分不再砍 | — |
+
+BeiDou 侧原有注释已经写明了怀疑的原因（`StatEffect` 里 `damage` 缺省取 100，客户端可能也算上了），
+但只处理了封禁，没处理钳位——**海盗的心灵控制伤害一直被服务端悄悄砍过**。
+
+LK 的 `2.5` 没有任何推导，是调到不报警为止的魔数，而且抬天花板有安全代价：这个钳位本身就是
+反外挂，天花板抬多少倍，改包能打的上限就抬多少倍。所以做成配置
+`mob_damage_mob_max_damage_rate`（`V1000.0.12`），**默认 1.5 取中**，配 `1.0` 恢复严格钳位。
+
+命名刻意避开 `multiplier`/`倍率`：它**不提高实际伤害**，伤害数值始终来自客户端包，
+它只抬「服务端愿意接受的上限」。叫倍率会误导运营。
+
+> 遗留未处理：那条 `log.warn` 是每次命中都打。系数调到 1.5 后大部分不再触发，
+> 但真遇到改包会刷屏。降级或限频属 BeiDou 侧清理，不是移植，另记。
+
+##### wz 侧的发现（本批不动，留给 wz 批次）
+
+`wz/Skill.wz/MobSkill.img.xml` 的 `git diff --stat` 是 `1 insertion, 14613 deletions`，
+**看着像删文件，其实是把整个 XML 压成了一行**。去掉全部空白后对比：
+
+```
+LK base     373501 字节
+BeiDou 当前 373501 字节   ← 与 LK base 完全一致
+LK head     373702 字节   ← 多出的 201 字节 = 两处真改动
+```
+
+两处都在 **skill 200（召唤）** 下面：
+
+**A｜level 88 的召唤列表 `3110302/5110301` → `9300167/9300168`。倾向否。**
+消费方是 `Mob.wz/8220002`（时钟塔怪人 Papulatus）。
+但 `9300167`/`9300168` **在两个仓库里都不存在**——逐个数过 mob id 邻域，
+LK 与 BeiDou 的 `Mob.wz` 都是 `9300160..9300166` + `9300169..9300179`，**缺口完全一样**。
+它们只在 `String.wz` 里有名字（后期版本残留的字符串表）。LK 是从新版客户端抄了数据没抄本体，
+搬过来只会让 Papulatus 召唤不存在的怪。
+
+**B｜新增 level 187（召唤 `9600026` ×3，hp 85，limit 3）。倾向搬。**
+消费方是 `Mob.wz/9600025` = **妖僧**，召唤 `9600026` = **妖僧分身**，两只 BeiDou 都有
+（`Map7/702060000` 里刷），`YaoSengPQ.js` 批次 5 查证过是活脚本。
+而 BeiDou 现在 `9600025` 指向 **level 81**——那一档召唤 `6230401` ×5、limit 20，
+一个跟妖僧毫无关系的通用档位。**妖僧现在召唤的是错的怪**，这是真内容缺陷。
+
+要生效必须连带把 `Mob.wz/9600025.img.xml` 的 `level 81 → 187` 一起改，而那个文件里
+LK 还夹着另一套平衡改动，与 BeiDou 已有的调整互相竞争：
+
+| | BeiDou 现状 | LK |
+|---|---|---|
+| `maxHP` | 80,000,000 | 100,000,000 |
+| `exp` | 24,000,000 | 16,000,000 |
+| `skill 200 level` | 81 | **187** |
+| `elemAttr` | 无 | `I3`（冰抗） |
+
+HP/exp 是两套口味不是修复，届时建议**只改 `level 81 → 187` 一处**，其余不动。
+
+##### 清单影响
+
+`MobDamageMobHandler.java` 判 `ported`，`MobSkill.java` / `MapleReactor.java` 判 `already-fixed`。
+`wz/Skill.wz/MobSkill.img.xml`、`wz/Mob.wz/9600025.img.xml`、`wz/Mob.wz/9600026.img.xml`
+**仍是 `pending`**，结论已记在上面，wz 批次直接取用。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `MobDamageMobHandler.java` | `calcMaxDamage` 的两条公式前乘 `mob_damage_mob_max_damage_rate` |
+| `V1000.0.12__insert_game_config_mob_damage_mob.sql` | 1 个键 + zh/en 两条 `lang_resources` |
+
+无新增指令、无 i18n 变动。
 
 ### 批次 7 — 数据类
 

@@ -26,6 +26,7 @@ import org.gms.client.Client;
 import org.gms.client.autoban.AutobanFactory;
 import org.gms.client.status.MonsterStatus;
 import org.gms.client.status.MonsterStatusEffect;
+import org.gms.config.GameConfig;
 import org.gms.net.AbstractPacketHandler;
 import org.gms.net.packet.InPacket;
 import org.slf4j.Logger;
@@ -109,6 +110,10 @@ public final class MobDamageMobHandler extends AbstractPacketHandler {
     private static int calcMaxDamage(Monster attacker, Monster damaged, boolean magic) {
         int attackerAtk, damagedDef, attackerLevel = attacker.getLevel();
         double maxDamage;
+        // 下面这套是 OdinMS 的估算式，算出来的上限比客户端实际打出的心灵控制伤害低，
+        // 照搬会把海盗的合法伤害钳掉。这个系数只抬「服务端愿意接受的上限」，不提高实际伤害，
+        // 伤害数值本身还是客户端报上来的。配 1.0 恢复原来的严格钳位。
+        double maxDamageRate = GameConfig.getServerDouble("mob_damage_mob_max_damage_rate");
         if (magic) {
             int atkRate = calcModifier(attacker, MonsterStatus.MAGIC_ATTACK_UP, MonsterStatus.MATK);
             attackerAtk = (attacker.getStats().getMADamage() * atkRate) / 100;
@@ -116,7 +121,7 @@ public final class MobDamageMobHandler extends AbstractPacketHandler {
             int defRate = calcModifier(damaged, MonsterStatus.MAGIC_DEFENSE_UP, MonsterStatus.MDEF);
             damagedDef = (damaged.getStats().getMDDamage() * defRate) / 100;
 
-            maxDamage = ((attackerAtk * (1.15 + (0.025 * attackerLevel))) - (0.75 * damagedDef)) * (Math.log(Math.abs(damagedDef - attackerAtk)) / Math.log(12));
+            maxDamage = maxDamageRate * ((attackerAtk * (1.15 + (0.025 * attackerLevel))) - (0.75 * damagedDef)) * (Math.log(Math.abs(damagedDef - attackerAtk)) / Math.log(12));
         } else {
             int atkRate = calcModifier(attacker, MonsterStatus.WEAPON_ATTACK_UP, MonsterStatus.WATK);
             attackerAtk = (attacker.getStats().getPADamage() * atkRate) / 100;
@@ -124,7 +129,7 @@ public final class MobDamageMobHandler extends AbstractPacketHandler {
             int defRate = calcModifier(damaged, MonsterStatus.WEAPON_DEFENSE_UP, MonsterStatus.WDEF);
             damagedDef = (damaged.getStats().getPDDamage() * defRate) / 100;
 
-            maxDamage = ((attackerAtk * (1.15 + (0.025 * attackerLevel))) - (0.75 * damagedDef)) * (Math.log(Math.abs(damagedDef - attackerAtk)) / Math.log(17));
+            maxDamage = maxDamageRate * ((attackerAtk * (1.15 + (0.025 * attackerLevel))) - (0.75 * damagedDef)) * (Math.log(Math.abs(damagedDef - attackerAtk)) / Math.log(17));
         }
 
         return (int) maxDamage;
