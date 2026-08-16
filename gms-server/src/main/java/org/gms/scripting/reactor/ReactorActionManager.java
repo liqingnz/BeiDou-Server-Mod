@@ -33,11 +33,13 @@ import org.gms.server.TimerManager;
 import org.gms.server.life.LifeFactory;
 import org.gms.server.life.Monster;
 import org.gms.server.maps.MapMonitor;
+import org.gms.server.maps.MapleMap;
 import org.gms.server.maps.Reactor;
 import org.gms.server.maps.ReactorDropEntry;
 import org.gms.server.partyquest.CarnivalFactory;
 import org.gms.server.partyquest.CarnivalFactory.MCSkill;
 import org.gms.util.NumberTool;
+import org.gms.util.PacketCreator;
 
 import javax.script.Invocable;
 import java.awt.*;
@@ -319,9 +321,13 @@ public class ReactorActionManager extends AbstractPlayerInteraction {
     }
 
     private void summonBoss(int mobId, int x, int y, String bgmName, String summonMessage) {
+        // 换曲与播报都绑反应堆所在的地图，不能走 AbstractPlayerInteraction 那两个
+        // 以玩家当前地图为准的版本——延迟这几秒里玩家可能已经离开，那样别的地图
+        // 会被切 BGM 并收到 BOSS 播报（spawnMonster 本来就是按 reactor.getMap() 刷的）
+        MapleMap map = reactor.getMap();
         spawnMonster(mobId, x, y);
-        changeMusic(bgmName);
-        mapMessage(6, summonMessage);
+        map.broadcastMessage(PacketCreator.musicChange(bgmName));
+        map.broadcastMessage(PacketCreator.serverNotice(6, summonMessage));
     }
 
     public void dispelAllMonsters(int num, int team) { //dispels all mobs, cpq

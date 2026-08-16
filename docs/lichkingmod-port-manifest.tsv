@@ -1705,8 +1705,8 @@ scripts/reactor/2619003.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上�
 scripts/reactor/2619004.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上游已有同名脚本，与 LK 版逐行同构，只差播报译文
 scripts/reactor/2619005.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上游已有同名脚本，与 LK 版逐行同构，只差播报译文
 scripts/reactor/5411000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/reactor/5511000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/reactor/5511001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/reactor/5511000.js	script	0	0	ported	LK 加 if (rm.getMapId() != 551030200) return; 修延迟召唤跑错图。BeiDou 已把这段重构进 ReactorActionManager.summonBossDelayed，症状不同：spawnMonster 走 reactor.getMap() 正确，但 changeMusic/mapMessage 走 getPlayer().getMap()，玩家在 3.2 秒内离开会把 BGM 与 BOSS 播报打到别的图。改法不照抄 LK——LK 的守卫用的是玩家的图，等于玩家一走就整个取消召唤、留守者白等。改为把三个动作统一绑 reactor.getMap()，不写死地图 ID，一次覆盖 5511000/5511001 及日后所有调用方
+scripts/reactor/5511001.js	script	0	0	ported	与 5511000 同一处 bug、同一处修复（ReactorActionManager.summonBossDelayed 把换曲与播报绑到 reactor.getMap()）。LK 侧另有一处硬编码 551030200 的守卫，同样不采
 scripts/reactor/8091000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/8091001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/8091002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
