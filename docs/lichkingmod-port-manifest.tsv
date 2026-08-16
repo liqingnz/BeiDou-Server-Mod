@@ -67,8 +67,8 @@ src/client/command/commands/gm0/LeaveEventCommand.java	java	1	1	pending
 src/client/command/commands/gm0/MapOwnerClaimCommand.java	java	22	15	pending	
 src/client/command/commands/gm0/OnlineCommand.java	java	51	3	pending	
 src/client/command/commands/gm0/RanksCommand.java	java	1	1	pending	
-src/client/command/commands/gm0/RatesCommand.java	java	1	0	pending	
-src/client/command/commands/gm0/ShowRatesCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/RatesCommand.java	java	1	0	ported	org/gms/client/command/commands/gm0/RatesCommand.java；增量只有一行——显示本图刷怪倍率与刷怪点数。原实现为此把 MapleMap.getMonsterSpawn() 从 private 改成 public，这里不改：那个方法返回的是整个列表的拷贝，只为取 size 暴露出去不划算，改为在 MapleMap 上加 getMonsterSpawnPointCount()。原实现调用处还得瞎传一个 getCurrentSpawnRate(1)，因为它保留了已经用不上的 numPlayers 参数；本次把该参数去掉了
+src/client/command/commands/gm0/ShowRatesCommand.java	java	1	1	rejected	不搬。增量只有一行 getExpRate() 改 getExpRate(player.getLevel())，其唯一目的是配合 World 上新增的三档阶梯经验重载，而那个重载已判不搬（见 src/config/WorldConfig.java 一行）。BeiDou 的等级相关经验加成挂在 Character 层而非 World 层，ShowRatesCommand 展示的世界基础倍率保持原样才对
 src/client/command/commands/gm0/StatDexCommand.java	java	1	1	pending	
 src/client/command/commands/gm0/StatIntCommand.java	java	1	1	pending	
 src/client/command/commands/gm0/StatLukCommand.java	java	1	1	pending	
@@ -146,7 +146,7 @@ src/client/creator/veteran/MagicianCreator.java	java	0	0	noise	仅格式化/空�
 src/client/creator/veteran/PirateCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/creator/veteran/ThiefCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/creator/veteran/WarriorCreator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/inventory/Equip.java	java	31	24	pending	
+src/client/inventory/Equip.java	java	31	24	ported	org/gms/client/inventory/Equip.java；两处：gainLevel 的元素装备分支加 use_elemental_weapon_gms_levelup 开关（关闭时落到既有的 improveDefaultStats 兜底，等价于原实现「像普通装备一样升级」；原键名 ELEMENTAL_WEAPON_USE_DEFAULT_LVLUP 里的 default 指 GMS 原版而非 improveDefaultStats，读起来与实际行为相反，故改名）；gainItemExp 加成长等级门槛 use_equip_growth_level_limit（reqLevel + itemLevel*5 > 玩家等级则不吃经验，满级不受限）。原实现另有两项不搬：把 while 循环注释掉改成一次只升一级——BeiDou 已有 use_equipment_level_up_continuous 做同一件事且可配；属性名与升级提示的中文硬编码——BeiDou 已走 I18nUtil（Equip.gainStats.*）
 src/client/inventory/Item.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/inventory/ItemFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/inventory/MapleInventory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -171,7 +171,7 @@ src/client/processor/stat/AssignSPProcessor.java	java	0	0	noise	仅格式化/空
 src/client/status/MonsterStatus.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/status/MonsterStatusEffect.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/config/ServerConfig.java	java	20	8	pending	
-src/config/WorldConfig.java	java	3	1	pending	
+src/config/WorldConfig.java	java	3	1	rejected	不搬。两处改动：新增 exp_rate_30/exp_rate_70 两个世界级阶梯经验字段——BeiDou 已有四套按等级调经验的机制且都更细（use_add_rates_by_level 每20级取斐波那契档并按角色经 ExtendValue 持久化；level_exp_rate 线性随等级；quick_level/quick_level_rate 低于目标等级越多加成越高，正是这两个键的意图但为连续斜坡而非两个断崖；use_enforce_novice_exp_rate 初心者11级前恒1x），再叠一层世界级三档只会与它们连乘。quest_rate 由 int 改 float——BeiDou 的 World.questRate 本就是 float。另 BeiDou 没有 WorldConfig 这个类，世界级配置走 game_config 表的 world 类型
 src/config/YamlConfig.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/game/ExpTable.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/game/GameConstants.java	java	19	3	pending	
@@ -569,7 +569,7 @@ src/server/gachapon/Sleepywood.java	java	12	21	pending
 src/server/life/ChangeableStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/Element.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MapleLifeFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/life/MapleMonster.java	java	35	31	pending	
+src/server/life/MapleMonster.java	java	35	31	ported	org/gms/server/life/Monster.java；本文件两处改动：getTakenDamage() 访问器批次5已移植（返回拷贝且拷贝动作放在 lockMonster() 内）；distributePartyExperience 的蹭经验判定 rejected —— 原实现把整套 IntervalBuilder 换成单条件「比怪低 N 级且不是击杀者」，而 BeiDou 的区间方案在每个维度都不弱：区间以每个出过伤害的队员等级为中心各加一段并自动合并，所以任何出过力的人都豁免（原实现只豁免最后一击那个人，更窄）；两个可调半径 exp_split_level_interval / exp_split_leech_interval 对单一 EXP_MOB_LEECH_INTERVAL；且原实现在基线里就把等级上界改成了 300，等于删掉反代练的那一半闸门。partyParticipation 只由 takenDamage 构建（Monster.java:617），里面只有真正打过怪的人，故「出力即豁免」成立。连带 killerId 参数不需要传进来
 src/server/life/MapleMonsterInformationProvider.java	java	4	3	pending	
 src/server/life/MapleMonsterStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MapleNPCStats.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -582,7 +582,7 @@ src/server/life/MobSkillFactory.java	java	0	0	noise	仅格式化/空白改动（
 src/server/life/MonsterDropEntry.java	java	3	1	pending	
 src/server/life/MonsterGlobalDropEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/MonsterListener.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/life/SpawnPoint.java	java	15	2	pending	
+src/server/life/SpawnPoint.java	java	15	2	ported	org/gms/server/life/SpawnPoint.java；单个刷怪点容量由写死的 1 改为 mob_spawn_point_capacity（默认 2），BOSS 点恒为 1；BOSS 重生时间 ±20% 随机化。修原实现三处：不加 private Monster mob 字段——那是有状态的实例对象，每个刷怪点常驻一份而 getMonster() 每次又 new 一只新的，存着的那只永远用不上，改为构造时取一次 final boolean boss；Math.random() 改 Randomizer.nextDouble()（前者是全局共享 Random，刷怪定时器多线程调用会争用同一个种子）；去掉 Java 9 起已废弃的 new Double(double)，乘 1000 改用该文件既有的 SECONDS.toMillis。另原实现最终态把 MOB_COUNT_MULTIPLIER 注释掉写死 2，这里取回配置形态
 src/server/life/positioner/MaplePlayerNPCPodium.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/life/positioner/MaplePlayerNPCPositioner.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/loot/MapleLootInventory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -678,7 +678,7 @@ src/tools/BCrypt.java	java	73	57	pending
 src/tools/DatabaseConnection.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/tools/FilePrinter.java	java	11	0	pending	
 src/tools/HexTool.java	java	24	10	pending	
-src/tools/IntervalBuilder.java	java	3	2	pending	
+src/tools/IntervalBuilder.java	java	3	2	rejected	不搬。唯一改动是把 private final List<Line2D> intervalLimits 的 final 去掉并留了句 // HanHuaMod 注释，无行为变化；该对象是 distributePartyExperience 每次新建的局部实例，final 该留。连带本文件的消费方判定见 src/server/life/MapleMonster.java
 src/tools/LogHelper.java	java	66	16	pending	
 src/tools/LongTool.java	java	5	11	pending	
 src/tools/MapleAESOFB.java	java	8	4	pending	
@@ -723,11 +723,11 @@ src/client/command/commands/gm2/PatrolCommand.java	java-new	118	0	ported	org/gms
 src/client/command/commands/gm2/RecallCommand.java	java-new	85	0	pending	
 src/client/command/commands/gm4/DeleteAccountCommand.java	java-new	108	0	already-fixed	org/gms/service/CharacterService.java:548 deleteAccount 已实现且严格优于 LK 版：@Transactional、逐个角色先下线再删、清 8 张账号级关联表以及 ExtendValue 的三种账号级类型；LK 版无事务，只删 hwidaccounts/quickslotkeymapped/storages/accounts 四张，照搬会留孤儿数据。入口已挂在 org/gms/controller/AccountController.java:79，不再另做游戏内 GM 指令
 src/client/command/commands/gm4/DeleteCharacterCommand.java	java-new	95	0	already-fixed	org/gms/service/CharacterService.java:524 deleteCharacterWithOnlineCheck 已实现（在线先下线再删，离线直接删）。CLAUDE.md 点名的 deleteCharacterEntry NPE 风险由同文件:535 safeDeleteCharacterEntry 兜住，LK 版没有这个兜底。入口已挂在 org/gms/controller/CharacterController.java:68，不再另做游戏内 GM 指令
-src/client/command/commands/gm4/DropProEquipCommand.java	java-new	90	0	deferred	缓，挪至批次6：与 ProEquipCommand 互为 90% 复制，唯一区别是 spawnItemDrop 而非 addFromDrop，移植时应合并成一个带 drop 开关的指令而不是两个类。依赖同为 EQUIP_STAT_RANDOMIZE_RANGE。重启条件同 ProEquipCommand
+src/client/command/commands/gm4/DropProEquipCommand.java	java-new	90	0	rejected	不建独立类。与 ProEquipCommand 逐字重复，唯一区别是 spawnItemDrop 而非 addFromDrop，已合并成 @proequip 的第三个参数 drop（见 org/gms/client/command/commands/gm4/ProEquipCommand.java）
 src/client/command/commands/gm4/GMBotCommand.java	java-new	123	9	ported	org/gms/client/command/commands/gm4/GMBotCommand.java；参数由 LK 的 0/1/2 魔法选择器（其中 1、2 硬编码成作者自己的角色id 2768/2971，且提示写 playername 实际却裸 parseInt，传名字直接抛异常）改为角色id并加解析保护；查找改用全区在线列表，不再限 GM 自己所在频道；修原实现检测到目标掉线后 cancel 完没有 return、继续对已下线角色调 getMap()；任务体按id重新取角色不再由闭包持有 Character 引用；删掉手工 owner 过滤 —— Character.pickupItem 内部已在 itemLock 下用 canBePickedBy 校验，且 LK 拿 getOwnerId() 去比 partyId 本就是错的（队伍归属在 MapItem 里是独立的 party_ownerid），锁外读该字段也不安全；魔法数字 8810010..8810018 改用 MobId.isDeadHorntailPart/HORNTAIL；登记改用 CommandManager.registerRunningCommandIfAbsent 原子占位（本指令的 key 是目标角色id 而非发起者自己，两个GM同时对同一目标发起时先查后写会双双通过，后写入的覆盖前一个，被覆盖的 future 谁也取消不到会一直跑，目标重登后还会接着清怪），抢输的一方撤掉自己的 future
 src/client/command/commands/gm4/LichDebugCommand.java	java-new	58	7	rejected	作者自用的 public static int debugVar，LK 全仓库无消费方；BeiDou 已有 gm5 DebugCommand
-src/client/command/commands/gm4/MobRateCommand.java	java-new	52	0	pending	
-src/client/command/commands/gm4/ProEquipCommand.java	java-new	89	0	deferred	缓，挪至批次6：依赖 EQUIP_STAT_RANDOMIZE_RANGE，那是 Godly 装备属性系统的配置键，提前引入会污染批次边界。另 BeiDou 已有 gm4/ProItemCommand，但语义不同 —— BeiDou 把全属性设为定值，LK 是在原属性上加值且原本为 0 的属性保持 0（保留装备特性），孰优要连同 Godly 一起取舍。重启条件：批次6 client/inventory/Equip 的 Godly 系统定案
+src/client/command/commands/gm4/MobRateCommand.java	java-new	52	0	ported	org/gms/client/command/commands/gm4/MobRateCommand.java；写 YamlConfig 静态字段改为 GameConfig.update（照 gm5/ShowMoveLifeCommand 的既有写法，只改内存不落库，重启回 game_config 表的值，持久修改走 gms-ui——比原实现好，那个静态字段后台根本看不见）。去掉原实现硬编码的下限 0.7：该值恰好等于 MOB_SPAWN_BASE_RATE 的默认值，意味着永远调不低，显然非本意，改为不得为负。第二个参数改为可选；加 NumberFormatException 保护；[Debug] 硬编码改 I18nUtil；删末尾多余的 return。指令注册见 db/lkport/V1000.0.10
+src/client/command/commands/gm4/ProEquipCommand.java	java-new	89	0	ported	org/gms/client/command/commands/gm4/ProEquipCommand.java；合并了 DropProEquipCommand（第三参 drop 切换 spawnItemDrop/addFromDrop），不建两个类。与既有 gm4 ProItemCommand 互补故两条都保留：ProItem 把全属性设为定值，本指令在原属性上加值且原本为 0 的项保持 0，保留装备特性。默认加成取 equip_stat_randomize_range。修原实现的 short 溢出：原写法 Math.max(0, x>0 ? x+statGain : 0) 只防负不防上溢，@proequip <id> 30000 会绕成负数，改为先在 int 域相加再钳到 Short.MAX_VALUE；另加 NumberFormatException 保护。指令注册见 db/lkport/V1000.0.8
 src/client/command/commands/gm4/RateEventCommand.java	java-new	88	0	rejected	不搬。BeiDou 已有 gm4 的 ExpRate/DropRate/MesoRate/QuestRate/BossDropRate 五个倍率指令，LK 版只是给它们套了「改完起个定时器改回去」；而 BeiDou 的 GameConfig 本身热重载、改 world 倍率会即时写回 World 对象，限时活动应走 GameConfig + gms-ui 后台，靠内存态定时器控制的话活动期间重启就丢状态、后台看到的还是旧值。连带结论：批次1 遗留未移植的 CommandManager.setWorldExpRate/QuestRate/DropRate 三个方法确定不补（World 也确实没有 setQuestRate）
 src/client/command/commands/gm4/SendMailCommand.java	java-new	51	0	deferred	缓：函数体只有 3 行有效代码，全部逻辑在 MailManager.sendMapleLandMailTOSingleUser，而 net/mailing/MailManager 已在批次2 deferred；它还 import 了 net/server/task/UpdateVotePointTask（批次3 deferred）。注意这是站外电子邮件，不是游戏内站内信。重启条件：邮箱验证方案定案后随 MailManager 一并
 src/client/command/commands/gm4/UpdateVoteCommand.java	java-new	49	0	deferred	缓：整个投票奖励系统暂缓。BeiDou 已有 gm0/ReadPointsCommand 与 gm3/GiveVpCommand 管点数读写，Client.votePoints/voteTime 是 HeavenMS 上游就有（LK 侧该段只被格式化提交触碰，无逻辑改动）；LK 真正新增的是三条运营策略——衰减因子 NX_DECLINE_FACTOR、进商城领取豁免衰减、未绑定邮箱投票无效，最后一条依赖已 deferred 的 net/mailing/MailManager。重启条件：确定是否接入外部投票站 + 衰减策略定案 + 邮箱验证方案定案

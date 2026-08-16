@@ -23,6 +23,7 @@ package org.gms.client.inventory;
 
 import com.alibaba.fastjson2.JSONObject;
 import lombok.Getter;
+import org.gms.client.Character;
 import org.gms.client.Client;
 import org.gms.config.GameConfig;
 import org.gms.constants.game.ExpTable;
@@ -614,7 +615,9 @@ public class Equip extends Item {
         List<Pair<StatUpgrade, Integer>> stats = new LinkedList<>(); // 初始化属性升级列表
         int equipLevel = ii.getEquipLevelReq(getItemId()); // 获取装备要求等级
 
-        if (isElemental) {// 如果是元素装备，从配置中获取元素属性升级列表
+        // use_elemental_weapon_gms_levelup 关闭时，元素装备跳过 wz 定义的小幅成长，
+        // 落到下面的 improveDefaultStats，按普通装备的方式升级
+        if (isElemental && GameConfig.getServerBoolean("use_elemental_weapon_gms_levelup")) {// 如果是元素装备，从配置中获取元素属性升级列表
             List<Pair<String, Integer>> elementalStats = ii.getItemLevelupStats(getItemId(), itemLevel);
             for (Pair<String, Integer> p : elementalStats) {
                 if (p.getRight() > 0) { // 只有增加值大于0时才添加到列表
@@ -667,6 +670,25 @@ public class Equip extends Item {
         return (int) itemExp;
     }
 
+    /**
+     * 成长门槛：装备只有在玩家已达到「下一等级的穿戴要求」时才继续吃经验，
+     * 避免长成一件自己穿不上的装备。已达本职业等级上限的玩家不受此限制——
+     * 用 getMaxClassLevel() 而不是统一的 max_level_cap，否则 120 级的骑士团
+     * 已经满级却仍被当作未满级，装备会在需求 125 级时永久停止成长。
+     */
+    private boolean isGrowthBlocked(Client c) {
+        if (!GameConfig.getServerBoolean("use_equip_growth_level_limit")) {
+            return false;
+        }
+
+        Character chr = c.getPlayer();
+        if (chr.getLevel() >= chr.getMaxClassLevel()) {
+            return false;
+        }
+
+        return ii.getEquipLevelReq(getItemId()) + itemLevel * 5 > chr.getLevel();
+    }
+
     private static double normalizedMasteryExp(int reqLevel) {
         // Conversion factor between mob exp and equip exp gain. Through many calculations, the expected for equipment levelup
         // from level 1 to 2 is killing about 100~200 mobs of the same level range, on a 1x EXP rate scenario.
@@ -699,6 +721,10 @@ public class Equip extends Item {
             return;
         }
 
+        if (isGrowthBlocked(c)) {
+            return;
+        }
+
         int reqLevel = ii.getEquipLevelReq(this.getItemId());// 获取装备的需求等级
 
         // 计算经验值修正因子
@@ -724,6 +750,13 @@ public class Equip extends Item {
 
                 if (itemLevel >= equipMaxLevel || !GameConfig.getServerBoolean("use_equipment_level_up_continuous")) {// 如果达到最大等级或者不允许连续升级，重置经验值并退出循环
                     itemExp = 0.0f;
+                    break;
+                }
+
+                // 每升一级都要重新判门槛：只在进入方法时查一次的话，连续升级会一口气跨过多个
+                // 穿戴要求，把装备养成玩家自己穿不上的东西。这里保留未消费的经验，
+                // 等玩家等级够了再接着升
+                if (isGrowthBlocked(c)) {
                     break;
                 }
 

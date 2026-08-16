@@ -108,6 +108,8 @@ public class MapleMap {
     private static final Logger log = LoggerFactory.getLogger(MapleMap.class);
     private static final List<MapObjectType> rangedMapobjectTypes = Arrays.asList(MapObjectType.SHOP, MapObjectType.ITEM, MapObjectType.NPC, MapObjectType.MONSTER, MapObjectType.DOOR, MapObjectType.SUMMON, MapObjectType.REACTOR);
     private static final Map<Integer, Pair<Integer, Integer>> dropBoundsCache = new HashMap<>(100);
+    /** 计入刷怪倍率的玩家，等级不得低于本图最高等级玩家这么多级 */
+    private static final int EFFECTIVE_PLAYER_LEVEL_GAP = 30;
 
     private final Map<Integer, MapObject> mapobjects = new LinkedHashMap<>();
     private final Set<Integer> selfDestructives = new LinkedHashSet<>();
@@ -134,7 +136,8 @@ public class MapleMap {
     private final int channel;
     private final int world;
     private int seats;
-    private byte monsterRate;
+    /** Map.wz 的 info/mobRate，本图刷怪密度系数。保留 wz 原值，取整会把 0.4~1.0 全压成 1、1.1~2.0 全压成 2 */
+    private final float monsterRate;
     private boolean clock;
     private boolean boat;
     private boolean docked = false;
@@ -199,10 +202,8 @@ public class MapleMap {
         this.channel = channel;
         this.world = world;
         this.returnMapId = returnMapId;
-        this.monsterRate = (byte) Math.ceil(monsterRate);
-        if (this.monsterRate == 0) {
-            this.monsterRate = 1;
-        }
+        // wz 没给出有意义的值时按 1 倍处理，与本字段被启用之前的表现一致
+        this.monsterRate = monsterRate > 0 ? monsterRate : 1.0f;
 
         final ReadWriteLock chrLock = new ReentrantReadWriteLock(true);
         chrRLock = chrLock.readLock();
@@ -1972,7 +1973,10 @@ public class MapleMap {
     public void spawnAllMonsterIdFromMapSpawnList(int id, int difficulty, boolean isPq) {
         for (SpawnPoint sp : getAllMonsterSpawn()) {
             if (sp.getMonsterId() == id && sp.shouldForceSpawn()) {
-                spawnMonster(sp.getMonster(), difficulty, isPq);
+                Monster mob = sp.getMonster();
+                if (mob != null) {
+                    spawnMonster(mob, difficulty, isPq);
+                }
             }
         }
     }
@@ -1983,7 +1987,10 @@ public class MapleMap {
 
     public void spawnAllMonstersFromMapSpawnList(int difficulty, boolean isPq) {
         for (SpawnPoint sp : getAllMonsterSpawn()) {
-            spawnMonster(sp.getMonster(), difficulty, isPq);
+            Monster mob = sp.getMonster();
+            if (mob != null) {
+                spawnMonster(mob, difficulty, isPq);
+            }
         }
     }
 
@@ -3230,7 +3237,10 @@ public class MapleMap {
         SpawnPoint sp = new SpawnPoint(monster, newpos, !monster.isMobile(), mobTime, mobInterval, team);
         monsterSpawn.add(sp);
         if (sp.shouldSpawn() || mobTime == -1) {// -1 does not respawn and should not either but force ONE spawn
-            spawnMonster(sp.getMonster());
+            Monster mob = sp.getMonster();
+            if (mob != null) {
+                spawnMonster(mob);
+            }
         }
     }
 
@@ -3648,7 +3658,10 @@ public class MapleMap {
     public void instanceMapFirstSpawn(int difficulty, boolean isPq) {
         for (SpawnPoint spawnPoint : getAllMonsterSpawn()) {
             if (spawnPoint.getMobTime() == -1) {   //just those allowed to be spawned only once
-                spawnMonster(spawnPoint.getMonster());
+                Monster mob = spawnPoint.getMonster();
+                if (mob != null) {
+                    spawnMonster(mob);
+                }
             }
         }
     }
@@ -3665,7 +3678,11 @@ public class MapleMap {
             int spawned = 0;
             for (SpawnPoint spawnPoint : randomSpawn) {
                 if (spawnPoint.shouldSpawn()) {
-                    spawnMonster(spawnPoint.getMonster());
+                    Monster mob = spawnPoint.getMonster();
+                    if (mob == null) {  // 与另一个刷怪线程抢名额抢输了，跳过
+                        continue;
+                    }
+                    spawnMonster(mob);
                     spawned++;
                     if (spawned >= numShouldSpawn) {
                         break;
@@ -3687,7 +3704,11 @@ public class MapleMap {
             int spawned = 0;
             for (SpawnPoint spawnPoint : randomSpawn) {
                 if (spawnPoint.shouldForceSpawn()) {
-                    spawnMonster(spawnPoint.getMonster());
+                    Monster mob = spawnPoint.getMonster();
+                    if (mob == null) {  // 与另一个刷怪线程抢名额抢输了，跳过
+                        continue;
+                    }
+                    spawnMonster(mob);
                     spawned++;
                     if (spawned >= numShouldSpawn) {
                         break;
@@ -3738,11 +3759,50 @@ public class MapleMap {
         return closest;
     }
 
-    private static double getCurrentSpawnRate(int numPlayers) {
-        return 0.70 + (0.05 * Math.min(6, numPlayers));
+    /**
+     * 本图当前的刷怪倍率 = 基础倍率 + 计入人数 × 每人增量。
+     * 「有效玩家」指等级不低于本图最高等级玩家 30 级的人，挂机小号不参与拉高刷怪率；
+     * 计入人数再按 mob_spawnrate_max_players 封顶，避免人多的图刷怪率无上限增长。
+     */
+    public double getCurrentSpawnRate() {
+        // 取一次快照供两轮遍历共用：characters 由 chrLock 保护，直接迭代会撞上进出地图的写操作
+        List<Character> players = getAllPlayers();
+
+        int maxLevel = 0;
+        for (Character chr : players) {
+            maxLevel = Math.max(maxLevel, chr.getLevel());
+        }
+
+        int effectivePlayers = 0;
+        for (Character chr : players) {
+            if (chr.getLevel() >= maxLevel - EFFECTIVE_PLAYER_LEVEL_GAP) {
+                effectivePlayers++;
+            }
+        }
+
+        int maxPlayers = GameConfig.getServerInt("mob_spawnrate_max_players");
+        if (maxPlayers > 0) {
+            effectivePlayers = Math.min(effectivePlayers, maxPlayers);
+        }
+
+        return GameConfig.getServerFloat("mob_spawn_base_rate")
+                + effectivePlayers * GameConfig.getServerFloat("mob_spawnrate_to_player_count");
     }
 
-    private int getNumShouldSpawn(int numPlayers) {
+    /**
+     * 本图 wz 数据里的刷怪密度系数（Map.wz 的 info/mobRate）。关闭开关时恒为 1，即忽略 wz 的地图差异。
+     */
+    private float getWzMonsterRate() {
+        return GameConfig.getServerBoolean("use_wz_map_mob_rate") ? monsterRate : 1.0f;
+    }
+
+    public int getMonsterSpawnPointCount() {
+        synchronized (monsterSpawn) {
+            return monsterSpawn.size();
+        }
+    }
+
+    private int getNumShouldSpawn() {
         /*
         System.out.println("----------------------------------");
         for (SpawnPoint spawnPoint : getMonsterSpawn()) {
@@ -3756,7 +3816,7 @@ public class MapleMap {
             return (monsterSpawn.size() - spawnedMonstersOnMap.get());
         }
 
-        int maxNumShouldSpawn = (int) Math.ceil(getCurrentSpawnRate(numPlayers) * monsterSpawn.size());
+        int maxNumShouldSpawn = (int) Math.ceil(getCurrentSpawnRate() * getWzMonsterRate() * monsterSpawn.size());
         return maxNumShouldSpawn - spawnedMonstersOnMap.get();
     }
 
@@ -3777,14 +3837,18 @@ public class MapleMap {
             chrRLock.unlock();
         }
 
-        int numShouldSpawn = getNumShouldSpawn(numPlayers);
+        int numShouldSpawn = getNumShouldSpawn();
         if (numShouldSpawn > 0) {
             List<SpawnPoint> randomSpawn = new ArrayList<>(getMonsterSpawn());
             Collections.shuffle(randomSpawn);
             short spawned = 0;
             for (SpawnPoint spawnPoint : randomSpawn) {
                 if (spawnPoint.shouldSpawn()) {
-                    spawnMonster(spawnPoint.getMonster());
+                    Monster mob = spawnPoint.getMonster();
+                    if (mob == null) {  // 与另一个刷怪线程抢名额抢输了，跳过
+                        continue;
+                    }
+                    spawnMonster(mob);
                     spawned++;
 
                     if (spawned >= numShouldSpawn) {

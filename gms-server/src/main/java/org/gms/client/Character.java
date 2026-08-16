@@ -4639,7 +4639,10 @@ public class Character extends AbstractCharacterObject {
         int quickLv = GameConfig.getWorldInt(getWorld(), "quick_level");
         if (level >= quickLv) return 1;
 
-        return 1f + (quickLv - level) * GameConfig.getWorldFloat(getWorld(), "quick_level_exp_rate");
+        // 键名以 game_config 表里实际存在的为准：world_prop 迁到 game_config 时列名
+        // quick_level_exp_rate 被写成了 quick_level_rate，这里读旧名会恒得 0（缺键返回 0F），
+        // 使加成恒为 1 倍、整个冲刺等级功能静默失效
+        return 1f + (quickLv - level) * GameConfig.getWorldFloat(getWorld(), "quick_level_rate");
     }
 
     public void updateMobExpRate() {

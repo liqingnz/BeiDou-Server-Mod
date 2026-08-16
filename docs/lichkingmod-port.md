@@ -497,8 +497,10 @@ key 跟着各批次的代码一起进。命名沿用现有约定：`<类名>.mes
 - 脚本中心 NPC 是 `NpcId.BEI_DOU_NPC_BASE`（9900001），不是 LK 的 9010000
 - `CommandManager` 的 `setWorldExpRate/QuestRate/DropRate` 三个静态方法**没有移植**——
   只被批次 4 的 `RateEventCommand` 用，且 `World` 只有 `setExpRate`/`setDropRate`，
-  **没有 `setQuestRate`**（`questRate` 是无 setter 的私有字段）。等做 `RateEventCommand`
+  ~~**没有 `setQuestRate`**（`questRate` 是无 setter 的私有字段）~~。等做 `RateEventCommand`
   时再决定是给 `World` 加 setter 还是走 `GameConfig`
+  > **划掉部分已被批次 6 G2 更正：`World` 有 `setQuestRate`**，Lombok `@Setter` 生成的。
+  > 结论（不补那三个方法）不变，但正确依据是批次 4 那条：唯一消费方 `RateEventCommand` 已 `rejected`。
 
 #### 已知未验证
 
@@ -722,7 +724,8 @@ BeiDou 要改接现有调度方式。
 
 `RateEvent` 被否决连带敲定了批次 1 的一个遗留：`CommandManager` 那三个
 `setWorldExpRate/QuestRate/DropRate` **确定不补**，它们唯一的消费方就是这个指令。
-（`World` 确实没有 `setQuestRate`，那个缺口也就不用补了。）
+（~~`World` 确实没有 `setQuestRate`，那个缺口也就不用补了。~~ **这句是错的，批次 6 G2 查明
+`World` 有 `setQuestRate`**；不补的理由只有「唯一消费方已 rejected」这一条。）
 
 #### 移植时修掉的 LK 问题
 
@@ -1037,33 +1040,389 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 
 ### 批次 6 — 游戏性 triage（唯一无法机械化的部分）
 
-逐条对比 BeiDou 现状后择优移植：
+> **本节的范围表已按清单重算。** 原先那张表是按「原始 diff 的文件数」写的，
+> 与真实改动数差得很远（`constants/skills/*` 写 52 个文件，实际 **51 个是 noise**，
+> 只有 `Corsair.java` 有 +1/-1；`server/quest/*` 写 37 个，实际 **33 个是 noise**）。
+> 现在的分母一律取清单里 `area ∈ {java, java-new} 且 disposition = pending` 的行。
 
-| 文件 | 改动量 | 内容 |
+#### 真实分母
+
+批次 6 动手时，Java 侧的 pending 是 **168 行**（160 `java` + 8 `java-new`）。
+但这 168 行**不都属于批次 6** —— 它们是「Java 侧还没判过的全部」，里面混着别的批次的尾巴
+和一大票汉化/编码噪音。按内容分完之后：
+
+| 归属 | 行数 | 说明 |
 |---|---|---|
-| `client/Character` | +225/-158 | 装备成长、经验分配、投票点、多个功能钩子（**需拆散到各批次**） |
-| `server/ItemInformationProvider` | +129/-13 | 装备成长/等级限制、发型脸型 ID 段扩大、`ITEM_MAX_SLOT` |
-| `server/maps/MapleMap` | +74/-39 | 怪物刷新倍率随地图人数变化 |
-| `client/autoban/AutobanManager` | +67/-2 | 误封修复 |
-| `server/expeditions/Expedition` | +53/-33 | 远征次数/重连限制（2 分钟重连、10 分钟 CD） |
-| `util/PacketCreator` | +58/-29 | |
-| `server/life/Monster` | +31/-18 | BOSS 元素属性 |
-| `constants/skills/*` | 52 文件 | 技能平衡 |
-| `client/inventory/Equip` | | Godly 系统（每项属性 5% 概率 +1~5） |
-| `server/quest/*` | 37 文件 | 任务倍率/奖励 |
-| `net/.../AbstractDealDamageHandler` | | 伤害计算 |
+| **批次 6 本批**（G0–G16） | **49** | 见下面的分组表 |
+| 批次 7（掉落 / 扭蛋 / 地图数据） | 22 | `MonsterDropEntry` 的 `distinctive` 列、`MonsterInformationProvider`、`@whodrops`/`@whatdropsfrom`、15 个 `server/gachapon/*`、`MapleMapFactory` |
+| 批次 8（皇家） | 5 | `RoyalCommand` / `RedeemCommand` / `RoyalAccount` / `CashOperationHandler` / `CashShop` |
+| 批次 2、3 的 deferred 尾巴 | 3 | `MapleClient`（角色删除重构）、`AbstractPlayerInteraction`（皇家+邮箱两组方法）、`EnterCashShopHandler`（进商城领投票券） |
+| 审计日志（独立项，非本批） | 6 | `LogHelper` / `FilePrinter` / `PlayerInteractionHandler` / `InventoryManipulator` / `GeneralChatHandler` / `PetChatHandler` |
+| 封禁重构 | 2 | `BanCommand` / `AdminCommandHandler`（连带 `Character.ban(String→int)`） |
+| **GBK/编码补丁 → 终局 rejected** | 17 | §8 风险清单里点名的那批：`BCrypt`、`GenericLittleEndianWriter`、`HexTool`、`StringUtil`、`MapleAESOFB`、`MapleLogger`、`data/{input,output}/*`、`PacketCreator` 的 `writeMapleChartFromCNString` 全套 |
+| **硬编码中文汉化 → rejected / already-fixed** | 41 | 把英文串直接换成中文字面量，违反 CLAUDE.md 规则 2；BeiDou 走 i18n 资源 |
+| **指令参数由「角色名」改成「角色 id」→ rejected** | 15 | LK 作者自用习惯（`@dc`/`@jail`/`@summon`/`@givenx` 等 15 个），玩家侧是功能倒退 |
+| 其余零碎 | 8 | `CommandsExecutor`（BeiDou 走 `command_info` 表，rejected）、`MapleServerHandler`、`RankingLoginTask`、`EnterMTSHandler`、`ItemConstants`、`MapleShop`、两个空异常类 |
+| **合计** | **168** | |
 
-> **最大风险点。** Cosmic 相对 2022 HeavenMS 修了很多 bug，LK 那些「修复 XX 的 BUG」
-> 有相当比例 BeiDou 已经修过甚至修得更好。**每条都要先读 BeiDou 当前实现再决定，
-> 不可无脑覆盖，否则造成功能回退。**
+> 中间三类（GBK 17 + 汉化 41 + 改 id 15 = **73 行**）不需要写一行代码，
+> 只需要在清单里填 `rejected` / `already-fixed` + 依据。
+> 它们占了 168 里的 43%，是「pending 数字大 ≠ 工作量大」最典型的一段。
 
-批次 4 挪进来的两项（都依赖 Godly 系统的 `EQUIP_STAT_RANDOMIZE_RANGE`，
-跟着 `client/inventory/Equip` 一起决策）：
+#### 批次 6 本批的分组（49 行 + 2 行 deferred 复核）
+
+| 组 | 主题 | 文件 | 配置键 |
+|---|---|---|---|
+| **G0** | 配置字段清点 | `config/ServerConfig` | 附录 B 全表的对照基准 |
+| **G1** | 刷怪倍率随地图人数变化 | `maps/MapleMap`、`life/SpawnPoint`、`gm4/MobRateCommand`（批次 1 挪来）、`gm0/RatesCommand` | `mob_spawn_base_rate`、`mob_spawnrate_to_player_count`、`mob_count_multiplier` |
+| **G2** | 阶梯经验 + 倍率 float 化 | `world/World`、`net/server/Server`、`config/WorldConfig`、`gm0/ShowRatesCommand` | `exp_rate_30`、`exp_rate_70`（world 级） |
+| **G3** | 组队蹭经验判定 | `life/MapleMonster`、`tools/IntervalBuilder` | `exp_mob_leech_interval` |
+| **G4** | **Godly 装备属性 + 装备成长等级门槛 + 堆叠上限** | `MapleItemInformationProvider`、`inventory/Equip` | `equip_stat_randomize_range`、`item_max_slot`、`elemental_weapon_use_default_lvlup` |
+| **G5** | 白医卷轴 / 制作 | `ScrollHandler`、`MakerProcessor`、`MakerItemFactory` | — |
+| **G6** | 怪物技能与怪打怪 | `life/MobSkill`（157 封技能）、`MobDamageMobHandler`、`maps/MapleReactor` | — |
+| **G7** | 远征次数配额 | `expeditions/{Expedition, ExpeditionType, ExpeditionBossLog}`、`world/PartyCharacter` | — |
+| **G8** | 反外挂 / 误封 | `autoban/{AutobanManager, AutobanFactory}`、`AbstractDealDamageHandler`、`CloseRange`/`Magic`/`Ranged`/`Summon` 四个伤害 handler | — |
+| **G9** | 技能平衡 | `MapleStatEffect`、`AranComboHandler`、`SpecialMoveHandler`、`gm2/BuffMapCommand`、`gm2/EmpowerMeCommand`、`constants/skills/Corsair`、`AssignAPProcessor` | `aran_combo_last_time`、`battleship_hp_factor` |
+| **G10** | 等级上限 | `constants/game/GameConstants` | `max_level_cap`、`cygnus_max_level_cap` |
+| **G11** | 自动喂药重复消耗 | `PetAutoPotHandler`、`PetAutopotProcessor` | — |
+| **G12** | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
+| **G13** | 雇佣商店存续天数 | `maps/HiredMerchant` | `merchant_expire_time` |
+| **G14** | `@analysis` BOSS 伤害占比 | `gm0/BossDmgAnalysisCommand`（批次 1 挪来） | — |
+| **G15** | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`quest/requirements/MinLevelRequirement`、`UseItemHandler` | — |
+| **G16** | `client/Character`（钩子汇聚点，**按组拆散**） | `client/MapleCharacter` 一个文件同时属于 G2/G3/G7/G9/G10/G11 | — |
+
+批次 4 挪进来的两项仍是 `deferred`，跟 **G4** 一起决策（收工时必须把这两行改掉，
+`deferred` 不算处理完）：
 
 | LK | 说明 |
 |---|---|
-| `gm4/ProEquipCommand` | BeiDou 已有 gm4 `ProItemCommand`，但语义不同：BeiDou 把全属性**设为**定值，LK 是在原属性上**加**值且原本为 0 的属性保持 0（保留装备特性）。要连同 Godly 一起取舍 |
-| `gm4/DropProEquipCommand` | 与上一个互为 90% 复制，唯一区别是 `spawnItemDrop` 而非 `addFromDrop`。**移植时合并成一个带 drop 开关的指令**，不要两个类 |
+| `gm4/ProEquipCommand` | BeiDou 已有 gm4 `ProItemCommand`，但语义不同：BeiDou 把全属性**设为**定值，LK 是在原属性上**加**值且原本为 0 的属性保持 0（保留装备特性） |
+| `gm4/DropProEquipCommand` | 与上一个互为 90% 复制，唯一区别是 `spawnItemDrop` 而非 `addFromDrop`。**合并成一个带 drop 开关的指令**，不要两个类 |
+
+#### 盘点阶段就查实的几条（动手前）
+
+| # | 事 | 结论 |
+|---|---|---|
+| 1 | **Godly 系统不在 `Equip.java`**，计划书原先归错了文件 | 实际在 `ItemInformationProvider.getRandStat()` 的两个重载里（`Randomizer.nextDouble() < 0.05` 分五档 +1~5），`randomizeStats` 是唯一调用方。`Equip.java` 的真改动是**装备成长等级门槛**（`reqLevel + itemLevel*5 > 玩家等级` 就不给经验）和**一次只升一级**（LK 把 `while` 循环注释掉了） |
+| 2 | **`Corsair.SPEED_INFUSION` → `HEROS_WILL` 的重命名 BeiDou 已经做过** | `constants/skills/Corsair.java:41` 已是 `HEROS_WILL`，`already-fixed` |
+| 3 | **但 Cosmic 的重命名只改了一半，留下一个真 BUG** | [StatEffect.java:1750](../gms-server/src/main/java/org/gms/server/StatEffect.java#L1750) 的 `isInfusion()` 里仍然列着 `Corsair.HEROS_WILL`，而 [:1707](../gms-server/src/main/java/org/gms/server/StatEffect.java#L1707) 的 `isHerosWill()` 开关里**没有** Corsair。结果：船长放英雄的意志会被当成加速灌注，且**不解除异常状态**。LK 的两行改动正好修的是这个 —— 归 **G9**，是本批少数「LK 比 BeiDou 对」的地方 |
+| 4 | **发型/脸型 ID 段扩大，BeiDou 早就有了** | `ItemConstants.isFace/isHair` 已按 `itemId/10000 ∈ {2,5}` / `{3,4,6}` 判定，等价于 LK 的 `20000–30000 ∪ 50000–60000` 与 `30000–50000 ∪ 60000–70000`，且 `ItemInformationProvider` 已改调这两个方法。**§7 批次 8 里列的三条前置只剩 Cape 一条**（`1102000..1103000` → `1104000`） |
+| 5 | `World` 的 `expRate`/`questRate` **BeiDou 已是 `float`** | LK 的 int→float 那半边是 `already-fixed`；G2 真正的增量只有 `getExpRate(int level)` 这个阶梯重载 |
+| 6 | `Character.lastAttack`（`volatile`）与 `Monster.getTakenDamage()` **批次 5 已经加好** | G14 的 `@analysis` 前置齐了，可直接写 |
+| 7 | `ExpeditionType` 缺 `KREXEL` / `YAOSENG`，`ExpeditionBossLog` 缺 `BALROG_NORMAL` / `KREXEL` / `YAOSENG` / `SHOWA` 四个条目 | 批次 5 已记，G7 补齐；克雷塞尔仍卡在缺失的两张 wz 地图 |
+| 8 | `mob_count_multiplier` / `max_level_cap` / `item_max_slot` 在 BeiDou 的 `game_config` 里**都不存在** | 附录 B 里只有 `equip_exp_rate` 是已有的，`exp_split_level_interval` / `exp_split_leech_interval` 是 BeiDou 侧的同类键（G3 要决定是复用还是新增 `exp_mob_leech_interval`） |
+| 9 | `CommandsExecutor` 的 +220/-187 **全是 `addCommand(...)` 注册表** | BeiDou 走 `command_info` 表 + 反射（批次 1 关键发现），整份 `rejected` |
+| 10 | LK 的 `MapleMap.getNumShouldSpawn` 里有一段**硬编码地图段 ×2 刷怪** | `220060000..220070400`（玩具城）、`270010100..270030500`（时间神殿）、`702070100..702070400`（藏经阁）。属运营调参而非机制，移植时要么落成配置要么不搬，别把魔法数字抄进来 |
+
+> **最大风险点。** Cosmic 相对 2022 HeavenMS 修了很多 bug，LK 那些「修复 XX 的 BUG」
+> 有相当比例 BeiDou 已经修过甚至修得更好。**每条都要先读 BeiDou 当前实现再决定，
+> 不可无脑覆盖，否则造成功能回退。** 上面第 2、4、5 条就是这么查出来的。
+
+#### G4 — Godly + 装备成长 ✅ 已完成
+
+原定 7 个子项，逐条查 BeiDou 现状后 **3 个 already-fixed，4 个写了代码**。
+
+| 子项 | 处置 | 依据 |
+|---|---|---|
+| Godly 属性（每档 1% 概率 +1~N） | ✅ `equip_godly_max_bonus`（默认 5） | 见下 |
+| `randomizeStats` 浮动范围参数化 | ✅ `equip_stat_randomize_range`（默认 5） | 默认值与原硬编码逐位相同，参数化零行为变更 |
+| 成长装备等级门槛 | ✅ `use_equip_growth_level_limit`（默认 true） | `Equip.gainItemExp` + `ItemInformationProvider.canWearEquipment` 两处 |
+| 元素武器升级方式 | ✅ `use_elemental_weapon_gms_levelup`（默认 true） | 1 行 |
+| `@proequip` / `@dropproequip` | ✅ 合并成一条带 `drop` 开关的指令 | 批次 4 挪来的两个 `deferred` 就此结清 |
+| **`ITEM_MAX_SLOT`** | ❌ **already-fixed，BeiDou 更完整** | 见下 |
+| **「一次只升一级」** | ❌ **already-fixed** | [Equip.java:725](../gms-server/src/main/java/org/gms/client/inventory/Equip.java#L725) 的 `use_equipment_level_up_continuous` 是同一件事且可配；LK 是硬编码 |
+
+**`ITEM_MAX_SLOT` 为什么判 already-fixed。** LK 只替换了 `smEntry == null` 兜底分支里的
+魔法数字 `100`，而绝大多数消耗品在 wz 里**都有** `slotMax`，压根走不到那条分支 ——
+这个旋钮在 LK 那边基本是失效的。BeiDou 的
+[`item_slot_max`](../gms-server/src/main/java/org/gms/server/ItemInformationProvider.java#L369)
+（`V1.7.0`，默认 `0` = 取 wz 值）两条分支都覆盖，还多一层 `canChangeSlotMax()` 只放开 USE/ETC 不动 CASH。
+**附录 B 的 `ITEM_MAX_SLOT` 一行作废。**
+
+##### Godly 的真实作用面（LK 没算过）
+
+它改的是 `getRandStat` / `getRandUpgradedStat` 两个**共用**的私有方法，所以牵连范围比
+「装备掉落」大得多：
+
+| 入口 | 调用点 |
+|---|---|
+| 怪物掉落 / 任务掉落 / `spawnItemDropList` | `MapleMap:694`、`:722`、`:2246` |
+| 反应堆掉落 | `ReactorActionManager:183`、`:215` |
+| 脚本 `gainItem(..., randomStats=true)` | `AbstractPlayerInteraction:695` |
+| **专业技能制作（Maker）** | `MakerProcessor:447` → `randomizeUpgradeStats` |
+
+Maker 这条是单独确认过要跟的 —— Maker 本身就是「花材料赌属性」，加档位符合定位。
+
+##### 移植时修掉 / 改掉的
+
+| 文件 | 问题 | 处理 |
+|---|---|---|
+| `getRandStat` / `getRandUpgradedStat` | 同一段 20 行 if-else **逐字复制了两遍**，档位数写死 5 无法调 | 抽成一个 `godlyBonus()`，档位数由配置给，`0` = 关闭 |
+| `canEquip` | 等级上限写死 `chr.getLevel() < 200`，而 LK 自己在 `Equip.gainItemExp` 里用的是 `MAX_LEVEL_CAP` —— **同一套规则两个口径** | 两处统一用 `max_level_cap` |
+| `canEquip` | 拒绝时直接 `return false`，没有 `equip.wear(false)` | 补上。BeiDou 该方法所有其它失败分支都会先 `wear(false)`，漏了会让客户端显示态与服务端不一致 |
+| `canEquip` | 另加 `chr.gmLevel() < 8` 作 GM 豁免 | 不搬。BeiDou 该方法开头 [:1861](../gms-server/src/main/java/org/gms/server/ItemInformationProvider.java#L1861) 已对 `Job.SUPERGM/GM` 直接放行，再加一层 gmLevel 就是两套 GM 口径 |
+| `ProEquipCommand` | `Math.max(0, x > 0 ? x + statGain : 0)` **只防负不防上溢**，`@proequip <id> 30000` 会把 `short` 绕成负数 | 先在 `int` 域相加再钳到 `Short.MAX_VALUE` |
+| `ProEquipCommand` | 裸 `Integer.parseInt` / `Short.parseShort` | 加 `NumberFormatException` 保护 |
+| `DropProEquipCommand` | 与上一个 90% 逐字复制 | 不建类，合并成第三个参数 `drop` |
+| 全部 | 中文硬编码 | `I18nUtil` + zh/en 两份（`ProEquipCommand.message1..4`、`ItemInformationProvider.message1`） |
+
+##### 因 BeiDou 差异做的调整
+
+- **`equip_stat_randomize_range` 的作用面比看上去小，已写进配置描述**：浮动区间是
+  `min(ceil(属性值 * 0.1), 本配置)`，所以只有属性值 **> 50** 时本配置才可能成为约束，
+  调它对低等级装备完全无效。LK 没说这件事。
+- **`randomizeStats` 里把配置取值提到方法开头取一次**。`GameConfig` 支持热重载，
+  逐项取 14 次可能读到不一致的中间态，同一件装备的 14 项应该用同一个范围。
+- **`ELEMENTAL_WEAPON_USE_DEFAULT_LVLUP` 改名 `use_elemental_weapon_gms_levelup`**。
+  原键名里的 "default" 指的是 **GMS 原版**（读 wz 的 0~2 点小幅成长），不是
+  `improveDefaultStats`；名字读起来和实际行为正好相反。
+- **两个成长门槛公式差一级是有意的，照搬**：`itemLevel = L` 的装备穿戴要求
+  `reqLevel + (L-1)*5`，而它升到 `L+1` 需要玩家已达 `reqLevel + L*5` ——
+  正好是 L+1 级的穿戴要求。即「只有已经穿得上下一级，装备才会长到下一级」。
+- **`@proequip` 不打 `UNTRADEABLE` 也不 `setOwner`**（与原实现一致）。
+  既有的 `@proitem` 两样都做，两条指令定位不同，都保留。
+
+##### 已知未验证
+
+只做了 `mvn -q -pl gms-server clean compile`，**没有运行验证**。`V1000.0.7` 的 5 个
+`game_config` 键与 `V1000.0.8` 的 `command_info` 插入是否生效需启动服务端跑 Flyway，
+情况同批次 1、4、5。Godly 的实际掉落分布、成长门槛在登录时对已穿装备的判定、
+`@proequip` 的 drop 分支都没有实跑确认。
+
+#### G1 — 刷怪倍率 ✅ 已完成
+
+| 子项 | 处置 |
+|---|---|
+| `getCurrentSpawnRate` 按有效玩家数计 | ✅ `mob_spawn_base_rate` + `mob_spawnrate_to_player_count` |
+| 单刷怪点容量 1 → 2 | ✅ `mob_spawn_point_capacity`（默认 2），BOSS 点恒为 1 |
+| BOSS 重生时间 ±20% 随机 | ✅ |
+| `@mobrate` | ✅ gm4，批次 1 挪来的项就此结清 |
+| `@rates` 显示刷怪倍率 | ✅ |
+| **按地图 id 段硬编码 ×2** | ❌ **rejected，改用 wz 数据**，见下 |
+
+##### 关键发现：`Map.wz` 的 `info/mobRate` BeiDou 一直在读，读完扔了
+
+原实现给三段地图 id 硬编码 ×2 刷怪：
+
+```java
+if ((mapid >= 220060000 && mapid <= 220070400) || (mapid >= 270010100 && mapid <= 270030500)
+        || (mapid >= 702070100 && mapid <= 702070400)) {
+    maxNumShouldSpawn *= 2;                     // 玩具城 / 时间神殿 / 藏经阁
+}
+```
+
+而 MapleStory 本来就有表达「这张图刷怪多密」的字段。
+[MapFactory.java:155](../gms-server/src/main/java/org/gms/server/maps/MapFactory.java#L155) 把
+`info/mobRate` 解析出来传给构造器，[MapleMap.java:202](../gms-server/src/main/java/org/gms/server/maps/MapleMap.java#L202)
+存进 `private byte monsterRate` —— **然后全仓库再没有第二处引用**。没有 getter，没有 Lombok，是个死字段。
+
+| | |
+|---|---|
+| 地图 img 总数 | 5364 |
+| 带 `mobRate` 的 | **5363** |
+| 取值范围 | 0.4 ~ 10，其中 2321 张是 1.0，**3000 多张不是** |
+
+再看原实现那三段在 wz 里的真实值，方向甚至是反的：
+
+| 硬编码 ×2 的段 | wz `mobRate` |
+|---|---|
+| 玩具城 `2200[6-7]` | 0.4 / 0.5 / 0.6 / 0.7×5 / 0.8 / 1.0×2 / 1.1 —— **Nexon 特意调低的** |
+| 时间神殿 `2700[1-3]` | 1.0×18 / 1.4×5 / 1.5×10 |
+| 藏经阁 `70207` | 0.5 / 0.9×3 —— 该段本身是 LK 自加的少林寺地图，BeiDou 没有 |
+
+**改法**：`getNumShouldSpawn` 里乘上 `monsterRate`，字段从 `byte` 改回 `float`
+（`(byte) Math.ceil` 会把 0.4~1.0 全压成 1、1.1~2.0 全压成 2，整个分布毁掉），
+加 `use_wz_map_mob_rate` 开关（默认 `true`，关掉即恢复到启用前的表现）。
+
+**为什么这样比硬编码好**：3000 多张地图各有各的密度而不是三段 id 一刀切；
+新地图自带数值不用改 Java；`mobRate` 是 Nexon 的原始设计意图，与客户端表现一致。
+
+**溢出风险已核**：`mobRate = 10` 的有 615 张，但其中 **576 张刷怪点数为 0**
+（925/926 段全是 PQ 与活动图），乘出来还是 0；剩下刷怪点多的几张也全在 9xxxxxxxx 活动图段。
+且真正的天花板是 `SpawnPoint` 的容量 —— 单点最多 `mob_spawn_point_capacity` 只，
+所以 `mobRate` 再大也只是「一次填满」而非无限刷。
+
+##### 移植时修掉的
+
+| 文件 | 问题 | 处理 |
+|---|---|---|
+| `getCurrentSpawnRate` | **裸遍历 `characters` 两遍，完全不持锁** | ⚠️ `characters` 是 `LinkedHashSet`，由 `chrLock` 读写锁保护，`respawn()` 自己取个 `size()` 都要先 `chrRLock.lock()`。照搬会在有人进出地图时 `ConcurrentModificationException`。改为 `getAllPlayers()` 取一次快照，两遍都在快照上走。**与批次 5 复查抓出的两条并发问题同一类** |
+| `getCurrentSpawnRate` | 逐人 `+= 0.1f` 累加浮点 | 改为累加人数、最后乘一次，消除累积误差 |
+| `getCurrentSpawnRate` | 保留了已经用不上的 `int numPlayers` 参数，它自己的 `RatesCommand` 里只好瞎传 `getCurrentSpawnRate(1)` | 去掉参数，连带 `getNumShouldSpawn(int)` 也去掉（全仓库只有 `respawn()` 一个调用方；`numPlayers == 0` 的提前返回留在 `respawn()` 里） |
+| `SpawnPoint` | 为了调 `mob.isBoss()` 加了 `private MapleMonster mob` 字段 —— 那是**有状态的实例对象**（HP、buff、控制者），每个刷怪点常驻一份，而 `getMonster()` 每次又 `new` 一只新的，存着的那只永远用不上 | 改为构造时取一次 `private final boolean boss` |
+| `SpawnPoint` | `Math.random()` | 改 `Randomizer.nextDouble()`。前者是全局共享的 `Random`，刷怪定时器多线程调用会争用同一个种子 |
+| `SpawnPoint` | `new Double(mobTime)` | Java 9 起 `@Deprecated`；连带 `* 1000` 改用该文件既有的 `SECONDS.toMillis` |
+| `SpawnPoint` | 最终态把 `MOB_COUNT_MULTIPLIER` 注释掉写死 `2` | 取回配置形态（§6.5 说的「反复推翻自己」） |
+| `MobRateCommand` | 硬编码下限 `Math.max(value, 0.7f)`，**恰好等于 `MOB_SPAWN_BASE_RATE` 的默认值，意味着永远调不低** | 改为不得为负 |
+| `MobRateCommand` | 写 `YamlConfig` 静态字段，后台完全看不见 | `GameConfig.update`（照 `gm5/ShowMoveLifeCommand`）。仍只改内存不落库，所以 `@mobrate` 是临时调参，重启回表里的值 —— 这一点在指令描述里写明了 |
+| `RatesCommand` | 为显示刷怪点数把 `getMonsterSpawn()` 改成 `public` | 不改。该方法返回整个列表的拷贝，只为取 `size` 暴露不划算；改为加 `getMonsterSpawnPointCount()` |
+
+##### 人数上限：不跟原实现，保留封顶
+
+原公式是 `0.70 + 0.05 × min(6, 人数)`，封顶 6 人；移植来源把这个上限去掉了，
+一张图 20 个有效玩家就是 `0.7 + 2.0 = 2.7` 倍，无天花板。**这一条不跟** ——
+上限保留为 6，落成配置项 `mob_spawnrate_max_players`（置 `0` 才是不封顶）。
+
+最终公式：
+
+```
+刷怪倍率 = mob_spawn_base_rate
+         + min(有效玩家数, mob_spawnrate_max_players) × mob_spawnrate_to_player_count
+怪物数上限 = ceil(刷怪倍率 × 本图 wz mobRate × 刷怪点数)
+实际天花板 = 刷怪点数 × mob_spawn_point_capacity（BOSS 点恒为 1）
+```
+
+##### 已知未验证
+
+只做了 `mvn -q -pl gms-server clean compile`。`V1000.0.9` 的 5 个 `game_config` 键与
+`V1000.0.10` 的 `command_info` 是否生效需启动服务端跑 Flyway。刷怪密度的实际观感、
+`mobRate` 高的活动图会不会有意外、BOSS 重生随机化都没有实跑确认。
+
+#### G2 — 阶梯经验 / 倍率 float 化 ✅ 已完成（**一行移植代码都没写**）
+
+整组 `already-fixed` + `rejected`。这是 C 类 triage 最典型的一次结果 ——
+**Cosmic/BeiDou 在同一件事上做得更细，照搬会造成功能倒退。**
+
+| 子项 | 处置 | 依据 |
+|---|---|---|
+| 阶梯经验 `exp_rate_30` / `exp_rate_70` | ❌ already-fixed | BeiDou 有**四套**，见下 |
+| `World.getExpRate(int level)` 分档重载 | ❌ rejected | 随上；BeiDou 的等级加成挂在 `Character` 层不在 `World` 层 |
+| 倍率 `int` → `float` | ❌ 一半 already-fixed | `World` 与 `Character` 的 exp/drop/meso/quest 倍率**本来就是 float** |
+| 点券券倍率 `int` → `float` | ❌ rejected | 见下 |
+| `gainExp(float)` / `gainMeso(float)` 重载 | ❌ rejected | 见下 |
+| `hasMerchant()` 时经验 ×1.05 | ❌ rejected | 摆摊本就是挂机收益，再给经验加成会让「开店挂机」严格优于「不开店挂机」 |
+| `ShowRatesCommand` 传等级 | ❌ rejected | 那行的唯一目的是配合已否决的分档重载 |
+
+##### 为什么阶梯经验判 already-fixed
+
+原实现是世界级三档写死：**<30 → 2x，30–69 → 3x，≥70 → 4x**（`config.yaml` 的
+`exp_rate_30: 2` / `exp_rate_70: 3` / `exp_rate: 4`）。BeiDou 侧已有的：
+
+| 机制 | 位置 | 形状 | 默认 |
+|---|---|---|---|
+| 每 20 级提升倍率 | `Character.setPlayerRates` + `GameConstants.EXP_RATE_GAIN` | 斐波那契 `{1,2,3,5,8,13,21,34,55,89,144,233,377,610}`，按 `level/20` 取档，**14 档** | `use_add_rates_by_level` = false |
+| 线性等级经验 | [Character.java:4632](../gms-server/src/main/java/org/gms/client/Character.java#L4632) `getLevelExpRate()` | `1 + level_exp_rate × 等级`，连续 | `level_exp_rate` = 0 |
+| **冲刺等级** | [Character.java:4636](../gms-server/src/main/java/org/gms/client/Character.java#L4636) `getQuickLevelExpRate()` | `1 + (quick_level − 等级) × 系数`，**低于目标等级越多加成越高** | `quick_level` = 0 |
+| 新手保护 | `hasNoviceExpRate()` | 初心者 11 级前恒 1x | `use_enforce_novice_exp_rate` |
+
+第三条**就是那两个键的意图**（早期给加成、到线收回），只是连续斜坡而非两个断崖；
+第一条是同样的「随等级抬倍率」但 14 档而非 3 档，而且挂在 `Character.expRate` 上、
+经 `ExtendValue` **按角色持久化**、有 `revertLastPlayerRates` 正确回滚、`@level`/`@maxstat` 都维护它。
+再叠一层世界级三档只会与这四套**连乘**，得到一个谁也说不清的最终倍率。
+
+##### 券倍率与 float 重载为什么 rejected
+
+- **券倍率**：原实现只是把 `rs.getInt("rate")` 改成 `rs.getFloat("rate")`，`nxcoupons.rate`
+  那一列它自己没动 —— 这是全面 float 化的**附带产物，不是特性**。BeiDou 侧要跟就得连 DDL 一起改，
+  换来的只是「点券券可以有 1.5 倍」这种目前没人要的能力。
+- **`gainExp(float)`**：函数体就是 `gainExp((int) gain, ...)`。原实现加它是因为自己的倍率变 float 后
+  调用点传不进去，BeiDou 没这个问题。**一个静默 `(int)` 截断的重载是坑** —— `gainExp(0.9f)` 变成 0 且无提示。
+
+##### 顺带修掉的一个 BeiDou 自身 BUG：冲刺等级功能是死的
+
+| 位置 | 键名 |
+|---|---|
+| `Character.getQuickLevelExpRate()` 读 | `quick_level_exp_rate` |
+| `V1.3.0__create_world_prop.sql:19` 旧表列 | `quick_level_exp_rate` |
+| **`V1.7.0__create_game_config.sql:29` 实际插入** | **`quick_level_rate`** ← 少了 `_exp` |
+
+从 `world_prop` 迁到 `game_config` 时键名写错了。`GameConfig.getWorldFloat` 缺键返回 `0F`，
+于是 `1 + (quickLv − level) × 0 = 1` —— **只要有人把 `quick_level` 打开，加成恒为 1 倍，功能静默失效**。
+默认 `quick_level = 0` 时方法提前返回 1，所以一直没暴露。
+
+**修法：改 `Character.java` 去读 `quick_level_rate`**，不发迁移改 DB 键名。
+理由是这样不动上游迁移建的行、在任何安装状态下都成立，且 `quick_level_rate` 正是运维
+今天在 gms-ui 里看到的名字；命名与 `level_exp_rate` 不一致是观感问题，功能失效才是 bug。
+
+> 这不是移植项，是路过发现的。清单里不占行。
+
+##### 更正批次 1 的一条记录
+
+§7 批次 1 写着「`World` 只有 `setExpRate`/`setDropRate`，**没有 `setQuestRate`**
+（`questRate` 是无 setter 的私有字段）」—— **实际有**，Lombok `@Setter` 生成的
+（[World.java:141](../gms-server/src/main/java/org/gms/net/server/world/World.java#L141)），
+`GameConfig.update` 的 `case "quest_rate"` 一直在调它。当时据此判定
+`CommandManager.setWorldQuestRate` 「补不了」，结论（不补）不变但依据是错的 ——
+真正的理由是批次 4 记的那条：唯一消费方 `RateEventCommand` 已 `rejected`。
+
+#### G1/G4 复查发现的 5 个问题与修正
+
+代码复查提了 5 个 P2，**全部核实成立并已修**。其中 4 条是本批自己写出来的，1 条是既有的，分开记：
+
+| # | 问题 | 来源 | 修正 |
+|---|---|---|---|
+| 1 | **连续升级绕过成长门槛。** 门槛只在 `gainItemExp` 进入时查一次，开着 `use_equipment_level_up_continuous` 时 `while` 会连升多级而不重新校验。15 级玩家能把需求 10 级的装备从 Lv1 一口气升到 Lv3，最终穿戴要求 20 级 —— 自己穿不上了 | **本批新增** | 抽出 `isGrowthBlocked(Client)`，**每次 `gainLevel` 前重新判**；被门槛拦下时 `break` 而**不清零 `itemExp`**，等玩家够级了接着升 |
+| 2 | **满级骑士团拿不到门槛豁免。** 两处都用统一的 `max_level_cap`（200）判满级，而 `Character.getMaxClassLevel()` 对骑士团返回 120。120 级骑士团已经满级却仍被当作未满级，装备在需求 125 级时永久停止成长 | **本批新增** | 两处（`Equip.gainItemExp`、`ItemInformationProvider.canWearEquipment`）都改用 `chr.getMaxClassLevel()`。附带好处：G10 把该方法改成读 `max_level_cap`/`cygnus_max_level_cap` 之后，这里自动跟着走 |
+| 3 | **刷怪点容量检查不是原子的。** `shouldSpawn()` 读完 `spawnedMonsters` 到 `getMonster()` 里 `incrementAndGet` 之间有窗口 | **既有问题**，改动前判的是 `spawnedMonsters.get() > 0`，同样是先查后增 | 见下 |
+| 4 | **`@mobrate` 接受 NaN 与 Infinity。** `Float.parseFloat` 收下 `NaN`/`Infinity`/溢出的科学计数法，`Math.max` 也拦不住 NaN。写进配置后 `getNumShouldSpawn` 的乘积取整恒为 0，**全服所有地图停止补怪**直到再改一次或重启 | **本批新增** | 抽出 `parseRate`，用 `Float.isFinite` 校验并限制到 `0..100`，非法输入给出提示 |
+| 5 | **Godly 档数没有有效范围。** 该值运营可在后台自由填。填到 100 以上时低档位的概率区间被高档位挤没，「总概率 = 档数%」不再成立；填到 `Short.MAX_VALUE` 以上返回值溢出成负数，直接污染装备属性 | **本批新增** | 消费端 `Math.min(..., 100)` 钳位；顺带把 `equip_stat_randomize_range` 钳到非负（负值会让浮动区间反向） |
+
+**#3 的竞态路径是通的，但性质与其余四条不同。** `MapManager.updateMaps()` 遍历**所有**地图调
+`map.respawn()`，而 `MonsterCarnival` 对自己那张图另起了一个 `respawnTask`
+（[MonsterCarnival.java:114](../gms-server/src/main/java/org/gms/server/partyquest/MonsterCarnival.java#L114)），
+两个定时器会并发打同一张图。不过这个窗口在改动前就存在，且后果**自愈**
+（多出来的怪被打死后 `monsterKilled` 会把计数减回去），既不泄漏也不可利用。
+
+修法选了**不改调用契约、无泄漏风险**的那一种：把名额占用挪进 `getMonster()`，
+**先 `incrementAndGet` 再比对容量，超了立刻 `decrementAndGet` 并返回 `null`**。
+`shouldSpawn()` 退化成预筛，7 个 `getMonster()` 调用点加空值跳过。
+
+> 没有选「`shouldSpawn()` 占位 + `getMonster()` 消费」那种方案：它要在
+> `MapleMap` 里重建一套预留协议，而**一次泄漏的预留会让该刷怪点永久不再出怪** ——
+> 比它要修的这个自愈问题严重得多。回退发生在建怪之前，也就不存在「挂上监听器却没入场」的怪。
+
+#### G3 — 组队蹭经验判定 ✅ 已完成（同样一行代码没写）
+
+原实现把整套 `IntervalBuilder` 删掉，换成一行：
+
+```java
+// below mob leech level and did no damage to mob
+if (member.getLevel() < this.getLevel() - EXP_MOB_LEECH_INTERVAL && member.getId() != killerId) {
+    underleveled.add(member);
+    continue;
+}
+```
+并在基线里就先把等级上界拆了（`addInterval(mobLevel - N, 300)`，注释写 `remove upper limit`），
+两个 `EXP_SPLIT_*` 键合并成一个 `EXP_MOB_LEECH_INTERVAL`。
+
+##### 判反了会很容易：`killerId` 豁免 BeiDou 早就有，而且更宽
+
+[Monster.java:552](../gms-server/src/main/java/org/gms/server/life/Monster.java#L552) 的
+`leechInterval` **给每个出过伤害的队员都以自己的等级为中心加了一段区间**，
+所以任何造成过伤害的人 `inInterval(自己的等级)` 恒为真。
+而 `partyParticipation` 只由 `takenDamage` 构建
+（[Monster.java:617](../gms-server/src/main/java/org/gms/server/life/Monster.java#L617)），
+里面只有真正打过怪的人 —— 「出力即豁免」成立。
+
+| | 低于怪物等级时谁还能拿到经验 |
+|---|---|
+| **BeiDou** | **任何出过力的队员** |
+| 原实现 | **只有最后一击那个人** |
+
+打了 90% 血但没抢到最后一击的低级队员，在原实现那儿颗粒无收，在 BeiDou 这儿拿得到。
+**`killerId` 豁免不是增量，是收窄。**
+
+##### 逐条判定
+
+| 子项 | 处置 | 依据 |
+|---|---|---|
+| 用单一 `mobLevel − N` 规则替换 `IntervalBuilder` | ❌ rejected | 见上；BeiDou 的区间方案豁免更宽、可调项更多（两个半径 vs 一个）、还多一条上界闸门 |
+| 去掉等级上界（`…, 300`） | ❌ rejected | 这是反代练的那一半。删掉后 200 级角色陪 20 级朋友打怪也算有效成员，收益基本为零（低级怪经验可忽略），代价是失去上界 |
+| `EXP_MOB_LEECH_INTERVAL` 配置键 | ❌ rejected | 合成一个键是**降低**表达力；BeiDou 的 `exp_split_level_interval` / `exp_split_leech_interval` 默认都是 5，与它同量级，数值上也不用调 |
+| `killerId` 传进 `distributePartyExperience` | ❌ rejected | 不需要；该参数在 BeiDou 的 `distributeExperience` 里本来就有，用于事件实例 |
+| `tools/IntervalBuilder` | ❌ rejected | 唯一改动是去掉 `private final` 并留了句 `// HanHuaMod`，无行为变化；该对象是每次新建的局部实例，`final` 该留 |
+| `Character` 的「无法获取经验」提示中文化 | ❌ already-fixed | [Character.java:8624](../gms-server/src/main/java/org/gms/client/Character.java#L8624) 已走 `I18nUtil.getMessage("Character.showUnderLeveledInfo", ...)`，zh/en 两份都在 |
+
+> `MapleMonster.java` 判 `ported` 而非 `rejected` —— 它还含批次 5 已移植的 `getTakenDamage()`。
+> 本组只否掉了蹭经验判定那一半。
+
+##### 清单影响
+
+`WorldConfig.java` / `ShowRatesCommand.java` / `IntervalBuilder.java` 三行判 `rejected`，
+`MapleMonster.java` 判 `ported`。
+`World.java` / `Server.java` / `MapleCharacter.java` / `ServerConfig.java` **仍是 `pending`** ——
+它们各自还夹着别组的改动（`World` 有 G13 的雇佣商店存续、`Server` 有角色删除与批次 3 的投票任务、
+`MapleCharacter` 是 G2/G3/G7/G9/G10/G11 的汇聚点、`ServerConfig` 要等全部配置键落地）。
 
 ### 批次 7 — 数据类
 
@@ -1079,10 +1438,13 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 皇家点券兑换与月卡逻辑，以及 8807 个 `Character.wz` 点装/发型/脸型/坐骑。
 
 > **必须一并移植的前置**：`ItemInformationProvider` 中为支持新发型/脸型扩大的 ID 段判断，
-> 否则点装不显示：
-> - Face: `20000–30000` 与 `50000–60000`（原 `20000–22000`）
-> - Hair: `30000–50000` 与 `60000–70000`（原 `30000–35000`）
-> - Cape: `1102000–1104000`（原 `1102000–1103000`）
+> 否则点装不显示。**批次 6 盘点时查证过，三条里已有两条不成立**：
+>
+> | ID 段 | LK 改法 | BeiDou 现状 |
+> |---|---|---|
+> | Face `20000–30000` ∪ `50000–60000` | 原 `20000–22000` | ✅ 已有 —— `ItemConstants.isFace` 判 `itemId/10000 ∈ {2,5}`，`ItemInformationProvider:227` 已改调它 |
+> | Hair `30000–50000` ∪ `60000–70000` | 原 `30000–35000` | ✅ 已有 —— `ItemConstants.isHair` 判 `itemId/10000 ∈ {3,4,6}` |
+> | Cape `1102000–1104000` | 原 `1102000–1103000` | ❌ **仍是 `1103000`**，这是唯一还要补的一条 |
 
 ---
 

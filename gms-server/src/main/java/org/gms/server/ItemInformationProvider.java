@@ -1253,29 +1253,59 @@ public class ItemInformationProvider {
         return nEquip.copy();
     }
 
+    /** 极品加成的档数上限，见 {@link #godlyBonus()} */
+    private static final int MAX_GODLY_BONUS = 100;
+
+    /**
+     * 极品（Godly）加成：命中时在常规浮动之上再叠加 1~equip_godly_max_bonus 点。
+     * 每一档各占 1% 概率，档位越高越靠前，所以命中总概率就是 equip_godly_max_bonus%。
+     * 配置为 0 表示关闭，此时装备属性与未引入本机制前完全一致。
+     */
+    private static short godlyBonus() {
+        // 上限钳到 100：每档占 1%，配到 100 以上时低档位的概率区间会被高档位挤没，
+        // 「总概率 = 档数%」的语义不再成立；配到 Short 上限以上还会让返回值溢出成负数污染属性。
+        // 这是运营可在后台自由填写的字段，不能指望它总是合法值。
+        int maxBonus = Math.min(GameConfig.getServerInt("equip_godly_max_bonus"), MAX_GODLY_BONUS);
+        if (maxBonus <= 0) {
+            return 0;
+        }
+        double roll = Randomizer.nextDouble();
+        for (int bonus = maxBonus; bonus >= 1; bonus--) {
+            if (roll < (maxBonus - bonus + 1) * 0.01) {
+                return (short) bonus;
+            }
+        }
+        return 0;
+    }
+
     private static short getRandStat(short defaultValue, int maxRange) {
         if (defaultValue == 0) {
             return 0;
         }
         int lMaxRange = (int) Math.min(Math.ceil(defaultValue * 0.1), maxRange);
-        return (short) ((defaultValue - lMaxRange) + Math.floor(Randomizer.nextDouble() * (lMaxRange * 2 + 1)));
+        return (short) (godlyBonus() + (defaultValue - lMaxRange) + Math.floor(Randomizer.nextDouble() * (lMaxRange * 2 + 1)));
     }
 
     public Equip randomizeStats(Equip equip) {
-        equip.setStr(getRandStat(equip.getStr(), 5));
-        equip.setDex(getRandStat(equip.getDex(), 5));
-        equip.setInt(getRandStat(equip.getInt(), 5));
-        equip.setLuk(getRandStat(equip.getLuk(), 5));
-        equip.setMatk(getRandStat(equip.getMatk(), 5));
-        equip.setWatk(getRandStat(equip.getWatk(), 5));
-        equip.setAcc(getRandStat(equip.getAcc(), 5));
-        equip.setAvoid(getRandStat(equip.getAvoid(), 5));
-        equip.setJump(getRandStat(equip.getJump(), 5));
-        equip.setSpeed(getRandStat(equip.getSpeed(), 5));
-        equip.setWdef(getRandStat(equip.getWdef(), 10));
-        equip.setMdef(getRandStat(equip.getMdef(), 10));
-        equip.setHp(getRandStat(equip.getHp(), 10));
-        equip.setMp(getRandStat(equip.getMp(), 10));
+        // 一次取值供 14 项共用：GameConfig 支持热重载，逐项取会让同一件装备用上不同的浮动范围。
+        // 钳到非负：负值会让 getRandStat 里的浮动区间反向，算出不可预期的属性
+        final int range = Math.max(0, GameConfig.getServerInt("equip_stat_randomize_range"));
+        final int wideRange = 2 * range;
+
+        equip.setStr(getRandStat(equip.getStr(), range));
+        equip.setDex(getRandStat(equip.getDex(), range));
+        equip.setInt(getRandStat(equip.getInt(), range));
+        equip.setLuk(getRandStat(equip.getLuk(), range));
+        equip.setMatk(getRandStat(equip.getMatk(), range));
+        equip.setWatk(getRandStat(equip.getWatk(), range));
+        equip.setAcc(getRandStat(equip.getAcc(), range));
+        equip.setAvoid(getRandStat(equip.getAvoid(), range));
+        equip.setJump(getRandStat(equip.getJump(), range));
+        equip.setSpeed(getRandStat(equip.getSpeed(), range));
+        equip.setWdef(getRandStat(equip.getWdef(), wideRange));
+        equip.setMdef(getRandStat(equip.getMdef(), wideRange));
+        equip.setHp(getRandStat(equip.getHp(), wideRange));
+        equip.setMp(getRandStat(equip.getMp(), wideRange));
         return equip;
     }
 
@@ -1284,7 +1314,7 @@ public class ItemInformationProvider {
             return 0;
         }
         int lMaxRange = maxRange;
-        return (short) (defaultValue + Math.floor(Randomizer.nextDouble() * (lMaxRange + 1)));
+        return (short) (godlyBonus() + defaultValue + Math.floor(Randomizer.nextDouble() * (lMaxRange + 1)));
     }
 
     public Equip randomizeUpgradeStats(Equip equip) {
@@ -1882,6 +1912,19 @@ public class ItemInformationProvider {
         if (highfivestamp) {
             reqLevel -= 5;
         }
+
+        // 成长装备的等级门槛：每提升 1 级，穿戴要求 +5。itemLevel 为 1 的新装备即为原始要求等级。
+        // 与 Equip.gainItemExp 里的成长门槛差一级是有意的——只有已经穿得上下一级，装备才会长到下一级。
+        // 满级判定用 getMaxClassLevel() 而非统一的 max_level_cap，否则骑士团（上限 120）永远算不上满级。
+        if (GameConfig.getServerBoolean("use_equip_growth_level_limit")) {
+            int growthReqLevel = reqLevel + (equip.getItemLevel() - 1) * 5;
+            if (growthReqLevel > chr.getLevel() && chr.getLevel() < chr.getMaxClassLevel()) {
+                chr.dropMessage(1, I18nUtil.getMessage("ItemInformationProvider.message1", growthReqLevel));
+                equip.wear(false);
+                return false;
+            }
+        }
+
         int i = 0; //lol xD
         //Removed job check. Shouldn't really be needed.
         if (reqLevel > chr.getLevel()) {

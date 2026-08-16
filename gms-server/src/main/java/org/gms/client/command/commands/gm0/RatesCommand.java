@@ -56,6 +56,9 @@ public class RatesCommand extends Command {
         if (GameConfig.getServerBoolean("use_quest_rate")) {
             showMsg_ += I18nUtil.getMessage("RatesCommand.message3") + "#e#b" + c.getWorldServer().getQuestRate() + "x#k#n" + "\r\n";
         }
+        showMsg_ += I18nUtil.getMessage("RatesCommand.message5",
+                Math.round(player.getMap().getCurrentSpawnRate() * 100) / 100f,
+                player.getMap().getMonsterSpawnPointCount()) + "\r\n";
 
         player.showHint(showMsg_, 300);
     }
