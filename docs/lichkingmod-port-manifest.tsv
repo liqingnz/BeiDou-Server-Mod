@@ -482,7 +482,7 @@ src/net/server/task/TimeoutTask.java	java	0	0	noise	仅格式化/空白改动（
 src/net/server/task/WeddingReservationTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/world/MapleMessenger.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/world/MapleParty.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/world/MaplePartyCharacter.java	java	5	0	pending	
+src/net/server/world/MaplePartyCharacter.java	java	5	0	ported	新增 attemptBoss(String) 转调 ExpeditionBossLog 的字符串重载，供批次7的 PapulatusBattle.js 使用。BeiDou 现版 PapulatusBattle.js:99 没有这个判断，时空的裂缝同样在绕过配额——那是脚本，归批次7
 src/net/server/world/World.java	java	17	6	pending	
 src/provider/MapleCanvas.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/provider/MapleData.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -548,9 +548,9 @@ src/server/events/gm/MapleFitness.java	java	0	0	noise	仅格式化/空白改动�
 src/server/events/gm/MapleOla.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/events/gm/MapleOxQuiz.java	java	2	2	pending	
 src/server/events/gm/MapleSnowball.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/expeditions/MapleExpedition.java	java	63	39	pending	
-src/server/expeditions/MapleExpeditionBossLog.java	java	17	9	pending	
-src/server/expeditions/MapleExpeditionType.java	java	26	7	pending	
+src/server/expeditions/MapleExpedition.java	java	63	39	ported	真BUG：addMemberInt 缺 attemptBoss 配额检查，而实际在用的入口正是它（scripts/npc/2101014.js:157），配额可绕过；addMember 有检查却无调用者。按 LK 思路把检查搬进 addMemberInt（返回码4），addMember 改为委托+返回码映射，保持 BeiDou 的 i18n（不搬 LK 的硬编码中文，也不留 LK 那段注释掉的旧代码）。EXPEDITION_BOSSES 补克雷塞尔双眼（MobId 新增 KREXEL_LEFT_EYE/KREXEL_RIGHT_EYE）。其余英文→中文硬编码与缩进为噪声，BeiDou 早已全套 i18n（Expedition.* 17 个键）
+src/server/expeditions/MapleExpeditionBossLog.java	java	17	9	ported	（1）新增 BALROG_NORMAL/KREXEL/SHOWA/YAOSENG 四个条目——此前 getBossEntryByName 返回 null 导致 attemptBoss 直接放行，这四个 BOSS 完全不受次数限制。（2）PINKBEAN/SCARGA entries 1→2 取 LK 值（用户决定）。（3）新增 attemptBoss(cid, channel, String, log) 重载供脚本使用。（4）修两个 BeiDou 真 BUG，不跟 LK 的写法：Calendar.HOUR 是12小时制且不动 AM_PM，下午启动会把清空点算成中午、删掉当天上午的记录 → 改用 HOUR_OF_DAY；set(DAY_OF_WEEK,THURSDAY) 在周日到周三指向未来的周四，deltaTime 为负且 Java 的 % 对负数仍为负，判定恒真 → 每次启动都拿未来时间戳把整张周榜删光，改为回退到最近一个已过去的周四并直接比较。LK 的 Math.abs 只是盖住症状，HOUR 12 更是越界写法
+src/server/expeditions/MapleExpeditionType.java	java	26	7	ported	新增 KREXEL(2,30,50,255,5) 与 YAOSENG(1,6,100,255,5)（克雷塞尔仍缺两张 wz 地图，枚举先补齐给批次7的脚本用）；新增 getPartInfo() 但改走 i18n（ExpeditionType.partInfo.size/level/time），且人数一栏用 getMinSize() 而非原始字段，开了单人远征时显示实际要求。LK 的 minSize 大改（6→2 等）rejected：纯运营调参，且 BeiDou 已有 use_enable_solo_expeditions 一开就把 minSize 压成1（ExpeditionType.java:61）是同一件事的更彻底做法。LK 重排枚举顺序不搬，改 ordinal 无必要
 src/server/gachapon/ElNath.java	java	9	4	pending	
 src/server/gachapon/Ellinia.java	java	12	4	pending	
 src/server/gachapon/GachaponItems.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）

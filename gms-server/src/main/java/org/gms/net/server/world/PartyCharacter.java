@@ -23,6 +23,7 @@ package org.gms.net.server.world;
 
 import org.gms.client.Character;
 import org.gms.client.Job;
+import org.gms.server.expeditions.ExpeditionBossLog;
 
 public class PartyCharacter {
     private final String name;
@@ -140,6 +141,13 @@ public class PartyCharacter {
 
     public int getWorld() {
         return world;
+    }
+
+    /**
+     * 给脚本用：不经过远征队对象直接按 BOSS 名查次数配额，并记一次尝试。
+     */
+    public boolean attemptBoss(String bossName) {
+        return ExpeditionBossLog.attemptBoss(id, channel, bossName, true);
     }
 
 }

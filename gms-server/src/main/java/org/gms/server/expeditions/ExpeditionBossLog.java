@@ -32,7 +32,6 @@ import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
-import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.HOURS;
 
 /**
@@ -44,9 +43,15 @@ public class ExpeditionBossLog {
     public enum BossLogEntry {
         ZAKUM(2, 1, false),
         HORNTAIL(2, 1, false),
-        PINKBEAN(1, 1, false),
-        SCARGA(1, 1, false),
-        PAPULATUS(2, 1, false);
+        PINKBEAN(2, 1, false),
+        SCARGA(2, 1, false),
+        PAPULATUS(2, 1, false),
+        // 以下四个 BOSS 此前没有条目，getBossEntryByName 返回 null 时 attemptBoss 直接放行，
+        // 等于完全不受次数限制
+        BALROG_NORMAL(2, 1, false),
+        KREXEL(2, 1, false),
+        SHOWA(2, 1, false),
+        YAOSENG(4, 1, true);
 
         private final int entries;
         private final int timeLength;
@@ -96,29 +101,32 @@ public class ExpeditionBossLog {
         Boss logs resets 12am, weekly thursday 12AM - thanks Smitty Werbenjagermanjensen (superadlez) - https://www.reddit.com/r/Maplestory/comments/61tiup/about_reset_time/
         */
 
-        Calendar thursday = Calendar.getInstance();
-        thursday.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY);
-        thursday.set(Calendar.HOUR, 0);
-        thursday.set(Calendar.MINUTE, 0);
-        thursday.set(Calendar.SECOND, 0);
+        // Calendar.HOUR 是 12 小时制（0-11）且不会动 AM_PM，下午启动时算出来的是当天中午而不是零点，
+        // 会把当天上午的挑战记录一起删掉，等于白送一次次数。两处都必须用 HOUR_OF_DAY
+        Calendar weeklyReset = Calendar.getInstance();
+        weeklyReset.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY);
+        weeklyReset.set(Calendar.HOUR_OF_DAY, 0);
+        weeklyReset.set(Calendar.MINUTE, 0);
+        weeklyReset.set(Calendar.SECOND, 0);
+        weeklyReset.set(Calendar.MILLISECOND, 0);
 
         Calendar now = Calendar.getInstance();
 
-        long weekLength = DAYS.toMillis(7);
-        long halfDayLength = HOURS.toMillis(12);
-
-        long deltaTime = now.getTime().getTime() - thursday.getTime().getTime();    // 2x time: get Date into millis
-        deltaTime += halfDayLength;
-        deltaTime %= weekLength;
-        deltaTime -= halfDayLength;
-
-        if (deltaTime < halfDayLength) {
-            ExpeditionBossLog.resetBossLogTable(true, thursday);
+        // set(DAY_OF_WEEK) 只在本周内移动，周日到周三会指到未来的周四。那样 deltaTime 为负、
+        // 取模后仍为负，判定恒真，于是拿一个未来时间戳把整张周榜删光
+        if (weeklyReset.after(now)) {
+            weeklyReset.add(Calendar.DAY_OF_MONTH, -7);
         }
 
-        now.set(Calendar.HOUR, 0);
+        long deltaTime = now.getTimeInMillis() - weeklyReset.getTimeInMillis();
+        if (deltaTime < HOURS.toMillis(12)) {
+            ExpeditionBossLog.resetBossLogTable(true, weeklyReset);
+        }
+
+        now.set(Calendar.HOUR_OF_DAY, 0);
         now.set(Calendar.MINUTE, 0);
         now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
 
         ExpeditionBossLog.resetBossLogTable(false, now);
     }
@@ -176,11 +184,15 @@ public class ExpeditionBossLog {
     }
 
     public static boolean attemptBoss(int cid, int channel, Expedition exped, boolean log) {
+        return attemptBoss(cid, channel, exped.getType().name(), log);
+    }
+
+    public static boolean attemptBoss(int cid, int channel, String bossName, boolean log) {
         if (!GameConfig.getServerBoolean("use_enable_daily_expeditions")) {
             return true;
         }
 
-        BossLogEntry boss = BossLogEntry.getBossEntryByName(exped.getType().name());
+        BossLogEntry boss = BossLogEntry.getBossEntryByName(bossName);
         if (boss == null) {
             return true;
         }

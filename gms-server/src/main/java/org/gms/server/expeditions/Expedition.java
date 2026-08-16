@@ -83,6 +83,8 @@ public class Expedition {
             MobId.HORNTAIL_WINGS,
             MobId.HORNTAIL_LEGS,
             MobId.HORNTAIL_TAIL,
+            MobId.KREXEL_LEFT_EYE,
+            MobId.KREXEL_RIGHT_EYE,
             MobId.SCARLION_STATUE,
             MobId.SCARLION,
             MobId.ANGRY_SCARLION,
@@ -206,27 +208,14 @@ public class Expedition {
     }
 
     public String addMember(Character player) {
-        if (!registering) {
-            return I18nUtil.getMessage("Expedition.addMember.message1");
-        }
-        if (banned.contains(player.getId())) {
-            return I18nUtil.getMessage("Expedition.addMember.message2", leader.getName());
-        }
-        if (members.size() >= this.getMaxSize()) { //Would be a miracle if anybody ever saw this
-            return I18nUtil.getMessage("Expedition.addMember.message3");
-        }
-
-        int channel = this.getRecruitingMap().getChannelServer().getId();
-        if (!ExpeditionBossLog.attemptBoss(player.getId(), channel, this, false)) {    // thanks Conrad, Cato for noticing some expeditions have entry limit
-            return I18nUtil.getMessage("Expedition.addMember.message4");
-        }
-
-        members.put(player.getId(), player.getName());
-        player.sendPacket(PacketCreator.getClock((int) (startTime - System.currentTimeMillis()) / 1000));
-        if (!silent) {
-            broadcastExped(PacketCreator.serverNotice(6, I18nUtil.getMessage("Expedition.addMember.message5", player.getName())));
-        }
-        return I18nUtil.getMessage("Expedition.addMember.message6");
+        // 两个入口的判定必须一致，否则少检查的那个就是绕过口子，因此这里只做返回码到文案的映射
+        return switch (addMemberInt(player)) {
+            case 1 -> I18nUtil.getMessage("Expedition.addMember.message1");
+            case 2 -> I18nUtil.getMessage("Expedition.addMember.message2", leader.getName());
+            case 3 -> I18nUtil.getMessage("Expedition.addMember.message3");
+            case 4 -> I18nUtil.getMessage("Expedition.addMember.message4");
+            default -> I18nUtil.getMessage("Expedition.addMember.message6");
+        };
     }
 
     public int addMemberInt(Character player) {
@@ -238,6 +227,12 @@ public class Expedition {
         }
         if (members.size() >= this.getMaxSize()) { //Would be a miracle if anybody ever saw this
             return 3; //"Sorry, this expedition is full!";
+        }
+
+        int channel = this.getRecruitingMap().getChannelServer().getId();
+        // 次数配额原先只在 addMember 里查，而脚本走的是 addMemberInt，等于配额可以绕过
+        if (!ExpeditionBossLog.attemptBoss(player.getId(), channel, this, false)) {    // thanks Conrad, Cato for noticing some expeditions have entry limit
+            return 4; //"Sorry, you've already reached the quota of attempts for this expedition!";
         }
 
         members.put(player.getId(), player.getName());

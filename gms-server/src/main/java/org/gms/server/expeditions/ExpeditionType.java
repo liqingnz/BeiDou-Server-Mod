@@ -23,6 +23,7 @@
 package org.gms.server.expeditions;
 
 import org.gms.config.GameConfig;
+import org.gms.util.I18nUtil;
 
 /**
  * @author Alan (SharpAceX)
@@ -41,7 +42,9 @@ public enum ExpeditionType {
     ARIANT1(2, 7, 20, 30, 5),
     ARIANT2(2, 7, 20, 30, 5),
     PINKBEAN(6, 30, 120, 255, 5),
-    CWKPQ(6, 30, 90, 255, 5);   // CWKPQ min-level 90, found thanks to Cato
+    CWKPQ(6, 30, 90, 255, 5),   // CWKPQ min-level 90, found thanks to Cato
+    KREXEL(2, 30, 50, 255, 5),
+    YAOSENG(1, 6, 100, 255, 5);
 
     private final int minSize;
     private final int maxSize;
@@ -75,5 +78,19 @@ public enum ExpeditionType {
 
     public int getRegistrationMinutes() {
         return registrationMinutes;
+    }
+
+    /**
+     * 供远征队 NPC 脚本展示的报名条件。人数一栏走 {@link #getMinSize()} 而不是原始字段，
+     * 这样开了单人远征时显示的就是实际要求。
+     */
+    public String getPartInfo() {
+        return "\r\n    " + I18nUtil.getMessage("ExpeditionType.partInfo.size", formatRange(getMinSize(), maxSize))
+                + "\r\n    " + I18nUtil.getMessage("ExpeditionType.partInfo.level", formatRange(minLevel, maxLevel))
+                + "\r\n    " + I18nUtil.getMessage("ExpeditionType.partInfo.time", String.valueOf(registrationMinutes));
+    }
+
+    private static String formatRange(int min, int max) {
+        return max > min ? min + " ~ " + max : String.valueOf(min);
     }
 }

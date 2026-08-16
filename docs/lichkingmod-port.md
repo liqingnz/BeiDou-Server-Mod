@@ -1080,7 +1080,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G4** | **Godly 装备属性 + 装备成长等级门槛 + 堆叠上限** | `MapleItemInformationProvider`、`inventory/Equip` | `equip_stat_randomize_range`、`item_max_slot`、`elemental_weapon_use_default_lvlup` |
 | **G5** | 白医卷轴 / 制作 | `ScrollHandler`、`MakerProcessor`、`MakerItemFactory` | ✅ 已完成 |
 | **G6** | 怪物技能与怪打怪 | `life/MobSkill`（157 封技能）、`MobDamageMobHandler`、`maps/MapleReactor` | ✅ java 侧完成（wz 留 pending） |
-| **G7** | 远征次数配额 | `expeditions/{Expedition, ExpeditionType, ExpeditionBossLog}`、`world/PartyCharacter` | — |
+| **G7** ✅ | 远征次数配额 | `expeditions/{Expedition, ExpeditionType, ExpeditionBossLog}`、`world/PartyCharacter` | — |
 | **G8** | 反外挂 / 误封 | `autoban/{AutobanManager, AutobanFactory}`、`AbstractDealDamageHandler`、`CloseRange`/`Magic`/`Ranged`/`Summon` 四个伤害 handler | — |
 | **G9** ✅ | 技能平衡 | `MapleStatEffect`、`AranComboHandler`、`SpecialMoveHandler`、`gm2/BuffMapCommand`、`gm2/EmpowerMeCommand`、`constants/skills/Corsair`、`AssignAPProcessor` | `aran_combo_last_time`、`aran_combo_gm_bonus`、`battleship_hp_per_skill_level`、`battleship_hp_per_level`、`battleship_stance`、`mana_reflection_stance`、`marksman_blind_stance`、`use_gm_no_skill_cooldown`、`fast_reuse_hero_will_divisor` |
 | **G10** | 等级上限 | `constants/game/GameConstants` | `max_level_cap`、`cygnus_max_level_cap` |
@@ -1753,6 +1753,91 @@ LK 没有、BeiDou 侧主动加的两处保险（LK 均无）：`AranComboHandle
 （满连后 combo 不再清零，长时间连击会绕成负数）、`SpecialMoveHandler` 的除零兜底。
 
 无新增指令（两个 GM 指令 BeiDou 已在 `command_info` 中注册）。
+
+#### G7 — 远征次数配额 ✅ 已完成
+
+4 个文件。LK 侧 55 行实质改动，**查出 BeiDou 三个真 BUG**，其中两个 LK 自己也没修对。
+
+> **贯穿全组的前提。** `use_enable_daily_expeditions` 在 BeiDou **默认 `false`**
+> （[V1.7.0:90](../gms-server/src/main/resources/db/migration/V1.7.0__create_game_config.sql#L90)），
+> `attemptBoss` 一进门就 `return true`。下面三个 BUG **只在运营把次数限制打开后才咬人**——
+> 但一旦打开就是三个一起咬。
+
+##### BUG 1：`addMemberInt` 漏配额检查（配额可绕过）
+
+BeiDou 两个入口不一致，而**有检查的那个没人调**：
+
+| 方法 | `attemptBoss` 检查 | 调用者 |
+|---|---|---|
+| `addMember` | ✅ | 无 java 调用者 |
+| `addMemberInt` | ❌ **没有** | `scripts/npc/2101014.js:157` |
+
+按 LK 思路把检查搬进 `addMemberInt`（新返回码 4），`addMember` 改为委托 + 返回码映射。
+不搬 LK 的硬编码中文（BeiDou 早已全套 i18n），也不留 LK 那段注释掉的旧实现。
+
+> 合并后 `addMember` 的成功播报统一走 `Expedition.addMemberInt.message1`，
+> `Expedition.addMember.message5` 成为孤儿键，保留未删（两条文案几乎一样）。
+
+##### BUG 2：`Calendar.HOUR` 是 12 小时制 → 每日榜清空点算成中午
+
+`HOUR` 是 hour-of-am/pm（0–11）且**不动 `AM_PM`**。下午重启服务器时
+`now.set(Calendar.HOUR, 0)` 得到的是**当天中午 12:00**，随后
+`DELETE ... WHERE attempttime <= 中午` 把**当天上午的挑战记录删掉** → 玩家白嫖一次配额。
+
+LK 改成 `HOUR, 12` 并注释 "12 am at midnight" —— `HOUR` 上限 11，宽松模式下 12 会跨 AM/PM 进位，
+**结果依然取决于重启时刻**。不搬 LK 写法，两处一律改用 `HOUR_OF_DAY`（并补 `MILLISECOND` 清零）。
+
+##### BUG 3：周榜在周日–周三启动时被整表清空
+
+`set(DAY_OF_WEEK, THURSDAY)` 只在**本周内**移动，周日–周三指向**未来**的周四：
+
+```
+deltaTime = now - 未来周四   → 负（最多 -4 天）
++= 12h; %= 7d               → Java 的 % 对负数仍为负，值不变
+-= 12h                      → 更负
+if (deltaTime < 12h)        → 恒真
+    → DELETE WHERE attempttime <= 未来时间   ← 删光整张周榜
+```
+
+**周日到周三，每次启动服务器都会清空周榜。** LK 的 `Math.abs(...)` 碰巧盖住症状但治标。
+改为**回退到最近一个已过去的周四**，`deltaTime` 恒在 `[0, 7天)`，
+原来那套 `+12h / %7d / -12h` 的绕法随之取消，直接比较。
+
+##### 逐项处置
+
+| 文件 | 处置 | 要点 |
+|---|---|---|
+| `MapleExpedition` | **ported** | BUG 1；`EXPEDITION_BOSSES` 补克雷塞尔双眼（`MobId` 新增两个常量） |
+| `MapleExpeditionBossLog` | **ported** | BUG 2/3；新增 4 个条目；`PINKBEAN`/`SCARGA` 次数 1→2；新增字符串重载 |
+| `MapleExpeditionType` | **ported** | 新增 `KREXEL`/`YAOSENG`；`getPartInfo()` 走 i18n。**minSize 大改 rejected** |
+| `MaplePartyCharacter` | **ported** | `attemptBoss(String)`，供批次 7 的 `PapulatusBattle.js` |
+
+**新增 4 个 `BossLogEntry` 为什么是功能而非调参**：没有条目时 `getBossEntryByName` 返回 `null`，
+`attemptBoss` 直接放行 —— 炎魔（普通）、克雷塞尔、将军墨西、藏经阁此前**完全不受次数限制**。
+
+**`ExpeditionType` 的 minSize 为什么 rejected**：LK 把 `BALROG_NORMAL` 6→1、`ZAKUM`/`HORNTAIL`/`SCARGA`
+6→2、`SHOWA` 3→2、`PINKBEAN` 6→3，纯运营调参；BeiDou 已有
+[`use_enable_solo_expeditions`](../gms-server/src/main/java/org/gms/server/expeditions/ExpeditionType.java#L61)
+一开就把 minSize 压成 1，是同一件事的更彻底做法。要调门槛改 `game_config`，不改枚举。
+LK 顺手重排的枚举顺序也不搬 —— 改 `ordinal()` 没必要冒险。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `Expedition.java` | `addMemberInt` 补配额检查、`addMember` 改委托、`EXPEDITION_BOSSES` +2 |
+| `ExpeditionBossLog.java` | 4 个新条目、两处次数调整、周/日清空点修正、字符串重载 |
+| `ExpeditionType.java` | `KREXEL`/`YAOSENG` 两个枚举、`getPartInfo()` |
+| `PartyCharacter.java` | `attemptBoss(String)` |
+| `MobId.java` | `KREXEL_LEFT_EYE` / `KREXEL_RIGHT_EYE` |
+| `message_{zh_CN,en_US}.properties` | `ExpeditionType.partInfo.size/level/time` |
+
+无新增配置键、无新增指令、无迁移脚本。
+
+##### 留给批次 7 的线索
+
+BeiDou 现版 [`scripts/event/PapulatusBattle.js:99`](../gms-server/scripts/event/PapulatusBattle.js)
+**没有 `attemptBoss` 判断**——时空的裂缝同样在绕过配额。API 已在本组补齐，脚本改动归批次 7。
 
 ### 批次 7 — 数据类
 

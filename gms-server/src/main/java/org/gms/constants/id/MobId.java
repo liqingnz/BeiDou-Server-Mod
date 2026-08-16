@@ -59,6 +59,9 @@ public class MobId {
         return mobId >= DEAD_HORNTAIL_MIN && mobId <= DEAD_HORNTAIL_MAX;
     }
 
+    public static final int KREXEL_LEFT_EYE = 9420521;
+    public static final int KREXEL_RIGHT_EYE = 9420522;
+
     public static final int SCARLION_STATUE = 9420546;
     public static final int SCARLION = 9420547;
     public static final int ANGRY_SCARLION = 9420548;
