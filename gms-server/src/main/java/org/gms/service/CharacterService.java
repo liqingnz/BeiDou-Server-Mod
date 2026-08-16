@@ -293,7 +293,8 @@ public class CharacterService {
         monsterbookMapper.deleteByQuery(QueryWrapper.create().where(MONSTERBOOK_D_O.CHARID.eq(cid)));
         // 删除characters
         charactersMapper.deleteById(cid);
-        // 删除family_character
+        // 删除family_character：先把下级过继给被删角色的上级，再删他自己那行
+        reparentFamilyJuniors(cid);
         familyCharacterMapper.deleteByQuery(QueryWrapper.create().where(FAMILY_CHARACTER_D_O.CID.eq(cid)));
         // 删除famelog
         famelogMapper.deleteByQuery(QueryWrapper.create().where(FAMELOG_D_O.CHARACTERID_TO.eq(cid).or(FAMELOG_D_O.CHARACTERID.eq(cid))));
@@ -343,6 +344,30 @@ public class CharacterService {
         // 补充heaven没有删除的2张表
         nameChangeService.cancelPendingNameChange(cid, false);
         worldTransferService.cancelPendingWorldTransfer(cid, false);
+    }
+
+    /**
+     * 删角色前把他在家族里的下级过继给他的上级，保证家族树不断链。
+     * <p>
+     * 只删被删角色自己那行的话，下级的 {@code seniorid} 会指向一个已经不存在的角色：
+     * {@code FamilyService.loadAllFamilies} 找不到 senior 就把他们丢进 unmatchedJuniors 且永远匹配不上；
+     * 更要命的是<b>被删的如果是族长</b>，整个家族再没有任何一行 {@code seniorid <= 0}，
+     * {@code family.getLeader()} 返回 null，收尾那句 {@code getLeader().doFullCount()} 直接 NPE，
+     * 服务器启动时整个家族系统的加载就断在这里。
+     * <p>
+     * 过继之后：删普通成员，他的下级挂到他上级名下，树仍连通；删族长，他的下级 seniorid 变成 0，
+     * 其中一个会成为新族长（{@code loadAllFamilies} 按 {@code seniorid <= 0} 判定），家族不至于无主。
+     */
+    private void reparentFamilyJuniors(int cid) {
+        FamilyCharacterDO self = familyCharacterMapper.selectOneByQuery(
+                QueryWrapper.create().where(FAMILY_CHARACTER_D_O.CID.eq(cid)));
+        if (self == null) {
+            return;     // 不在任何家族里
+        }
+
+        int newSeniorId = Optional.ofNullable(self.getSeniorid()).orElse(0);
+        FamilyCharacterDO update = FamilyCharacterDO.builder().seniorid(newSeniorId).build();
+        familyCharacterMapper.updateByQuery(update, QueryWrapper.create().where(FAMILY_CHARACTER_D_O.SENIORID.eq(cid)));
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)

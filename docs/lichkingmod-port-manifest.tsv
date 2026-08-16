@@ -38,7 +38,7 @@ src/client/AbstractMapleCharacterObject.java	java	0	0	noise	仅格式化/空白�
 src/client/BuddyList.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/BuddylistEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/MapleBuffStat.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/MapleCharacter.java	java	277	198	pending	
+src/client/MapleCharacter.java	java	277	198	ported	批次6-G16：按组拆散。多数 hunk 归 G2/G3/G8/G9/G10/G11/G12/G15 及批次5；买活与升级提示语 BeiDou 无此代码。本组落地：满级广播走i18n、中文屏蔽词、角色名GBK字节上限、魔法盾/回声免驱散、圣盾挡魅惑、龙血safeAddHP。捡物 pickItemDrop 提前是 LK 引入的物品销毁回归，不搬；家族级联删除改为过继下级+加载判空（原改法解决不了删族长导致的启动NPE）
 src/client/MapleClient.java	java	47	12	pending	
 src/client/MapleDisease.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/MapleDiseaseValueHolder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）

@@ -1089,7 +1089,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G13** ✅ | 雇佣商店存续天数 | `maps/HiredMerchant`、`world/World`（仅存续判定一处） | `merchant_expire_time` |
 | **G14** ✅ | `@analysis` BOSS 伤害占比 | `gm2/BossDmgAnalysisCommand`（批次 1 挪来，权限从 gm0 收到 gm2） | — |
 | **G15** ✅ | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`UseItemHandler`、`client/Character`（公开入口） | `use_quest_hp_pill`（默认关，**且依赖 wz**） |
-| **G16** | `client/Character`（钩子汇聚点，**按组拆散**） | `client/MapleCharacter` 一个文件同时属于 G2/G3/G7/G9/G10/G11 | — |
+| **G16** ✅ | `client/Character`（钩子汇聚点，**按组拆散**） | `client/Character`、`constants/net/ServerConstants`、`constants/string/CharsetConstants`、`service/{CharacterService, FamilyService}` | — |
 
 批次 4 挪进来的两项仍是 `deferred`，跟 **G4** 一起决策（收工时必须把这两行改掉，
 `deferred` 不算处理完）：
@@ -2319,6 +2319,110 @@ javadoc 里记了 `clientMaxHp` 钳 30000 而内部 `maxHp` 不封顶这件事 �
 | `V1000.0.20__insert_game_config_quest_hp_pill.sql` | 1 个配置键 + zh/en 各 1 条 `lang_resources` |
 | `message_{zh_CN,en_US}.properties` | `Quest.message1~2` |
 | `log_{zh_CN,en_US}.properties` | `Quest.info.grantHpPill.msg1` |
+
+#### G16 — `client/Character` 钩子汇聚点 ✅ 已完成（批次 6 收官）
+
+`MapleCharacter.java` 是 LK 改动最多的单个文件（+311 / −193、**70 个 hunk**），但按组拆完，
+绝大部分早有归宿。真正需要在本组决策的只有 7 条。
+
+##### 已在别组决策，不重复
+
+| hunk | 归属 |
+|---|---|
+| 倍率 `int→float`、`getExpRate(level)`、`gainExp(float)`/`gainMeso(float)` 重载、`activeCouponRates`、`hasMerchant()` 经验 ×1.05 | **G2 整组 rejected/already-fixed** |
+| `showUnderleveledInfo` 带 `EXP_MOB_LEECH_INTERVAL` 的文案 | **G3 已 rejected**，且 BeiDou 无此方法 |
+| `resetBattleshipHp` 的 3000 / 配置化 | **G9** |
+| `getMaxClassLevel` 读配置 | **G10** |
+| autopot 双重消耗（MP 段注释掉、`0.9f→0.95f`） | **G11** |
+| `lastAttackTime` + getter/setter | **批次 5** |
+| `addMaxHpMpExternal` | **G15** |
+| `lastLogoutTime` 字段 + getter | **G12 已确认不需要**（BeiDou 只写不读） |
+| `ban()` 连带写 `ipbans` | **G8 已否决 IP 封禁** |
+
+##### BeiDou 压根没有这些代码
+
+- **买活系统**（`showBuybackInfo`/`canBuyback`/`getTimeRemaining`，约 60 行 diff）—— Cosmic 已整块删除，全服搜 `buyback` 零命中。
+- **升级提示语**（5/10/15…200 级那 40 行 `yellowMessage`）—— 同样不存在。
+
+##### 已 already-fixed，且 BeiDou 的实现更好
+
+- `canCreateChar` 支持中文名：BeiDou 早就是 `[a-zA-Z0-9一-龥]{2,12}`，下限比原实现还宽（2 vs 3）。
+- 捡物加点券：BeiDou 已抽成 `ItemId.isNxCard()` + `use_announce_nx_coupon_loot` 开关 + **按数量相乘**。
+  原实现新增的 `4310100`（5000 点券）又是自造物品，同 G15 的 wz 依赖，未采纳。
+- `deleteCharFromDB` 主体：已重写进 `CharacterService`，**`fredstorage` 早就在删**。
+
+##### 🔴 原实现引入的回归，明确不搬
+
+捡物时把 `pickItemDrop` 从末尾**提到了分发逻辑之前**：
+
+```java
++                    this.getMap().pickItemDrop(pickupPacket, mapitem);   // 提到了这里
+                     if (mapitem.getMeso() > 0) { ...
+-                    this.getMap().pickItemDrop(pickupPacket, mapitem);   // 原本在这
+                 } else if (!hasSpaceInventory) {
+```
+
+提前之后，`addFromDrop` 失败走 `return` 的那条路径上，**物品已从地图移除但没进背包 = 凭空销毁**。
+BeiDou 在末尾统一调一次（[Character.java:2139](../gms-server/src/main/java/org/gms/client/Character.java#L2139)），保持不动。
+
+##### ⭐ 顺带挖出一个比原改动严重得多的问题：删族长会让服务器启动 NPE
+
+原实现把 `DELETE FROM family_character WHERE cid = ?` 改成 `WHERE cid = ? OR seniorid = ?`。
+但**两边都没解决真正的问题**——[FamilyService.java](../gms-server/src/main/java/org/gms/service/FamilyService.java) 结尾是：
+
+```java
+family.getLeader().doFullCount();
+```
+
+族长是靠 `seniorid <= 0` 认出来的。删掉族长之后，这个家族再没有任何一行满足该条件 →
+`getLeader()` 返回 `null` → **服务器启动时 NPE，把所有大区的家族加载一起打断**。
+原实现的 `OR seniorid = ?` 只删直系下级，孙辈还在，**照样没有族长、照样 NPE**，
+而且它把直系下级的家族籍和声望一并删掉了。
+
+因此**没有搬那行**，改成两条真修：
+
+| 位置 | 做法 |
+|---|---|
+| `CharacterService.reparentFamilyJuniors(cid)` | 删角色前把他的下级**过继**给他的上级（`UPDATE ... SET seniorid = <被删者的seniorid> WHERE seniorid = <cid>`）。删普通成员时树保持连通；删族长时下级 `seniorid` 变 0，其中一个自然成为新族长 |
+| `FamilyService.loadAllFamilies` | 收尾判空，leader 缺失时记 warn 并跳过——历史脏数据不该让整个家族系统加载不起来 |
+
+这条正是 CLAUDE.md 里「账号/角色级联删除有坑」的又一例。
+
+##### 其余 6 条按运营决定全部移植
+
+| # | 内容 | 说明 |
+|---|---|---|
+| 1 | `LEVEL_200` 满级广播 | BeiDou 原先是**英文硬编码**在 `ServerConstants`，中文服玩家满级会收到英文广播。改走 i18n（`Character.levelUp.maxLevelBroadcast`），常量删除 |
+| 2 | `BLOCKED_NAMES` 补中文屏蔽词 | 冒充管理/系统的、脏字、与大区名混淆的片段，以及一批政治人物名 |
+| 3 | 角色名 GBK 字节上限 | 见下方⚠️ |
+| 4 | 魔法盾 / 英雄的回声不被驱散 | `dispelBuffs` 例外表加 `Magician.MAGIC_GUARD`、`Beginner.ECHO_OF_HERO`。法师被驱散时连魔法盾一起掉基本等于秒死 |
+| 5 | 圣盾可挡魅惑 | `giveDebuff` 从 `!(SEDUCE \|\| STUN)` 改为 `!= STUN`。**会明显削弱扎昆、暗黑龙王这类靠魅惑的 BOSS**，是一次实打实的平衡放宽 |
+| 6 | 龙血不致死 | `prepareDragonBlood` 的 `addHP(-x)` → `safeAddHP`。BeiDou 本来就有 `safeAddHP`，龙吼等其他自伤技能都在用，只有龙血漏了 |
+
+> **⚠️ 第 3 条要留意**：常量取的是原实现的 `< 12` 字节。这道检查**同时收紧了纯 ASCII 名**——
+> 正则允许 12 位，字节上限 11 会把第 12 位挡掉，等于**现有玩家能取的英文名从 12 字符缩到 11**。
+> 要放宽把 `ServerConstants.MAX_CHARACTER_NAME_BYTES` 调到 13 即可（`characters.name` 是 `VARCHAR(13)`）。
+> 编码取 GBK 是因为它是本服支持的语言里最宽的一种，按它算对任何语言的客户端都安全，
+> 封装在 `CharsetConstants.getWidestCharset()`。
+
+##### 记录但未做
+
+`Character.attemptBoss(String)` 这个便捷方法 BeiDou 没有，脚本侧走的是
+`AbstractPlayerInteraction` → `ExpeditionBossLog.attemptBoss(..., false)`（不记账）。
+这正是 **G7 记下、留给批次 7 决定**的那条：`attemptBoss` 是「查即扣」，
+批次 7 给 BOSS 脚本接配额时要先决定是否拆出一个不记账的 `canAttemptBoss`。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `Character.java` | 满级广播走 i18n；角色名字节上限；魔法盾/回声免驱散；圣盾挡魅惑；龙血 `safeAddHP` |
+| `ServerConstants.java` | 中文屏蔽词；`MAX_CHARACTER_NAME_BYTES`；删除 `LEVEL_200` |
+| `CharsetConstants.java` | `getWidestCharset()` |
+| `CharacterService.java` | `reparentFamilyJuniors` |
+| `FamilyService.java` | 族长缺失时判空 + warn |
+| `message_{zh_CN,en_US}.properties` | `Character.levelUp.maxLevelBroadcast` |
+| `log_{zh_CN,en_US}.properties` | `FamilyService.loadAllFamilies.warn1` |
 
 ### 批次 7 — 数据类
 
