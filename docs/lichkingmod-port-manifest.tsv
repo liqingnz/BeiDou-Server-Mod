@@ -1307,7 +1307,7 @@ scripts/npc/9201132.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201133.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201134.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/9201135.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
-scripts/npc/9201142.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201142.js	script	0	0	ported	批次7：卷轴回收系统，双语两份重写（isRecyclableScroll API 批次5已备）；LK 注释噪音未搬
 scripts/npc/9201143.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9209000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9209000_old.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
