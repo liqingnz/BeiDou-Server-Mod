@@ -23,7 +23,6 @@
 //Fixed grammar, javascript syntax
 
 var status = 0;
-var price = 100000;
 
 function isTransformed(ch) {
     const BuffStat = Java.type('org.gms.client.BuffStat');
@@ -37,31 +36,19 @@ function start() {
         return;
     }
 
-    cm.sendSimple("欢迎来到生命之洞穴 - 入口！你想要进去和 #r暴君#k 战斗吗？如果你想要和他战斗，你可能需要一些 #b#v2000005##k，这样如果你被 #r暴君#k 击中了，你就可以恢复一些HP。\r\n#L1#我想花100,000金币购买10个！#l\r\n#L2#不用了，让我进去吧！#l");
+    cm.sendAcceptDecline("欢迎来到生命之穴的入口！你想进去挑战#r暗黑龙王#k吗？");
 }
 
 function action(mode, type, selection) {
     if (mode < 1) {
         cm.dispose();
-    } else if (selection == 1) {
-        if (cm.getMeso() >= price) {
-            if (!cm.canHold(2000005)) {
-                cm.sendOk("抱歉，你的背包里没有空位来存放这个物品！");
-            } else {
-                cm.gainMeso(-price);
-                cm.gainItem(2000005, 10);
-                cm.sendOk("谢谢购买这个药水。记得好好使用它！");
-            }
-        } else {
-            cm.sendOk("抱歉，你没有足够的金币来购买它们！");
-        }
-        cm.dispose();
-    } else if (selection == 2) {
-        if (cm.getLevel() > 99) {
-            cm.warp(240050000, 0);
-        } else {
-            cm.sendOk("对不起，您需要至少达到100级或以上才能进入。");
-        }
-        cm.dispose();
+        return;
     }
+
+    if (cm.getLevel() > 99) {
+        cm.warp(240050000, 0);
+    } else {
+        cm.sendOk("对不起，您需要至少达到100级或以上才能进入。");
+    }
+    cm.dispose();
 }

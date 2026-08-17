@@ -1089,7 +1089,7 @@ scripts/npc/2060009.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2080000.js	script	0	0	partial	神木村龙之武器制作。采纳菜单换 #i##t# 宏（两层都是写死名），保留各层自己的等级/类型后缀（LK 丢了）。17 项与 String.wz 核对：16 项精确匹配，唯一不匹配是英文层写死名的拼写错误 Dragon Carbella（String.wz 为 Carabella），宏自动修掉。菜单顺序与发放 itemSet 逐项对应已验证。否决 new Array 与半汉化文案
 scripts/npc/2081000.js	script	0	0	done	采纳去掉死菜单项「为神木村做点什么」（点进去只有 Under development）；不照抄 LK 注释掉代码的做法，连同分支一并删。顺带补了 zh-CN 层漏译的 sendGetNumber
 scripts/npc/2081004.js	script	0	0	ported	gms-server/scripts/npc/2081004.js 与 scripts-zh-CN/npc/2081004.js —— 修了材料校验：原实现把校验写在循环体内，第一种材料够了就直接走 else 收材料发成品，另外两种一件都不用有
-scripts/npc/2081005.js	script	0	0	rejected	LK 把 sendSimple 菜单换成 sendAcceptDecline，删掉了「买 10 瓶药水」分支，减功能
+scripts/npc/2081005.js	script	0	0	done	可罗宾（Keroben），神木村生命之穴入口的守门龙人。用户 2026-08-17 决定采用 LK 版功能：入口从 sendSimple 两选菜单改为 sendAcceptDecline，删掉「10 万金币买 10 瓶 2000005」那条分支，只保留进洞（仍需龙人变身药水 2210003 或道具 4001086 的资格检查 + 100 级门槛）。不照抄 LK 注释掉代码的做法，连同 price 变量一并删净；两层同构
 scripts/npc/2081100.js	script	0	0	rejected	把「教我本职业技能」的 sendSimple 菜单换成 sendOk+dispose，等于删掉四转技能书发放入口；BeiDou 版已按 getSkillLevel==0 防重复领取
 scripts/npc/2081200.js	script	0	0	rejected	同 2081100：删掉四转技能书发放入口
 scripts/npc/2081300.js	script	0	0	rejected	同 2081100：删掉四转技能书发放入口
