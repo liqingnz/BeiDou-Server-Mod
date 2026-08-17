@@ -44,6 +44,9 @@ function scheduleNew() {
     em.setProperty("haveBalrog", "false");
     em.schedule("stopentry", closeTime);
     em.schedule("takeoff", beginTime);
+    // Publish when the next departure is due, so the port maps (map/onUserEnter/<mapid>.js)
+    // can greet arrivals with a live countdown instead of only broadcasting at takeoff.
+    em.setProperty("nextTakeoff", "" + (Date.now() + beginTime));
 }
 
 function stopentry() {
@@ -61,14 +64,16 @@ function takeoff() {
     // Give whoever is left on the dock a clock counting down to the next departure: the
     // ferry comes back exactly one rideTime after it pulls out. Same treatment as Subway.js.
     const PacketCreator = Java.type('org.gms.util.PacketCreator');
-    Ellinia_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
-    Orbis_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    Ellinia_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
+    Orbis_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
 
     em.setProperty("docked", "false");
 
     if (Math.random() < 0.42) {
         em.schedule("approach", (invasionStartTime + Math.trunc((Math.random() * invasionDelayTime))));
     }
+    // The ride is away: the next departure is one rideTime (getting back) plus one beginTime (docked) out.
+    em.setProperty("nextTakeoff", "" + (Date.now() + rideTime + beginTime));
     em.schedule("arrived", rideTime);
 }
 

@@ -29,6 +29,9 @@ function scheduleNew() {
     em.setProperty("entry", "true");
     em.schedule("stopEntry", closeTime);
     em.schedule("takeoff", beginTime);
+    // 发布下一班发车时刻，好让港口地图（map/onUserEnter/<mapid>.js）在玩家一进场就能
+    // 显示实时倒计时，而不是只在发车那一刻广播一次。
+    em.setProperty("nextTakeoff", "" + (Date.now() + beginTime));
 }
 
 function stopEntry() {
@@ -36,14 +39,16 @@ function stopEntry() {
 }
 
 function takeoff() {
-    // 给还留在站台上的人一个倒计时：地铁开走后正好一个 rideTime 就会回来。
+    // 给还留在站台上的人一个倒计时：下一班发车要等一个 rideTime（开回来）加一个 beginTime（靠站等待）。
     const PacketCreator = Java.type('org.gms.util.PacketCreator');
-    KC_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
-    NLC_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    KC_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
+    NLC_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
 
     em.setProperty("docked", "false");
     KC_Waiting.warpEveryone(Subway_to_NLC.getId());
     NLC_Waiting.warpEveryone(Subway_to_KC.getId());
+    // 车已开走：下一班要等一个 rideTime（开回来）加一个 beginTime（靠站等待）。
+    em.setProperty("nextTakeoff", "" + (Date.now() + rideTime + beginTime));
     em.schedule("arrived", rideTime);
 }
 

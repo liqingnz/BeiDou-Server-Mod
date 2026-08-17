@@ -2682,6 +2682,41 @@ LK 原文已封存到 `docs/lkport-parked/npc/9000020.js`（用户 2026-08-17 �
 >
 > `Elevator`/`Hak`/`KerningTrain` 不在此列：前者无 `takeoff()` 结构，后两者已有 `getClock`。
 
+##### 进港即显示倒计时（用户 2026-08-17 要求）
+
+发车瞬间的 `broadcastMessage` 只打到那一刻在场的人；要「一进港口就看到出发倒计时」
+得挂进场钩子。查证下来**不需要动 wz**：
+
+```java
+// MapFactory：wz 里没有 onUserEnter 字段时，默认拿地图 ID 当脚本名
+String onEnter = DataTool.getString(infoData.getChildByPath("onUserEnter"), String.valueOf(mapid));
+map.setOnUserEnter(onEnter.equals("") ? String.valueOf(mapid) : onEnter);
+```
+
+`MapScriptManager#runMapScript` 找不到文件就静默返回 false，所以
+**往 `scripts/map/onUserEnter/<mapid>.js` 丢文件即生效**——内层那几个正是这么工作的
+（这 11 张外层图的 wz 里都没有 `onUserEnter` 字段，已逐个核对）。
+
+实现分两半：
+
+1. **事件脚本发布下一班发车时刻**（6 个 × 两层 = 12 个文件）
+   - `scheduleNew()`：`em.setProperty("nextTakeoff", "" + (Date.now() + beginTime))`
+   - `takeoff()`：`em.setProperty("nextTakeoff", "" + (Date.now() + rideTime + beginTime))`
+
+   两处的值与 `arrived()` → `scheduleNew()` 的实际排程一致，所以车在途中时港口显示的
+   也是正确的（更长的）等待。LK 的 `Boats.js` 里留着一行注释掉的
+   `// em.setProperty("takeoffTime", )`——他们想过这件事但没做。
+
+2. **11 张港口图各一个 `onUserEnter` 脚本**，读 `nextTakeoff` 算差值发 `getClock`。
+   **只放 `scripts/` 一份**：`AbstractScriptManager#getInvocableScriptEngine` 是
+   **按文件回退**的（先 `scripts-<lang>/`，没有才用 `scripts/`），而这些脚本
+   没有任何面向玩家的文案，两种语言共用同一份即可。
+
+**顺带修掉自己引入的口径不一致**：发车瞬间的广播原本发 `rideTime`（车多久开**回来**），
+而进港脚本算的是下一班多久**发车** = `rideTime + beginTime`。同一玩家走出去再进来
+会看到两个不同的数。用户要的是出发倒计时，故把六个载具的广播统一改成
+`getClock((rideTime + beginTime) / 1000)`，注释同步更正。
+
 **② `npc/9270047` 改判 partial —— 采纳任务 `4576` 前置门**
 
 先前判 rejected 的理由是「新增限制而非修 bug」，用户决定采纳。加在**加入**与**组建**两处，

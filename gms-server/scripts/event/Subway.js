@@ -29,6 +29,9 @@ function scheduleNew() {
     em.setProperty("entry", "true");
     em.schedule("stopEntry", closeTime);
     em.schedule("takeoff", beginTime);
+    // Publish when the next departure is due, so the port maps (map/onUserEnter/<mapid>.js)
+    // can greet arrivals with a live countdown instead of only broadcasting at takeoff.
+    em.setProperty("nextTakeoff", "" + (Date.now() + beginTime));
 }
 
 function stopEntry() {
@@ -37,14 +40,16 @@ function stopEntry() {
 
 function takeoff() {
     // Give whoever is left standing on the platform a clock counting down to the
-    // next train: the subway comes back exactly one rideTime after it pulls out.
+    // next train: the next departure is one rideTime (getting back) plus one beginTime (docked) away.
     const PacketCreator = Java.type('org.gms.util.PacketCreator');
-    KC_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
-    NLC_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    KC_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
+    NLC_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
 
     em.setProperty("docked", "false");
     KC_Waiting.warpEveryone(Subway_to_NLC.getId());
     NLC_Waiting.warpEveryone(Subway_to_KC.getId());
+    // The ride is away: the next departure is one rideTime (getting back) plus one beginTime (docked) out.
+    em.setProperty("nextTakeoff", "" + (Date.now() + rideTime + beginTime));
     em.schedule("arrived", rideTime);
 }
 

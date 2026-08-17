@@ -37,6 +37,9 @@ function scheduleNew() {
     em.setProperty("entry", "true");
     em.schedule("stopEntry", closeTime); //The time to close the gate
     em.schedule("takeoff", beginTime); //The time to begin the ride
+    // Publish when the next departure is due, so the port maps (map/onUserEnter/<mapid>.js)
+    // can greet arrivals with a live countdown instead of only broadcasting at takeoff.
+    em.setProperty("nextTakeoff", "" + (Date.now() + beginTime));
 }
 
 function stopEntry() {
@@ -48,10 +51,10 @@ function takeoff() {
     Ludibrium_btf.warpEveryone(Train_to_Orbis.getId());
 
     // Give whoever is left on the platform a clock counting down to the next departure:
-    // the ride comes back exactly one rideTime after it pulls out. Same as Boats.js / Subway.js.
+    // the next departure is one rideTime (getting back) plus one beginTime (docked) away. Same as Boats.js / Subway.js.
     const PacketCreator = Java.type('org.gms.util.PacketCreator');
-    Orbis_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
-    Ludibrium_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    Orbis_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
+    Ludibrium_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
     Orbis_docked.broadcastShip(false);
     Ludibrium_docked.broadcastShip(false);
 
@@ -59,6 +62,8 @@ function takeoff() {
     Orbis_docked.setDocked(false);
     Ludibrium_docked.setDocked(false);
 
+    // The ride is away: the next departure is one rideTime (getting back) plus one beginTime (docked) out.
+    em.setProperty("nextTakeoff", "" + (Date.now() + rideTime + beginTime));
     em.schedule("arrived", rideTime); //The time that require move to destination
 }
 

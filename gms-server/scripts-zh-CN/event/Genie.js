@@ -56,6 +56,9 @@ function scheduleNew() {
     em.setProperty("entry", "true");
     em.schedule("stopEntry", closeTime); //The time to close the gate
     em.schedule("takeoff", beginTime); //The time to begin the ride
+    // 发布下一班发车时刻，好让港口地图（map/onUserEnter/<mapid>.js）在玩家一进场就能
+    // 显示实时倒计时，而不是只在发车那一刻广播一次。
+    em.setProperty("nextTakeoff", "" + (Date.now() + beginTime));
 }
 
 function stopEntry() {
@@ -66,10 +69,10 @@ function takeoff() {
     Orbis_btf.warpEveryone(Genie_to_Ariant.getId());
     Ariant_btf.warpEveryone(Genie_to_Orbis.getId());
 
-    // 给还留在站台上的人一个倒计时：车/船开走后正好一个 rideTime 就会回来。同 Boats.js / Subway.js。
+    // 给还留在站台上的人一个倒计时：下一班发车要等一个 rideTime（开回来）加一个 beginTime（靠站等待）。同 Boats.js / Subway.js。
     const PacketCreator = Java.type('org.gms.util.PacketCreator');
-    Orbis_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
-    Ariant_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    Orbis_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
+    Ariant_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
     Orbis_docked.broadcastShip(false);
     Ariant_docked.broadcastShip(false);
 
@@ -77,6 +80,8 @@ function takeoff() {
     Orbis_docked.setDocked(false);
     Ariant_docked.setDocked(false);
 
+    // 车已开走：下一班要等一个 rideTime（开回来）加一个 beginTime（靠站等待）。
+    em.setProperty("nextTakeoff", "" + (Date.now() + rideTime + beginTime));
     em.schedule("arrived", rideTime); //The time that require move to destination
 }
 

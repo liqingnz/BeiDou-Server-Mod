@@ -53,6 +53,9 @@ function scheduleNew() {
     // 安排关闭入口和起飞的时间点
     em.schedule("stopentry", closeTime);
     em.schedule("takeoff", beginTime);
+    // 发布下一班发车时刻，好让港口地图（map/onUserEnter/<mapid>.js）在玩家一进场就能
+    // 显示实时倒计时，而不是只在发车那一刻广播一次。
+    em.setProperty("nextTakeoff", "" + (Date.now() + beginTime));
 }
 
 function stopentry() {
@@ -72,10 +75,10 @@ function takeoff() {
     Orbis_btf.warpEveryone(Boat_to_Ellinia.getId());
     Ellinia_btf.warpEveryone(Boat_to_Orbis.getId());
 
-    // 给还留在码头上的人一个倒计时：船开走后正好一个 rideTime 就会回来。同 Subway.js。
+    // 给还留在码头上的人一个倒计时：下一班发车要等一个 rideTime（开回来）加一个 beginTime（靠站等待）。同 Subway.js。
     const PacketCreator = Java.type('org.gms.util.PacketCreator');
-    Ellinia_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
-    Orbis_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    Ellinia_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
+    Orbis_docked.broadcastMessage(PacketCreator.getClock((rideTime + beginTime) / 1000));
 
     // 设置码头状态为未停靠
     em.setProperty("docked", "false");
@@ -86,6 +89,8 @@ function takeoff() {
     }
 
     // 安排到达目的地的时间点
+    // 车已开走：下一班要等一个 rideTime（开回来）加一个 beginTime（靠站等待）。
+    em.setProperty("nextTakeoff", "" + (Date.now() + rideTime + beginTime));
     em.schedule("arrived", rideTime);
 }
 
