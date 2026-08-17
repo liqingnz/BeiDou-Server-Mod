@@ -36,6 +36,10 @@ var expedBoss = "暴力熊和心疤狮王";
 var expedMap = "阴森世界";
 var expedItem = 4032246;
 
+/* 「前往梦幻主题公园」——开启阴森世界那条线的任务，这次远征就在阴森世界里。
+   卡这个前置是为了避免把没走正常流程解锁该区域的玩家直接丢进去。 */
+var PREREQ_QUEST = 4576;
+
 var list = "你想要做什么？#b\r\n\r\n#L1#查看当前远征队员名单#l\r\n#L2#开始战斗！#l\r\n#L3#结束远征#l";
 
 function start() {
@@ -75,6 +79,9 @@ function action(mode, type, selection) {
                 if (expedition.contains(player)) { //If you're in it but it hasn't started, be patient
                     cm.sendOk("你已经注册了这次远征。请等待 #r" + expedition.getLeader().getName() + "#k 开始。");
                     cm.dispose();
+                } else if (!cm.isQuestCompleted(PREREQ_QUEST)) {
+                    cm.sendOk("你还没完成#b#q" + PREREQ_QUEST + "##k，没法加入这次远征。");
+                    cm.dispose();
                 } else { //If you aren't in it, you're going to get added
                     cm.sendOk(expedition.addMember(cm.getPlayer()));
                     cm.dispose();
@@ -96,6 +103,12 @@ function action(mode, type, selection) {
             }
         } else if (status == 1) {
             if (selection == 1) {
+                if (!cm.isQuestCompleted(PREREQ_QUEST)) {
+                    cm.sendOk("你还没完成#b#q" + PREREQ_QUEST + "##k，没法组建这次远征队。");
+                    cm.dispose();
+                    return;
+                }
+
                 if (!cm.haveItem(expedItem)) {
                     cm.sendOk("作为远征队领袖，你必须携带#b#t" + expedItem + "##k在你的物品栏中，与" + expedBoss + "进行战斗！");
                     cm.dispose();

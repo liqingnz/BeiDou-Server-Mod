@@ -39,6 +39,13 @@ function takeoff() {
     em.setProperty("docked", "false");
     KC_bfd.warpEveryone(Plane_to_CBD.getId());
     CBD_bfd.warpEveryone(Plane_to_KC.getId());
+
+    // Give whoever is left on the platform a clock counting down to the next departure:
+    // the ride comes back exactly one rideTime after it pulls out. Same as Boats.js / Subway.js.
+    // Kerning side is skipped on purpose: KC_docked is map 103000000, Kerning City itself,
+    // not a platform -- a clock there would hit every player in town.
+    const PacketCreator = Java.type('org.gms.util.PacketCreator');
+    CBD_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
     em.schedule("arrived", rideTime); //The time that require move to destination
 }
 

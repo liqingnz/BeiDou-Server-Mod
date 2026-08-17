@@ -2645,6 +2645,40 @@ LK 加了第三条航线（上海 `701000000` → 嵩山少林寺 `702000000`）
 > 并翻译 10 段中文描述——那是创作不是移植，故不在本批次做，与
 > 「GameConfig 门只在中文层」同列为 BeiDou 双层一致性待办。
 
+LK 原文已封存到 `docs/lkport-parked/npc/9000020.js`（用户 2026-08-17 要求）。
+
+##### 三项收尾（用户 2026-08-17 指示）
+
+**① 发车倒计时铺到全部载具（BeiDou 自身补强，非 LK 移植）**
+
+`Boats`/`Subway` 采纳倒计时后，横扫 `scripts/event/` 里所有载具脚本，把同一功能补齐。
+判据：脚本有 `takeoff()` + `rideTime`，且 `arrived()` 在 `rideTime` 后调 `scheduleNew()`
+重新靠站——**六个载具逐个核对过这个前提成立**，所以倒计时数字准确。
+
+| 脚本 | 线路 | 挂钟的图 |
+|---|---|---|
+| `Boats` | 魔法密林 ↔ 天空之城 | `Ellinia_docked` / `Orbis_docked`（已做） |
+| `Subway` | 废弃都市 ↔ 新叶城 | `KC_docked` / `NLC_docked`（已做） |
+| `Cabin` | 天空之城 ↔ 神木村 | `Orbis_docked` `200000131` / `Leafre_docked` `240000110` |
+| `Genie` | 天空之城 ↔ 阿里安特 | `Orbis_docked` `200000151` / `Ariant_docked` `260000100` |
+| `Trains` | 天空之城 ↔ 玩具城 | `Orbis_docked` `200000121` / `Ludibrium_docked` `220000110` |
+| `AirPlane` | 废弃都市 ↔ 新加坡 | **只挂** `CBD_docked` `540010000`（樟宜机场） |
+
+> **`AirPlane` 只挂单侧是查出来的坑**：它的 `KC_docked` 是 **`103000000`——废弃都市主城本身**，
+> 不是站台（该变量只用作 `arrived()` 的落客点）。往那儿广播会给全城玩家挂上倒计时。
+> 其余五个的 `*_docked` 都经 `String.wz` 核对过是正经码头/站台，且 `takeoff()` 清空的是
+> `*_btf`，站台侧留人，广播打得到「刚好错过这班」的玩家。
+>
+> `Elevator`/`Hak`/`KerningTrain` 不在此列：前者无 `takeoff()` 结构，后两者已有 `getClock`。
+
+**② `npc/9270047` 改判 partial —— 采纳任务 `4576` 前置门**
+
+先前判 rejected 的理由是「新增限制而非修 bug」，用户决定采纳。加在**加入**与**组建**两处，
+提示语用 `#q4576#` 宏渲染任务名而不写死文案。两层同构，各 5 处引用。
+其余三类（`getPartInfo()`、老类名、`importPackage`）仍然否决。
+
+**③ `npc/9000020` LK 原文封存**，见 `docs/lkport-parked/`。
+
 > **必须一并移植的前置**：`ItemInformationProvider` 中为支持新发型/脸型扩大的 ID 段判断，
 > 否则点装不显示。**批次 6 盘点时查证过，三条里已有两条不成立**：
 >

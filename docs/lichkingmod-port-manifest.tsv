@@ -1193,7 +1193,7 @@ scripts/npc/9000012.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9000013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000019.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9000020.js	script	0	0	rejected	世界旅行社。LK 加第三条航线（上海 701000000 → 嵩山少林寺 702000000），但 BeiDou 的 scripts-zh-CN 早已是自己 2025 年的重写（Magical-H，「北斗航旅」），5 个目的地含少林寺，数据结构也不同——中文层 ⊃ LK ⊃ 英文层。英文层只有 2 个目的地，属 BeiDou 自身的双层缺口，补齐要整份重写 + 翻译 10 段中文描述，是创作不是移植，另记待办
+scripts/npc/9000020.js	script	0	0	rejected	世界旅行社。LK 加第三条航线（上海 701000000 → 嵩山少林寺 702000000），但 BeiDou 的 scripts-zh-CN 早已是自己 2025 年的重写（Magical-H「北斗航旅」），5 个目的地含少林寺，数据结构也不同——中文层 ⊃ LK ⊃ 英文层。原文封存在 docs/lkport-parked/。英文层只有 2 个目的地，补齐要按中文层对象结构整份重写 + 翻译 10 段描述，属创作非移植，另记 BeiDou 双层一致性待办
 scripts/npc/9000021.js	script	0	0	rejected	LK 在 status==0 就 sendOk+dispose+return，等于把 BossRushPQ 的入口 NPC 废掉，后面 4 步再也走不到
 scripts/npc/9000036.js	script	0	0	rejected	LK 把亨内西的饰品制作 NPC「Agent E」整个换成皇家点券兑换台（原逻辑复制到 9000036_accessory.js，但脚本引擎按 npc/<id>.js 找文件，那份永远不会被加载，LK 也无任何 openNpc 引用它）。五个菜单项依赖 cm.gainRoyalPoint/gainRoyalTime、@redeem 指令、以及 3100000/3100001/3101000/3101001 四个两层 Item.wz 都没有的道具。用户 2026-08-17 决定皇家系统整个跳过，故判 rejected；照搬只会白白删掉一个能用的饰品制作 NPC
 scripts/npc/9000037.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1328,7 +1328,7 @@ scripts/npc/9270036.js	script	0	0	ported	批次7 美容券统一：造型券→5
 scripts/npc/9270037.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/9270038.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270041.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9270047.js	script	0	0	rejected	Scarga 远征 NPC。①LK 用 exped.getPartInfo() 取要求文案，BeiDou 统一用 em.getProperty("party")（全仓库 8 个 NPC 都是，getPartInfo 零使用）；②MapleExpeditionType/MaplePacketCreator 是 BeiDou 已改的类名；③importPackage 死代码；④若干 dispose 后多余的 return。LK 新增的「必须完成任务 4576（前往梦幻主题公园）才能加入/组建远征队」是新增限制而非修 bug——该任务在 BeiDou 脚本里零引用，没有别处锁这条线，属运营决策，需要时再开
+scripts/npc/9270047.js	script	0	0	partial	Scarga 远征 NPC。采纳 LK 的任务 4576（前往梦幻主题公园）前置门，加在「加入远征队」与「组建远征队」两处：该任务开启的正是远征所在的阴森世界，卡住它可避免把没走正常流程解锁该区域的玩家直接丢进去。提示语用 #q4576# 宏渲染任务名，不写死文案。否决：exped.getPartInfo() 对 BeiDou 统一的 em.getProperty("party")（全仓库 8 个 NPC 都用后者）、MapleExpeditionType/MaplePacketCreator 老类名、importPackage 死代码、若干 dispose 后多余的 return
 scripts/npc/9310004.js	script	0	0	rejected	东方神舟撞车：LK 与 BeiDou 各自独立做了蜈蚣入口守卫，同目标图 701010321。BeiDou 更完整——兼顾 4103/8512 两个版本的任务、支持资格证明道具 4031289 进入、带重复进入/是否扣券开关、用地图名宏；LK 只查 isQuestStarted(8512)，还带个零调用的 generateSelectionMenu
 scripts/npc/9310005.js	script	0	0	rejected	东方神舟撞车：黑羊守卫，同目标图 701010322、同退出图 701010320。BeiDou 走任务模式（任务 4109 + 完成后自动 reset）、显示收集进度、可指定落点传送门 h000；LK 只是直接扣 50 个黑羊毛，等价于 BeiDou 的 QuestMode=false 分支
 scripts/npc/9310006.js	script	0	0	rejected	BeiDou 版（@Magical-H 东方神舟框架）更完整：组队/等级/赤珠任务校验俱全；LK 版是单人 startInstance + 60 行死注释

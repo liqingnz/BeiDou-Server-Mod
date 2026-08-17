@@ -65,6 +65,12 @@ function stopEntry() {
 function takeoff() {
     Orbis_btf.warpEveryone(Genie_to_Ariant.getId());
     Ariant_btf.warpEveryone(Genie_to_Orbis.getId());
+
+    // Give whoever is left on the platform a clock counting down to the next departure:
+    // the ride comes back exactly one rideTime after it pulls out. Same as Boats.js / Subway.js.
+    const PacketCreator = Java.type('org.gms.util.PacketCreator');
+    Orbis_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    Ariant_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
     Orbis_docked.broadcastShip(false);
     Ariant_docked.broadcastShip(false);
 

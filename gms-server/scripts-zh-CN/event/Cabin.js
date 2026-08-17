@@ -86,6 +86,11 @@ function takeoff() {
     Orbis_btf.warpEveryone(Cabin_to_Leafre.getId());
     Leafre_btf.warpEveryone(Cabin_to_Orbis.getId());
 
+    // 给还留在站台上的人一个倒计时：车/船开走后正好一个 rideTime 就会回来。同 Boats.js / Subway.js。
+    const PacketCreator = Java.type('org.gms.util.PacketCreator');
+    Orbis_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    Leafre_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+
     Orbis_docked.broadcastShip(false);
     Leafre_docked.broadcastShip(false);
 

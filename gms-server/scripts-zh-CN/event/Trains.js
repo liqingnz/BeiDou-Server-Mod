@@ -46,6 +46,11 @@ function stopEntry() {
 function takeoff() {
     Orbis_btf.warpEveryone(Train_to_Ludibrium.getId());
     Ludibrium_btf.warpEveryone(Train_to_Orbis.getId());
+
+    // 给还留在站台上的人一个倒计时：车/船开走后正好一个 rideTime 就会回来。同 Boats.js / Subway.js。
+    const PacketCreator = Java.type('org.gms.util.PacketCreator');
+    Orbis_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
+    Ludibrium_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
     Orbis_docked.broadcastShip(false);
     Ludibrium_docked.broadcastShip(false);
 

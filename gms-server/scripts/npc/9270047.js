@@ -36,6 +36,11 @@ var expedBoss = "Scarlion and Targa";
 var expedMap = "Spooky World";
 var expedItem = 4032246;
 
+/* "Off to the Fantasy Theme Park" -- the quest that opens up Spooky World, where this
+   expedition takes place. Gating on it keeps players from being dropped into an area
+   they have not unlocked through the normal progression. */
+var PREREQ_QUEST = 4576;
+
 var list = "What would you like to do?#b\r\n\r\n#L1#View current Expedition members#l\r\n#L2#Start the fight!#l\r\n#L3#Stop the expedition.#l";
 
 function start() {
@@ -75,6 +80,9 @@ function action(mode, type, selection) {
                 if (expedition.contains(player)) { //If you're in it but it hasn't started, be patient
                     cm.sendOk("You have already registered for the expedition. Please wait for #r" + expedition.getLeader().getName() + "#k to begin it.");
                     cm.dispose();
+                } else if (!cm.isQuestCompleted(PREREQ_QUEST)) {
+                    cm.sendOk("You have not finished #b#q" + PREREQ_QUEST + "##k yet, so you cannot join this expedition.");
+                    cm.dispose();
                 } else { //If you aren't in it, you're going to get added
                     cm.sendOk(expedition.addMember(cm.getPlayer()));
                     cm.dispose();
@@ -96,6 +104,12 @@ function action(mode, type, selection) {
             }
         } else if (status == 1) {
             if (selection == 1) {
+                if (!cm.isQuestCompleted(PREREQ_QUEST)) {
+                    cm.sendOk("You have not finished #b#q" + PREREQ_QUEST + "##k yet, so you cannot lead this expedition.");
+                    cm.dispose();
+                    return;
+                }
+
                 if (!cm.haveItem(expedItem)) {
                     cm.sendOk("As the expedition leader, you must have on your inventory a #b#t" + expedItem + "##k to battle " + expedBoss + "!");
                     cm.dispose();

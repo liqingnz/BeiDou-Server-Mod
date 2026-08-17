@@ -39,6 +39,12 @@ function takeoff() {
     em.setProperty("docked", "false");
     KC_bfd.warpEveryone(Plane_to_CBD.getId());
     CBD_bfd.warpEveryone(Plane_to_KC.getId());
+
+    // 给还留在站台上的人一个倒计时：车/船开走后正好一个 rideTime 就会回来。同 Boats.js / Subway.js。
+    // 废弃都市侧刻意不挂：KC_docked 是 103000000 废弃都市主城本身，不是站台，
+    // 挂上去会打到全城玩家。
+    const PacketCreator = Java.type('org.gms.util.PacketCreator');
+    CBD_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
     em.schedule("arrived", rideTime); //The time that require move to destination
 }
 
