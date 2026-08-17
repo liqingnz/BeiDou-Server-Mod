@@ -2,10 +2,13 @@ package org.gms;
 
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.gms.manager.ServerManager;
 import org.gms.util.RequireUtil;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -28,7 +31,10 @@ public class ServerApplication {
             log.error("自动创建数据库失败：", e);
             return;
         }
-        SpringApplication.run(ServerApplication.class, args);
+        // 上下文必须在任何 Bean 创建之前就交给 ServerManager，详见 ServerManager#setEarlyContext
+        SpringApplication application = new SpringApplication(ServerApplication.class);
+        application.addInitializers((ApplicationContextInitializer<ConfigurableApplicationContext>) ServerManager::setEarlyContext);
+        application.run(args);
     }
 
     /**
