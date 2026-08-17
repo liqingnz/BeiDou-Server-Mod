@@ -28,6 +28,14 @@ public class CharsetConstants {
         return Charset.forName(Language.fromLang(language).getCharset());
     }
 
+    /**
+     * 本服支持的编码里最宽的一种（GBK，每个汉字两字节）。
+     * 按字节校验长度、又拿不到当前客户端语言时用它取上界，结果对任何语言的客户端都是安全的。
+     */
+    public static Charset getWidestCharset() {
+        return Charset.forName(Language.LANGUAGE_CN.getCharset());
+    }
+
     public static Locale getLanguageLocale(int language) {
         return Locale.forLanguageTag(Language.fromLang(language).getLanguageTag());
     }

@@ -43,6 +43,7 @@ import org.gms.constants.id.MobId;
 import org.gms.constants.inventory.ItemConstants;
 import org.gms.constants.net.ServerConstants;
 import org.gms.constants.skills.*;
+import org.gms.constants.string.CharsetConstants;
 import org.gms.constants.string.ExtendKey;
 import org.gms.constants.string.ExtendType;
 import org.gms.dao.entity.*;
@@ -966,6 +967,11 @@ public class Character extends AbstractCharacterObject {
             if (lname.contains(nameTest)) {
                 return false;
             }
+        }
+        // 正则按「字符数」限长，但出包是按字节走的：一个汉字在 GBK 下占两字节，12 个汉字就是 24 字节。
+        // 这里再按字节卡一道，取 GBK 是因为它是本服支持的语言里最宽的编码，按它算最保险
+        if (name.getBytes(CharsetConstants.getWidestCharset()).length >= ServerConstants.MAX_CHARACTER_NAME_BYTES) {
+            return false;
         }
         return !existName(name) && Pattern.compile("[a-zA-Z0-9\u4e00-\u9fa5]{2,12}").matcher(name).matches(); // 加入对中文编码的检测
     }
@@ -2442,12 +2448,27 @@ public class Character extends AbstractCharacterObject {
         }
     }
 
+    /**
+     * 驱散时保留的技能。魔法盾与英雄的回声掉了基本等于秒死，所以豁免。
+     * <p>
+     * 四条职业线的同名技能 id 各不相同，必须全部列出：只判冒险家那两个的话，
+     * 炎术士、Evan 的魔法盾和骑士团、战神、Evan 的英雄回声照样会被驱散，
+     * 同一个机制在不同职业上表现不一致。
+     */
+    private static boolean isUndispellableSkill(int sourceId) {
+        return sourceId == Magician.MAGIC_GUARD || sourceId == BlazeWizard.MAGIC_GUARD || sourceId == Evan.MAGIC_GUARD
+                || sourceId == Beginner.ECHO_OF_HERO || sourceId == Noblesse.ECHO_OF_HERO
+                || sourceId == Legend.ECHO_OF_HERO || sourceId == Evan.ECHO_OF_HERO;
+    }
+
     public void dispel() {
         if (!(GameConfig.getServerBoolean("use_undispel_holy_shield") && this.hasActiveBuff(Bishop.HOLY_SHIELD))) {
             List<BuffStatValueHolder> mbsvhList = getAllStatups();
             for (BuffStatValueHolder mbsvh : mbsvhList) {
                 if (mbsvh.effect.isSkill()) {
-                    if (mbsvh.effect.getBuffSourceId() != Aran.COMBO_ABILITY) { // check discovered thanks to Croosade dev team
+                    // 魔法盾与英雄的回声不随驱散消失：法师被驱散后若连魔法盾一起掉，基本等于秒死
+                    int buffId = mbsvh.effect.getBuffSourceId();
+                    if (buffId != Aran.COMBO_ABILITY && !isUndispellableSkill(buffId)) { // check discovered thanks to Croosade dev team
                         cancelEffect(mbsvh.effect, false, mbsvh.startTime);
                     }
                 }
@@ -2556,7 +2577,8 @@ public class Character extends AbstractCharacterObject {
 
     public void giveDebuff(final Disease disease, MobSkill skill) {
         if (!hasDisease(disease) && getDiseasesSize() < 2) {
-            if (!(disease == Disease.SEDUCE || disease == Disease.STUN)) {
+            // 魅惑改为可被圣盾免疫，只有晕眩仍然必中。会明显削弱扎昆、暗黑龙王这类靠魅惑的 BOSS
+            if (disease != Disease.STUN) {
                 if (hasActiveBuff(Bishop.HOLY_SHIELD)) {
                     return;
                 }
@@ -5935,7 +5957,8 @@ public class Character extends AbstractCharacterObject {
                     }
 
                     final String names = (getMedalText() + name);
-                    getWorldServer().broadcastPacket(PacketCreator.serverNotice(6, String.format(ServerConstants.LEVEL_200, names, maxClassLevel, names)));
+                    getWorldServer().broadcastPacket(PacketCreator.serverNotice(6,
+                            I18nUtil.getMessage("Character.levelUp.maxLevelBroadcast", names, maxClassLevel, names)));
                 }
             }
 
@@ -6919,7 +6942,8 @@ public class Character extends AbstractCharacterObject {
                 return;
             }
 
-            addHP(-bloodEffect.getX());
+            // 龙血是持续扣血的自伤 buff，用 safeAddHP 保底留 1 血——龙吼等其他自伤技能本来就走这条
+            safeAddHP(-bloodEffect.getX());
             sendPacket(PacketCreator.showOwnBuffEffect(bloodEffect.getSourceId(), 5));
             getMap().broadcastMessage(Character.this, PacketCreator.showBuffEffect(getId(), bloodEffect.getSourceId(), 5), false);
         }, 4000, 4000);
@@ -8179,6 +8203,19 @@ public class Character extends AbstractCharacterObject {
 
         transientMp = (maxpoint > nextMax) ? ((float) curpoint) / maxpoint : ((float) ret) / nextMax;
         return ret;
+    }
+
+    /**
+     * 永久提升血/魔上限，给「血液精华」这类道具用。
+     * <p>
+     * {@link AbstractCharacterObject#addMaxMPMaxHP} 是 {@code protected}，同包外够不着，
+     * 所以在这里开一个公开入口。{@code silent = false}，改动要即时下发给客户端。
+     * <p>
+     * 注意 {@code clientMaxHp} 在 {@code changeHpMpPool} 里被钳在 30000，内部 {@code maxHp}
+     * 却不封顶——超过之后客户端血条与服务端实际值会对不上，调用方要自己控制总量。
+     */
+    public void addMaxHpMpExternal(int maxHpIncrease, int maxMpIncrease) {
+        addMaxMPMaxHP(maxHpIncrease, maxMpIncrease, false);
     }
 
     public boolean applyHpMpChange(int hpCon, int hpchange, int mpchange) {

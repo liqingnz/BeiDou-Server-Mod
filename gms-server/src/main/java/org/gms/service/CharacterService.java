@@ -14,8 +14,10 @@ import org.gms.constants.string.ExtendType;
 import org.gms.dao.entity.*;
 import org.gms.dao.mapper.*;
 import org.gms.model.dto.CharacterListItemDTO;
+import org.gms.model.dto.ChrListReqDTO;
 import org.gms.model.dto.ChrOnlineListReqDTO;
 import org.gms.model.dto.ChrOnlineListRtnDTO;
+import org.gms.model.dto.UpdateCharacterDTO;
 import org.gms.exception.BizException;
 import org.gms.model.pojo.SkillEntry;
 import org.gms.net.server.Server;
@@ -289,9 +291,12 @@ public class CharacterService {
         areaInfoMapper.deleteByQuery(QueryWrapper.create().where(AREA_INFO_D_O.CHARID.eq(cid)));
         // 删除monsterbook
         monsterbookMapper.deleteByQuery(QueryWrapper.create().where(MONSTERBOOK_D_O.CHARID.eq(cid)));
+        // 家族过继必须排在删 characters 之前：family_character.cid 上有
+        // ON DELETE CASCADE（V1.0.49__some_alter.sql），characters 一删，这里就查不到被删者那行了
+        reparentFamilyJuniors(cid);
         // 删除characters
         charactersMapper.deleteById(cid);
-        // 删除family_character
+        // 删除family_character（cid 的外键是 ON DELETE CASCADE，上一步通常已经带走，这里兜底）
         familyCharacterMapper.deleteByQuery(QueryWrapper.create().where(FAMILY_CHARACTER_D_O.CID.eq(cid)));
         // 删除famelog
         famelogMapper.deleteByQuery(QueryWrapper.create().where(FAMELOG_D_O.CHARACTERID_TO.eq(cid).or(FAMELOG_D_O.CHARACTERID.eq(cid))));
@@ -341,6 +346,103 @@ public class CharacterService {
         // 补充heaven没有删除的2张表
         nameChangeService.cancelPendingNameChange(cid, false);
         worldTransferService.cancelPendingWorldTransfer(cid, false);
+    }
+
+    /**
+     * 家族树是<b>二叉</b>的：{@link org.gms.client.FamilyEntry} 里 {@code juniors} 定长 2。
+     */
+    private static final int FAMILY_JUNIOR_CAPACITY = 2;
+
+    /**
+     * 删角色前把他在家族里的下级重新挂接，保证家族树不断链。<b>必须在删 characters 之前调用</b>——
+     * {@code family_character.cid} 上有 {@code ON DELETE CASCADE}，characters 一删这里就什么都查不到了。
+     * <p>
+     * 不处理的话，下级的 {@code seniorid} 会指向一个已经不存在的角色：
+     * {@code FamilyService.loadAllFamilies} 找不到 senior 就把他们丢进 unmatchedJuniors 且永远匹配不上；
+     * 更要命的是<b>被删的如果是族长</b>，整个家族再没有任何一行 {@code seniorid <= 0}，
+     * {@code family.getLeader()} 返回 null，收尾那句 {@code getLeader().doFullCount()} 直接 NPE。
+     * <p>
+     * 挂接规则，两条硬约束都必须守住：
+     * <ol>
+     *   <li><b>一个家族最多一个根</b>。{@code loadAllFamilies} 对每个 {@code seniorid <= 0} 的行都调
+     *       {@code setLeader}，多于一个就会「最后一行胜出」，族长不确定、家族静默分裂。
+     *       所以删族长时只提拔一个下级当新族长，另一个挂到新族长名下。</li>
+     *   <li><b>新上级的下级数不能超过 {@value #FAMILY_JUNIOR_CAPACITY}</b>。超了 {@code FamilyEntry.addJunior}
+     *       会拒绝，而 {@code setSenior} 在拒绝前已经把 {@code this.senior} 赋好了 —— 子认父、父不认子，
+     *       内存树静默不一致、人数统计也错。</li>
+     * </ol>
+     * <p>
+     * <b>已知限制</b>：这里只做「就近挂接」，不做二叉树重排。名额不够时剩下的下级维持原样（{@code seniorid}
+     * 悬空），行为与本方法引入前一致 —— {@code FamilyService} 那道判空能兜住，但那棵子树会脱离统计。
+     * 这种情况会打 warn 并列出角色 id，需要人工处理。真要做完整重排是另一个课题。
+     */
+    private void reparentFamilyJuniors(int cid) {
+        FamilyCharacterDO self = familyCharacterMapper.selectOneByQuery(
+                QueryWrapper.create().where(FAMILY_CHARACTER_D_O.CID.eq(cid)));
+        if (self == null) {
+            return;     // 不在任何家族里
+        }
+
+        // 按 cid 升序取，保证同样的数据每次跑出同样的结果，不依赖 selectAll 的返回顺序
+        List<FamilyCharacterDO> juniors = familyCharacterMapper.selectListByQuery(
+                QueryWrapper.create().where(FAMILY_CHARACTER_D_O.SENIORID.eq(cid))
+                        .orderBy(FAMILY_CHARACTER_D_O.CID.asc()));
+        if (juniors.isEmpty()) {
+            return;
+        }
+
+        int newSeniorId = Optional.ofNullable(self.getSeniorid()).orElse(0);
+        List<Integer> placed = new ArrayList<>();
+        if (newSeniorId <= 0) {
+            // 被删的是族长：提拔第一个下级当新族长，其余挂到新族长名下。
+            // precepts（家训）挂在族长那一行上，要跟着位置一起转移，否则家族公告凭空消失
+            int newLeaderId = juniors.get(0).getCid();
+            familyCharacterMapper.updateByQuery(
+                    FamilyCharacterDO.builder().seniorid(0).reptosenior(0).precepts(self.getPrecepts()).build(),
+                    QueryWrapper.create().where(FAMILY_CHARACTER_D_O.CID.eq(newLeaderId)));
+            placed.add(newLeaderId);
+            placeWithinCapacity(cid, newLeaderId, juniors.subList(1, juniors.size()), placed);
+        } else {
+            placeWithinCapacity(cid, newSeniorId, juniors, placed);
+        }
+
+        List<Integer> stranded = juniors.stream().map(FamilyCharacterDO::getCid)
+                .filter(id -> !placed.contains(id)).toList();
+        if (!stranded.isEmpty()) {
+            log.warn(I18nUtil.getLogMessage("CharacterService.reparentFamilyJuniors.warn1"), cid, stranded);
+        }
+    }
+
+    /**
+     * 在 {@code newSeniorId} 的剩余名额内挂接下级，放不下的留给调用方记账。
+     *
+     * @param deletingCid 正在被删除的角色。<b>必须从名额统计里排除</b>：本方法跑在删 characters 之前，
+     *                    非族长路径下被删者自己那行的 seniorid 恰好就是 {@code newSeniorId}，
+     *                    不排除就会把他即将腾出的位置算成占用，每次删「有下级的普通成员」都少挂一个下级，
+     *                    把「名额不够才悬空」这条已知限制放大成常态。
+     */
+    private void placeWithinCapacity(int deletingCid, int newSeniorId, List<FamilyCharacterDO> juniors, List<Integer> placed) {
+        long used = familyCharacterMapper.selectCountByQuery(
+                QueryWrapper.create().where(FAMILY_CHARACTER_D_O.SENIORID.eq(newSeniorId))
+                        .and(FAMILY_CHARACTER_D_O.CID.ne(deletingCid)));
+        int free = (int) (FAMILY_JUNIOR_CAPACITY - used);
+        if (free <= 0) {
+            return;
+        }
+        moveJuniorsTo(newSeniorId, juniors.subList(0, Math.min(free, juniors.size())), placed);
+    }
+
+    private void moveJuniorsTo(int newSeniorId, List<FamilyCharacterDO> juniors, List<Integer> placed) {
+        if (juniors.isEmpty()) {
+            return;
+        }
+        List<Integer> ids = juniors.stream().map(FamilyCharacterDO::getCid).toList();
+        // reptosenior 一并清零：换了上级之后，攒给旧上级的声望不该带过去，
+        // 这也是 FamilyEntry.setSenior 的语义（见 updateDBChangeFamily 里的 reptosenior = 0）
+        familyCharacterMapper.updateByQuery(
+                FamilyCharacterDO.builder().seniorid(newSeniorId).reptosenior(0).build(),
+                QueryWrapper.create().where(FAMILY_CHARACTER_D_O.CID.in(ids)));
+        placed.addAll(ids);
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
@@ -493,28 +595,117 @@ public class CharacterService {
     }
 
     public List<CharacterListItemDTO> getCharacterListByAccountId(int accountId) {
-        List<CharactersDO> list = getCharacterByAccountId(accountId);
-        return list.stream().map(cdo -> {
-            int worldId = Optional.ofNullable(cdo.getWorld()).orElse(0);
-            String worldName = GameConstants.getWorldName(worldId);
-            Job job = Job.getById(cdo.getJob());
-            return CharacterListItemDTO.builder()
-                    .id(cdo.getId())
-                    .name(cdo.getName())
-                    .job(cdo.getJob())
-                    .jobName(job == null ? "" : job.getName())
-                    .level(cdo.getLevel())
-                    .world(worldId)
-                    .worldName(worldName)
-                    .gm(cdo.getGm())
-                    .meso(cdo.getMeso())
-                    .fame(cdo.getFame())
-                    .guildid(cdo.getGuildid())
-                    .createdate(cdo.getCreatedate())
-                    .lastLogoutTime(cdo.getLastLogoutTime())
-                    .online(findOnlineCharacter(cdo.getId()) != null)
-                    .build();
-        }).toList();
+        return getCharacterByAccountId(accountId).stream().map(this::toCharacterListItem).toList();
+    }
+
+    /**
+     * 全量角色列表（含离线），供GM后台「角色列表」页分页查询。
+     */
+    public Page<CharacterListItemDTO> getCharacterList(ChrListReqDTO request) {
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        if (request.getId() != null) {
+            queryWrapper.where(CHARACTERS_D_O.ID.eq(request.getId()));
+        }
+        if (!RequireUtil.isEmpty(request.getName())) {
+            queryWrapper.where(CHARACTERS_D_O.NAME.like(request.getName()));
+        }
+        if (request.getAccountId() != null) {
+            queryWrapper.where(CHARACTERS_D_O.ACCOUNTID.eq(request.getAccountId()));
+        }
+        if (request.getWorld() != null) {
+            queryWrapper.where(CHARACTERS_D_O.WORLD.eq(request.getWorld()));
+        }
+        queryWrapper.orderBy(CHARACTERS_D_O.ID.asc());
+
+        int pageNo = request.getPageNo() == null ? 1 : request.getPageNo();
+        int pageSize = request.getPageSize() == null ? 20 : request.getPageSize();
+        Page<CharactersDO> page = charactersMapper.paginate(pageNo, pageSize, queryWrapper);
+
+        Page<CharacterListItemDTO> result = new Page<>();
+        result.setPageNumber(page.getPageNumber());
+        result.setPageSize(page.getPageSize());
+        result.setTotalRow(page.getTotalRow());
+        result.setRecords(page.getRecords().stream().map(this::toCharacterListItem).toList());
+        return result;
+    }
+
+    /**
+     * GM后台编辑角色：仅改 characters 表中的安全字段，且要求角色离线。
+     * <p>
+     * 在线时内存中的 Character 才是权威副本，登出/自动存档时 saveCharToDB 会用内存数据
+     * 覆盖这里写入的值，导致改动静默丢失，故直接拒绝——与 AccountService#updateAccountByGM 的策略一致。
+     * 在线玩家的实时调整请走「玩家管理」页。
+     */
+    public void updateCharacterByGm(UpdateCharacterDTO submitData) {
+        RequireUtil.requireNotNull(submitData.getId(), I18nUtil.getExceptionMessage("PARAMETER_SHOULD_NOT_EMPTY", "id"));
+        CharactersDO chr = findById(submitData.getId());
+        RequireUtil.requireNotNull(chr, I18nUtil.getExceptionMessage("UNKNOWN_CHARACTER"));
+        RequireUtil.requireTrue(findOnlineCharacter(submitData.getId()) == null,
+                I18nUtil.getExceptionMessage("CharacterService.isOnline"));
+        checkUpdateCharacterParam(submitData);
+
+        CharactersDO update = CharactersDO.builder()
+                .id(chr.getId())
+                .level(submitData.getLevel())
+                .exp(submitData.getExp())
+                .meso(submitData.getMeso())
+                .fame(submitData.getFame())
+                .job(submitData.getJob())
+                .gm(submitData.getGm())
+                .map(submitData.getMap())
+                .ap(submitData.getAp())
+                .build();
+        // mybatis-flex 的 update(entity) 默认忽略 null 字段，未填的项不会被清空
+        charactersMapper.update(update);
+
+        log.info(I18nUtil.getLogMessage("CharacterService.updateByGm.info1", chr.getId(), chr.getName()));
+    }
+
+    private void checkUpdateCharacterParam(UpdateCharacterDTO submitData) {
+        if (submitData.getLevel() != null && submitData.getLevel() < 1) {
+            throw new BizException(I18nUtil.getExceptionMessage("ILLEGAL_PARAMETERS", "level"));
+        }
+        requireNotNegative(submitData.getExp(), "exp");
+        requireNotNegative(submitData.getMeso(), "meso");
+        requireNotNegative(submitData.getAp(), "ap");
+        requireNotNegative(submitData.getMap(), "map");
+        if (submitData.getGm() != null && (submitData.getGm() < 0 || submitData.getGm() > 127)) {
+            throw new BizException(I18nUtil.getExceptionMessage("ILLEGAL_PARAMETERS", submitData.getGm()));
+        }
+        if (submitData.getJob() != null && Job.getById(submitData.getJob()) == null) {
+            throw new BizException(I18nUtil.getExceptionMessage("ILLEGAL_PARAMETERS", submitData.getJob()));
+        }
+    }
+
+    private void requireNotNegative(Integer value, String name) {
+        if (value != null && value < 0) {
+            throw new BizException(I18nUtil.getExceptionMessage("ILLEGAL_PARAMETERS", name));
+        }
+    }
+
+    private CharacterListItemDTO toCharacterListItem(CharactersDO cdo) {
+        int worldId = Optional.ofNullable(cdo.getWorld()).orElse(0);
+        Job job = Job.getById(cdo.getJob());
+        return CharacterListItemDTO.builder()
+                .id(cdo.getId())
+                .accountId(cdo.getAccountid())
+                .name(cdo.getName())
+                .job(cdo.getJob())
+                .jobName(job == null ? "" : job.getName())
+                .level(cdo.getLevel())
+                .exp(cdo.getExp())
+                .ap(cdo.getAp())
+                .map(cdo.getMap())
+                .world(worldId)
+                .worldName(GameConstants.getWorldName(worldId))
+                .gm(cdo.getGm())
+                .meso(cdo.getMeso())
+                .fame(cdo.getFame())
+                .guildid(cdo.getGuildid())
+                .createdate(cdo.getCreatedate())
+                .lastLogoutTime(cdo.getLastLogoutTime())
+                .online(findOnlineCharacter(cdo.getId()) != null)
+                .build();
     }
 
     /**

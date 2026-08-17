@@ -32,6 +32,16 @@ const ACCOUNT: AppRouteRecordRaw = {
         roles: ['admin'],
       },
     },
+    {
+      path: 'character',
+      name: 'CharacterList',
+      component: () => import('@/views/account/character/index.vue'),
+      meta: {
+        locale: 'menu.account.character',
+        requiresAuth: true,
+        roles: ['admin'],
+      },
+    },
   ],
 };
 

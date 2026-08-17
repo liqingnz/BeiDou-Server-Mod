@@ -3,6 +3,7 @@ package org.gms.dao.entity;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,17 +14,16 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 全服留言板 实体类。
+ * 后台发放资源的常用物品收藏表 实体类。
  *
- * @author Nap
- * @since 2026-08-15
+ * @author beidou
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("message_board")
-public class MessageBoardDO implements Serializable {
+@Table("favorite_item")
+public class FavoriteItemDO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -35,27 +35,22 @@ public class MessageBoardDO implements Serializable {
     private Integer id;
 
     /**
-     * 留言角色id
+     * 对应发放资源类型：5=道具，6=装备
      */
-    private Integer characterId;
+    private Integer type;
 
     /**
-     * 留言角色名
+     * 物品id
      */
-    private String characterName;
+    private Integer itemId;
 
     /**
-     * 留言内容原文，不含角色名与颜色控制码
+     * 物品名称，添加时按当时的wz数据缓存，仅供展示
      */
-    private String message;
+    private String itemName;
 
     /**
-     * 留言时作者是否为GM，仅用于渲染高亮
-     */
-    private Boolean isGm;
-
-    /**
-     * 留言时间
+     * 创建时间
      */
     private Date createTime;
 }

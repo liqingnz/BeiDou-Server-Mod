@@ -192,7 +192,8 @@
     pin: [
       {
         validator: (value: any, cb: any) => {
-          if (value === '' || /^\d{4}$/.test(value)) {
+          // pin 允许为空（未设置时后端返回 null/undefined），有值时才校验位数
+          if (!value || /^\d{4}$/.test(value)) {
             cb();
           } else {
             cb(t('account.list.updateForm.rules.pin.length'));
@@ -203,7 +204,8 @@
     pic: [
       {
         validator: (value: any, cb: any) => {
-          if (value === '' || /^\d{6}$/.test(value)) {
+          // pic 同上，允许为空
+          if (!value || /^\d{6}$/.test(value)) {
             cb();
           } else {
             cb(t('account.list.updateForm.rules.pic.length'));

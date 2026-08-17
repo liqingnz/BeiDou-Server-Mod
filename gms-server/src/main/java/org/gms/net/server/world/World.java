@@ -1664,7 +1664,10 @@ public class World {
                     int timeOn = dm.getValue().getRight();
                     HiredMerchant hm = dm.getValue().getLeft();
 
-                    if (timeOn <= 144) {   // 1440 minutes == 24hrs
+                    // 计数器每 10 分钟加 1（HiredMerchantTask 的注册周期），144 跳 == 1440 分钟 == 24 小时。
+                    // 配置缺失时 getServerInt 返回 0，那样商店会在第二跳就被强关，所以回落到原版的 1 天。
+                    int expireDays = GameConfig.getServerInt("merchant_expire_time");
+                    if (timeOn <= (expireDays > 0 ? expireDays : 1) * 144) {
                         activeMerchants.put(hm.getOwnerId(), new Pair<>(dm.getValue().getLeft(), timeOn + 1));
                     } else {
                         hm.forceClose();

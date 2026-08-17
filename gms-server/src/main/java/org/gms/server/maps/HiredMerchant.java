@@ -38,6 +38,7 @@ import org.gms.net.server.world.World;
 import org.gms.server.ItemInformationProvider;
 import org.gms.server.Trade;
 import org.gms.util.DatabaseConnection;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 import org.gms.util.Pair;
 import org.slf4j.Logger;
@@ -316,6 +317,12 @@ public class HiredMerchant extends AbstractMapObject {
                 if (canBuy(c, newItem)) {
                     c.getPlayer().gainMeso(-price, false);
                     price -= Trade.getFee(price);  // thanks BHB for pointing out trade fees not applying here
+
+                    // 成交流水：price 已扣掉手续费，记的是店主实际入账的钱，查纠纷时比数量有用
+                    log.info(I18nUtil.getLogMessage("HiredMerchant.info.buy.msg1"),
+                            c.getPlayer().getName(), quantity,
+                            ItemInformationProvider.getInstance().getName(newItem.getItemId()),
+                            newItem.getItemId(), ownerName, price);
 
                     synchronized (sold) {
                         sold.add(new SoldItem(c.getPlayer().getName(), pItem.getItem().getItemId(), newItem.getQuantity(), price));
@@ -747,11 +754,16 @@ public class HiredMerchant extends AbstractMapObject {
     }
 
     public int getTimeOpen() {
-        double openTime = (System.currentTimeMillis() - start) / 60000;
+        // 客户端这一格只按「1 天」的量程渲染，存续天数放宽后必须把已开时长整体前移，
+        // 否则多出来的那几天在店主界面上无法表达。回落值与 World.runHiredMerchantSchedule 一致。
+        int expireDays = GameConfig.getServerInt("merchant_expire_time");
+        double openTime = ((System.currentTimeMillis() - start) / 60000) + ((expireDays > 0 ? expireDays : 1) - 1) * 1440L;
         openTime /= 1440;   // heuristics since engineered method to count time here is unknown
         openTime *= 1318;
 
-        return (int) Math.ceil(openTime);
+        // 这个值以 short 出包（PacketCreator.getHiredMerchant），存续天数配到 13 天以上就会
+        // 溢出成负数，这里钳住上界
+        return (int) Math.min(Math.ceil(openTime), Short.MAX_VALUE);
     }
 
     public void clearMessages() {

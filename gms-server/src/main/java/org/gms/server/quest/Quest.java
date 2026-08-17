@@ -23,9 +23,12 @@ package org.gms.server.quest;
 
 import org.gms.client.Character;
 import org.gms.client.QuestStatus;
+import org.gms.client.inventory.Item;
 import org.gms.client.QuestStatus.Status;
 import org.gms.config.GameConfig;
 import org.gms.constants.game.DelayedQuestUpdate;
+import org.gms.constants.id.ItemId;
+import org.gms.util.I18nUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gms.provider.Data;
@@ -345,10 +348,44 @@ public class Quest {
             for (AbstractQuestAction a : acts) {
                 a.run(chr, selection);
             }
+
+            grantHpPill(chr);
+
             if (!this.hasNextQuestAction()) {
                 chr.announceUpdateQuest(DelayedQuestUpdate.INFO, chr.getQuest(this));
             }
         }
+    }
+
+    /**
+     * 完成一个<b>不可重复</b>的任务后额外发一颗小血液精华。可重复任务（带 INTERVAL 前置）不给，
+     * 否则刷重复任务就能无限堆血上限。
+     * <p>
+     * <b>默认关闭，开之前先算账</b>：BeiDou 的 wz 里约有 2290 个不可重复任务，一颗 +10 血上限，
+     * 全清就是 +22900，而客户端血上限只有 30000——等于加点加血彻底失去意义。
+     * 原作者其实写过「任务 MIN_LEVEL ≥ 30 且角色等级 > 70 才给」的门槛，但那段是注释掉的，
+     * 活代码只判了「不可重复」。这里按原样移植，收紧留给运营决定。
+     * <p>
+     * 另外物品 {@link ItemId#HP_PILL_SMALL} <b>不是原版物品</b>，BeiDou 的 wz 里还没有，
+     * 补上 Item.wz/Consume/0200.img 与 String.wz/Consume.img 之前，这里发出去的会是个无名道具。
+     */
+    private void grantHpPill(Character chr) {
+        if (!GameConfig.getServerBoolean("use_quest_hp_pill")) {
+            return;
+        }
+        // startReqs 是按类型索引的 EnumMap，直接查键即可，不必像原实现那样遍历
+        if (startReqs.containsKey(QuestRequirementType.INTERVAL)) {
+            return;
+        }
+
+        // 背包满时 gainItem 会返回 null，而任务已经完成、不可重复任务也没法重做——
+        // 这颗药丸就永久丢了。至少不能把「没发出去」记成发放成功
+        Item granted = chr.getAbstractPlayerInteraction().gainItem(ItemId.HP_PILL_SMALL, (short) 1, false, true);
+        if (granted == null) {
+            log.warn(I18nUtil.getLogMessage("Quest.warn.grantHpPill.msg1"), chr.getName(), chr.getId(), id);
+            return;
+        }
+        log.info(I18nUtil.getLogMessage("Quest.info.grantHpPill.msg1"), chr.getName(), chr.getId(), id, ItemId.HP_PILL_SMALL);
     }
 
     public void reset(Character chr) {
@@ -370,6 +407,9 @@ public class Quest {
     }
 
     public boolean forceStart(Character chr, int npc) {
+        if (GameConfig.getServerBoolean("use_debug")) {
+            chr.dropMessage(5, I18nUtil.getMessage("Quest.message1", id, npc));
+        }
         QuestStatus newStatus = new QuestStatus(this, QuestStatus.Status.STARTED, npc);
 
         QuestStatus oldStatus = chr.getQuest(this.getId());
@@ -406,6 +446,9 @@ public class Quest {
     }
 
     public boolean forceComplete(Character chr, int npc) {
+        if (GameConfig.getServerBoolean("use_debug")) {
+            chr.dropMessage(5, I18nUtil.getMessage("Quest.message2", id, npc));
+        }
         if (timeLimit > 0) {
             chr.sendPacket(PacketCreator.removeQuestTimeLimit(id));
         }

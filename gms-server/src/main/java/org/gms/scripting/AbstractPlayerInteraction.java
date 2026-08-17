@@ -34,6 +34,7 @@ import org.gms.constants.id.NpcId;
 import org.gms.constants.inventory.ItemConstants;
 import org.gms.constants.string.ExtendType;
 import org.gms.dao.entity.ExtendValueDO;
+import org.gms.manager.ServerManager;
 import org.gms.model.pojo.SkillEntry;
 import org.gms.net.server.Server;
 import org.gms.net.server.guild.Guild;
@@ -43,6 +44,7 @@ import org.gms.scripting.event.EventInstanceManager;
 import org.gms.scripting.event.EventManager;
 import org.gms.scripting.npc.NPCScriptManager;
 import org.gms.server.ItemInformationProvider;
+import org.gms.service.MessageBoardService;
 import org.gms.server.Marriage;
 import org.gms.server.TimerManager;
 import org.gms.server.expeditions.Expedition;
@@ -71,6 +73,8 @@ import static java.util.concurrent.TimeUnit.DAYS;
 public class AbstractPlayerInteraction {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractPlayerInteraction.class);
+
+    private static final MessageBoardService messageBoardService = ServerManager.getApplicationContext().getBean(MessageBoardService.class);
 
     /**
      * 进行中的测谎，key 是被测角色id。登记入口只有 putIfAbsent 一处，同一目标同时只能有一场。
@@ -1655,6 +1659,36 @@ public class AbstractPlayerInteraction {
     public int getOnlineTime()
     {
         return getPlayer().getCurrentOnlineTime();
+    }
+
+    /**
+     * 全服留言板的展示文本，最新的在最上面。
+     */
+    public String getMessageBoard() {
+        return messageBoardService.getMessages();
+    }
+
+    /**
+     * 往全服留言板写一条留言。
+     * <p>
+     * 事务边界在 {@code MessageBoardService.addMessage} 上，异常要穿出那层代理 Spring 才会回滚，
+     * 所以捕获点在这里而不在 service 内部。
+     *
+     * @return 写入成功才返回 true。<b>脚本必须按返回值决定扣不扣钱</b>——内容为空、超长或入库失败都返回 false。
+     */
+    public boolean addMessageBoardEntry(String message) {
+        try {
+            messageBoardService.addMessage(getPlayer(), message);
+            return true;
+        } catch (IllegalArgumentException e) {
+            // 内容为空或超长是玩家的普通输入错误，而且因为失败不扣钱、重试免费，
+            // 不能和真正的 DB 故障共用 ERROR + 堆栈，否则谁都能零成本刷错误日志
+            return false;
+        } catch (Exception e) {
+            log.error(I18nUtil.getLogMessage("MessageBoardService.addMessage.error1"),
+                    getPlayer().getName(), getPlayer().getId(), e);
+            return false;
+        }
     }
 
 

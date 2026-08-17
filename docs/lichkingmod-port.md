@@ -1097,11 +1097,11 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G9** ✅ | 技能平衡 | `MapleStatEffect`、`AranComboHandler`、`SpecialMoveHandler`、`gm2/BuffMapCommand`、`gm2/EmpowerMeCommand`、`constants/skills/Corsair`、`AssignAPProcessor` | `aran_combo_last_time`、`aran_combo_gm_bonus`、`battleship_hp_per_skill_level`、`battleship_hp_per_level`、`battleship_stance`、`mana_reflection_stance`、`marksman_blind_stance`、`use_gm_no_skill_cooldown`、`fast_reuse_hero_will_divisor` |
 | **G10** ✅ | 等级上限 | `constants/game/GameConstants` | `max_level_cap`、`cygnus_max_level_cap` |
 | **G11** ✅ | 自动喂药重复消耗 | `PetAutoPotHandler`、`PetAutopotProcessor` | — |
-| **G12** | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
-| **G13** | 雇佣商店存续天数 | `maps/HiredMerchant` | `merchant_expire_time` |
-| **G14** | `@analysis` BOSS 伤害占比 | `gm0/BossDmgAnalysisCommand`（批次 1 挪来） | — |
-| **G15** | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`quest/requirements/MinLevelRequirement`、`UseItemHandler` | — |
-| **G16** | `client/Character`（钩子汇聚点，**按组拆散**） | `client/MapleCharacter` 一个文件同时属于 G2/G3/G7/G9/G10/G11 | — |
+| **G12** ✅ | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
+| **G13** ✅ | 雇佣商店存续天数 | `maps/HiredMerchant`、`world/World`（仅存续判定一处） | `merchant_expire_time` |
+| **G14** ✅ | `@analysis` BOSS 伤害占比 | `gm2/BossDmgAnalysisCommand`（批次 1 挪来，权限从 gm0 收到 gm2） | — |
+| **G15** ✅ | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`UseItemHandler`、`client/Character`（公开入口） | `use_quest_hp_pill`（默认关，**且依赖 wz**） |
+| **G16** ✅ | `client/Character`（钩子汇聚点，**按组拆散**） | `client/Character`、`constants/net/ServerConstants`、`constants/string/CharsetConstants`、`service/{CharacterService, FamilyService}` | — |
 
 批次 4 挪进来的两项仍是 `deferred`，跟 **G4** 一起决策（收工时必须把这两行改掉，
 `deferred` 不算处理完）：
@@ -2069,6 +2069,559 @@ LK 的 `+0.1f` 是靠加宽迟滞带缓解，治标。
 没有 701000000 / 702000000 / 702070400 / 701010322 的条目，`MapFactory.loadPlaceName` 回退空串，
 `@goto` 列表会渲染成 `'shanghai' - #b#k`。中文部署（本仓库默认）不受影响。
 补英文名要动 `wz/String.wz`，**按既定约定 img.xml 类改动统一留到 wz 批次**，届时一并处理。
+
+#### G12 — 活动召回限制 ✅ 已完成
+
+前提：`use_enable_recall_event` 在 BeiDou **默认 `false`**（[V1.7.0:91](../gms-server/src/main/resources/db/migration/V1.7.0__create_game_config.sql#L91)），整套功能默认关闭。
+
+##### LK 的实现有两个缺陷，从数据结构上改掉
+
+| LK | 问题 | 本次做法 |
+|---|---|---|
+| 另开一张 `lastRecallTime` map 做冷却 | **只 put 从不 remove**，也不在 `manageEventInstances()` 清理范围内 —— 按角色 id 无限增长的**内存泄漏** | 两个时间戳并进 `RecallEntry` record，交给已有清理任务一并回收 |
+| 用 `player.getLastLogoutTime()` 判断掉线多久 | **BeiDou 没有这个东西**。`lastLogoutTime` 只是 `characters` 表一列，`logOff()` 写进去、**从不读回内存**，`Character` 上没有 getter | 改用 `storedAt`。`storeEventInstance` 正是在 [`EventInstanceManager.playerDisconnected`](../gms-server/src/main/java/org/gms/scripting/event/EventInstanceManager.java#L604) 里调用的，那就是**掉出活动**的时刻，比「登出时刻」更贴近语义 |
+
+判定整个下沉到 `recallEventInstance()`（handler 侧零改动），用 `replace` 做 CAS 避免并发重复召回；
+另加 `peekEventInstance()` 供 GM 指令用——不受时限与冷却约束，也不计入冷却。
+
+LK 用同一个 `MAX_RECALL_TIME` 同时当时限和冷却，这里按计划书拆成两个键，默认值相同 = 行为等价但可分开调。
+
+##### 「remove → get」的取舍（已确认收下）
+
+召回成功后条目**不再删除**（原实现是 `remove`，一次性）。保留的理由：GM 的 `@recall` 需要历史还在，
+登录时序出岔子时还能补救；重复召回由冷却约束，条目在活动结束后由 `manageEventInstances()` 回收。
+
+##### ⚠️ 已知取舍：脱战重登不受惩罚
+
+**v83 客户端退出游戏与网络掉线都是直接关 socket**，同走 [`Client.channelInactive`](../gms-server/src/main/java/org/gms/client/Client.java#L270) →
+`closeMapleSession()` → `disconnect()`，服务端**没有任何区分信号**（`inTransition` 只区分换频道/进商城）。
+
+所以「快死了先退游戏、再登回来」的玩家也会在时限内被放回活动 —— **召回等于免掉了脱战应有的代价**。
+
+**当前有意接受这个行为**，未做额外限制。收益其实有限，因为异常状态并不会被刷掉：
+
+| 环节 | 位置 |
+|---|---|
+| 存盘写 `playerdiseases`，存的是**剩余时长** `length - (now - startTime)` | [Character.java:2486](../gms-server/src/main/java/org/gms/client/Character.java#L2486)、[:7337](../gms-server/src/main/java/org/gms/client/Character.java#L7337) |
+| 登录读回塞进 `PlayerBuffStorage` | [CharacterService.java:422](../gms-server/src/main/java/org/gms/service/CharacterService.java#L422) |
+| `silentApplyDiseases` 重新施加 + 补发 debuff 包 | [PlayerLoggedinHandler:246](../gms-server/src/main/java/org/gms/net/server/channel/handlers/PlayerLoggedinHandler.java#L246)、[:409](../gms-server/src/main/java/org/gms/net/server/channel/handlers/PlayerLoggedinHandler.java#L409) |
+
+即：**被魅惑退出再登回来，人还是被魅惑的**，剩余时间、HP、所在地图都不变。冷却同理走 `cooldowns` 表。
+
+将来若要收紧，两条现成路子：把 `max_recall_time` 调短（真掉线重连约 1–2 分钟）；
+或加「掉线时身上带异常状态则不予自动召回」的判定，让这类玩家只能由 GM 手动放回。
+取舍已写进 `EventRecallCoordinator` 的 javadoc 与 `V1000.0.17` 的注释。
+
+##### `RecallCommand`（新指令）
+
+LK 那版 85 行里 **40 行是注释掉的旧实现**，另有三个问题，都没照搬：
+
+| LK | 本次 |
+|---|---|
+| 4 条硬编码中文 | 走 i18n（`RecallCommand.message1~5`） |
+| `Integer.parseInt(params[0])` 无 try/catch，GM 输错就抛 `NumberFormatException` | 先按角色名查，纯数字再按 id 查（`StringUtil.isNumeric`，与同目录 `DcCommand` 同款） |
+| 只接受数字角色 ID | 名字优先 —— GM 手上有的是名字 |
+
+配套 `command_info` 注册（批次 1 关键发现：新指令靠表注册而非代码），`syntax = recall`，`default_level = 2`。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `EventRecallCoordinator.java` | `RecallEntry` record、时限/冷却判定、CAS、`peekEventInstance` |
+| `RecallCommand.java`（新） | `@recall` |
+| `V1000.0.17__insert_recall_config_and_command.sql` | 2 个配置键 + zh/en 各 2 条 `lang_resources` + 1 条 `command_info` |
+| `message_{zh_CN,en_US}.properties` | `RecallCommand.message1~5` |
+
+`PlayerLoggedinHandler` 零改动（判定已下沉）。LK 该文件里的未使用 import
+`gm4.LichDebugCommand`（批次 5 残留）与 GM 登录广播改中文（BeiDou 早已是中文）均为噪声。
+
+#### G13 — 雇佣商店存续天数 ✅ 已完成
+
+`MapleHiredMerchant.java` 的 `git diff -w` 后**只剩 2 处实质改动**（其余全是格式化）；
+`World.java` 里只有 1 处属于本组（同文件的 `exprate_30/70`、`questrate` 变 `float` 是别组的，未动）。
+
+##### 存续时长（功能主体）
+
+计数器在 [`World.runHiredMerchantSchedule`](../gms-server/src/main/java/org/gms/net/server/world/World.java#L1655) 里
+每 10 分钟加 1（[World.java:257](../gms-server/src/main/java/org/gms/net/server/world/World.java#L257) 注册的 `HiredMerchantTask` 周期），
+144 跳 = 1440 分钟 = 24 小时 —— 所以 `merchant_expire_time` 的**单位是天**，原版写死 144 即 1 天。
+
+```java
+int expireDays = GameConfig.getServerInt("merchant_expire_time");
+if (timeOn <= (expireDays > 0 ? expireDays : 1) * 144) {
+```
+
+`> 0` 兜底照例不能省：`getServerInt` 对缺失键返回 `0`，`0 * 144 = 0` 会让商店在**第二个 10 分钟跳**
+就被 `forceClose` —— 数据库没迁移就等于全服商店 10 分钟暴毙。
+
+默认值取 **3 天**（LK 三份配置分别是 3 / 7 / 3，Cosmic 原版 1）。
+
+##### `getTimeOpen()` —— 按 LK 原样搬，另加溢出钳制
+
+```java
+double openTime = ((now - start) / 60000) + ((expireDays > 0 ? expireDays : 1) - 1) * 1440L;
+```
+
+这个字段只在 [PacketCreator.java:5187](../gms-server/src/main/java/org/gms/util/PacketCreator.java#L5187) 给**店主本人**写一次，
+原注释就写着 *"heuristics since engineered method to count time here is unknown"*。
+
+> **移植记录**：我原本建议不搬这条偏移 —— 它等价于 `原值 + (天数-1)*1318`，即一个刚开的店会上报
+> 「已经开了 天数-1 天」。**运营方决定按 LK 原样搬**：客户端这一格只按 1 天的量程渲染，
+> 不整体前移的话，存续期放宽到 3 天在店主界面上根本无法表达，等于 ① 的配置只有一半效果。
+
+不过这条顺带暴露了一个真 bug，一并修掉：返回值以 **`short` 出包**。原来上限 1 天 → 最大约 1318，安全；
+天数可配之后，`(2×天数-1) × 1318 > 32767` 即 **13 天以上就会溢出成负数**。所以钳在 `Short.MAX_VALUE`。
+
+##### 成交流水日志
+
+LK 用 `FilePrinter.print(FilePrinter.MERCHANT_BOUGHT, ...)` 写 `interactions/MerchantLog.txt`。
+BeiDou 的 `FilePrinter` 已基本废弃（只剩几处注释掉的调用），改走 log4j2 + `I18nUtil.getLogMessage`，
+对照写法是现成的 [`Trade.logTrade`](../gms-server/src/main/java/org/gms/server/Trade.java#L587)。
+
+比 LK 多记一个 `price` —— 它是 `Trade.getFee` **扣完手续费后**店主实际入账的钱，查纠纷时比数量有用。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `World.java` | `runHiredMerchantSchedule` 读 `merchant_expire_time` |
+| `HiredMerchant.java` | `getTimeOpen` 偏移 + `short` 溢出钳制；`buy` 加成交流水日志 |
+| `V1000.0.18__insert_game_config_merchant_expire.sql` | 1 个配置键 + zh/en 各 1 条 `lang_resources` |
+| `log_{zh_CN,en_US}.properties` | `HiredMerchant.info.buy.msg1` |
+
+##### 记录但未做
+
+- `HiredMerchant` 里 3 条 Cosmic 遗留的硬编码英文玩家提示（`buy` 的背包满 / 金币不足，
+  `announceItemSold` 的 `[Hired Merchant] Item '...' has been sold...`），违反 CLAUDE.md 第 2 条，
+  但不在 LK 本次 diff 范围内，未混进本组提交。
+- `World.java:33-34` 有一对**重复的 `import org.gms.config.GameConfig`**（仓库既有，非本次引入）。
+  该文件在清单里仍是 `pending`，后续还会动，留到那时一并清。
+
+#### G14 — `@analysis` BOSS 伤害占比 ✅ 已完成
+
+批次 1 挪过来的唯一一条。前置 [`Monster.getTakenDamage()`](../gms-server/src/main/java/org/gms/server/life/Monster.java#L1006)
+批次 5 已加好，且返回的是**持锁拷贝**的 `Map<Integer, Long>`，比 LK 直接把内部
+`HashMap<Integer, AtomicLong>` 交出去安全（调用方遍历不受写入影响，也拿不到可变的 `AtomicLong`）。
+
+纯新增文件（LK +75 行），没有 BeiDou 对应实现要比对。有效代码只有 30 行，但问题不少。
+
+##### LK 原文的问题与本次做法
+
+| # | LK | 本次 |
+|---|---|---|
+| 1 | 表头 `dropMessage(6, ...)`、明细 `yellowMessage`，两种样式混用 | 统一成本仓库惯例：表头 `yellowMessage`（黄字），明细 `message()`——见 `@bosshp`、`@online` |
+| 2 | 亿/万 分段在余数为 0 时多吐一个 `0`：`100000000` → 「1亿0」，`250000000` → 「2亿5000万0」 | 只在余数非零时才拼末段 |
+| 3 | `long percent = damage * 100L / maxHp` 整数除法，**不足 1% 一律显示 0%** | 保留一位小数，`String.format(Locale.ROOT, "%.1f", ...)`；`Locale.ROOT` 不能省，否则某些区域小数点会变逗号 |
+| 4 | 地图上没有存活 BOSS 时**完全没有输出** | 补一条提示 |
+| 5 | 7 行注释掉的 `totalDamage` 死代码 | 不搬 |
+| 6 | 全部硬编码中文（含 `setDescription`） | 走 i18n（`BossDmgAnalysisCommand.message1~6`） |
+| 7 | `damages.get(attacker.getId())` 每人查两次 | 查一次 |
+| 8 | 输出顺序 = `getAllPlayers()` 的顺序 | 按伤害降序 |
+
+> **⚠️ 复查更正**：第 1 条起初被我判成「`yellowMessage` 是屏幕顶部提示条，后一条顶掉前一条，
+> LK 多人时只看得到最后一个人」，**这是错的**。`yellowMessage` → `sendYellowTip` 发的是
+> `SET_WEEK_EVENT_MESSAGE` + `0xFF`，那是**聊天框里的黄字**，持久且会堆叠。
+> 仓库内两处反证：[`BossHpCommand`](../gms-server/src/main/java/org/gms/client/command/commands/gm1/BossHpCommand.java#L48)
+> 每只 BOSS 连发两条 `yellowMessage`（第二条是 100 字符血量条），
+> [`OnlineCommand`](../gms-server/src/main/java/org/gms/client/command/commands/gm0/OnlineCommand.java#L42)
+> 一次输出几十行。所以 LK 那里**没有功能缺陷**，只是表头与明细两种样式混用。
+> 这条同时给出了本仓库的输出惯例：**表头 `yellowMessage`，明细 `message()`**，本命令已按此统一。
+
+##### 两处按运营决定，不是技术判断
+
+- **权限从 `gm0` 收到 `gm2`**：LK 放 gm0 等于给全服一张 DPS 表，远征/组队里容易引发扯皮。
+  包名必须与 `command_info.default_level` 一致（反射按 `gm{default_level}` 找类），所以这决定了文件放在哪个包。
+- **统计口径保持 LK 原样**：只列**当前还在本地图**的玩家。中途离开或掉线的人，伤害仍计在 BOSS 的
+  `takenDamage` 里但不列出来。因此各行百分比之和通常小于「已掉血量」——
+  表头给的是 **BOSS 剩余血量比例**（直接来自 `hp/maxHp`）而不是各行合计，免得两个数对不上引起误会。
+
+##### 数字格式
+
+中文客户端按亿/万分段，其余语言按千分位 `%,d`（v83 BOSS 伤害动辄上亿，紧凑写法好读得多）。
+分支依据是 `CharsetConstants.getLanguageLocale(ThreadLocalUtil.getClientLang())`，
+与 `I18nUtil.getMessage` 取语言的路径同源。
+
+> 单位键 `message5`（亿）/ `message6`（万）在 `message_en_US.properties` 里也放了同样的中文值。
+> 它们只在中文客户端的拼接分支里被读到，英文那份纯粹是防止 MessageSource 回退时抛
+> `NoSuchMessageException`，两个文件里都有注释说明。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `gm2/BossDmgAnalysisCommand.java`（新） | `@analysis` |
+| `V1000.0.19__insert_command_info_analysis.sql` | 1 条 `command_info` |
+| `message_{zh_CN,en_US}.properties` | `BossDmgAnalysisCommand.message1~6` |
+
+#### G15 — 任务奖励 / HP 药丸 ✅ java 侧完成（**wz 未补，功能尚未生效**）
+
+名字看着小，实际是四件互不相干的事，而且撞上一个硬前提。
+
+##### 🔴 硬前提：两个药丸物品在 BeiDou 的 wz 里不存在
+
+`2000100`（血液精华）/ `2000101`（血液精华（小））**是 LK 自己造的物品**，而且就在本次区间内造的：
+
+```
+git show b0671161:wz/Item.wz/Consume/0200.img.xml → 无 020001xx
+LK 当前                                            → 有 02000100、02000101
+BeiDou wz/ 与 wz-zh-CN/                            → 都没有
+```
+
+按「img.xml 放最后」的约定，本组只做 java 侧，**物品补齐前整条链不生效**。
+两个 wz 文件的清单行已记下具体要补什么。另注意 LK 把 `tradeBlock` 写成了
+`<string value="1"/>` 而非原版的 `<int value="1"/>`，补 wz 时要确认 `ItemInformationProvider` 认不认。
+
+##### balance 量级（决定了默认必须关）
+
+LK 的逻辑是**每完成一个非重复任务白送一颗小药丸**，吃掉永久 +10 最大 HP（法师 +2HP/+8MP）。
+
+BeiDou 的 wz 里 `QuestInfo.img` 有 **2819** 个任务条目，`Check.img` 带 `interval`（可重复）的 **528** 个
+—— 约 **2290 个不可重复任务**：
+
+| | 全清后永久收益 |
+|---|---|
+| 非法师 | **+22,900 最大 HP** |
+| 法师 | +4,580 HP / +18,320 MP |
+
+而 [`AbstractCharacterObject:266`](../gms-server/src/main/java/org/gms/client/AbstractCharacterObject.java#L266) 把
+`clientMaxHp` 钳在 **30000**。等于光做任务就能顶满血上限，AP 加血完全失去意义。
+
+LK 自己也犹豫过 —— 门槛是**注释掉的**：`//  && overLevel30 && chr.getLevel() > 70`，
+`overLevel30` 因此是个**永远为 false、从未被读的死变量**。
+**运营决定按 LK 活代码原样移植（不加等级门槛），配置 `use_quest_hp_pill` 默认关。**
+
+##### 四件事的落点
+
+| | 内容 | 本次做法 |
+|---|---|---|
+| **A** | `Quest.complete` 完成任务送药丸 | 抽成 `grantHpPill(chr)`，`use_quest_hp_pill` 默认 `false`；可重复任务不给（否则刷重复任务无限堆血上限） |
+| **B** | `UseItemHandler` 吃药丸永久加上限 | 抽成 `applyHpPill(chr, hp, mageHp, mageMp)`；新增 `ItemId.HP_PILL_LARGE/SMALL` 常量 |
+| **C** | `use_debug` 时提示任务开始/完成 | 照运营决定**直接发给玩家**（`dropMessage(5, ...)`），但文案走 i18n |
+| **D** | `MinLevelRequirement.getMinLevel()` | **不搬** —— 它只服务于被注释掉的等级门槛，活代码无调用方；A 既然不做门槛，加了就是死访问器 |
+
+##### 修掉的 LK 问题
+
+- **`isBeginnerJob()` 替代 `id != 0 && id != 1000`**：LK 只排除了初心者(0) 和骑士团新手(1000)，
+  **漏了 2000（战神新手）** —— 战神新手吃药丸能白拿 +500 血。BeiDou 的
+  [`Character.isBeginnerJob()`](../gms-server/src/main/java/org/gms/client/Character.java#L5703) 三个都覆盖。
+- **法师判定改 `Job.isA`**：`isA(Job.MAGICIAN) || isA(Job.BLAZEWIZARD1)` 与 LK 的
+  `id/100 == 2 || id/100 == 12` **完全等价**（`isA` 在 `basebranch % 10 == 0` 时退化为 `id/100` 比较），
+  但用的是本仓库的既有惯例。
+- **`startReqs.containsKey(INTERVAL)` 替代遍历**：`startReqs` 是按类型索引的 `EnumMap`，
+  查键即可，同文件 :255 已经是这个写法。行为完全一致。
+
+##### 新增的公开入口
+
+`AbstractCharacterObject.addMaxMPMaxHP` 是 `protected`，`UseItemHandler` 不在同包够不着，
+所以在 `Character` 上加了 `addMaxHpMpExternal(int, int)`（LK 也是这么干的，只是它落在 G16 那个钩子汇聚文件里）。
+javadoc 里记了 `clientMaxHp` 钳 30000 而内部 `maxHp` 不封顶这件事 —— 超过之后客户端血条与服务端实际值会对不上。
+
+> LK 的 `MapleStatEffect` 里还有一套「从 wz 的 `hpMax`/`mpMax` 字段永久加池子」的机制，
+> **不在本次区间内**（`b0671161` 之前就有），所以 G9 没漏。BeiDou 的 `StatEffect` 也完全没有这两个字段。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `Quest.java` | `grantHpPill`；`forceStart`/`forceComplete` 的 `use_debug` 提示 |
+| `UseItemHandler.java` | 两个药丸分支 + `applyHpPill` |
+| `Character.java` | `addMaxHpMpExternal` 公开入口 |
+| `ItemId.java` | `HP_PILL_LARGE`、`HP_PILL_SMALL` |
+| `V1000.0.20__insert_game_config_quest_hp_pill.sql` | 1 个配置键 + zh/en 各 1 条 `lang_resources` |
+| `message_{zh_CN,en_US}.properties` | `Quest.message1~2` |
+| `log_{zh_CN,en_US}.properties` | `Quest.info.grantHpPill.msg1` |
+
+#### G16 — `client/Character` 钩子汇聚点 ✅ 已完成（批次 6 收官）
+
+`MapleCharacter.java` 是 LK 改动最多的单个文件（+311 / −193、**70 个 hunk**），但按组拆完，
+绝大部分早有归宿。真正需要在本组决策的只有 7 条。
+
+##### 已在别组决策，不重复
+
+| hunk | 归属 |
+|---|---|
+| 倍率 `int→float`、`getExpRate(level)`、`gainExp(float)`/`gainMeso(float)` 重载、`activeCouponRates`、`hasMerchant()` 经验 ×1.05 | **G2 整组 rejected/already-fixed** |
+| `showUnderleveledInfo` 带 `EXP_MOB_LEECH_INTERVAL` 的文案 | **G3 已 rejected**，且 BeiDou 无此方法 |
+| `resetBattleshipHp` 的 3000 / 配置化 | **G9** |
+| `getMaxClassLevel` 读配置 | **G10** |
+| autopot 双重消耗（MP 段注释掉、`0.9f→0.95f`） | **G11** |
+| `lastAttackTime` + getter/setter | **批次 5** |
+| `addMaxHpMpExternal` | **G15** |
+| `lastLogoutTime` 字段 + getter | **G12 已确认不需要**（BeiDou 只写不读） |
+| `ban()` 连带写 `ipbans` | **G8 已否决 IP 封禁** |
+
+##### BeiDou 压根没有这些代码
+
+- **买活系统**（`showBuybackInfo`/`canBuyback`/`getTimeRemaining`，约 60 行 diff）—— Cosmic 已整块删除，全服搜 `buyback` 零命中。
+- **升级提示语**（5/10/15…200 级那 40 行 `yellowMessage`）—— 同样不存在。
+
+##### 已 already-fixed，且 BeiDou 的实现更好
+
+- `canCreateChar` 支持中文名：BeiDou 早就是 `[a-zA-Z0-9一-龥]{2,12}`，下限比原实现还宽（2 vs 3）。
+- 捡物加点券：BeiDou 已抽成 `ItemId.isNxCard()` + `use_announce_nx_coupon_loot` 开关 + **按数量相乘**。
+  原实现新增的 `4310100`（5000 点券）又是自造物品，同 G15 的 wz 依赖，未采纳。
+- `deleteCharFromDB` 主体：已重写进 `CharacterService`，**`fredstorage` 早就在删**。
+
+##### 🔴 原实现引入的回归，明确不搬
+
+捡物时把 `pickItemDrop` 从末尾**提到了分发逻辑之前**：
+
+```java
++                    this.getMap().pickItemDrop(pickupPacket, mapitem);   // 提到了这里
+                     if (mapitem.getMeso() > 0) { ...
+-                    this.getMap().pickItemDrop(pickupPacket, mapitem);   // 原本在这
+                 } else if (!hasSpaceInventory) {
+```
+
+提前之后，`addFromDrop` 失败走 `return` 的那条路径上，**物品已从地图移除但没进背包 = 凭空销毁**。
+BeiDou 在末尾统一调一次（[Character.java:2139](../gms-server/src/main/java/org/gms/client/Character.java#L2139)），保持不动。
+
+##### ⭐ 顺带挖出一个比原改动严重得多的问题：删族长会让服务器启动 NPE
+
+原实现把 `DELETE FROM family_character WHERE cid = ?` 改成 `WHERE cid = ? OR seniorid = ?`。
+但**两边都没解决真正的问题**——[FamilyService.java](../gms-server/src/main/java/org/gms/service/FamilyService.java) 结尾是：
+
+```java
+family.getLeader().doFullCount();
+```
+
+族长是靠 `seniorid <= 0` 认出来的。删掉族长之后，这个家族再没有任何一行满足该条件 →
+`getLeader()` 返回 `null` → **服务器启动时 NPE，把所有大区的家族加载一起打断**。
+原实现的 `OR seniorid = ?` 只删直系下级，孙辈还在，**照样没有族长、照样 NPE**，
+而且它把直系下级的家族籍和声望一并删掉了。
+
+因此**没有搬那行**，改成两条真修：
+
+| 位置 | 做法 |
+|---|---|
+| `CharacterService.reparentFamilyJuniors(cid)` | 删角色前把他的下级**过继**给他的上级（`UPDATE ... SET seniorid = <被删者的seniorid> WHERE seniorid = <cid>`）。删普通成员时树保持连通；删族长时下级 `seniorid` 变 0，其中一个自然成为新族长 |
+| `FamilyService.loadAllFamilies` | 收尾判空，leader 缺失时记 warn 并跳过——历史脏数据不该让整个家族系统加载不起来 |
+
+这条正是 CLAUDE.md 里「账号/角色级联删除有坑」的又一例。
+
+##### 其余 6 条按运营决定全部移植
+
+| # | 内容 | 说明 |
+|---|---|---|
+| 1 | `LEVEL_200` 满级广播 | BeiDou 原先是**英文硬编码**在 `ServerConstants`，中文服玩家满级会收到英文广播。改走 i18n（`Character.levelUp.maxLevelBroadcast`），常量删除 |
+| 2 | `BLOCKED_NAMES` 补中文屏蔽词 | 冒充管理/系统的、脏字、与大区名混淆的片段，以及一批政治人物名 |
+| 3 | 角色名 GBK 字节上限 | 见下方⚠️ |
+| 4 | 魔法盾 / 英雄的回声不被驱散 | `dispelBuffs` 例外表加 `Magician.MAGIC_GUARD`、`Beginner.ECHO_OF_HERO`。法师被驱散时连魔法盾一起掉基本等于秒死 |
+| 5 | 圣盾可挡魅惑 | `giveDebuff` 从 `!(SEDUCE \|\| STUN)` 改为 `!= STUN`。**会明显削弱扎昆、暗黑龙王这类靠魅惑的 BOSS**，是一次实打实的平衡放宽 |
+| 6 | 龙血不致死 | `prepareDragonBlood` 的 `addHP(-x)` → `safeAddHP`。BeiDou 本来就有 `safeAddHP`，龙吼等其他自伤技能都在用，只有龙血漏了 |
+
+> **⚠️ 第 3 条的取值经过一次修正**：原实现是 `< 12` 字节，即**最多 11 字节**——那会把第 12 位
+> ASCII 和正好六个汉字（12 字节）的名字一起挡掉，比角色名正则的 `{2,12}` 本身还严，
+> 等于悄悄收窄了现有玩家的取名空间。**运营决定放宽**，`ServerConstants.MAX_CHARACTER_NAME_BYTES`
+> 取 **13**（开区间，即最多 12 字节），正好对齐 `characters.name` 的 `VARCHAR(13)`，
+> 12 位 ASCII 与 6 个汉字都能过。
+> 编码取 GBK 是因为它是本服支持的语言里最宽的一种，按它算对任何语言的客户端都安全，
+> 封装在 `CharsetConstants.getWidestCharset()`。
+
+##### 记录但未做
+
+`Character.attemptBoss(String)` 这个便捷方法 BeiDou 没有，脚本侧走的是
+`AbstractPlayerInteraction` → `ExpeditionBossLog.attemptBoss(..., false)`（不记账）。
+这正是 **G7 记下、留给批次 7 决定**的那条：`attemptBoss` 是「查即扣」，
+批次 7 给 BOSS 脚本接配额时要先决定是否拆出一个不记账的 `canAttemptBoss`。
+
+##### 本组产物
+
+| 文件 | 改动 |
+|---|---|
+| `Character.java` | 满级广播走 i18n；角色名字节上限；魔法盾/回声免驱散；圣盾挡魅惑；龙血 `safeAddHP` |
+| `ServerConstants.java` | 中文屏蔽词；`MAX_CHARACTER_NAME_BYTES`；删除 `LEVEL_200` |
+| `CharsetConstants.java` | `getWidestCharset()` |
+| `CharacterService.java` | `reparentFamilyJuniors` |
+| `FamilyService.java` | 族长缺失时判空 + warn |
+| `message_{zh_CN,en_US}.properties` | `Character.levelUp.maxLevelBroadcast` |
+| `log_{zh_CN,en_US}.properties` | `FamilyService.loadAllFamilies.warn1` |
+
+#### 批次 6 收尾 — 清 `deferred`（20 → 8）
+
+`deferred` 不算处理完。收工前把此前四个批次积压的 20 行逐条复核，按依赖聚成 5 簇。
+**12 行终局结清，8 行正式移交后续批次并写明解锁条件。**
+
+##### C1 · 邮箱验证体系（8 行）→ 全部 `rejected`
+
+`net/mailing/{MailManager, MailConst, Verifier}`、`gm0/VerifyEmailCommand`、`gm0/ChangePasswordCommand`、
+`gm4/SendMailCommand`、`npc/verifyEmail.js`、`npc/changePassword.js`
+
+这是**站外 SMTP 电子邮件**，不是站内信，要真实邮件服务凭据。否决的两条实质理由：
+
+- BeiDou 已有网页端改密码（`AccountService.updateAccountByUser`），闸门是**旧密码**。
+- LK 的 `@changepassword` 唯一闸门就是邮箱验证码 —— 脚本第一步那个算术码是**自显自验**的，
+  没有任何鉴权作用。砍掉邮箱直接搬，等于**任何人在一台已登录的客户端上都能改走账号密码**，
+  比现有的旧密码闸门更弱。
+
+账号找回将来真要做，按 BeiDou 自己的 JWT / `AuthTokenFilter` 体系写，比移植这版干净。
+
+##### C2 · 投票奖励（2 行）→ 全部 `rejected`
+
+`net/server/task/UpdateVotePointTask`、`gm4/UpdateVoteCommand`
+
+它是「接入 gtop100 这一**特定站点**」的运营集成，不是通用功能。四个阻塞叠在一起：
+需要真实站点注册（URL 内嵌 siteid 与 pass）；SQL 里的 `and email is not null` 就是
+「未绑定邮箱投票无效」，**依赖已否决的 C1**；读写 `accounts.lastVoteTime`，**BeiDou 无此列**；
+LK 用 HeavenMS 的 `TimerManager` 自建调度，搬过来要改接 BeiDou 的调度，属重写而非移植。
+
+点数读写 BeiDou 已有 `gm0/ReadPointsCommand` 与 `gm3/GiveVpCommand`。
+
+##### C3 · 全服留言板（2 行）→ `ported`
+
+`server/MessageBoard` + `npc/9800001.js`。数据库前置批次 0 就绪（`message_board` 表、
+`MessageBoardDO`、`MessageBoardMapper`），java 与脚本侧当场做完。
+
+> **⚠️ 与 G15 同类的 wz 依赖，收尾时漏记，终审复查补上**：本节原先写的「零外部依赖」是**错的**。
+> **NPC 9800001 在 BeiDou 的两层 wz 里都不存在**，功能目前不可达：
+>
+> | 缺什么 | 核实 |
+> |---|---|
+> | `String.wz/Npc.img.xml` 的 `9800001`「留言板」条目 | `wz/` 与 `wz-zh-CN/` 均 0 命中；LK 侧有 |
+> | `Map.wz/Map/Map9/910000000.img.xml`（自由市场入口）的 life 摆放 | BeiDou 0 命中；LK 侧有 |
+> | 客户端 `Npc.wz` 的形象 img | 两边服务端 wz 都没有该文件，属客户端资源 |
+>
+> 全仓库无任何 `openNpc(9800001)`，没有 wz 数据 GM 也召不出来。**处理方式对齐 G15**：
+> java 侧已就位，这两个 wz 文件的清单行已注明它们是留言板的入口，批次 7 处理时补齐即可生效。
+
+重写为 Spring `MessageBoardService`，脚本入口挂在 `AbstractPlayerInteraction` 上
+（`cm.getMessageBoard()` / `cm.addMessageBoardEntry(text)`）。修掉的 7 个问题：
+
+| # | 原实现 | 本次 |
+|---|---|---|
+| 1 | 单例上一个裸 `LinkedList` 被多频道并发读写 | **去掉缓存**，每次开板直接查库。留言板是低频 NPC 交互，30 行查询是毫秒级 |
+| 2 | `getMessages` 的 `SELECT` 无 `ORDER BY` 却用 `addFirst` 装填，冷启动后顺序与内存态不一致 | 随 1 一并消失；排序统一按**自增 id** 而不是 `create_time`——`TIMESTAMP` 只到秒，同秒内多条分不出先后 |
+| 3 | 留言板为空时 `size() == 0` 恒真，每次调用都白查一次库 | 随 1 一并消失 |
+| 4 | 淘汰旧留言是「循环 `DELETE ... LIMIT 1`」，`ps` 每轮重新 prepare 且从不 close | 查出第 30 条的 id，一条 `DELETE ... WHERE id < ?` 解决 |
+| 5 | 颜色控制码 + 角色名拼进 `message` 入库，与 `character_name` 列重复；40 字上限校验的是原文、入库的却是拼装串 | **只存原文**，名字与颜色码渲染时再拼，长度校验量的就是入库内容。「留言时是否为 GM」是历史事实，单独用 `is_gm` 列记 |
+| 7 | 玩家输入直接拼进 NPC 富文本，可注入 `#e#b` 与换行**伪造一整行 GM 样式的假留言**，`is_gm` 的视觉区分形同虚设 | 入库前剥掉 `#` 与所有 ISO 控制字符，清洗后再量长度 |
+
+> **展示名是快照，不是当前名**：`character_name` 存的是留言当时的角色名，改名后历史留言仍显示旧名。
+> 这是有意的——留言板是历史记录。此前本节把「改名显示旧名」列成了已修问题，属于表述错误，已更正。
+> **并发下「最多 30 条」是最终一致而非严格约束**：两个频道同时留言时，双方都基于当时的 30 行算阈值，
+> 可能短暂留下 31 行，下一次留言会修剪回去。留言板不需要严格上限，不为此加库级串行化。
+| 6 | `addMessage` 捕获 `SQLException` 后**仍返回 `true`**，脚本据此扣钱 —— **入库失败照样扣 50 万** | 失败返回 `false`，脚本先写库成功才扣钱；另补了空内容不可提交 |
+
+> 表名 `messageboard` / `messageBoard` 大小写混用（Linux MySQL 上会炸）在批次 0 建表时就不存在了 ——
+> BeiDou 用 `message_board` 且走 Mapper。第 5 条要的 `is_gm` 列直接改了
+> `V1000.0.2` 的建表语句（该迁移从未在任何环境执行过），没有另开 `ALTER`。
+
+##### C4 / C5 · 移交后续批次（8 行，保持 `deferred`）
+
+这 8 行**硬阻塞在批次 6 拿不到的东西上**，不是决策问题。清单 evidence 已统一改写成
+`【认领：批次N】+ 解锁条件` 的格式：
+
+| 认领 | 行 | 解锁条件 |
+|---|---|---|
+| **批次 7** | `event/KrexelBattle.js`、`portal/treeboss00.js`、`npc/9270045.js`、`reactor/5411001.js` | 补齐地图 `541020700`/`541020800`、`Reactor.wz/5411001.img`、BOSS 凭证 `3100000`。远征侧 `ExpeditionType.KREXEL` 与 `ExpeditionBossLog` 条目 **G7 已就位** |
+| **批次 7** | `portal/mahavira_enter.js` | 脚本名只出现在 LK 改过的 `Map7/702050000.img.xml` 里，BeiDou 同名文件无 portal script 字段，单独搬不会被触发 |
+| **批次 7** | `npc/9000036_accessory.js` | 与主体 `npc/9000036.js` 是一套；另需先确认入口——LK 全仓库无任何地方 `openNpc` 到这个脚本名 |
+| **批次 7** | `scripting/npc/NPCConversationManager.java` | 真增量只有 `doGachapon(quantity)`，四个消费方全是批次 7 脚本，且 BeiDou 已有自己的 `@gacha` 体系 |
+| **批次 8** | `npc/under_maintenance.js` | 正文只剩「功能维护中」，真逻辑（皇家月卡日奖励）被 LK 自己注释掉了 |
+
+##### 收尾后的账
+
+`deferred` **20 → 8**，且剩下 8 行全部有认领批次与解锁条件。
+批次 6 自身产生的 `deferred` 归零。
+
+#### 批次 6 复查修正（审查范围 `57ef59e00..8c794542e`）
+
+外部静态审查报了 11 条，逐条复核后 **9 条成立并已修，1 条不成立，1 条转为决策项**。
+
+##### 🔴 最严重的一条：G16 的家族过继**从来没有执行过**
+
+`family_character.cid` 上有 `ON DELETE CASCADE`
+（[V1.0.49__some_alter.sql](../gms-server/src/main/resources/db/migration/V1.0.49__some_alter.sql#L8)），
+而 `deleteCharacterById` 里 `charactersMapper.deleteById(cid)` 排在 `reparentFamilyJuniors(cid)` **前面**。
+characters 一删，`family_character` 那行被数据库连带删掉，过继方法查不到 `self` 直接返回 ——
+**整个修复是死代码**，删族长仍然会留下无主家族（只是 `FamilyService` 的判空挡住了 NPE）。
+
+顺带暴露出算法本身也不成立，一并重写：
+
+| 问题 | 修法 |
+|---|---|
+| 调用点在删 characters 之后 | 移到之前 |
+| 家族树是**二叉**的（`FamilyEntry.juniors` 定长 2），无脑把所有下级挂到同一上级会超容。`addJunior` 拒绝时 `setSenior` 已经把 `this.senior` 赋好了 —— **子认父、父不认子**，内存树静默不一致 | 先查新上级已用名额，只在 `2 - used` 个空位内挂接 |
+| 删族长时两个下级都变成 `seniorid = 0`，`loadAllFamilies` 对每个都调 `setLeader`，**最后一行胜出**，族长不确定、家族静默分裂 | 只提拔**一个**下级当新族长（按 cid 升序，结果确定），另一个挂到新族长名下 |
+| 族长那行的 `precepts`（家训）没有转移 | 随位置一起转移给新族长 |
+| `reptosenior` 没清零，与 `FamilyEntry.setSenior` 的语义（`updateDBChangeFamily` 里 `reptosenior = 0`）不一致 | 一并清零 |
+
+> **已知限制（明确不做）**：
+> 1. 只做「就近挂接」，**不做二叉树重排**。名额不够时剩余下级维持 `seniorid` 悬空，
+>    行为与本方法引入前一致，`FamilyService` 的判空能兜住，但那棵子树会脱离统计，会打 warn 列出角色 id。
+> 2. **过继只写 DB，运行中服务器的内存树不更新**。GM 后台在线删角色后，`World.families` 里被删者的
+>    `FamilyEntry` 仍在、下级仍认他当上级、声望照旧流向已删角色，**要重启才对齐**。
+>    修复瞄准的主症状（启动 NPE）是加载期问题，DB 侧修复足以解决。
+> 3. `placeWithinCapacity` 的 count 与 update 之间没有行锁，而 `FamilyEntry.join()/fork()` 走裸 JDBC、
+>    在这套事务体系之外。窗口极窄，最坏结果是 DB 里出现 3 个同 senior 的行，下次启动被 `addJunior` 拒收
+>    第三个，退化成上面第 1 条的悬空情形，由判空兜住。
+
+##### 其余 8 条已修
+
+| 位置 | 问题 | 修法 |
+|---|---|---|
+| `EventRecallCoordinator.storeEventInstance` | 每次掉线都把 `lastRecallAt` 重置为 0，**`recall_cooldown` 在「掉线→召回→再掉线」这条正常路径上等于不存在** | 改用 `compute`；还在同一个 `EventInstanceManager` 里就保留原 `lastRecallAt`，换了活动才重新计时 |
+| `EventRecallCoordinator.manageEventInstances` | 先收集 key 再按 key 删；扫描与删除之间同一角色若从新活动掉出，新条目会被误删 | 改带值删除 `remove(key, entry)` |
+| `MessageBoardService.addMessage` | 方法上有 `@Transactional` 却在内部 catch 住异常返回 false —— Spring 看到正常返回**照样提交 insert**，于是 trim 失败时留言进库、脚本因收到 false 不扣钱，**白送一条** | 事务边界留在 service、异常穿出代理；捕获点移到 `AbstractPlayerInteraction`。（不能拆成同类内的两个方法——自调用绕过代理，`@Transactional` 根本不生效） |
+| `MessageBoardService` | 玩家输入直接进 NPC 富文本，可注入 `#e#b` + 换行**伪造 GM 留言行** | 入库前剥掉 `#` 与 ISO 控制字符，清洗后再量长度 |
+| `Quest.grantHpPill` | `gainItem` 在 USE 栏满时静默失败，而任务已完成、不可重复任务无法重做 —— 药丸**永久丢失**却记了成功日志 | 改用返回 `Item` 的重载，`null` 时打 warn 不记成功 |
+| `Character.dispel` | 免驱散只列了冒险家的 `Magician.MAGIC_GUARD` 与 `Beginner.ECHO_OF_HERO`，**炎术士 / Evan 的魔法盾、骑士团 / 战神 / Evan 的英雄回声照样被驱散** | 抽成 `isUndispellableSkill`，覆盖四条职业线全部 7 个 id |
+| `RecallCommand` | `StringUtil.isNumeric` 的正则是 `-?\d+(\.\d+)?`，**放行小数和超 int 范围的长数字**，`parseInt` 照样抛异常 | 去掉 isNumeric，直接 try/catch `NumberFormatException` |
+| §7 本节 | 把「改名后显示旧名」写成了已修问题，实际仍显示留言时的名字 | 更正为「展示名是快照」，并补记「30 条上限是最终一致」 |
+
+##### 1 条不成立：留言板脚本的硬编码文案
+
+审查认为 `9800001.js` 里的 `sendYesNo/sendGetText/sendOk` 文案违反 CLAUDE.md 第 2 条。**不成立**：
+脚本层的 i18n 机制就是 `scripts/`（英文）+ `scripts-<lang>/`（语言覆盖）这套目录分层，
+CLAUDE.md 的 wz/脚本加载一节写得很清楚。仓库里 **722 个 NPC 脚本没有任何一个调用 i18n API**，
+两套 9800001.js 正是按这个约定分别写的中英文本。第 2 条约束的是服务端 Java 代码。
+
+##### 1 条转为决策项后已裁定：角色名字节上限
+
+审查不赞成把「12 字节容量」实现成「最多 11 字节」，指出 `>= 12` 拒绝的不只是 12 位 ASCII，
+**六个汉字（正好 12 字节）也会被拒**。该副作用属实，**运营已裁定放宽**：
+`MAX_CHARACTER_NAME_BYTES` 从 12 改为 **13**（开区间，即最多 12 字节），
+对齐 `characters.name VARCHAR(13)` 与角色名正则的 `{2,12}`，12 位 ASCII 与 6 个汉字都放行。
+
+#### 批次 6 终审修正（审查范围 `57ef59e00..bc516593e`）
+
+第三轮终审确认前一轮 9 条修正全部真实生效、4 条「不搬 LK / 反修 LK」的判断全部成立、
+对脚本 i18n 的驳回也获认同。本轮新报 2 个实质问题 + 5 条低优先级，**全部已修**。
+
+##### 🔴 新发现 1：名额统计把被删者自己算进去了，普通成员删除时永远少挂一个下级
+
+`placeWithinCapacity` 的 `used = count(seniorid = newSeniorId)` 跑在删 characters **之前**
+（这正是上一轮刻意保证的顺序），于是非族长路径下**被删者自己那行的 `seniorid` 恰好就是 `newSeniorId`**，
+必然被计入 `used`。他马上就要被级联删掉、腾出一个名额，`free = 2 - used` 却没把这个位置算回来。
+
+| 家族形态 | 删 A 时的实际结果 | 应有结果 |
+|---|---|---|
+| S→A→(B, C)，S 只有 A 一个下级 | `used=1`，`free=1` → B 挂上、**C 悬空打 warn** | S 空出两位，B、C 都该挂上 |
+| S→(A, D)，A 有一个下级 B | `used=2`，`free=0` → **B 直接悬空** | 实际有 1 个空位 |
+
+也就是说**每删一个「有下级的普通成员」都会少挂一个**，把「名额不够才悬空」这条已知限制放大成了常态。
+修法：count 查询排除被删角色（`.and(CID.ne(deletingCid))`）。族长提拔路径不受影响
+（被删者自己那行 `seniorid <= 0`，本来就不会被计入新族长的名额）。
+
+##### 🔴 新发现 2：留言板功能当前不可达，而收尾记录写的是「零外部依赖」
+
+与 G15 的血液精华完全同类的 wz 依赖，收尾时漏记。详见上面 C3 一节补入的表格 ——
+**NPC 9800001 在 BeiDou 两层 wz 里都不存在**，`String.wz/Npc.img.xml` 条目与
+`Map9/910000000.img.xml` 的 life 摆放都缺，全仓库也没有 `openNpc(9800001)`。
+两个 wz 文件的清单行已注明它们是留言板入口，处理方式对齐 G15。
+
+##### 其余 5 条已修
+
+| 位置 | 问题 | 修法 |
+|---|---|---|
+| `UseItemHandler.applyHpPill` | 法师判定沿用原实现的 `id/100 == 2 \|\| == 12`，**Evan（2200 系）拿的是战士待遇**；且 `isBeginnerJob()` 只覆盖 0/1000/2000，**漏了 Evan 新手 2001** | 法师判定改用仓库既有的 `getJobStyle() == Job.MAGICIAN`（它把三条法师线统一归类）；新手排除单独补 `Job.EVAN`。不直接改 `isBeginnerJob()` —— 初心者经验、自动加点等多处在用，扩语义要单独评估 |
+| `AbstractPlayerInteraction.addMessageBoardEntry` | 超长留言这种普通输入错误也走 `log.error` + 堆栈，而失败不扣钱、重试免费，**玩家可零成本刷错误日志** | `IllegalArgumentException` 单独 catch 不打日志，其余才 ERROR |
+| `MessageBoardService.sanitize` | 只剥 `#` 与 ISO 控制字符，漏了 Cf 类格式字符：U+200B 能拼出「看着全空却收了 50 万」的留言（`trim()` 不剥零宽空格），U+202E 能让文本视觉倒序 | 过滤条件加 `getType(cp) == FORMAT` |
+| `ServerConstants.BLOCKED_NAMES` | 匹配是 `name.toLowerCase().contains(...)`，但数组里 `FREDRICK`/`GameMaster`/`Scania`/`AsiaSoft` **含大写，永远匹配不中**（存量问题，但本次改的就是这个数组） | 条目统一小写；`GameMaster` 与已有的 `gamemaster` 重复，去重 |
+| §7 家族一节 | 已知限制只写了「不做二叉重排」 | 补记「过继只写 DB，运行中删除要重启才对齐内存树」与「count→update 之间无行锁，`FamilyEntry.join/fork` 走裸 JDBC 在事务体系外」 |
+
+> 终审还提示：新增屏蔽词里的单字「操」会误伤「曹操」这类合法名。这属运营已裁定的取舍，未改。
 
 ### 批次 7 — 数据类
 

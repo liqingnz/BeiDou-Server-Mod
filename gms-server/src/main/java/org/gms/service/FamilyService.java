@@ -2,6 +2,7 @@ package org.gms.service;
 
 import com.mybatisflex.core.query.QueryWrapper;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.gms.client.Family;
 import org.gms.client.FamilyEntry;
 import org.gms.client.Job;
@@ -12,6 +13,7 @@ import org.gms.dao.mapper.FamilyCharacterMapper;
 import org.gms.dao.mapper.FamilyEntitlementMapper;
 import org.gms.net.server.Server;
 import org.gms.net.server.world.World;
+import org.gms.util.I18nUtil;
 import org.gms.util.Pair;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ import java.util.List;
 
 import static org.gms.dao.entity.table.FamilyEntitlementDOTableDef.FAMILY_ENTITLEMENT_D_O;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class FamilyService {
@@ -78,7 +81,14 @@ public class FamilyService {
         }
         for (World world : Server.getInstance().getWorlds()) {
             for (Family family : world.getFamilies()) {
-                family.getLeader().doFullCount();
+                // 族长是靠 seniorid <= 0 认出来的。历史脏数据（族长被删、下级 seniorid 悬空）会让
+                // 整个家族没有族长，这里不判空就是一个 NPE 把所有大区的家族加载全打断
+                FamilyEntry leader = family.getLeader();
+                if (leader == null) {
+                    log.warn(I18nUtil.getLogMessage("FamilyService.loadAllFamilies.warn1"), family.getID(), world.getId());
+                    continue;
+                }
+                leader.doFullCount();
             }
         }
     }
