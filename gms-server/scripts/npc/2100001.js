@@ -50,7 +50,7 @@ function action(mode, type, selection) {
 
         if (selectedType == 0) { //mineral refine
             var selStr = "Which mineral would you like to refine?#b";
-            var minerals = ["Bronze Plate", "Steel Plate", "Mithril Plate", "Adamantium Plate", "Silver Plate", "Orihalcon Plate", "Gold Plate", "Lithium"];
+            var minerals = ["#i4011000##t4011000#", "#i4011001##t4011001#", "#i4011002##t4011002#", "#i4011003##t4011003#", "#i4011004##t4011004#", "#i4011005##t4011005#", "#i4011006##t4011006#", "#i4011008##t4011008#"];
             for (var i = 0; i < minerals.length; i++) {
                 selStr += "\r\n#L" + i + "# " + minerals[i] + "#l";
             }
@@ -58,7 +58,7 @@ function action(mode, type, selection) {
             equip = false;
         } else if (selectedType == 1) { //jewel refine
             var selStr = "Which jewel would you like to refine?#b";
-            var jewels = ["Garnet", "Amethyst", "Aquamarine", "Emerald", "Opal", "Sapphire", "Topaz", "Diamond", "Black Crystal"];
+            var jewels = ["#i4021000##t4021000#", "#i4021001##t4021001#", "#i4021002##t4021002#", "#i4021003##t4021003#", "#i4021004##t4021004#", "#i4021005##t4021005#", "#i4021006##t4021006#", "#i4021007##t4021007#", "#i4021008##t4021008#"];
             for (var i = 0; i < jewels.length; i++) {
                 selStr += "\r\n#L" + i + "# " + jewels[i] + "#l";
             }
@@ -66,7 +66,7 @@ function action(mode, type, selection) {
             equip = false;
         } else if (selectedType == 2) { //Crystal refine
             var selStr = "A crystal? That's a rare item indeed. Don't worry, I can refine it just as well as others. Which crystal would you like to refine? #b";
-            var crystals = ["Power Crystal", "Wisdom Crystal", "DEX Crystal", "LUK Crystal"];
+            var crystals = ["#i4005000##t4005000#", "#i4005001##t4005001#", "#i4005002##t4005002#", "#i4005003##t4005003#"];
             for (var i = 0; i < crystals.length; i++) {
                 selStr += "\r\n#L" + i + "# " + crystals[i] + "#l";
             }
@@ -167,7 +167,7 @@ function action(mode, type, selection) {
                         }
                     } else {
 
-                        if (cm.haveItem(mats[i], matQty[i] * qty)) {
+                        if (!cm.haveItem(mats[i], matQty[i] * qty)) {
                             complete = false;
                         }
                     }

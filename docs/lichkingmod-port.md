@@ -2717,6 +2717,42 @@ map.setOnUserEnter(onEnter.equals("") ? String.valueOf(mapid) : onEnter);
 会看到两个不同的数。用户要的是出发倒计时，故把六个载具的广播统一改成
 `getClock((rideTime + beginTime) / 1000)`，注释同步更正。
 
+##### 精炼 NPC 家族（6 个，5 采纳 1 拒）+ 一个祖传 bug
+
+LK 对这批 NPC 的改法一致：菜单从写死道具名换成图标宏。逐个核对后按 `1022003` 的
+成熟做法处理（`#i<id>##t<id>#` + 保留等级后缀，LK 的版本会丢后缀）：
+
+| NPC | 位置 | 处理 |
+|---|---|---|
+| `2080000` 龙之武器制作 | 神木村 | **两层**都写死名 → 都换宏。17 项核对：16 精确匹配，1 项是英文层拼写错误 `Dragon Carbella`（`String.wz` 为 `Carabella`），宏自动修掉 |
+| `2020000` Vogen | 冰峰雪域 | 中文层已是宏，英文层落后 → 改英文层 29 项 |
+| `2040016` | 玩具城 | 同上，英文层 22 项 |
+| `1052003` | 废弃都市 | 同上，英文层 19 项（claws 保留 `Thief Lv. 60` 后缀） |
+| `2100001` | 阿里安特 | **两层**写死名 → 都换宏 21 项；另修 bug 见下 |
+| `1032002` Francois | 魔法密林 | ❌ 纯格式，配方逐项相同，LK 连正文翻译都没做 |
+
+**`2100001` 的祖传 bug（顺带修掉，LK 也有）**：
+
+```js
+if (matQty[i] * qty == 1) {
+    if (!cm.haveItem(mats[i])) { complete = false; }
+} else {
+    if (cm.haveItem(mats[i], matQty[i] * qty)) { complete = false; }   // ← 少了 !
+}
+```
+
+`haveItem(id, qty)` 是「至少有 qty 个」（`AbstractPlayerInteraction:235`），
+所以数量 >1 的配方**带够材料反而被判不完整**——这家 NPC 的多数量配方从没人做成过。
+BeiDou 两层 + LK 三份全是倒装，属上游祖传。两层一起补上 `!`。
+
+> 顺带记录的双层内容差：`2040016` 中文层水晶菜单与 `itemSet` 有 **5** 项（含黑水晶
+> `4005004`），英文层只有 **4** 项——归双层一致性待办。
+> `2040016:238` 的 `haveItem(mats[i] * qty)` 看着吓人但无害：该分支仅在
+> `matQty[i]*qty == 1` 时走到，整数意味着 `qty` 必为 1。
+
+拒掉的另两个：`portal/tutorquest`（又是强制绑邮箱，批次 2 已定不做）、
+`npc/2081005`（LK 把菜单换成 `sendAcceptDecline`，删掉了「买 10 瓶药水」分支）。
+
 **② `npc/9270047` 改判 partial —— 采纳任务 `4576` 前置门**
 
 先前判 rejected 的理由是「新增限制而非修 bug」，用户决定采纳。加在**加入**与**组建**两处，

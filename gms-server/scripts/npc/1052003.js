@@ -51,7 +51,7 @@ function action(mode, type, selection) {
             selectedType = selection;
             if (selectedType == 0) { //mineral refine
                 var selStr = "So, what kind of mineral ore would you like to refine?#b";
-                var minerals = ["Bronze", "Steel", "Mithril", "Adamantium", "Silver", "Orihalcon", "Gold"];
+                var minerals = ["#i4011000##t4011000#", "#i4011001##t4011001#", "#i4011002##t4011002#", "#i4011003##t4011003#", "#i4011004##t4011004#", "#i4011005##t4011005#", "#i4011006##t4011006#"];
                 for (var i = 0; i < minerals.length; i++) {
                     selStr += "\r\n#L" + i + "# " + minerals[i] + "#l";
                 }
@@ -59,7 +59,7 @@ function action(mode, type, selection) {
                 cm.sendSimple(selStr);
             } else if (selectedType == 1) { //jewel refine
                 var selStr = "So, what kind of jewel ore would you like to refine?#b";
-                var jewels = ["Garnet", "Amethyst", "Aquamarine", "Emerald", "Opal", "Sapphire", "Topaz", "Diamond", "Black Crystal"];
+                var jewels = ["#i4021000##t4021000#", "#i4021001##t4021001#", "#i4021002##t4021002#", "#i4021003##t4021003#", "#i4021004##t4021004#", "#i4021005##t4021005#", "#i4021006##t4021006#", "#i4021007##t4021007#", "#i4021008##t4021008#"];
                 for (var i = 0; i < jewels.length; i++) {
                     selStr += "\r\n#L" + i + "# " + jewels[i] + "#l";
                 }
@@ -71,7 +71,7 @@ function action(mode, type, selection) {
                 cm.sendYesNo(selStr);
             } else if (selectedType == 3) { //claw refine
                 var selStr = "Ah, you wish to upgrade a claw? Then tell me, which one?#b";
-                var claws = ["Blood Gigantic#k - Thief Lv. 60#b", "Sapphire Gigantic#k - Thief Lv. 60#b", "Dark Gigantic#k - Thief Lv. 60#b"];
+                var claws = ["#i1472023##t1472023##k - Thief Lv. 60#b", "#i1472024##t1472024##k - Thief Lv. 60#b", "#i1472025##t1472025##k - Thief Lv. 60#b"];
                 for (var i = 0; i < claws.length; i++) {
                     selStr += "\r\n#L" + i + "# " + claws[i] + "#l";
                 }

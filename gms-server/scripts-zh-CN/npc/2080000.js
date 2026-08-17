@@ -70,36 +70,36 @@ function action(mode, type, selection) {
             cm.dispose();
         } else if (selectedType == 1) { //warrior weapon
             var selStr = "好的，那你想让哪件战士武器承载龙之力？#b";
-            var weapon = ["狂龙闪电剑#k - 110级 单手剑#b", "狂龙怒斩#k - 110级 单手斧#b", "狂龙地锤#k - 110级 单手钝器#b", "飞龙巨剑#k - 110级 双手剑#b", "炼狱魔龙斧#k - 110级 双手斧#b", "金龙轰天锤#k - 110级 双手钝器#b",
-                "盘龙七冲枪#k - 110级 长枪#b", "血龙神斧#k - 110级 长杖#b"]; // BW：Blunt Weapon（钝器）
+            var weapon = ["#i1302059##t1302059##k - 110级 单手剑#b", "#i1312031##t1312031##k - 110级 单手斧#b", "#i1322052##t1322052##k - 110级 单手钝器#b", "#i1402036##t1402036##k - 110级 双手剑#b",
+                "#i1412026##t1412026##k - 110级 双手斧#b", "#i1422028##t1422028##k - 110级 双手钝器#b", "#i1432038##t1432038##k - 110级 长枪#b", "#i1442045##t1442045##k - 110级 长杖#b"]; // BW：Blunt Weapon（钝器）
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 2) { //bowman weapon
             var selStr = "好的，那你想让哪件弓箭手武器承载龙之力？#b";
-            var weapon = ["金龙振翅弓#k - 110级 弓#b", "黄金飞龙弩#k - 110级 十字弓#b"];
+            var weapon = ["#i1452044##t1452044##k - 110级 弓#b", "#i1462039##t1462039##k - 110级 十字弓#b"];
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 3) { //magician weapon
             var selStr = "好的，那你想让哪件魔法师武器承载龙之力？#b";
-            var weapon = ["佘太君龙杖#k - 108级 魔杖#b", "黑精灵王杖#k - 110级 法杖#b"];
+            var weapon = ["#i1372032##t1372032##k - 108级 魔杖#b", "#i1382036##t1382036##k - 110级 法杖#b"];
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 4) { //thief weapon
             var selStr = "好的，那你想让哪件盗贼武器承载龙之力？#b";
-            var weapon = ["蝉翼龙牙破#k - 110级 力量型匕首#b", "半月龙鳞裂#k - 110级 运气型匕首#b", "寒木升龙拳#k - 110级 飞镖#b"]; // Claw：盗贼使用的飞镖武器
+            var weapon = ["#i1332049##t1332049##k - 110级 力量型匕首#b", "#i1332050##t1332050##k - 110级 运气型匕首#b", "#i1472051##t1472051##k - 110级 飞镖#b"]; // Claw：盗贼使用的飞镖武器
 			for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 5) { //pirate weapon
             var selStr = "好的，那你想让哪件海盗武器承载龙之力？#b";
-            var weapon = ["撕裂者#k - 110级 指虎#b", "枭龙#k - 110级 手枪#b"]; // Knuckle：海盗（拳手）使用的指虎武器
+            var weapon = ["#i1482013##t1482013##k - 110级 指虎#b", "#i1492013##t1492013##k - 110级 手枪#b"]; // Knuckle：海盗（拳手）使用的指虎武器
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }

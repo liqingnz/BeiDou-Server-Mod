@@ -70,36 +70,36 @@ function action(mode, type, selection) {
             cm.dispose();
         } else if (selectedType == 1) { //warrior weapon
             var selStr = "Very well, then which Warrior weapon shall receive a dragon's power?#b";
-            var weapon = ["Dragon Carbella#k - Lv. 110 One-Handed Sword#b", "Dragon Axe#k - Lv. 110 One-Handed Axe#b", "Dragon Mace#k - Lv. 110 One-Handed BW#b", "Dragon Claymore#k - Lv. 110 Two-Handed Sword#b", "Dragon Battle Axe#k - Lv. 110 Two-Handed Axe#b", "Dragon Flame#k - Lv. 110 Two-Handed BW#b",
-                "Dragon Faltizan#k - Lv. 110 Spear#b", "Dragon Chelbird#k - Lv. 110 Polearm#b"];
+            var weapon = ["#i1302059##t1302059##k - Lv. 110 One-Handed Sword#b", "#i1312031##t1312031##k - Lv. 110 One-Handed Axe#b", "#i1322052##t1322052##k - Lv. 110 One-Handed BW#b", "#i1402036##t1402036##k - Lv. 110 Two-Handed Sword#b",
+                "#i1412026##t1412026##k - Lv. 110 Two-Handed Axe#b", "#i1422028##t1422028##k - Lv. 110 Two-Handed BW#b", "#i1432038##t1432038##k - Lv. 110 Spear#b", "#i1442045##t1442045##k - Lv. 110 Polearm#b"];
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 2) { //bowman weapon
             var selStr = "Very well, then which Bowman weapon shall receive a dragon's power?#b";
-            var weapon = ["Dragon Shiner Bow#k - Lv. 110 Bow#b", "Dragon Shiner Cross#k - Lv. 110 Crossbow#b"];
+            var weapon = ["#i1452044##t1452044##k - Lv. 110 Bow#b", "#i1462039##t1462039##k - Lv. 110 Crossbow#b"];
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 3) { //magician weapon
             var selStr = "Very well, then which Magician weapon shall receive a dragon's power?#b";
-            var weapon = ["Dragon Wand#k - Lv. 108 Wand#b", "Dragon Staff#k - Lv. 110 Staff#b"];
+            var weapon = ["#i1372032##t1372032##k - Lv. 108 Wand#b", "#i1382036##t1382036##k - Lv. 110 Staff#b"];
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 4) { //thief weapon
             var selStr = "Very well, then which Thief weapon shall receive a dragon's power?#b";
-            var weapon = ["Dragon Kanzir#k - Lv. 110 STR Dagger#b", "Dragon Kreda#k - Lv. 110 LUK Dagger#b", "Dragon Green Sleve#k - Lv. 110 Claw#b"];
+            var weapon = ["#i1332049##t1332049##k - Lv. 110 STR Dagger#b", "#i1332050##t1332050##k - Lv. 110 LUK Dagger#b", "#i1472051##t1472051##k - Lv. 110 Claw#b"];
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }
             cm.sendSimple(selStr);
         } else if (selectedType == 5) { //pirate weapon
             var selStr = "Very well, then which Pirate weapon shall receive a dragon's power?#b";
-            var weapon = ["Dragon Slash Claw#k - Lv. 110 Knuckle#b", "Dragonfire Revolver#k - Lv. 110 Gun#b"];
+            var weapon = ["#i1482013##t1482013##k - Lv. 110 Knuckle#b", "#i1492013##t1492013##k - Lv. 110 Gun#b"];
             for (var i = 0; i < weapon.length; i++) {
                 selStr += "\r\n#L" + i + "# " + weapon[i] + "#l";
             }

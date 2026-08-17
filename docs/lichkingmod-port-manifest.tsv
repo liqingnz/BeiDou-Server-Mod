@@ -889,7 +889,7 @@ scripts/npc/1022104.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1022105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032000.js	script	0	0	rejected	只把变量名 mesos 改成中文标识符「金币」
 scripts/npc/1032001.js	script	0	0	rejected	LK 用 Packages.server.life.MaplePlayerNPC 老包名，BeiDou 已改用 Java.type 引自己的类，逻辑相同
-scripts/npc/1032002.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1032002.js	script	0	0	rejected	魔法密林 Francois 精炼。纯格式（[] vs new Array、大括号），配方数据逐项相同，LK 连翻译都没做（正文仍是英文），只译了头部注释一个词
 scripts/npc/1032003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -902,7 +902,7 @@ scripts/npc/1032113.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1032114.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/npc/1052002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1052003.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052003.js	script	0	0	partial	废弃都市抓子精炼。英文层 3 个菜单 19 项换宏（中文层已是宏），claws 保留「Thief Lv. 60」后缀。材料校验本就正确
 scripts/npc/1052004.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/1052005.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/1052006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1014,7 +1014,7 @@ scripts/npc/2012022.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2012024.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2012025.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2013000.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：新增「预览通关奖励」菜单项，读 em.getProperty("reward")（由对应 PQ 脚本的 setRewardList() 写入）。译文与其余改动不搬
-scripts/npc/2020000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2020000.js	script	0	0	partial	冰峰雪域 Vogen 精炼。与 1022003 同型：中文层早已是宏，英文层落后。改英文层 5 个菜单 29 项为宏；矿石 7 项是英文层用简称（Bronze vs Bronze Plate），其余 22 项精确匹配。materials 菜单是动作描述非道具名，保持文字。否决 LK 的 #z 别名与 new Array
 scripts/npc/2020002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2020005.js	script	0	0	rejected	把单次购买上限 100 提到 2000。canHold 只校验一格，先扣钱后发货，上限拉高会放大背包放不下就丢钱的既有风险
 scripts/npc/2020008.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
@@ -1035,7 +1035,7 @@ scripts/npc/2040000.js	script	0	0	rejected	只是把 4031045 提成 ticketId 变
 scripts/npc/2040002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040014.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2040016.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2040016.js	script	0	0	partial	玩具城精炼。英文层 4 个菜单 22 项换宏（中文层已是宏）。顺带记录双层内容差：中文层水晶菜单与 itemSet 有 5 项（含黑水晶 4005004），英文层只有 4 项——归双层一致性待办。line 238 的 haveItem(mats[i]*qty) 无害（该分支仅 qty==1 时走到）
 scripts/npc/2040019.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/2040020.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2040021.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1086,10 +1086,10 @@ scripts/npc/2050018.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2050019.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2060005.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2060009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2080000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2080000.js	script	0	0	partial	神木村龙之武器制作。采纳菜单换 #i##t# 宏（两层都是写死名），保留各层自己的等级/类型后缀（LK 丢了）。17 项与 String.wz 核对：16 项精确匹配，唯一不匹配是英文层写死名的拼写错误 Dragon Carbella（String.wz 为 Carabella），宏自动修掉。菜单顺序与发放 itemSet 逐项对应已验证。否决 new Array 与半汉化文案
 scripts/npc/2081000.js	script	0	0	done	采纳去掉死菜单项「为神木村做点什么」（点进去只有 Under development）；不照抄 LK 注释掉代码的做法，连同分支一并删。顺带补了 zh-CN 层漏译的 sendGetNumber
 scripts/npc/2081004.js	script	0	0	ported	gms-server/scripts/npc/2081004.js 与 scripts-zh-CN/npc/2081004.js —— 修了材料校验：原实现把校验写在循环体内，第一种材料够了就直接走 else 收材料发成品，另外两种一件都不用有
-scripts/npc/2081005.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2081005.js	script	0	0	rejected	LK 把 sendSimple 菜单换成 sendAcceptDecline，删掉了「买 10 瓶药水」分支，减功能
 scripts/npc/2081100.js	script	0	0	rejected	把「教我本职业技能」的 sendSimple 菜单换成 sendOk+dispose，等于删掉四转技能书发放入口；BeiDou 版已按 getSkillLevel==0 防重复领取
 scripts/npc/2081200.js	script	0	0	rejected	同 2081100：删掉四转技能书发放入口
 scripts/npc/2081300.js	script	0	0	rejected	同 2081100：删掉四转技能书发放入口
@@ -1121,7 +1121,7 @@ scripts/npc/2094001.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2094002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2095000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2096000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2100001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2100001.js	script	0	0	partial	阿里安特精炼。①修真 bug：数量>1 的材料校验少了 !，带够材料反被判「不完整」，这家 NPC 的多数量配方从没人做成过——BeiDou 两层 + LK 三份全都倒装，上游祖传，两层一起修；②两层菜单 21 项换宏（中文层原是写死中文名）。LK 只换了宏没修 bug
 scripts/npc/2100005.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/2100006.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/2100007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1506,7 +1506,7 @@ scripts/portal/secretgate3_open.js	script	0	0	noise	改动可证明只落在字�
 scripts/portal/timeQuest.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
 scripts/portal/tristanEnter.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/tutorHelper.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/portal/tutorquest.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/tutorquest.js	script	0	0	rejected	骑士团教程门。LK 加强制绑邮箱（pi.getEmail + openNpc verifyEmail），批次2 已定不做，BeiDou 无该 API
 scripts/quest/1021.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/20002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/quest/20010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
