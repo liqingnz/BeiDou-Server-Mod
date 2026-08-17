@@ -2812,6 +2812,48 @@ BeiDou 两层 + LK 三份全是倒装，属上游祖传。两层一起补上 `!`
 
 ---
 
+## 9. 批次 7 分支 review 收口（2026-08-18）
+
+对 `port/lk-batch7`（62 提交 / 341 文件）做了两轮独立 review，逐条复核后的结论。
+**已改的不再赘述**（见对应提交），这里只留「查证属实但本批不改」和「留给后续批次」的部分。
+
+### 9.1 已修（13 条）
+
+| 类别 | 位置 | 问题 |
+|---|---|---|
+| 复制物品 | `RetrieveCommand` | `addFromDrop` 部分入包失败后按**原始数量**记账、重试还免费，可凭空复制；改记 `item.getQuantity()`（被改写后的剩余量）。同时修可充值物品在预检里被错误聚合成一格 |
+| 误封 | `AbstractDealDamageHandler` | 告警/普通计分两条分支缺 `maxWithCrit > 0` 护栏，估算不出上限（如暗影之网对残血怪整除得 0）时每条正伤害都记分。顺带把 4 个阈值提出循环、说明串改懒拼 |
+| 配置缺失 | `GameConfig` + 4 处调用 | 无参 `getServerXxx` 把「行不存在」和「值是 0」都返回 0。新增 `getServerInt/Float/Double(key, fallback)` 重载，补齐 `mob_spawn_base_rate`、`mob_spawnrate_to_player_count`、`detect_answer_seconds`、`fast_reuse_hero_will_divisor`、`mob_spawn_point_capacity` 的回退 |
+| 等级上限 | `GameConstants` | 骑士团回退值 120 与迁移种子 155 不一致，配置行缺失会静默提前 35 级封顶；回退改 155 |
+| 空指针 | `SellInvCommand` | `getShop(1337)` 可能为 null；并改为按实际减少的数量记账（`Shop.sell` 有两条静默拒收路径） |
+| 任务泄漏 | `CosPreviewCommand` | 越过号段不自停（脸型要空转 4 小时）、角色下线不清理、`intMap` 被 face/hair 两个任务互踩。改用任务闭包内的计数器 + 越界自停 + 登出自停，`CommandManager.intMap` 随之删除 |
+| 增益断档 | `RangedAttackHandler` / `AranComboHandler` | 耗球式连击技能扣完连击后 `setCombo` 会取消 ARAN_COMBO，而重挂只在跨进新十位档时发生——UI 还显示着剩余连击、增益已消失，最长空窗 9 刀。抽出 `applyComboBuff` 在消耗后立即重挂 |
+| 双层不一致 | `scripts/item/BeiDouSatelliteManual.js` | 中文层已停用、英文层仍发 100 万金币；按文件级回退，en-US 下可绕过停用 |
+| 双层不一致 | `NPCScriptManager` + 3 个指令 | 指名脚本找不到时兜底到 `npc/<npcid>.js`，会静默打开毫不相干的 NPC 对话。兜底改为只对道具脚本成立；`openNpc` 返回布尔，`@whodrops`/`@mapdrops`/`@cospreview` 据此给提示 |
+| 文案 | `PinkBeanBattle.js` 双层 | 倒计时改 5 秒但 4 处广播仍写「15 秒」；文案改为跟随 `countDown` 变量 |
+
+### 9.2 查证属实、本批不改
+
+- **`V1000.1.8` 扭蛋奖池的 DELETE 按 `(pool_id, item_id)` 会把运营手工加的权重行一并收敛回一行**——迁移文件头第 31–32 行本来就写明了这个取舍。`gachapon_reward` 用重复行加权，而本迁移的语义就是「这个池里这件道具改成 X」，把运营加的副本一起删掉与语义一致。不改。
+- **`V1000.1.9` 神木村奖池不可重复执行、无 `(gachapon_id, name)` 唯一约束**——Flyway 按版本号只跑一次；且 `9100111` 的地图放置是本批同一次迁移新加的，此前不存在任何地图上的该 NPC，运营无从预先配过池。不改。
+- **`server/gachapon/Leafre.java` 缺 AGPL 头**——同包 `ElNath.java` 等兄弟文件也都没有，按 CLAUDE.md「匹配周边代码风格」不补。
+- **骑士团上限 155 本身**——`docs/lichkingmod-port.md` 已记录「原版 120，运营决定」，是有意变更（改的只是配置缺失时的回退值，见 9.1）。
+
+### 9.3 转交与遗留
+
+- **`V1000.0.2__create_message_board.sql` 与批次 6 分歧** —— 两分支的分叉点是 `2daa01f5`，批次 6 在分叉后**原地重写**了这个版本号（`message` 收窄到 `VARCHAR(64)`、新增 `is_gm`），批次 7 分叉后**没碰过**这三个文件。
+  - 因此 **git 合并不会冲突**（单边修改），批次 6 的版本会直接生效——两轮 review 里「必出 git 冲突」的判断不成立。
+  - 真正的风险是**已经跑过批次 7 迁移的库**：Flyway 按版本号跳过，`V1000.0.2` 不会重跑，库里仍是 `VARCHAR(255)` 且没有 `is_gm`，再跑批次 6 的代码就会 `Unknown column 'is_gm'`。
+  - **修法在批次 6 那边**：把原地重写改成新增一个 `V1000.0.21` 的 `ALTER`。本批不动。
+- **美容券的产出渠道（第 5/6 项 wz 批次的发布前置）** —— `2bd5ac0ec` 已在提交信息里写明「通用券的产出渠道随 wz 批量迁移一并处理」，这里把欠账量化：
+  - master 上 90 个旧券 ID 被脚本消耗，本批之后只剩 34 个（含美瞳券与 `2012007` 的 `5154000`），**56 个断供**——`5151xxx` 染发券整段全断。
+  - `wz/Etc.wz/Commodity.img.xml` 仍以 `OnSale=1` 出售其中大量旧券，而新的 `5159000–5159005` **在商城里一条都没有**（脚本里可用金币买，NX 渠道为空）。
+  - 净效果：玩家花 NX 买到的券在多数美容 NPC 处不可用，存量旧券搁浅。
+  - **发布前必须做的两件事**：旧券下架（或让脚本兼容旧券）+ 新券上架；存量旧券是否做转换迁移由运营定。改 `Commodity.img.xml` 要同步客户端，属第 6 项。
+- **`scripts/BeiDouSpecial/` 整个目录不存在**（BeiDou 自身的历史状况，非本批引入）—— `Salon`、`当前地图掉落_物品查询`、`当前地图掉落_当前地图` 只有中文层有。本批已让这三个指令在 en-US 下报错而不是打开错的 NPC（9.1），但**功能本身在 en-US 下仍缺**。与「`GameConfig` 门只在中文层」「`9000020` 英文层只有 2 个目的地」同属 BeiDou 双层一致性待办。
+
+---
+
 ## 附录
 
 ### A. 可复现的分析命令

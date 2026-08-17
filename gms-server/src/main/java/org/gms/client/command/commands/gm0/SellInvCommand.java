@@ -26,6 +26,7 @@ import org.gms.client.command.commands.CommandManager;
 import org.gms.client.inventory.Inventory;
 import org.gms.client.inventory.InventoryType;
 import org.gms.client.inventory.Item;
+import org.gms.server.Shop;
 import org.gms.server.ShopFactory;
 import org.gms.util.I18nUtil;
 
@@ -77,6 +78,13 @@ public class SellInvCommand extends Command {
             return;
         }
 
+        // shops 表里没有这一行时 ShopFactory 会缓存并返回 null，逐格调用会让普通玩家的指令抛空指针
+        Shop shop = ShopFactory.getInstance().getShop(SELL_SHOP_ID);
+        if (shop == null) {
+            player.yellowMessage(I18nUtil.getMessage("SellInvCommand.message5", SELL_SHOP_ID));
+            return;
+        }
+
         Map<Item, Short> soldItems = new HashMap<>();
         Inventory inventory = player.getInventory(type);
         // BeiDou 的 Shop.sell 返回 void、直接给玩家结算金币，
@@ -89,8 +97,14 @@ public class SellInvCommand extends Command {
                 continue;
             }
             short quantity = item.getQuantity();
-            ShopFactory.getInstance().getShop(SELL_SHOP_ID).sell(c, type, slot, quantity);
-            soldItems.put(item, quantity);
+            shop.sell(c, type, slot, quantity);
+            // Shop.sell 有两条静默拒收路径（数量为负直接 return、canSell 为假只回一个包），
+            // 物品会原样留在格子里。按实际减少的数量记账，否则回购单里会出现根本没卖掉的东西
+            Item remaining = inventory.getItem((byte) slot);
+            short sold = remaining == null ? quantity : (short) (quantity - remaining.getQuantity());
+            if (sold > 0) {
+                soldItems.put(item, sold);
+            }
         }
         int totalSold = player.getMeso() - mesoBefore;
 

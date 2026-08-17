@@ -70,9 +70,9 @@ public class SpawnPoint {
         return denySpawn;
     }
 
-    /** BOSS 点恒定只放一只，普通点的容量由配置决定 */
+    /** BOSS 点恒定只放一只，普通点的容量由配置决定，缺配置时取迁移脚本里的种子值 2 */
     private int spawnCapacity() {
-        return boss ? 1 : Math.max(1, GameConfig.getServerInt("mob_spawn_point_capacity"));
+        return boss ? 1 : Math.max(1, GameConfig.getServerInt("mob_spawn_point_capacity", 2));
     }
 
     /**

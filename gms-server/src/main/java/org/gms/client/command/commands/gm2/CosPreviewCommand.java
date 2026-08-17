@@ -31,6 +31,7 @@ import org.gms.server.TimerManager;
 import org.gms.util.I18nUtil;
 
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 造型预览。
@@ -63,9 +64,12 @@ public class CosPreviewCommand extends Command {
     public void execute(Client c, String[] params) {
         Character player = c.getPlayer();
 
-        // 默认路径：打开 Salon，不进入遍历分支
+        // 默认路径：打开 Salon，不进入遍历分支。
+        // Salon 目前只有中文层有，en-US 下开不起来，得给玩家一句提示
         if (params.length < 2) {
-            player.getAbstractPlayerInteraction().openNpc(NpcId.BEI_DOU_NPC_BASE, SALON_SCRIPT);
+            if (!player.getAbstractPlayerInteraction().openNpc(NpcId.BEI_DOU_NPC_BASE, SALON_SCRIPT)) {
+                player.yellowMessage(I18nUtil.getMessage("Command.scriptMissing", SALON_SCRIPT));
+            }
             return;
         }
 
@@ -86,24 +90,35 @@ public class CosPreviewCommand extends Command {
 
         String category = face ? CATEGORY_FACE : CATEGORY_HAIR;
         CommandManager.getInstance().cancelRunningCommands(category, player.getId());
-        CommandManager.getInstance().setIntMap(player.getId(), startId);
 
+        // 计数器放在任务闭包里而不是 CommandManager 的共享 intMap：intMap 只按角色id分键、
+        // 取消却按类别分类，同时开 face 和 hair 两个预览会以 +1/+10 交错改同一个计数器
+        AtomicInteger cursor = new AtomicInteger(startId);
         ScheduledFuture<?> sf = TimerManager.getInstance().register(
-                () -> stepPreview(player, face, category), PREVIEW_INTERVAL_MS);
+                () -> stepPreview(player, face, category, cursor), PREVIEW_INTERVAL_MS);
         CommandManager.getInstance().registerRunningCommands(category, player.getId(), sf);
     }
 
-    private void stepPreview(Character player, boolean face, String category) {
-        Integer current = CommandManager.getInstance().getIntMap(player.getId());
-        if (current == null) {
+    private void stepPreview(Character player, boolean face, String category, AtomicInteger cursor) {
+        // 角色下线后没有任何地方会来收这个任务，它会一直每 800ms 对一个已登出的 Character
+        // 调 setFace/updateSingleStat，把整个角色对象一起留在内存里
+        if (!player.isLoggedInWorld()) {
             CommandManager.getInstance().cancelRunningCommands(category, player.getId());
             return;
         }
-        CommandManager.getInstance().setIntMap(player.getId(), current + (face ? FACE_STEP : HAIR_STEP));
 
+        int current = cursor.getAndAdd(face ? FACE_STEP : HAIR_STEP);
+
+        // 越过号段就自停。原先只发一条提示不取消任务，脸型从 30000 空转到 50000
+        // 要刷屏四个多小时，之后更是永久无效地跑下去
         boolean valid = face ? ItemConstants.isFace(current) : ItemConstants.isHair(current);
-        if (!valid || ItemInformationProvider.getInstance().getName(current) == null) {
+        if (!valid) {
             player.yellowMessage(I18nUtil.getMessage("CosPreviewCommand.message4", current));
+            CommandManager.getInstance().cancelRunningCommands(category, player.getId());
+            return;
+        }
+        // 号段内但本服没有这一款，跳过继续找下一款
+        if (ItemInformationProvider.getInstance().getName(current) == null) {
             return;
         }
 

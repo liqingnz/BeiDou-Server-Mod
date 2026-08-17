@@ -43,6 +43,9 @@ public class WhoDropsCommand extends Command {
 
     @Override
     public void execute(Client c, String[] params) {
-        c.getPlayer().getAbstractPlayerInteraction().openNpc(NpcId.BEI_DOU_NPC_BASE, SCRIPT_NAME);
+        // 脚本中心目前只有中文层有，en-US 下开不起来。开不起来要说一声，不能让玩家对着没反应的指令猜
+        if (!c.getPlayer().getAbstractPlayerInteraction().openNpc(NpcId.BEI_DOU_NPC_BASE, SCRIPT_NAME)) {
+            c.getPlayer().yellowMessage(I18nUtil.getMessage("Command.scriptMissing", SCRIPT_NAME));
+        }
     }
 }

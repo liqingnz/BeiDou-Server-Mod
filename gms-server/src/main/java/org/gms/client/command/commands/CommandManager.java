@@ -41,11 +41,6 @@ public class CommandManager {
     }
 
     /**
-     * 通用整型暂存，按角色id存放。目前用于点装预览记录当前遍历到的造型id。
-     */
-    private final Map<Integer, Integer> intMap = new ConcurrentHashMap<>();
-
-    /**
      * 按「类别 -> 角色id」登记正在运行的定时任务，用于重复执行时取消上一轮。
      */
     private final Map<String, Map<Integer, ScheduledFuture<?>>> runningCommands = new ConcurrentHashMap<>();
@@ -67,14 +62,6 @@ public class CommandManager {
      * 记录通过指令卖出物品所得的金币，与 itemSoldThroughCommand 配套。
      */
     private final Map<Integer, Integer> itemSoldMeso = new ConcurrentHashMap<>();
-
-    public Integer getIntMap(Integer key) {
-        return intMap.get(key);
-    }
-
-    public void setIntMap(Integer key, Integer value) {
-        intMap.put(key, value);
-    }
 
     public ScheduledFuture<?> getRunningCommand(String category, Integer characterId) {
         Map<Integer, ScheduledFuture<?>> categoryCommands = runningCommands.get(category);

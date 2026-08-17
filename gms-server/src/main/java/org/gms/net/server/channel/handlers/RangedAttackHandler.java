@@ -96,14 +96,14 @@ public final class RangedAttackHandler extends AbstractDealDamageHandler {
             chr.getMap().broadcastMessage(chr, PacketCreator.rangedAttack(chr, attack.skill, attack.skilllevel, attack.stance, attack.numAttackedAndDamage, 0, attack.allDamage, attack.speed, attack.direction, attack.display), false);
             // 连击技能改为「消耗」对应连击数而不是清空，剩余连击可以继续累积
             short comboCount = chr.getCombo();
-            if (attack.skill == Aran.COMBO_SMASH && chr.getCombo() >= 30) {
-                chr.setCombo((short) (comboCount - 30));
+            if (attack.skill == Aran.COMBO_SMASH && comboCount >= 30) {
+                consumeCombo(chr, comboCount, 30);
                 applyAttack(attack, chr, 1);
-            } else if (attack.skill == Aran.COMBO_FENRIR && chr.getCombo() >= 100) {
-                chr.setCombo((short) (comboCount - 100));
+            } else if (attack.skill == Aran.COMBO_FENRIR && comboCount >= 100) {
+                consumeCombo(chr, comboCount, 100);
                 applyAttack(attack, chr, 2);
-            } else if (attack.skill == Aran.COMBO_TEMPEST && chr.getCombo() >= 200) {
-                chr.setCombo((short) (comboCount - 200));
+            } else if (attack.skill == Aran.COMBO_TEMPEST && comboCount >= 200) {
+                consumeCombo(chr, comboCount, 200);
                 applyAttack(attack, chr, 4);
             }
         } else {
@@ -256,5 +256,17 @@ public final class RangedAttackHandler extends AbstractDealDamageHandler {
                 applyAttack(attack, chr, bulletCount);
             }
         }
+    }
+
+    /**
+     * 扣掉本次连击技能消耗的连击数，并按剩余连击数重新挂上连击增益。
+     * <p>
+     * {@code setCombo} 在连击数下降时会取消 ARAN_COMBO，而 {@link AranComboHandler} 只在跨进
+     * 新的十位档时才重挂；不在这里补一次，玩家会看着 UI 上剩下的连击数、身上却没有增益。
+     */
+    private static void consumeCombo(Character chr, short comboCount, int cost) {
+        short remaining = (short) (comboCount - cost);
+        chr.setCombo(remaining);
+        AranComboHandler.applyComboBuff(chr, remaining);
     }
 }

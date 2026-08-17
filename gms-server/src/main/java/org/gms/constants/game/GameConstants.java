@@ -525,11 +525,13 @@ public class GameConstants {
      * 骑士团（Cygnus）的等级上限，见 {@link #getMaxLevel()} 的说明。
      */
     public static int getCygnusMaxLevel() {
-        return clampLevelCap(GameConfig.getServerInt("cygnus_max_level_cap"), 120);
+        // 回落值取迁移种子的 155 而不是原版的 120：种子是本服对外承诺的上限，配置行万一缺失，
+        // 静默提前 35 级封顶比沿用原版值更难被发现。max_level_cap 的种子与回落值本来就同为 200
+        return clampLevelCap(GameConfig.getServerInt("cygnus_max_level_cap"), 155);
     }
 
     /**
-     * 等级上限的取值范围。非正数（含配置缺失时 GameConfig 返回的 0）回落到原硬编码值；
+     * 等级上限的取值范围。非正数（含配置缺失时 GameConfig 返回的 0）回落到该项的出厂默认值；
      * 上界 255 是协议限制——角色等级在多处以 writeByte 发给客户端，256 会绕回 0。
      */
     private static int clampLevelCap(int configured, int fallback) {

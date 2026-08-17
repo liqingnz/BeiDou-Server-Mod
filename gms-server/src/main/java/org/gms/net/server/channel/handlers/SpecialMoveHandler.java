@@ -92,8 +92,9 @@ public final class SpecialMoveHandler extends AbstractPacketHandler {
                 } else {
                     int cooldownTime = effect.getCooldown();
                     if (StatEffect.isHerosWill(skillid) && GameConfig.getServerBoolean("use_fast_reuse_hero_will")) {
-                        // 除数为 0 会抛 ArithmeticException，配置写歪也得兜住
-                        cooldownTime /= Math.max(1, GameConfig.getServerInt("fast_reuse_hero_will_divisor"));
+                        // 除数为 0 会抛 ArithmeticException，配置写歪也得兜住；
+                        // 缺配置时回退到种子值 60，否则除数变成 1，开关开了却等于没开
+                        cooldownTime /= Math.max(1, GameConfig.getServerInt("fast_reuse_hero_will_divisor", 60));
                     }
 
                     c.sendPacket(PacketCreator.skillCooldown(skillid, cooldownTime));

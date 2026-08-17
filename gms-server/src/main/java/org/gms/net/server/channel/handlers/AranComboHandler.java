@@ -60,23 +60,41 @@ public class AranComboHandler extends AbstractPacketHandler {
             int prevTier = prevCombo / 10;
             int newTier = combo / 10;
             if (newTier > prevTier) {
-                boolean ignoreSkillLevel = player.getJob().getId() == 2000;
-                int tier;
-                if (newTier <= 10) {
-                    // 100 连以内保持原语义：档位超过技能等级就不给
-                    tier = ignoreSkillLevel || newTier <= skillLevel ? newTier : 0;
-                } else {
-                    // 满连之后没有更高的档，按自己的最高档每 10 连续期一次。
-                    // applyComboBuff 服务端是 Long.MAX_VALUE 不过期，续期只为维持客户端 99999ms 的图标，
-                    // 因此不必每刀都发包重登
-                    tier = ignoreSkillLevel ? 10 : Math.min(skillLevel, 10);
-                }
-                if (tier > 0) {
-                    SkillFactory.getSkill(Aran.COMBO_ABILITY).getEffect(tier).applyComboBuff(player, combo);
-                }
+                applyComboBuff(player, combo, skillLevel);
             }
             player.setCombo(combo);
             player.setLastCombo(currentTime);
         }
+    }
+
+    /**
+     * 按当前连击数把连击增益挂上。
+     * <p>
+     * 消耗型连击技能（{@link RangedAttackHandler} 里的三招）扣完连击之后必须补调一次：
+     * {@code Character.setCombo} 在连击数下降时会取消 ARAN_COMBO 增益，而本类只在跨进新的十位档
+     * 时才重挂——不补这一下的话，客户端还显示着剩余连击数、增益却已经没了，要一直打到下一个整十
+     * 才恢复，最长空窗 9 刀。
+     */
+    static void applyComboBuff(Character player, short combo, int skillLevel) {
+        boolean ignoreSkillLevel = player.getJob().getId() == 2000;
+        int newTier = combo / 10;
+        int tier;
+        if (newTier <= 10) {
+            // 100 连以内保持原语义：档位超过技能等级就不给
+            tier = ignoreSkillLevel || newTier <= skillLevel ? newTier : 0;
+        } else {
+            // 满连之后没有更高的档，按自己的最高档每 10 连续期一次。
+            // applyComboBuff 服务端是 Long.MAX_VALUE 不过期，续期只为维持客户端 99999ms 的图标，
+            // 因此不必每刀都发包重登
+            tier = ignoreSkillLevel ? 10 : Math.min(skillLevel, 10);
+        }
+        if (tier > 0) {
+            SkillFactory.getSkill(Aran.COMBO_ABILITY).getEffect(tier).applyComboBuff(player, combo);
+        }
+    }
+
+    /** 供消耗连击的攻击处理器调用，技能等级自己查 */
+    static void applyComboBuff(Character player, short combo) {
+        applyComboBuff(player, combo, player.getSkillLevel(SkillFactory.getSkill(Aran.COMBO_ABILITY)));
     }
 }

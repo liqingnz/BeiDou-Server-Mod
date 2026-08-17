@@ -134,7 +134,11 @@ public class NPCScriptManager extends AbstractScriptManager {
                         engine = getInvocableScriptEngine("item/" + fileName + ".js", c);
                     }
                 }
-                if (engine == null) {
+                // 兜底到 npc/<npcid>.js 只对道具脚本成立：道具脚本找不到就按普通NPC对话处理，
+                // resetItemScript 正是为此。指名要某个脚本却找不到时不能兜底——那会静默打开一个
+                // 毫不相干的NPC对话（BeiDou 自己的脚本中心都挂在同一个 9900001 上，
+                // 中文层独有的 BeiDouSpecial 脚本在 en-US 下就会兜到「升级」NPC）。
+                if (engine == null && (itemScript || fileName == null)) {
                     engine = getInvocableScriptEngine("npc/" + npc + ".js", c);
                     cm.resetItemScript();
                 }

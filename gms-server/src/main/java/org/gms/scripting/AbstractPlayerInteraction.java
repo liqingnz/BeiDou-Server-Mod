@@ -375,14 +375,18 @@ public class AbstractPlayerInteraction {
         openNpc(npcid, null);
     }
 
-    public void openNpc(int npcid, String script) {
+    /**
+     * @return 对话是否真的开起来了。指名的脚本文件不存在时返回 false，
+     * 调用方（尤其是指令）应据此给玩家一句提示，而不是当作成功
+     */
+    public boolean openNpc(int npcid, String script) {
         if (c.getCM() != null) {
-            return;
+            return false;
         }
 
         c.removeClickedNPC();
         NPCScriptManager.getInstance().dispose(c);
-        NPCScriptManager.getInstance().start(c, npcid, script, null);
+        return NPCScriptManager.getInstance().start(c, npcid, script, null);
     }
 
     public int getQuestStatus(int id) {
@@ -1401,7 +1405,9 @@ public class AbstractPlayerInteraction {
             return;
         }
 
-        long answerMs = GameConfig.getServerInt("detect_answer_seconds") * 1000L;
+        // 缺配置时必须回退到种子值 15 秒：0 秒等于零延迟调度，判罚线程会赶在题目弹出去之前抢到
+        // settled，目标压根没看到题就被扣券关监狱
+        long answerMs = GameConfig.getServerInt("detect_answer_seconds", 15) * 1000L;
         session.verdict = TimerManager.getInstance().schedule(() -> settleDetection(victimId, victimName), answerMs);
 
         // 题必须确认真的弹出去了，才收费、才让判罚生效。openNpc 遇到目标已有会话是静默返回的，

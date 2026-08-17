@@ -129,8 +129,20 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
      * 那会让判定退化成「任何伤害都超标」，因此非正数一律回落到硬编码默认值。
      */
     private static double configuredRatio(String key, double fallback) {
-        double ratio = GameConfig.getServerDouble(key);
+        double ratio = GameConfig.getServerDouble(key, fallback);
         return ratio > 0 ? ratio : fallback;
+    }
+
+    /**
+     * 拼出伤害异常的说明串，供 AutobanFactory 记录。
+     * <p>
+     * 只在真的要报出去时调用：取地图名要过一次 wz 数据，而这段说明按「怪物数 × 攻击段数」触发，
+     * 无条件拼串会让每一次正常的多段攻击都白付一遍代价。
+     */
+    private static String describeDamage(Character chr, Monster monster, int skillId, int damage, long maxWithCrit) {
+        return "DMG: " + damage + " MaxDMG: " + maxWithCrit + " SID: " + skillId
+                + " MobID: " + (monster != null ? monster.getId() : "null")
+                + " Map: " + chr.getMap().getMapName() + " (" + chr.getMapId() + ")";
     }
 
     protected void applyAttack(AttackInfo attack, final Character player, int attackCount) {
@@ -896,6 +908,14 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
                 calcDmgMax = fixed;
             }
         }
+        // 四个阈值在整次攻击里是常量，提到循环外读一次。GameConfig.getServerXxx 每次都要遍历
+        // server 子树并对 key 做一次 toLowerCase，放在每条伤害线上等于按怪物数×段数重复扫描
+        final double alertRatio = configuredRatio("damage_hack_alert_ratio", 1.5);
+        final double pointRatio = configuredRatio("damage_hack_point_ratio", 5);
+        final double severeRatio = configuredRatio("damage_hack_severe_ratio", 30);
+        final int configuredSeverePoints = GameConfig.getServerInt("damage_hack_severe_points", 15);
+        final int severePoints = configuredSeverePoints > 0 ? configuredSeverePoints : 15;
+
         for (int i = 0; i < ret.numAttacked; i++) {
             int oid = p.readInt();
             p.skip(14);
@@ -1005,24 +1025,33 @@ public abstract class AbstractDealDamageHandler extends AbstractPacketHandler {
                     maxWithCrit *= 2;
                 }
 
-                // GM 用 @maxstats 之类测伤害时会刷屏——addPoint 本来就跳过 GM，只有 alert 会触发
-                if (!chr.isGM()) {
-                    String dmgReason = "DMG: " + damage + " MaxDMG: " + maxWithCrit + " SID: " + ret.skill + " MobID: " + (monster != null ? monster.getId() : "null") + " Map: " + chr.getMap().getMapName() + " (" + chr.getMapId() + ")";
+                // GM 用 @maxstats 之类测伤害时会刷屏——addPoint 本来就跳过 GM，只有 alert 会触发。
+                // maxWithCrit 是服务端估算值，为 0 时说明估不出来（隐士的暗影之网对残血怪整除即得 0），
+                // 三条分支都不能据此判定，否则每条正伤害都各记一分，默认 15 分就是一个多段攻击包封掉正常玩家
+                if (!chr.isGM() && maxWithCrit > 0) {
+                    // 说明串只在真的要报出去时才拼：这里每条伤害线走一次，而拼串要取地图名
+                    String dmgReason = null;
 
                     // Warn if the damage is over 1.5x what we calculated above.
-                    if (damage > maxWithCrit * configuredRatio("damage_hack_alert_ratio", 1.5)) {
+                    if (damage > maxWithCrit * alertRatio) {
+                        dmgReason = describeDamage(chr, monster, ret.skill, damage, maxWithCrit);
                         AutobanFactory.DAMAGE_HACK.alert(chr, dmgReason);
                     }
 
                     // Add a ab point if its over 5x what we calculated.
-                    if (damage > maxWithCrit * configuredRatio("damage_hack_point_ratio", 5)) {
+                    if (damage > maxWithCrit * pointRatio) {
+                        if (dmgReason == null) {
+                            dmgReason = describeDamage(chr, monster, ret.skill, damage, maxWithCrit);
+                        }
                         AutobanFactory.DAMAGE_HACK.addPoint(chr.getAutoBanManager(), dmgReason);
                     }
 
-                    // 高倍数一次性加重计分。maxWithCrit 是服务端估算值，为 0 时说明估不出来，不能据此判定
-                    if (maxWithCrit > 0 && damage > maxWithCrit * configuredRatio("damage_hack_severe_ratio", 30)) {
-                        int severePoints = GameConfig.getServerInt("damage_hack_severe_points");
-                        AutobanFactory.DAMAGE_HACK.addPoint(chr.getAutoBanManager(), dmgReason, severePoints > 0 ? severePoints : 15);
+                    // 高倍数一次性加重计分
+                    if (damage > maxWithCrit * severeRatio) {
+                        if (dmgReason == null) {
+                            dmgReason = describeDamage(chr, monster, ret.skill, damage, maxWithCrit);
+                        }
+                        AutobanFactory.DAMAGE_HACK.addPoint(chr.getAutoBanManager(), dmgReason, severePoints);
                     }
                 }
 

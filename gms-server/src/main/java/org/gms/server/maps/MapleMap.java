@@ -3785,8 +3785,10 @@ public class MapleMap {
             effectivePlayers = Math.min(effectivePlayers, maxPlayers);
         }
 
-        return GameConfig.getServerFloat("mob_spawn_base_rate")
-                + effectivePlayers * GameConfig.getServerFloat("mob_spawnrate_to_player_count");
+        // 两个倍率都必须给回退值：缺配置时相加得 0，getNumShouldSpawn 算出的上限也是 0，
+        // 场上的怪被清完之后全服所有普通地图都不再补怪。回退值取迁移脚本里的种子。
+        return GameConfig.getServerFloat("mob_spawn_base_rate", 0.7f)
+                + effectivePlayers * GameConfig.getServerFloat("mob_spawnrate_to_player_count", 0.1f);
     }
 
     /**

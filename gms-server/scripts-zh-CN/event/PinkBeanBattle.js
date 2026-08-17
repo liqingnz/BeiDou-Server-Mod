@@ -97,7 +97,7 @@ function setEventRewards(eim) {
 }
 
 function afterSetup(eim) {
-    eim.dropMessage(5, "第一波攻击将在15秒后开始，请做好准备。");
+    eim.dropMessage(5, "第一波攻击将在" + countDown + "秒后开始，请做好准备。");
     eim.schedule("startWave", countDown * 1000);
 }
 
@@ -283,7 +283,7 @@ function monsterKilled(mob, eim) {
                 stage++;
                 eim.setIntProperty("stage", stage);
 
-                eim.dropMessage(5, "下一波攻击将在15秒后开始，请做好准备。");
+                eim.dropMessage(5, "下一波攻击将在" + countDown + "秒后开始，请做好准备。");
                 eim.schedule("startWave", countDown * 1000);
             }
         }

@@ -327,6 +327,18 @@ public class GameConfig {
         return valueProp.getIntValue("value");
     }
 
+    /**
+     * 取不到配置时返回 fallback，而不是无差别的 0。
+     * <p>
+     * 无参重载对「配置行不存在」和「配置值就是 0」返回同一个 0，调用方无从分辨。刷怪倍率、
+     * 答题时限这类参数 0 是一个有害取值（不刷怪、零秒判罚），因此凡是 0 不合法的地方都该用这个重载，
+     * fallback 取迁移脚本里的种子值。与 {@link #getServerObject(String, Object)} 是同一套写法。
+     */
+    public static int getServerInt(String key, int fallback) {
+        JSONObject valueProp = getValueProp("server", key);
+        return valueProp == null ? fallback : valueProp.getIntValue("value");
+    }
+
     public static byte getWorldByte(int worldId, String key) {
         JSONObject valueProp = getValueProp("world", String.valueOf(worldId), key);
         if (valueProp == null) {
@@ -391,6 +403,12 @@ public class GameConfig {
         return valueProp.getFloatValue("value");
     }
 
+    /** 取不到配置时返回 fallback，说明见 {@link #getServerInt(String, int)} */
+    public static float getServerFloat(String key, float fallback) {
+        JSONObject valueProp = getValueProp("server", key);
+        return valueProp == null ? fallback : valueProp.getFloatValue("value");
+    }
+
     public static double getWorldDouble(int worldId, String key) {
         JSONObject valueProp = getValueProp("world", String.valueOf(worldId), key);
         if (valueProp == null) {
@@ -405,6 +423,12 @@ public class GameConfig {
             return 0D;
         }
         return valueProp.getDoubleValue("value");
+    }
+
+    /** 取不到配置时返回 fallback，说明见 {@link #getServerInt(String, int)} */
+    public static double getServerDouble(String key, double fallback) {
+        JSONObject valueProp = getValueProp("server", key);
+        return valueProp == null ? fallback : valueProp.getDoubleValue("value");
     }
 
     public static String getWorldString(int worldId, String key) {

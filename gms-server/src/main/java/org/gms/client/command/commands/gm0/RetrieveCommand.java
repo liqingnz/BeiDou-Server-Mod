@@ -81,7 +81,11 @@ public class RetrieveCommand extends Command {
             // 原实现只要清单里有一件装备，就把所有物品都当装备处理，此处逐件按自身类型分支
             item.setQuantity(item.getInventoryType() == InventoryType.EQUIP ? 1 : entry.getValue());
             if (!InventoryManipulator.addFromDrop(c, item)) {
-                failed.put(item, entry.getValue());
+                // 记的必须是 addFromDrop 改写后的剩余量，不能是原始数量：addFromDropInternal 会先把
+                // 一部分并进已有的堆、开新格失败时才返回 false，并把 item 的数量改写成还没发出去的那部分。
+                // 按原始数量记账，玩家腾出一格再来一次（重试免费）就白拿到已经并进包里的那部分。
+                // 其余失败路径（装备满格、可充值物品、pickupRestricted）都没动过数量，取回来仍是全额。
+                failed.put(item, item.getQuantity());
             }
         }
 
@@ -109,25 +113,33 @@ public class RetrieveCommand extends Command {
      * 而 checkSpaceProgressively 的 usedSlots 只记新增格数，不记前一条已经假想占掉的堆叠余量，
      * 逐条问会让每条都看到当前背包里同一份剩余容量，从而低估所需格数。
      * 聚合的键取 itemId + flag + owner，与 addFromDrop 实际的合并条件一致。
+     * <p>
+     * 可充值物品（飞镖/子弹）是例外，不能聚合：addFromDrop 对它们从不并堆，每次都新开一格，
+     * 而 checkSpaceProgressively 对它们一律只算一格。聚合后两把飞镖会被当成一格放行，实际要两格。
      */
     private static boolean hasSpaceForAll(Client c, Map<Item, Short> itemList) {
         Map<InventoryType, Integer> usedSlots = new EnumMap<>(InventoryType.class);
 
-        // 装备不堆叠，每件独占一格，逐件累加即可
+        // 装备与可充值物品都不并堆，每条记录独占一格，逐条累加即可
         for (Map.Entry<Item, Short> entry : itemList.entrySet()) {
             Item item = entry.getKey();
-            if (item.getInventoryType() != InventoryType.EQUIP) {
-                continue;
-            }
-            if (!checkOne(c, item.getItemId(), (short) 1, item.getOwner(), InventoryType.EQUIP, usedSlots)) {
-                return false;
+            if (item.getInventoryType() == InventoryType.EQUIP) {
+                if (!checkOne(c, item.getItemId(), (short) 1, item.getOwner(), InventoryType.EQUIP, usedSlots)) {
+                    return false;
+                }
+            } else if (ItemConstants.isRechargeable(item.getItemId())) {
+                if (!checkOne(c, item.getItemId(), entry.getValue(), item.getOwner(),
+                        ItemConstants.getInventoryType(item.getItemId()), usedSlots)) {
+                    return false;
+                }
             }
         }
 
         Map<StackKey, Integer> stacks = new LinkedHashMap<>();
         for (Map.Entry<Item, Short> entry : itemList.entrySet()) {
             Item item = entry.getKey();
-            if (item.getInventoryType() == InventoryType.EQUIP) {
+            if (item.getInventoryType() == InventoryType.EQUIP
+                    || ItemConstants.isRechargeable(item.getItemId())) {
                 continue;
             }
             stacks.merge(new StackKey(item.getItemId(), item.getFlag(), item.getOwner()),

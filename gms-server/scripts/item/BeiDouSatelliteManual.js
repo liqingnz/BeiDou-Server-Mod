@@ -12,7 +12,16 @@ function start()
   action(1, 0, 0);
 }
 
-function action(mode, type, selection) 
+function action(mode, type, selection)
+{
+	// temporary disable this script -- keep in sync with scripts-zh-CN/item/BeiDouSatelliteManual.js.
+	// The loader falls back to this file per-file, so disabling only the zh-CN copy would leave
+	// the 7-books-for-1M-mesos payout below reachable under en-US.
+	im.dispose();
+	// payout(mode);
+}
+
+function payout(mode)
 {
 	if (CheckStatus(mode))
 	{
@@ -29,7 +38,7 @@ function action(mode, type, selection)
 			else
 			{
 				im.sendOk("More book is required.");
-				im.dispose();				
+				im.dispose();
 			}
 	    }
 		else
@@ -37,7 +46,7 @@ function action(mode, type, selection)
 			im.dispose();
 		}
 	}
-			
+
 }
 
 function CheckStatus(mode)
