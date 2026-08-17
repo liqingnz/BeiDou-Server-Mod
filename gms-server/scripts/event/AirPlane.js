@@ -40,10 +40,17 @@ function takeoff() {
     KC_bfd.warpEveryone(Plane_to_CBD.getId());
     CBD_bfd.warpEveryone(Plane_to_KC.getId());
 
-    // Give whoever is left on the platform a clock counting down to the next departure:
-    // the ride comes back exactly one rideTime after it pulls out. Same as Boats.js / Subway.js.
-    // Kerning side is skipped on purpose: KC_docked is map 103000000, Kerning City itself,
-    // not a platform -- a clock there would hit every player in town.
+    // Give whoever is left in the outer hall a clock counting down to the next departure:
+    // the plane is back exactly one rideTime after it pulls out. Same as Boats.js / Subway.js.
+    //
+    // Only the Singapore side gets one, because the two ends are not symmetric:
+    //   Singapore  ticket NPC 9270038 stands in CBD_docked (540010000, Changi Airport),
+    //              a hall of its own -> people who miss the flight are standing there.
+    //   Kerning    ticket NPC 9270041 stands in Kerning City itself (103000000), which is
+    //              what KC_docked points at. A clock there would hit every player in town.
+    // KC_bfd (540010100, Kerning Airport) is the *inner* boarding hall, not a waiting room:
+    // its onUserEnter warpAheads latecomers straight onto the departed plane, so nobody ever
+    // waits there for the next one. Same reason the other rides skip their own *_btf maps.
     const PacketCreator = Java.type('org.gms.util.PacketCreator');
     CBD_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
     em.schedule("arrived", rideTime); //The time that require move to destination

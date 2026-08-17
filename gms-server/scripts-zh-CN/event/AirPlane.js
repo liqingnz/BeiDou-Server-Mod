@@ -40,9 +40,15 @@ function takeoff() {
     KC_bfd.warpEveryone(Plane_to_CBD.getId());
     CBD_bfd.warpEveryone(Plane_to_KC.getId());
 
-    // 给还留在站台上的人一个倒计时：车/船开走后正好一个 rideTime 就会回来。同 Boats.js / Subway.js。
-    // 废弃都市侧刻意不挂：KC_docked 是 103000000 废弃都市主城本身，不是站台，
-    // 挂上去会打到全城玩家。
+    // 给还留在外层大厅的人一个倒计时：飞机开走后正好一个 rideTime 就会回来。同 Boats.js / Subway.js。
+    //
+    // 只挂新加坡侧，因为两端结构不对称：
+    //   新加坡    售票员 9270038 站在 CBD_docked（540010000 樟宜机场），是独立的一张图，
+    //             没赶上飞机的人就站在那儿。
+    //   废弃都市  售票员 9270041 站在废弃都市主城本身（103000000），也就是 KC_docked 指的图。
+    //             往那儿挂钟会打到全城玩家。
+    // KC_bfd（540010100 废弃都市机场）是*内层*登机厅而非候机室：它的 onUserEnter 会把迟到的人
+    // warpAhead 直接送上已起飞的飞机，没人会在那儿等下一班。其余载具跳过各自的 *_btf 同理。
     const PacketCreator = Java.type('org.gms.util.PacketCreator');
     CBD_docked.broadcastMessage(PacketCreator.getClock(rideTime / 1000));
     em.schedule("arrived", rideTime); //The time that require move to destination
