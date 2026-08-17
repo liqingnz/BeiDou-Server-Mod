@@ -1341,7 +1341,7 @@ scripts/npc/9310037.js	script	0	0	ported	批次7：少林寺整形助理如花�
 scripts/npc/9310039.js	script	0	0	rejected	BeiDou 版走通用组队副本框架（YaoSengPQ + 任务8534 + 防远程开启）；LK 版改用远征队系统，且 getEventManager 传的 YaosengBattle 与文件名 YaoSengBattle.js 大小写不符，其 startInstance 分支本身是断的。妖僧每周4次配额已在本批接进 YaoSengPQ.js
 scripts/npc/9310044.js	script	0	0	rejected	东方神舟撞车：妖僧副本（少林密室）出口脚本，与 BeiDou 完全等价（同出口图 702070400）。BeiDou 版用地图名宏
 scripts/npc/9310050.js	script	0	0	already-fixed	两版同为 sendStorage(9310050) 仓库调用，逐字等价
-scripts/npc/9900000.js	script	0	0	rejected	GM 专用美容 NPC（gmLevel>=1）。LK 把男性脸型列表从 32 个 v83 原版脸注释掉，换成 for(i=20800;i<=28820;++i) 塞入他们批次 8 自制的 8021 个自定义脸型。BeiDou 的 Character.wz 里 20800+ 一个都没有，pushIfItemExists 会全滤掉，男性脸型菜单会变成空的——依赖已跳过的批次 8 资源
+scripts/npc/9900000.js	script	0	0	rejected	KIN（GM 专用美容 NPC，gmLevel>=1）。LK 把男性脸型从 32 个 v83 原版脸换成 for(20800..28820) 塞入批次 8 自制的 8021 个脸型；BeiDou 的 Character.wz 里 20800+ 一个都没有，pushIfItemExists 全滤掉后菜单变空。原文封存在 docs/lkport-parked/
 scripts/npc/9977777.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/MagatiaPassword.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/PupeteerPassword.js	script	0	0	rejected	LK 删掉 sendGetText 口令校验直接放行，BeiDou 版保留了谜题
@@ -1503,7 +1503,7 @@ scripts/portal/secretDoor.js	script	0	0	noise	改动可证明只落在字符串�
 scripts/portal/secretgate1_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/secretgate2_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/secretgate3_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/portal/timeQuest.js	script	0	0	rejected	时间神殿通道门。LK 加 var isGm = gmLevel()>2，往七个分支各接 || isGm 想让 GM 免任务穿门。但优先级让 (map<5 && completed) || isGm 在 isGm 为真时第一分支必中：GM 站在换段图（map 5/105/205/300）会被 warp(mapid+10) 送进不存在的地图（如 270010510），而非正确的下一段枢纽。且 BeiDou GM 本有 !warp 指令
+scripts/portal/timeQuest.js	script	0	0	done	时间神殿通道门。采纳 LK 的意图（GM gmLevel>2 免任务穿门）但重写实现：LK 在整条条件后接 || isGm，优先级使 isGm 为真时第一分支必中，GM 站换段图（5/105/205/300）会被 warp(mapid+10) 送进不存在的地图；改为把 isGm 放进每个分支的任务判断括号内，GM 仍走正常分段路由。两层同改
 scripts/portal/tristanEnter.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/tutorHelper.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/tutorquest.js	script	0	0	rejected	骑士团教程门。LK 加强制绑邮箱（pi.getEmail + openNpc verifyEmail），批次2 已定不做，BeiDou 无该 API

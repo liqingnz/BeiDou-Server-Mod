@@ -27,20 +27,25 @@ function enter(pi) {
     var mapid = pi.getPlayer().getMapId();
     pi.playPortalSound();
     var map = (mapid - 270010000) / 100;
+    // GMs (level > 2) pass every door without the quest, but still follow the normal lane
+    // routing below. Do NOT tack "|| isGm" onto the whole condition instead: that makes the
+    // first branch swallow every GM regardless of where they stand, warping them to
+    // mapid + 10 -- a map that does not exist at the lane-end maps (5/105/205/300).
+    var isGm = pi.getPlayer().gmLevel() > 2;
     //pi.getPlayer().dropMessage(5, map + " " + pi.isQuestCompleted(3534));
-    if (map < 5 && pi.isQuestCompleted(3500 + map)) {
+    if (map < 5 && (pi.isQuestCompleted(3500 + map) || isGm)) {
         pi.warp(mapid + 10, "out00");
-    } else if (map == 5 && pi.isQuestCompleted(3502 + map)) {
+    } else if (map == 5 && (pi.isQuestCompleted(3502 + map) || isGm)) {
         pi.warp(270020000, "out00");
-    } else if (map > 100 && map < 105 && pi.isQuestCompleted(3407 + map)) {
+    } else if (map > 100 && map < 105 && (pi.isQuestCompleted(3407 + map) || isGm)) {
         pi.warp(mapid + 10, "out00");
-    } else if (map == 105 && pi.isQuestCompleted(3514)) {
+    } else if (map == 105 && (pi.isQuestCompleted(3514) || isGm)) {
         pi.warp(270030000, "out00");
-    } else if (map > 200 && map < 205 && pi.isQuestCompleted(3314 + map)) {
+    } else if (map > 200 && map < 205 && (pi.isQuestCompleted(3314 + map) || isGm)) {
         pi.warp(mapid + 10, "out00");
-    } else if (map == 205 && pi.isQuestCompleted(3519)) {
+    } else if (map == 205 && (pi.isQuestCompleted(3519) || isGm)) {
         pi.warp(270040000, "out00");
-    } else if (map == 300 && (pi.haveItem(4032002) || pi.isQuestCompleted(3522))) {
+    } else if (map == 300 && (pi.haveItem(4032002) || pi.isQuestCompleted(3522) || isGm)) {
         pi.warp(270040100, "out00");
     } else {
         if (map > 200) {
