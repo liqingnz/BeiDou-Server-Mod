@@ -865,7 +865,7 @@ scripts/npc/1012005.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1012006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1012008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1012100.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1012100.js	script	0	0	rejected	弓箭手转职教官（名人堂）。同 1052001：老类名 + 格式 + 译文，另把一处 sendYesNo 确认改成 sendNext 直接往下走（少一次确认，不采）
 scripts/npc/1012103.js	script	0	0	ported	批次7 美容券统一：造型券→5159000、染发券→5159004（双层）
 scripts/npc/1012104.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/1012105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -900,7 +900,7 @@ scripts/npc/1032100.js	script	0	0	rejected	只是提示语里 item 变量的拼�
 scripts/npc/1032102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032113.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032114.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1052001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1052001.js	script	0	0	rejected	飞侠转职教官（名人堂）。LK 只有 Packages.* 全限定名 vs BeiDou 已有的 Java.type、单行 if 去大括号、译文；逻辑（canSpawnPlayerNpc/spawnPlayerNPC/任务 100009）逐行相同
 scripts/npc/1052002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1052003.js	script	0	0	partial	废弃都市抓子精炼。英文层 3 个菜单 19 项换宏（中文层已是宏），claws 保留「Thief Lv. 60」后缀。材料校验本就正确
 scripts/npc/1052004.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
@@ -925,7 +925,7 @@ scripts/npc/1061007.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1061009.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1061010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1061012.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
-scripts/npc/1061014.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1061014.js	script	0	0	rejected	蝙蝠魔远征 NPC。LK 做了四件事，全拒：①importPackage + MapleExpeditionType/MaplePacketCreator 老类名（BeiDou 已 Java.type + 改名）；②要求文案改用他们 fork 的 exped.getPartInfo()（BeiDou 全仓库 8 个远征/PQ NPC 统一走 em.getProperty("party")）；③startInstance(...) != 0——LK fork 把返回值改成了 int，BeiDou 是 boolean，照搬类型就错；④译文与 dispose 后多余 return。无 9270047 那样的任务门可采
 scripts/npc/1061018.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1061100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1063000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -943,7 +943,7 @@ scripts/npc/1072006.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/1072007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1072008.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1081001.js	script	0	0	rejected	只在 dispose 后加多余的 return（分支是 if/else if 链），其余译文
-scripts/npc/1090000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/1090000.js	script	0	0	rejected	海盗转职教官（名人堂）。同 1052001：老类名 + 格式 + 译文，任务 100010 一线逻辑相同
 scripts/npc/1091003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1092000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1092007.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1028,7 +1028,7 @@ scripts/npc/2030006.js	script	0	0	rejected	三转问答试炼（冰峰雪域圣�
 scripts/npc/2030006_old.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2030008.js	script	0	0	rejected	新增「已完成 100201 后，30 个 4000082 反复换 2 个火焰之眼」的可重复兑换。BeiDou 现有路径是一次性锻造 5 个，之后走 NPC 2082014 的商店按 6000 万金币购买——不是死路，属经济向调参，需要时再开
 scripts/npc/2030010.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2030013.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2030013.js	script	0	0	rejected	扎昆远征 NPC。LK 做了四件事，全拒：①importPackage + MapleExpeditionType/MaplePacketCreator 老类名（BeiDou 已 Java.type + 改名）；②要求文案改用他们 fork 的 exped.getPartInfo()（BeiDou 全仓库 8 个远征/PQ NPC 统一走 em.getProperty("party")）；③startInstance(...) != 0——LK fork 把返回值改成了 int，BeiDou 是 boolean，照搬类型就错；④译文与 dispose 后多余 return。无 9270047 那样的任务门可采
 scripts/npc/2032001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2032002.js	script	0	0	rejected	译文里塞了「自行百度流程 = =」还留着英文原文；其余是把道具名改成 #t4001018# 宏，纯外观
 scripts/npc/2040000.js	script	0	0	rejected	只是把 4031045 提成 ticketId 变量，行为不变
@@ -1104,7 +1104,7 @@ scripts/npc/2082014.js	script	0	0	rejected	LK 用 YamlConfig，BeiDou 已是 Gam
 scripts/npc/2083000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2083001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2083002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2083004.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2083004.js	script	0	0	rejected	暗黑龙王远征 NPC。LK 做了四件事，全拒：①importPackage + MapleExpeditionType/MaplePacketCreator 老类名（BeiDou 已 Java.type + 改名）；②要求文案改用他们 fork 的 exped.getPartInfo()（BeiDou 全仓库 8 个远征/PQ NPC 统一走 em.getProperty("party")）；③startInstance(...) != 0——LK fork 把返回值改成了 int，BeiDou 是 boolean，照搬类型就错；④译文与 dispose 后多余 return。无 9270047 那样的任务门可采
 scripts/npc/2083006.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2090004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2090005.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
@@ -1137,7 +1137,7 @@ scripts/npc/2101014.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2101017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2102001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2102002.js	script	0	0	rejected	把玩家拒绝购买时的告别对话注释掉（反而少了反馈），另提了个只用在提示文案里的 ticketId 变量（gainItem/canHold 仍写字面量），无实质改进
-scripts/npc/2103000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2103000.js	script	0	0	rejected	绿洲之水/Tigun 变身。LK 做的是 importPackage(Packages.client)（GraalVM 死代码）、把 2210005 提成 tigunMorphPotion 变量（纯命名）、MapleBuffStat 老类名（BeiDou 已是 BuffStat）、译文、去大括号；判定与发放逻辑逐行相同
 scripts/npc/2103002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2110005.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/2111000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1180,7 +1180,7 @@ scripts/npc/2133001.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/2133002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2133004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2140000.js	script	0	0	ported	gms-server/scripts/npc/2140000.js 与 scripts-zh-CN/npc/2140000.js —— 任务重置NPC，用到本批新增的 cm.startQuestPro；改成先重置成功再扣钱，原实现重置失败也照扣一千万
-scripts/npc/2141001.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/2141001.js	script	0	0	rejected	粉红豆远征 NPC。LK 做了四件事，全拒：①importPackage + MapleExpeditionType/MaplePacketCreator 老类名（BeiDou 已 Java.type + 改名）；②要求文案改用他们 fork 的 exped.getPartInfo()（BeiDou 全仓库 8 个远征/PQ NPC 统一走 em.getProperty("party")）；③startInstance(...) != 0——LK fork 把返回值改成了 int，BeiDou 是 boolean，照搬类型就错；④译文与 dispose 后多余 return。无 9270047 那样的任务门可采
 scripts/npc/2141002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/22000.js	script	0	0	rejected	强制绑邮箱才放行（批次2 已定不做）；另把等级门槛 6 改 5，属调参
 scripts/npc/9000000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1230,7 +1230,7 @@ scripts/npc/9120101.js	script	0	0	ported	批次7 美容券统一：造型券→5
 scripts/npc/9120102.js	script	0	0	ported	批次7 美容券统一：整形券→5159002（双层）；美瞳券按 LK 原样保留
 scripts/npc/9120103.js	script	0	0	ported	批次7 美容券统一：整形券→5159003（双层）；美瞳券按 LK 原样保留
 scripts/npc/9120200.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9120201.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9120201.js	script	0	0	rejected	昭和远征 NPC。LK 做了四件事，全拒：①importPackage + MapleExpeditionType/MaplePacketCreator 老类名（BeiDou 已 Java.type + 改名）；②要求文案改用他们 fork 的 exped.getPartInfo()（BeiDou 全仓库 8 个远征/PQ NPC 统一走 em.getProperty("party")）；③startInstance(...) != 0——LK fork 把返回值改成了 int，BeiDou 是 boolean，照搬类型就错；④译文与 dispose 后多余 return。无 9270047 那样的任务门可采
 scripts/npc/9120202.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9120203.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9200100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1293,7 +1293,7 @@ scripts/npc/9201100.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201101.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9201102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201106.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201113.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201113.js	script	0	0	rejected	镇魂骑士团 PQ（CWKPQ）远征 NPC。LK 做了四件事，全拒：①importPackage + MapleExpeditionType/MaplePacketCreator 老类名（BeiDou 已 Java.type + 改名）；②要求文案改用他们 fork 的 exped.getPartInfo()（BeiDou 全仓库 8 个远征/PQ NPC 统一走 em.getProperty("party")）；③startInstance(...) != 0——LK fork 把返回值改成了 int，BeiDou 是 boolean，照搬类型就错；④译文与 dispose 后多余 return。无 9270047 那样的任务门可采
 scripts/npc/9201123.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9201124.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
 scripts/npc/9201125.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
@@ -1306,7 +1306,7 @@ scripts/npc/9201131.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201132.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201133.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201134.js	script	0	0	rejected	BeiDou 版更全：多了 eim.giveEventReward 与背包满时的提示，LK 版没有
-scripts/npc/9201135.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9201135.js	script	0	0	rejected	马来西亚导游。BeiDou 版从大都会返程走 peekSavedLocation("WORLDTOUR")——送回玩家来时的地方，兜底 541000000；LK 把这段注释掉硬编码 540000000（新加坡 CBD），从新叶城等地过来的玩家会被丢到新加坡而不是回家，属回退。另有告别语境的文案改动
 scripts/npc/9201142.js	script	0	0	ported	批次7：卷轴回收系统，双语两份重写（isRecyclableScroll API 批次5已备）；LK 注释噪音未搬
 scripts/npc/9201143.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9209000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1341,7 +1341,7 @@ scripts/npc/9310037.js	script	0	0	ported	批次7：少林寺整形助理如花�
 scripts/npc/9310039.js	script	0	0	rejected	BeiDou 版走通用组队副本框架（YaoSengPQ + 任务8534 + 防远程开启）；LK 版改用远征队系统，且 getEventManager 传的 YaosengBattle 与文件名 YaoSengBattle.js 大小写不符，其 startInstance 分支本身是断的。妖僧每周4次配额已在本批接进 YaoSengPQ.js
 scripts/npc/9310044.js	script	0	0	rejected	东方神舟撞车：妖僧副本（少林密室）出口脚本，与 BeiDou 完全等价（同出口图 702070400）。BeiDou 版用地图名宏
 scripts/npc/9310050.js	script	0	0	already-fixed	两版同为 sendStorage(9310050) 仓库调用，逐字等价
-scripts/npc/9900000.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/npc/9900000.js	script	0	0	rejected	GM 专用美容 NPC（gmLevel>=1）。LK 把男性脸型列表从 32 个 v83 原版脸注释掉，换成 for(i=20800;i<=28820;++i) 塞入他们批次 8 自制的 8021 个自定义脸型。BeiDou 的 Character.wz 里 20800+ 一个都没有，pushIfItemExists 会全滤掉，男性脸型菜单会变成空的——依赖已跳过的批次 8 资源
 scripts/npc/9977777.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/MagatiaPassword.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/PupeteerPassword.js	script	0	0	rejected	LK 删掉 sendGetText 口令校验直接放行，BeiDou 版保留了谜题
@@ -1503,7 +1503,7 @@ scripts/portal/secretDoor.js	script	0	0	noise	改动可证明只落在字符串�
 scripts/portal/secretgate1_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/secretgate2_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/secretgate3_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/portal/timeQuest.js	script	0	0	pending	含代码改动；只搬逻辑不搬译文
+scripts/portal/timeQuest.js	script	0	0	rejected	时间神殿通道门。LK 加 var isGm = gmLevel()>2，往七个分支各接 || isGm 想让 GM 免任务穿门。但优先级让 (map<5 && completed) || isGm 在 isGm 为真时第一分支必中：GM 站在换段图（map 5/105/205/300）会被 warp(mapid+10) 送进不存在的地图（如 270010510），而非正确的下一段枢纽。且 BeiDou GM 本有 !warp 指令
 scripts/portal/tristanEnter.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/tutorHelper.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/tutorquest.js	script	0	0	rejected	骑士团教程门。LK 加强制绑邮箱（pi.getEmail + openNpc verifyEmail），批次2 已定不做，BeiDou 无该 API

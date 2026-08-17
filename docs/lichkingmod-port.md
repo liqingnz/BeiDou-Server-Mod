@@ -2753,6 +2753,33 @@ BeiDou 两层 + LK 三份全是倒装，属上游祖传。两层一起补上 `!`
 拒掉的另两个：`portal/tutorquest`（又是强制绑邮箱，批次 2 已定不做）、
 `npc/2081005`（LK 把菜单换成 `sendAcceptDecline`，删掉了「买 10 瓶药水」分支）。
 
+##### 收尾一批（13 个，全拒）——第 2 项脚本组至此清零
+
+按用户要求，拒的也写清 LK 到底做了什么：
+
+| 脚本 | LK 做了什么 | 为什么拒 |
+|---|---|---|
+| `portal/timeQuest` | 加 `isGm = gmLevel() > 2`，七个分支各接 `\|\| isGm`，想让 GM 免任务穿时间神殿的门 | **实现是坏的**：优先级使 `(map<5 && completed) \|\| isGm` 在 GM 处第一分支必中，站在换段图（map 5/105/205/300）会被 `warp(mapid+10)` 送进不存在的地图（如 `270010510`）。GM 本有 `!warp` |
+| `npc/2141001` 粉红豆<br>`9120201` 昭和<br>`1061014` 蝙蝠魔<br>`2030013` 扎昆<br>`2083004` 暗黑龙王<br>`9201113` CWKPQ | 六个远征 NPC 同一套：①`importPackage` + `MapleExpeditionType`/`MaplePacketCreator`；②要求文案改用他们 fork 的 `exped.getPartInfo()`；③`startInstance(...) != 0`；④译文 + `dispose` 后补 `return` | ①②BeiDou 已 `Java.type` + 改名，且全仓库 8 个远征/PQ NPC 统一走 `em.getProperty("party")`；③**LK fork 把 `startInstance` 返回值改成了 `int`，BeiDou 是 `boolean`**，照搬类型就错；无 `9270047` 那样的任务门可采 |
+| `npc/9900000` | GM 美容 NPC。把男性脸型列表从 32 个 v83 原版脸注释掉，换成 `for (i=20800; i<=28820; ++i)` 塞入他们批次 8 自制的 **8021 个自定义脸型** | BeiDou `Character.wz` 里 `20800+` 一个都没有，`pushIfItemExists` 会全滤掉，男性脸型菜单**变成空的** |
+| `npc/1052001`/`1012100`/`1090000` | 飞侠/弓箭手/海盗转职教官（名人堂）。`Packages.*` 全限定名、单行 `if` 去大括号、译文；`1012100` 另把一处 `sendYesNo` 确认改成 `sendNext` 直接往下走 | 逻辑逐行相同，BeiDou 已现代化；少一次确认不采 |
+| `npc/9201135` | 马来西亚导游。把返程的 `peekSavedLocation("WORLDTOUR")`（送回玩家来时的地方，兜底 `541000000`）注释掉，硬编码 `540000000` 新加坡 CBD | **回退**：从新叶城等地过来的玩家会被丢到新加坡而不是回家 |
+| `npc/2103000` | 绿洲之水/Tigun 变身。`importPackage(Packages.client)`、把 `2210005` 提成 `tigunMorphPotion` 变量、`MapleBuffStat` 老类名、译文、去大括号 | 判定与发放逻辑逐行相同，纯命名与格式 |
+
+#### 第 2 项脚本组 · 最终账目
+
+931 个 script 行全部judged完毕，pending 清零：
+
+| 处置 | 数量 | 含义 |
+|---|---|---|
+| `noise` | 665 | 机判纯译文/格式（判据见「全量分层」） |
+| `rejected` | 165 | 人工逐个看过，LK 侧无价值或有害 |
+| `ported` | 57 | 早期批次整搬 |
+| `partial` | 29 | 采纳部分（修 bug / 单点功能），余下否决 |
+| `done` | 13 | 全采纳或按用户决定改写 |
+| `already-fixed` | 2 | BeiDou 上游已有同等修复 |
+| **合计** | **931** | |
+
 **② `npc/9270047` 改判 partial —— 采纳任务 `4576` 前置门**
 
 先前判 rejected 的理由是「新增限制而非修 bug」，用户决定采纳。加在**加入**与**组建**两处，
