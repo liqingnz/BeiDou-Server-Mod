@@ -68,6 +68,9 @@ BeiDou-Server 是一个冒险岛（MapleStory v83，GMS 协议）私服服务端
 ### 游戏服内部要点
 - Netty 传输：`LoginServer`/`ChannelServer` + 各自 Initializer；opcode 在 `constants/net`，包加密在 `net/encryption`。
 - WZ/脚本加载（双语覆盖机制）：服务端默认加载 `gms-server/wz/`（英文基础）与 `gms-server/scripts/`（英文）；再按 `gms.service.language`（`zh-CN`/`en-US`）用 `wz-<lang>/`（如 `wz-zh-CN/`）、`scripts-<lang>/` 覆盖英文基础——即 `wz/`+`wz-zh-CN/` 合并出中文数据，`scripts/`+`scripts-zh-CN/` 合并出中文脚本。读取入口 `provider/wz`。
+  **注意是整文件覆盖，不是节点合并**：同名文件存在于语言层时，基础层那份一个节点都读不到。
+  且本项目**只支持 `zh-CN`**——343 个脚本仅有中文层、英文基础层的 `Quest.wz` 少 365 条任务，
+  切 `en-US` 会大面积失效，定案见 `docs/lichkingmod-port.md` §17.4。
 - 脚本引擎：**GraalVM JS**（非 Nashorn），NPC/quest/portal/reactor/event/item/map 脚本为 `.js`。`Server` 静态块里 `polyglot.engine.WarnInterpreterOnly=false` 抑制告警。
 
 ### i18n（服务端）
