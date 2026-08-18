@@ -316,7 +316,7 @@ public class ItemId {
 
     public static final int NX_CARD_100 = 4031865;
     public static final int NX_CARD_250 = 4031866;
-    // LK 移植：BOSS 掉落的 5000 点券，掉落表见 V1000.0.1__lichkingmod_port.sql
+    // LK 移植：BOSS 掉落的 5000 点券，掉落表见 db/lkport/R__lk_40_drops.sql
     public static final int NX_CARD_5000 = 4310100;
 
     public static boolean isNxCard(int itemId) {
