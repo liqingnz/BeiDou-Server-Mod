@@ -8575,6 +8575,16 @@
         <string name="name" value="Blue Potion"/>
         <string name="desc" value="A potion made out of blue herbs.\nRecovers 100 MP."/>
     </imgdir>
+    <imgdir name="2000100">
+        <string name="name" value="Blood Essence"/>
+        <string name="desc" value="A pill that raises your maximum HP.
+Raises it by 500 (Magicians gain 100 HP and 400 MP)."/>
+    </imgdir>
+    <imgdir name="2000101">
+        <string name="name" value="Blood Essence (Small)"/>
+        <string name="desc" value="A pill that raises your maximum HP.
+Raises it by 10 (Magicians gain 2 HP and 8 MP)."/>
+    </imgdir>
     <imgdir name="2290000">
         <string name="name" value="[Mastery Book] Monster Magnet"/>
         <string name="desc" value="This increases the master level of the #cMonster Magnet# skill to 20 with a 70% chance of success.\nJob: 4th Advancement Warrior\nCondition: At least level 5 in this skill"/>

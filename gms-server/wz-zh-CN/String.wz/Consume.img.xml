@@ -112,6 +112,16 @@
     <string name="desc" value="如果已经拥有真·影分身之术,使用将使分身的攻击伤害提升."/>
     <string name="name" value="真·影分身之术(伤害提升)"/>
   </imgdir>
+  <imgdir name="2000100">
+    <string name="name" value="血液精华"/>
+    <string name="desc" value="提升血量上限的药丸。
+提升值500(法师提升100HP和400MP)。"/>
+  </imgdir>
+  <imgdir name="2000101">
+    <string name="name" value="血液精华（小）"/>
+    <string name="desc" value="提升血量上限的药丸。
+提升值10(法师提升2HP和8MP)。"/>
+  </imgdir>
   <imgdir name="2001000">
     <string name="desc" value="熟透的西瓜\n恢复HP和MP约1000"/>
     <string name="name" value="西瓜"/>
