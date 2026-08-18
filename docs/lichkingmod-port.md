@@ -4529,3 +4529,84 @@ ASM 新增的字段以 `elemAttr`(30)、`attack/*`(20)、`ban/*`(18)、`skill/1/
 3. **`Mob.wz` 48 个有新增的文件** —— 逐个过，注意另有 26 个是我们更全
 4. ~~`Npc.wz`~~ —— **不做**，见 §19.5
 5. `foothold` —— **整段不合**，见 §19.2
+
+---
+
+## 20. §14.3 第 8 项定案：整批归档，不主动合并（用户 2026-08-18 决定）
+
+用户判断：这批全是**共有文件**，BeiDou 本来就有，差的是数据不是功能；
+先归档，游戏里真撞到 bug 再按图索骥修。**本节即为反查索引。**
+
+### 20.1 为什么反应式修复在这里成立
+
+关键在失败模式的「响亮程度」，而这批恰好是干净的两分：
+
+| 差异类型 | 症状 | 是否响亮 |
+|---|---|---|
+| 缺 `portal` | 走过去没反应、进不去图 | **响亮** |
+| 缺 `life` 槽 | NPC 不在、刷怪点空 | **响亮** |
+| 缺 `ladderRope` | 上不去平台，可能困住 | **响亮** |
+| 缺 `info/onUserEnter` 等脚本钩子 | 进图脚本不触发 | **响亮** |
+| `mobRate`、`elemAttr`、`PDRate`/`MDRate`、`hideHP` 数值不同 | 刷新快慢／抗性／减伤不同 | 静默 |
+
+响亮的那些不破坏存档、不崩服，撞到再补一条即可；
+**静默的那些恰恰是不该动的**——那是数值口径，BeiDou 的值本来就是它自己要的，
+拿 ASM 覆盖是引入回退（`Mob.wz` 有 20 只怪的 `elemAttr` 只有我们有，见 §19.4）。
+
+另有两条独立理由：合并 `Map.wz` 的 portal/life 必须同步客户端（客户端没有
+该 portal 就不会画、也不会发切图请求），99 个文件的重编与校验成本不低；
+且 ASM 的 `foothold` 编号与 `canvas` 记法（`format`/`scale`）会一并带进来，
+把客户端同步面积从几十个文件推到上百个（§19.2）。
+
+### 20.2 反查索引：会「硬卡住」的只有 26 张图
+
+撞到「进不去 / NPC 不在 / 上不去」时先查这张表；**不在表里的地图，
+问题不在这批 wz 差异上**，别往这儿找。
+
+| 地图 | ASM 有而我们无 |
+|---|---|
+| `101020001` |  ladderRope×3 portal×2 |
+| `200080100` |  portal×1 |
+| `221024400` |  portal×1 |
+| `221024500` |  portal×1 |
+| `222010402` |  portal×1 |
+| `240060000` |  ladderRope×4 |
+| `240060100` |  ladderRope×4 |
+| `251010401` |  portal×1 |
+| `251010404` |  portal×1 |
+| `261000010` |  portal×1 |
+| `261000011` |  portal×2 |
+| `261000020` |  portal×1 |
+| `261000021` |  portal×2 |
+| `300000002` |  life×1 |
+| `300000010` |  life×1 |
+| `300000100` |  life×1 |
+| `300010000` |  ladderRope×2 life×5 portal×2 |
+| `300010100` |  ladderRope×4 life×8 portal×2 |
+| `300010200` |  ladderRope×3 life×3 portal×2 |
+| `300010300` |  ladderRope×1 life×7 portal×5 |
+| `300010400` |  portal×1 |
+| `300020000` |  ladderRope×1 life×9 portal×3 |
+| `300020100` |  ladderRope×5 life×5 |
+| `300020200` |  ladderRope×1 life×1 portal×2 |
+| `300030000` |  ladderRope×4 life×5 portal×2 |
+| `300030100` |  portal×1 |
+
+其中 `3000*` 共 13 张是妖精森林（Ellin Forest），是一个完整内容块——
+**如果玩家反馈集中在妖精森林，直接按 §19.6 第 1 项整块合并，不要逐张修。**
+
+### 20.3 真要修时的操作
+
+工具都在 `docs/tools/`，可原地复跑：
+
+```bash
+perl docs/tools/triage2.pl <BeiDou的wz> <ASM的wz> <单文件清单> \
+  'info,life,portal,reactor,foothold,ladderRope,seat,area,clock,timeMob,monsterCarnival,shipObj,swim' --detail
+```
+
+- 逐文件账目：[asm-map-mob-npc-triage.tsv](asm-map-mob-npc-triage.tsv)
+- Map 全量明细：`docs/tools/asm-triage-detail-map.txt`
+- 可直接整文件覆盖的安全名单（Map 57 个 / Mob 42 个）与必须逐条合并的名单：见 §19.6 与本次会话记录
+
+**注意**：`Npc.wz` 16 个差异**永远不用管**——`info/script` 与 `hideName`
+服务端一个都不读（NPC 脚本按 id 找 `npc/<id>.js`），是纯客户端字段。
