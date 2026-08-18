@@ -674,9 +674,10 @@ public class AbstractPlayerInteraction {
                         // upgradeSlots 取自 wz 的 tuc，<= 0 意味着这件饰品本来就没有卷孔（戒指基本都是）。
                         // 原实现这一条不受 isUseCS 约束，于是任务奖励、活动、扭蛋发出去的饰品也一并补孔，
                         // 结果同一枚戒指怪掉的 0 孔、NPC 给的 3 孔。补孔是制作系统的设定，不该覆盖所有发放路径。
-                        if (ItemConstants.isAccessory(it.getItemId()) && it.getUpgradeSlots() <= 0) {
-                            it.setUpgradeSlots(3);
-                        }
+                        // 注释掉，与LK一致
+//                        if (ItemConstants.isAccessory(it.getItemId()) && it.getUpgradeSlots() <= 0) {
+//                            it.setUpgradeSlots(3);
+//                        }
 
                         if (GameConfig.getServerBoolean("use_enhanced_crafting")) {
                             if (!(c.getPlayer().isGM() && GameConfig.getServerBoolean("use_perfect_gm_scroll"))) {
