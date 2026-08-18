@@ -467,7 +467,9 @@ public class PacketCreator {
         } else {
             int itemLevel = equip.getItemLevel();
 
-            long expNibble = (ExpTable.getExpNeededForLevel(ii.getEquipLevelReq(item.getItemId())) * equip.getItemExp());
+            // 两个操作数都是 int，不先转 long 的话乘法在 int 里溢出后才拓宽。
+            // getExpNeededForLevel 200 级返回 1,697,021,059，itemExp 只要 ≥ 2 就爆。
+            long expNibble = ((long) ExpTable.getExpNeededForLevel(ii.getEquipLevelReq(item.getItemId())) * equip.getItemExp());
             expNibble /= ExpTable.getEquipExpNeededForLevel(itemLevel);
 
             p.writeByte(0);

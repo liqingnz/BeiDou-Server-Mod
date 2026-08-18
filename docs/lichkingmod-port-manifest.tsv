@@ -672,39 +672,39 @@ src/server/quest/requirements/NpcRequirement.java	java	0	0	noise	仅格式化/�
 src/server/quest/requirements/PetRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/requirements/QuestRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/requirements/ScriptRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/tools/ArrayMap.java	java	3	0	pending	
+src/tools/ArrayMap.java	java	3	0	noise	LK 改动仅 `// HanHuaMod, remove final keyword` 注释与空行
 src/tools/AutoJCE.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/tools/BCrypt.java	java	73	57	pending	
+src/tools/BCrypt.java	java	73	57	noise	LK 改动仅数组声明风格 `int P[]` → `int[] P` 与一个 import；BeiDou 侧 org/gms/util/BCrypt.java
 src/tools/DatabaseConnection.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/tools/FilePrinter.java	java	11	0	pending	
-src/tools/HexTool.java	java	24	10	pending	
+src/tools/FilePrinter.java	java	11	0	deferred	为什么缓：LK 新增的常量含 LOG_ROYAL / LOG_REDEEM_ROYAL_DAILY，属批次 8 皇家系统；BeiDou 已用 log4j2 取代 FilePrinter（仅存三处注释掉的引用），不会重建该类。什么条件下重启：批次 8 落地皇家系统时，决定这两类日志改用 log4j2 还是入库
+src/tools/HexTool.java	java	24	10	already-fixed	org/gms/util/HexTool.java —— LK 改动是增强 for 改写 + 去掉对 CharsetConstants 的耦合，BeiDou 版本本就不含字符集逻辑
 src/tools/IntervalBuilder.java	java	3	2	rejected	不搬。唯一改动是把 private final List<Line2D> intervalLimits 的 final 去掉并留了句 // HanHuaMod 注释，无行为变化；该对象是 distributePartyExperience 每次新建的局部实例，final 该留。连带本文件的消费方判定见 src/server/life/MapleMonster.java
-src/tools/LogHelper.java	java	66	16	pending	
-src/tools/LongTool.java	java	5	11	pending	
-src/tools/MapleAESOFB.java	java	8	4	pending	
-src/tools/MapleLogger.java	java	1	1	pending	
-src/tools/MaplePacketCreator.java	java	112	122	pending	
-src/tools/Pair.java	java	5	11	pending	
+src/tools/LogHelper.java	java	66	16	already-fixed	org/gms/server/Trade.java:588 —— 交易日志功能已被吸收进 Trade.logTrade 并接入 i18n，BeiDou 无 LogHelper 类
+src/tools/LongTool.java	java	5	11	noise	LK 改动仅大括号换行风格与 javadoc 重排
+src/tools/MapleAESOFB.java	java	8	4	noise	LK 改动仅 `byte iv[]` → `byte[] iv` 与注释掉的字段声明；BeiDou 侧 org/gms/net/encryption/MapleAESOFB.java
+src/tools/MapleLogger.java	java	1	1	noise	LK 改动仅 `op.toString()` → `op` 与缩进
+src/tools/MaplePacketCreator.java	java	112	122	ported	org/gms/util/PacketCreator.java:470 —— LK 的实质改动仅两类：(1) writeMapleAsciiString → writeMapleChartString 的 GB2312 化，BeiDou 已在封包层用 CharsetConstants 解决；(2) expNibble 乘法的 (long) 溢出修复，本次搬入（getExpNeededForLevel 200 级返回 1,697,021,059，itemExp ≥ 2 即在 int 内溢出）
+src/tools/Pair.java	java	5	11	noise	LK 改动仅 javadoc 标签重排
 src/tools/Randomizer.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/tools/StringUtil.java	java	12	3	pending	
-src/tools/data/input/ByteArrayByteStream.java	java	2	0	pending	
+src/tools/StringUtil.java	java	12	3	already-fixed	org/gms/net/packet/ByteBufOutPacket.java:91 —— LK 在 StringUtil 里按 GBK 字节数补齐定长串；BeiDou 在封包层用 Arrays.copyOf(value.getBytes(charset), fixed) 解决，层次更对且字符集可变
+src/tools/data/input/ByteArrayByteStream.java	java	2	0	noise	LK 改动仅 `// HanHuaMod` 注释掉的字段声明；且该 IO 层已被 Cosmic 整体换成 org/gms/net/packet/ByteBufInPacket（Netty ByteBuf）
 src/tools/data/input/ByteInputStream.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/tools/data/input/GenericLittleEndianAccessor.java	java	15	6	pending	
-src/tools/data/input/GenericSeekableLittleEndianAccessor.java	java	3	1	pending	
-src/tools/data/input/InputStreamByteStream.java	java	3	0	pending	
+src/tools/data/input/GenericLittleEndianAccessor.java	java	15	6	already-fixed	org/gms/net/packet/ByteBufInPacket.java:56 —— LK 把 readAsciiString 硬编码成 GB2312（并删掉 HeavenMS 原有的 CharsetConstants 查表），BeiDou 走 CharsetConstants.getCharset(clientLang) 按客户端语言查表，更通用
+src/tools/data/input/GenericSeekableLittleEndianAccessor.java	java	3	1	noise	LK 改动仅 javadoc 与 HanHuaMod 注释；IO 层已换成 org/gms/net/packet/*
+src/tools/data/input/InputStreamByteStream.java	java	3	0	noise	同 ByteArrayByteStream：仅 HanHuaMod 注释；IO 层已换成 org/gms/net/packet/*
 src/tools/data/input/LittleEndianAccessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/tools/data/input/RandomAccessByteStream.java	java	2	0	pending	
-src/tools/data/input/SeekableInputStreamBytestream.java	java	1	2	pending	
+src/tools/data/input/RandomAccessByteStream.java	java	2	0	noise	同上：仅 HanHuaMod 注释；IO 层已换成 org/gms/net/packet/*
+src/tools/data/input/SeekableInputStreamBytestream.java	java	1	2	noise	LK 改动仅 javadoc 单行化；IO 层已换成 org/gms/net/packet/*
 src/tools/data/input/SeekableLittleEndianAccessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/tools/data/output/BAOSByteOutputStream.java	java	2	0	pending	
-src/tools/data/output/ByteOutputStream.java	java	1	1	pending	
-src/tools/data/output/GenericLittleEndianWriter.java	java	52	9	pending	
-src/tools/data/output/LittleEndianWriter.java	java	1	1	pending	
-src/tools/data/output/MaplePacketLittleEndianWriter.java	java	2	0	pending	
-src/tools/exceptions/EmptyMovementException.java	java	0	1	pending	
-src/tools/exceptions/EventInstanceInProgressException.java	java	0	1	pending	
-src/tools/packets/Fishing.java	java	3	4	pending	
-src/tools/packets/Wedding.java	java	21	8	pending	
+src/tools/data/output/BAOSByteOutputStream.java	java	2	0	noise	同上：仅 HanHuaMod 注释；IO 层已换成 org/gms/net/packet/ByteBufOutPacket
+src/tools/data/output/ByteOutputStream.java	java	1	1	noise	LK 改动仅 javadoc 空白；IO 层已换成 org/gms/net/packet/*
+src/tools/data/output/GenericLittleEndianWriter.java	java	52	9	already-fixed	org/gms/net/packet/ByteBufOutPacket.java:79 —— 同上，LK 硬编码 GB2312，BeiDou 出向也走 CharsetConstants 查表
+src/tools/data/output/LittleEndianWriter.java	java	1	1	noise	LK 改动仅 `byte b[]` → `byte[] b`；IO 层已换成 org/gms/net/packet/*
+src/tools/data/output/MaplePacketLittleEndianWriter.java	java	2	0	noise	同上：仅 HanHuaMod 注释；IO 层已换成 org/gms/net/packet/*
+src/tools/exceptions/EmptyMovementException.java	java	0	1	noise	LK 改动仅删一行空 javadoc；BeiDou 侧 org/gms/exception/EmptyMovementException.java
+src/tools/exceptions/EventInstanceInProgressException.java	java	0	1	noise	LK 改动仅删一行空 javadoc；BeiDou 侧 org/gms/exception/EventInstanceInProgressException.java
+src/tools/packets/Fishing.java	java	3	4	rejected	LK 把 `(1400.0*rand + 1201) * mesoRate` 改成 `(1400.0*rand + 1201*mesoRate)`，倍率只作用于常数项而非整个掷值，是回退；BeiDou util/packets/Fishing.java:99 保持倍率乘整体并用 float 倍率
+src/tools/packets/Wedding.java	java	21	8	noise	LK 改动仅 enum 构造器去 private 与 `// HanHuaMod` 注释；BeiDou 侧 org/gms/util/packets/WeddingPackets.java
 src/client/command/commands/CommandManager.java	java-new	89	6	ported	org/gms/client/command/commands/CommandManager.java；改并发容器。三个 setWorldXxxRate 确定不补 —— 唯一的消费方 RateEventCommand 已 rejected。批次4 追加三处：clearItemSold 供 RetrieveCommand 清空出售记录（并发容器不接受 null 值，用不了原实现的 set(id, null)）；registerRunningCommandIfAbsent 原子登记，给 GMBot 这种 key 是目标角色而非发起者自己的指令用；cancelRunningCommands 改为先原子 remove 再 cancel，原先先查后删会在并发下取消掉别人刚登记的新任务
 src/client/command/commands/gm0/BossDmgAnalysisCommand.java	java-new	75	0	ported	批次6-G14：改写为 gm2/BossDmgAnalysisCommand。修掉亿万分段多吐0、百分比整数除法；补无BOSS提示、按伤害降序、全量i18n；输出统一为表头yellowMessage+明细message()（同 @bosshp/@online）
 src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	rejected	批次6收尾终局否决：唯一闸门是邮箱验证码（脚本首步算术码自显自验无鉴权作用），去掉邮箱等于任何人在已登录客户端上都能改走账号密码，比BeiDou网页端的旧密码闸门更弱
