@@ -77,21 +77,17 @@ public class GotoCommand extends Command {
     @Override
     public void execute(Client c, String[] params) {
         Character player = c.getPlayer();
+
+        // 守卫必须在列清单之前：选单点一下就传送，放到后面等于给了一条绕过通道。
+        String blocked = blockReason(player);
+        if (blocked != null) {
+            player.dropMessage(1, blocked);
+            return;
+        }
+
         if (params.length < 1) {
             showDestinations(player, null);
             return;
-        }
-
-        if (!player.isAlive()) {
-            player.dropMessage(1, I18nUtil.getMessage("GotoCommand.message5"));
-            return;
-        }
-
-        if (!player.isGM()) {
-            if (player.getEventInstance() != null || MiniDungeonInfo.isDungeonMap(player.getMapId()) || FieldLimit.CANNOTMIGRATE.check(player.getMap().getFieldLimit())) {
-                player.dropMessage(1, I18nUtil.getMessage("GotoCommand.message6"));
-                return;
-            }
         }
 
         Map<String, Integer> gotomaps;
@@ -103,16 +99,53 @@ public class GotoCommand extends Command {
         }
 
         if (gotomaps.containsKey(params[0])) {
-            MapleMap target = c.getChannelServer().getMapFactory().getMap(gotomaps.get(params[0]));
-
-            // expedition issue with this command detected thanks to Masterrulax
-            Portal targetPortal = target.getRandomPlayerSpawnpoint();
-            player.saveLocationOnWarp();
-            player.changeMap(target, targetPortal);
+            warpTo(player, gotomaps.get(params[0]));
         } else {
             // detailed info on goto available areas suggested thanks to Vcoc
             showDestinations(player, params[0]);
         }
+    }
+
+    /**
+     * 能不能用 @goto 传送。
+     *
+     * @return 不能传送时返回该给玩家的提示，能传送时返回 null
+     */
+    private static String blockReason(Character player) {
+        if (!player.isAlive()) {
+            return I18nUtil.getMessage("GotoCommand.message5");
+        }
+        if (!player.isGM() && (player.getEventInstance() != null
+                || MiniDungeonInfo.isDungeonMap(player.getMapId())
+                || FieldLimit.CANNOTMIGRATE.check(player.getMap().getFieldLimit()))) {
+            return I18nUtil.getMessage("GotoCommand.message6");
+        }
+        return null;
+    }
+
+    /**
+     * 供 npc/gotoList.js 的选单回调。传送口径（守卫 + 随机出生点）与 @goto &lt;name&gt;
+     * 完全一致——选单开着的时候玩家可能已经死了或被关进副本，所以这里必须再查一次。
+     *
+     * @return 是否真的传送了；被守卫拦下时返回 false 并已提示玩家
+     */
+    public static boolean warpFromMenu(Character player, int mapId) {
+        String blocked = blockReason(player);
+        if (blocked != null) {
+            player.dropMessage(1, blocked);
+            return false;
+        }
+        warpTo(player, mapId);
+        return true;
+    }
+
+    private static void warpTo(Character player, int mapId) {
+        MapleMap target = player.getClient().getChannelServer().getMapFactory().getMap(mapId);
+
+        // expedition issue with this command detected thanks to Masterrulax
+        Portal targetPortal = target.getRandomPlayerSpawnpoint();
+        player.saveLocationOnWarp();
+        player.changeMap(target, targetPortal);
     }
 
     /**

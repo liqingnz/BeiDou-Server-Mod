@@ -5,10 +5,15 @@
  *
  * 目的地取自 GameConstants.GOTO_TOWNS / GOTO_AREAS，与 @goto <name> 用的是同一份
  * 注册表，不另立清单——那样迟早会跟指令本身对不上。
- * GOTO_AREAS 只对 GM 开放，与 GotoCommand.execute 的判定保持一致。
+ * GOTO_AREAS 只对 GM 开放，与 GotoCommand 的判定保持一致。
+ *
+ * 传送不在本脚本里做，交回 GotoCommand.warpFromMenu：守卫（死亡 / 活动副本 /
+ * 迷你地下城 / CANNOTMIGRATE）与落点（随机出生点）都得跟 @goto <name> 一个口径，
+ * 在这儿抄一遍迟早会漂。
  */
-var GameConstants = Packages.org.gms.constants.game.GameConstants;
-var MapFactory = Packages.org.gms.server.maps.MapFactory;
+var GameConstants = Java.type("org.gms.constants.game.GameConstants");
+var MapFactory = Java.type("org.gms.server.maps.MapFactory");
+var GotoCommand = Java.type("org.gms.client.command.commands.gm1.GotoCommand");
 
 var destinations = [];   // [[mapId, 显示名], ...]，下标即选项序号
 
@@ -28,12 +33,10 @@ function start() {
 }
 
 function levelGoto(selection) {
-    if (selection < 0 || selection >= destinations.length) {
-        cm.dispose();
-        return;
+    if (selection >= 0 && selection < destinations.length) {
+        // 拦下时 warpFromMenu 自己会提示玩家，这里不用再说一遍
+        GotoCommand.warpFromMenu(cm.getPlayer(), destinations[selection][0]);
     }
-    cm.getPlayer().saveLocationOnWarp();
-    cm.warp(destinations[selection][0]);
     cm.dispose();
 }
 
@@ -54,7 +57,7 @@ function collect(registry, prefix) {
     var it = registry.entrySet().iterator();
     while (it.hasNext()) {
         var e = it.next();
-        rows.push([e.getValue(), e.getKey(), prefix]);
+        rows.push([e.getValue(), e.getKey()]);
     }
     rows.sort(function (a, b) {
         return a[0] - b[0];
@@ -63,14 +66,10 @@ function collect(registry, prefix) {
     var out = [];
     for (var i = 0; i < rows.length; i++) {
         var mapId = rows[i][0];
-        var placeName;
-        try {
-            placeName = String(MapFactory.loadPlaceName(mapId));
-        } catch (err) {
-            placeName = "";           // wz 里没有地名时退回只显示 key，不要因此整张单子打不开
-        }
-        var label = rows[i][2] + "'" + rows[i][1] + "'";
-        if (placeName !== "" && placeName !== "null") {
+        // loadPlaceName 内部已吞掉全部异常并回落空串，这里不必再兜一层
+        var placeName = String(MapFactory.loadPlaceName(mapId));
+        var label = prefix + "'" + rows[i][1] + "'";
+        if (placeName !== "") {
             label += " - " + placeName;
         }
         out.push([mapId, label]);

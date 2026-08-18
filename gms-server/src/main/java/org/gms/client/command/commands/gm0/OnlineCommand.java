@@ -17,6 +17,10 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+/*
+   @Author: Arthur L - Refactored command content into modules
+*/
 package org.gms.client.command.commands.gm0;
 
 import org.gms.client.Character;
@@ -70,7 +74,8 @@ public class OnlineCommand extends Command {
     }
 
     /**
-     * 普通玩家看不到任何 GM；GM 看得到平级以下的 GM，但看不到比自己权限高的。
+     * 普通玩家看不到任何 GM；GM 只看得到权限**严格低于**自己的 GM——
+     * 同级之间互相不可见，也看不到自己。这一条照搬 LK，改成 &lt;= 就是同级可见。
      */
     private static boolean isVisibleTo(Character viewer, Character target) {
         if (!target.isGM()) {
