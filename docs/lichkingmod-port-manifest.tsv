@@ -56,68 +56,68 @@ src/client/SkillMacro.java	java	0	0	noise	仅格式化/空白改动（git diff -
 src/client/autoban/AutobanFactory.java	java	8	1	ported	alert 日志补 characterId/accountId（角色可改名，事后追查只有名字对不上）；新增 addPoint(ban, reason, weight) 重载供严重情形一次性加重计分。LK 的 public static int rangeFastAttackInterval/generalFastAttackInterval 两个可变公有静态字段 rejected——BeiDou 走 GameConfig。LK 的 MONSTER_VAC 条目 rejected，见 AutobanManager 一行
 src/client/autoban/AutobanManager.java	java	67	2	ported	addPoint 增加 weight 重载（原方法委托为 weight=1），日志补 characterId/accountId。LK 的 ban(String) rejected：BeiDou 已有等价且更稳的 Character.autoBan（有 isGM/isBanned 前置、警察包、GM广播、可逆），LK 那版额外写 ipbans 表并 banMacs()——IP 在 CGNAT/校园网/网吧下不等于身份、封了会牵连无辜且作弊者换IP只需十秒，MAC 由客户端上报、能改伤害包的人改MAC是顺手事而共用电脑/虚拟网卡的正常玩家反被封；且触发判据 maxWithCrit 是本移植两次确认偏低的估算值。LK 实现本身也有缺陷：ip.matches("/[0-9]{1,3}\..*") 依赖 InetSocketAddress.toString 的前导斜杠，Connection/PreparedStatement 无 try-with-resources。改为走 DAMAGE_HACK 加权计分（V1000.0.15 的 damage_hack_severe_ratio/points）。LK 的 checkForVac + MONSTER_VAC rejected：逻辑是「最近3次怪物死亡坐标完全相同就告警」，固定刷新点的怪、不移动的怪、反复击杀BOSS 坐标本就相同，误报率极高，且落在跨组钩子文件 MapleMap.java。spam() 改用 Calendar 取时间随 FAST_ATTACK 一并 rejected
 src/client/command/Command.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/CommandsExecutor.java	java	220	187	pending	
-src/client/command/commands/gm0/BuyBackCommand.java	java	2	2	pending	
+src/client/command/CommandsExecutor.java	java	220	187	already-fixed	org/gms/client/command/CommandsExecutor.java:100,121,125 —— 三处提示已走 I18nUtil；LK 的 407 行改动里 395 行是指令注册表重排，BeiDou 有自己的注册表
+src/client/command/commands/gm0/BuyBackCommand.java	java	2	2	rejected	BeiDou 无买活系统——Cosmic 已整块删除，全服搜 buyback 零命中，无对应指令文件
 src/client/command/commands/gm0/DisposeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm0/DropLimitCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm0/GachaCommand.java	java	10	6	rejected	LK 改动是硬编码汉化 + 改按 mapId 索引；BeiDou 已走 I18nUtil 且输出格式（#v 图标 + #z 名）更好。批次7 已把 getLootNames/getLootIds 改为从枚举派生，顺带补上原先漏掉的玩具城与冰峰雪域
-src/client/command/commands/gm0/HelpCommand.java	java	1	1	pending	
-src/client/command/commands/gm0/JoinEventCommand.java	java	5	5	pending	
-src/client/command/commands/gm0/LeaveEventCommand.java	java	1	1	pending	
-src/client/command/commands/gm0/MapOwnerClaimCommand.java	java	22	15	pending	
+src/client/command/commands/gm0/HelpCommand.java	java	1	1	already-fixed	org/gms/client/command/commands/gm0/HelpCommand.java:33 —— setDescription(I18nUtil.getMessage("HelpCommand.message1"))；LK 是硬编码中文
+src/client/command/commands/gm0/JoinEventCommand.java	java	5	5	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
+src/client/command/commands/gm0/LeaveEventCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
+src/client/command/commands/gm0/MapOwnerClaimCommand.java	java	22	15	rejected	LK 删掉了 countBosses()==0 的占图前置与退出时 unclaimOwnership 的处理；BeiDou 保留，见 MapOwnerClaimCommand.java:47-50
 src/client/command/commands/gm0/OnlineCommand.java	java	51	3	pending	
-src/client/command/commands/gm0/RanksCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/RanksCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm0/RatesCommand.java	java	1	0	ported	org/gms/client/command/commands/gm0/RatesCommand.java；增量只有一行——显示本图刷怪倍率与刷怪点数。原实现为此把 MapleMap.getMonsterSpawn() 从 private 改成 public，这里不改：那个方法返回的是整个列表的拷贝，只为取 size 暴露出去不划算，改为在 MapleMap 上加 getMonsterSpawnPointCount()。原实现调用处还得瞎传一个 getCurrentSpawnRate(1)，因为它保留了已经用不上的 numPlayers 参数；本次把该参数去掉了
 src/client/command/commands/gm0/ShowRatesCommand.java	java	1	1	rejected	不搬。增量只有一行 getExpRate() 改 getExpRate(player.getLevel())，其唯一目的是配合 World 上新增的三档阶梯经验重载，而那个重载已判不搬（见 src/config/WorldConfig.java 一行）。BeiDou 的等级相关经验加成挂在 Character 层而非 World 层，ShowRatesCommand 展示的世界基础倍率保持原样才对
-src/client/command/commands/gm0/StatDexCommand.java	java	1	1	pending	
-src/client/command/commands/gm0/StatIntCommand.java	java	1	1	pending	
-src/client/command/commands/gm0/StatLukCommand.java	java	1	1	pending	
-src/client/command/commands/gm0/StatStrCommand.java	java	1	1	pending	
+src/client/command/commands/gm0/StatDexCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
+src/client/command/commands/gm0/StatIntCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
+src/client/command/commands/gm0/StatLukCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
+src/client/command/commands/gm0/StatStrCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm0/TimeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm0/UptimeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm1/BossHpCommand.java	java	1	1	pending	
+src/client/command/commands/gm1/BossHpCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm1/GotoCommand.java	java	12	5	pending	
-src/client/command/commands/gm1/MobHpCommand.java	java	1	1	pending	
+src/client/command/commands/gm1/MobHpCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm1/WhatDropsFromCommand.java	java	33	16	ported	批次7：吸收 #v/#z 物品图标富文本；保留按怪名搜索，不跟 LK 改按 id（同批次1的 id 化否决理由）
 src/client/command/commands/gm1/WhoDropsCommand.java	java	28	17	already-fixed	批次5已重定向脚本中心「当前地图掉落_物品查询」，LK 的掉率显示/空结果改进均被覆盖
 src/client/command/commands/gm2/BuffMapCommand.java	java	5	3	ported	补 ThunderBreaker.SPEED_INFUSION 与 Hero.MAPLE_WARRIOR 两个 buff。LK 抄的是裸数字，按规则1改用常量。setDescription 那行 BeiDou 已走 I18nUtil，不动
 src/client/command/commands/gm2/ClearSavedLocationsCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm2/DcCommand.java	java	4	1	pending	
+src/client/command/commands/gm2/DcCommand.java	java	4	1	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName
 src/client/command/commands/gm2/EmpowerMeCommand.java	java	1	1	ported	技能数组补 Hero.STANCE（1121002）。LK 用裸数字，按规则1改用常量
 src/client/command/commands/gm2/GachaListCommand.java	java	1	1	rejected	LK 改动只是给 setDescription 填中文；BeiDou 已是 I18nUtil.getMessage("GachaListCommand.message1")
 src/client/command/commands/gm2/IdCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/ItemCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm2/ItemDropCommand.java	java	1	1	pending	
-src/client/command/commands/gm2/JailCommand.java	java	3	1	pending	
+src/client/command/commands/gm2/ItemDropCommand.java	java	1	1	rejected	LK 注释掉 toDrop.setOwner(player.getName())，等于放开 GM 掉落物归属让任何人可捡；BeiDou 两条掉落路径都保留归属（ItemDropCommand.java:127 与 :84 的 setOwner("")）
+src/client/command/commands/gm2/JailCommand.java	java	3	1	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName
 src/client/command/commands/gm2/LootCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/MaxSkillCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm2/ReachCommand.java	java	2	1	pending	
+src/client/command/commands/gm2/ReachCommand.java	java	2	1	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName
 src/client/command/commands/gm2/RechargeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/SearchCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/SetSlotCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/SetStatCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm2/SummonCommand.java	java	25	22	pending	
-src/client/command/commands/gm2/UnJailCommand.java	java	3	1	pending	
+src/client/command/commands/gm2/SummonCommand.java	java	25	22	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName；LK 另删掉了「本频道找不到就遍历全世界频道」的兜底
+src/client/command/commands/gm2/UnJailCommand.java	java	3	1	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName
 src/client/command/commands/gm2/WarpAreaCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm2/WarpCommand.java	java	1	1	pending	
+src/client/command/commands/gm2/WarpCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm2/WarpMapCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm2/WhereaMiCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm3/BanCommand.java	java	10	8	pending	
-src/client/command/commands/gm3/DebuffCommand.java	java	2	1	pending	
+src/client/command/commands/gm3/BanCommand.java	java	10	8	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName；LK 连 Syntax 提示都改成了 <characterId>
+src/client/command/commands/gm3/DebuffCommand.java	java	2	1	rejected	LK 把写死的 getMobSkill(128, 7) 改成读 params[1] 但无长度校验，省略参数即抛异常；BeiDou 已重构为 MobSkillType 枚举，见 DebuffCommand.java:69-75
 src/client/command/commands/gm3/FlyCommand.java	java	4	1	pending	
-src/client/command/commands/gm3/GiveMesosCommand.java	java	6	4	pending	
-src/client/command/commands/gm3/GiveNxCommand.java	java	14	8	pending	
+src/client/command/commands/gm3/GiveMesosCommand.java	java	6	4	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName
+src/client/command/commands/gm3/GiveNxCommand.java	java	14	8	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName
 src/client/command/commands/gm3/GiveRpCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm3/GiveVpCommand.java	java	3	2	pending	
+src/client/command/commands/gm3/GiveVpCommand.java	java	3	2	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName
 src/client/command/commands/gm3/MaxHpMpCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm3/MusicCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm3/NoticeCommand.java	java	1	1	pending	
+src/client/command/commands/gm3/NoticeCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm3/OnlineTwoCommand.java	java	8	8	pending	
-src/client/command/commands/gm3/QuestCompleteCommand.java	java	1	0	pending	
+src/client/command/commands/gm3/QuestCompleteCommand.java	java	1	0	rejected	LK 唯一改动是注释掉 quest.complete(player, quest.getNpcRequirement(true))，是功能删除而非移植项
 src/client/command/commands/gm3/QuestResetCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm3/QuestStartCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm3/ReloadMapCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm3/StartEventCommand.java	java	6	7	pending	
+src/client/command/commands/gm3/StartEventCommand.java	java	6	7	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm3/TimerMapCommand.java	java	4	3	pending	
 src/client/command/commands/gm4/BossDropRateCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm4/PapCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -134,7 +134,7 @@ src/client/command/commands/gm6/ServerAddChannelCommand.java	java	0	0	noise	仅�
 src/client/command/commands/gm6/ServerAddWorldCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm6/ServerRemoveChannelCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm6/ServerRemoveWorldCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/command/commands/gm6/ShutdownCommand.java	java	9	7	pending	
+src/client/command/commands/gm6/ShutdownCommand.java	java	9	7	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))；LK 其余改动为 import 与倒计时文案拼接
 src/client/command/commands/gm6/SupplyRateCouponCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/creator/CharacterFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/creator/CharacterFactoryRecipe.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -711,7 +711,7 @@ src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	rejecte
 src/client/command/commands/gm0/DetectCommand.java	java-new	78	0	ported	gms-server/src/main/java/org/gms/client/command/commands/gm0/DetectCommand.java + V1000.0.5 注册；判定与处罚在 AbstractPlayerInteraction.detectPlayer，参数落成 V1000.0.6 的五个 game_config 键，use_player_detect 默认关闭
 src/client/command/commands/gm0/MapDropsCommand.java	java-new	88	0	ported	org/gms/client/command/commands/gm0/MapDropsCommand.java；退化为入口，逻辑复用 scripts-zh-CN/BeiDouSpecial/当前地图掉落_当前地图.js
 src/client/command/commands/gm0/QianDaoCommand.java	java-new	86	0	already-fixed	gms-server/scripts-zh-CN/BeiDouSpecial/每日签到.js:26 已实现每日签到（角色级，走 ExtendValue 的 daily 类型自动重置，发道具 2430033）。LK 版是账号级发点券，粒度不同但功能重叠，且其实现是坏的：oneDay 被写成 10000 毫秒（真正的 24 小时被注释掉）、两行调试用 dropMessage 残留会直接打给玩家、并把签到时间存进 accounts.lastVoteTime 与投票系统抢同一列，而 BeiDou 的 AccountsDO 根本没有这一列。如需账号级签到应走 ExtendValue 的 ACCOUNT_EXTEND_DAILY 另立新需求，不是移植
-src/client/command/commands/gm0/RedeemCommand.java	java-new	90	0	pending	
+src/client/command/commands/gm0/RedeemCommand.java	java-new	90	0	deferred	为什么缓：新增文件，读写 royalAccounts 表，属批次 8 皇家系统（见 lichkingmod-port.md:403 已从批次 4 挪来）。什么条件下重启：批次 8 落地 RoyalAccount 与 royalAccounts 表时一并移植
 src/client/command/commands/gm0/RetrieveCommand.java	java-new	84	0	ported	org/gms/client/command/commands/gm0/RetrieveCommand.java；配套给 CommandManager 加 clearItemSold —— 原实现用 set(id, null) 清空，而批次1 已把那些 map 换成 ConcurrentHashMap，put 空值会直接抛异常。另修两处：改为整批预检背包空间再扣钱（原实现先扣钱、忽略 addFromDrop 返回值，背包满时钱扣了物品没进包、记录还被清空）；逐件按自身背包类型分支（原实现只要清单里有一件装备就把全部当装备处理）。发放一律走 addFromDrop 发原物品对象 —— 原实现对非装备用 addById(c, itemId, quantity)，那个重载新建的是 owner=null/flag=0/expiration=-1 的干净物品，而 Shop.canSell:174 只校验数量不看这些字段，两条指令又都是 gm0，普通玩家可靠 @sellinv+@retrieve 洗掉 USE/ETC 的 UNTRADEABLE、SANDBOX 标记并把限时物品变永久。预检用 checkSpaceProgressively 并按背包类型分别累加 usedSlots（checkSpace 对装备只判断还有没有一格，逐件问会得出一格能放五件的错误结论），非装备还先按 itemId+flag+owner 聚合再检查（清单一个原背包格一条记录，逐条问会让每条都看到同一份剩余堆叠容量而低估格数）。发放逐件检查返回值，放不下的留在记录里待重试并把待付金额清零，不再二次收费
 src/client/command/commands/gm0/RollCommand.java	java-new	51	0	ported	org/gms/client/command/commands/gm0/RollCommand.java
 src/client/command/commands/gm0/SellInvCommand.java	java-new	101	9	ported	org/gms/client/command/commands/gm0/SellInvCommand.java；三分支合并，格数上限改用 Inventory.getSlotLimit()
@@ -732,7 +732,7 @@ src/client/command/commands/gm4/RateEventCommand.java	java-new	88	0	rejected	不
 src/client/command/commands/gm4/SendMailCommand.java	java-new	51	0	rejected	批次6收尾终局否决：随 MailManager（另依赖同被否决的 UpdateVotePointTask）
 src/client/command/commands/gm4/UpdateVoteCommand.java	java-new	49	0	rejected	批次6收尾终局否决：随 UpdateVotePointTask。点数读写BeiDou已有 gm0/ReadPointsCommand 与 gm3/GiveVpCommand
 src/client/command/commands/gm5/ReloadConfigCommand.java	java-new	40	0	rejected	不搬。函数体只有一句 YamlConfig.fromFile("config.yaml")，而 BeiDou 没有 YamlConfig，配置走 GameConfig 单例 + game_config 表，GameConfig 的 update/remove/add 本身就是热重载，gms-ui 后台改完即时生效，不需要一个重载指令
-src/client/command/commands/gm5/RoyalCommand.java	java-new	114	0	pending	
+src/client/command/commands/gm5/RoyalCommand.java	java-new	114	0	deferred	为什么缓：新增文件，皇家点数/时长指令，属批次 8（见 lichkingmod-port.md:1074）。什么条件下重启：同 RedeemCommand
 src/client/command/commands/gm5/TestScriptCommand.java	java-new	58	0	ported	org/gms/client/command/commands/gm5/TestScriptCommand.java
 src/constants/string/CNLanguageConstants.java	java-new	41	0	pending	
 src/net/mailing/MailConst.java	java-new	15	0	rejected	批次6收尾终局否决：随 MailManager
