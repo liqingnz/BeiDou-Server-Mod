@@ -4017,3 +4017,76 @@ wz/String.wz/{Cash,Etc,Ins}.img.xml          LK 移植的道具名 + 本批凭�
 | `Quest.wz` | 互有增删且量大（BeiDou 独有 30,983），只按任务 id 合并需要的（如乌鲁城 4526–4530） |
 | `String.wz` | 中文层已完成（`c00176a21`）。英文基础层 `wz/String.wz` **永不覆盖** |
 | `Character.wz` | 本批不动，归批次 8 |
+
+---
+
+## 14. 「单文件多条目」型 wz 的分歧审查（2026-08-18）
+
+零覆盖导入漏东西的结构性原因：**一个 .img 文件承载成百上千条逻辑条目**时，
+ASM 在文件内部新增/修改的条目全部不可见。用户实测已撞到两处
+（`Map2/211040600` 缺狮子王之城入口、`Map5/541020000` 缺入口）。
+本节把这一类文件全部过一遍。
+
+### 14.1 缺口清单（按功能影响排序）
+
+| 文件 | BeiDou | ASM | ASM 多 | 说明 |
+|---|---|---|---|---|
+| **`Quest.wz/QuestInfo.img`** | 2,819 | 3,183 | **+365** | 任务定义 |
+| **`Quest.wz/Check.img`** | 2,873 | 3,248 | **+376** | 任务前置/条件 |
+| **`Quest.wz/Act.img`** | 2,988 | 3,347 | **+360** | 任务奖励 |
+| **`Quest.wz/Say.img`** | 2,809 | 3,174 | **+365** | 任务对话 |
+| **`Item.wz/Install/0301.img`** | 63 | 606 | **+543** | 椅子 |
+| **`Item.wz/Etc/0403.img`** | 1,168 | 1,360 | **+192** | 任务道具 |
+| **`Etc.wz/Commodity.img`** | 8,947 | 9,077 | **+130** | 商城商品表 |
+| **`Item.wz/Etc/0400.img`** | 825 | 934 | **+109** | 任务道具 |
+| `Item.wz/Install/0399.img` | 231 | 257 | +26 | |
+| `Item.wz/Consume/0202.img` | 506 | 525 | +19 | 卷轴 |
+| `Item.wz/Consume/0204.img` | 754 | 773 | +19 | 卷轴 |
+| `Item.wz/Cash/0515.img` | 116 | 131 | +15 | 美容券 |
+| `Item.wz/Consume/0200.img` | 55 | 70 | +15 | 药水 |
+| `Item.wz/Consume/0229.img` | 139 | 152 | +13 | |
+| `Item.wz/Etc/0422.img`、`0426`、`0431` | — | — | +7/+3/+5 | |
+| `Item.wz/Consume/0207`、`0243`、`0245` 等 | — | — | +7/+4/+4 | |
+| `Sound.wz/Mob.img` | 6,212 | 7,174 | +962 节点 | 怪物音效 |
+| `UI.wz/UIWindow.img` | 693 | 707 | +14 | `MobGage/Mob` 血槽白名单 |
+| `Sound.wz/Bgm03`、`Bgm15` | — | — | +2/+3 | |
+| `Effect.wz/BasicEff.img` | 1,204 | 1,199 | **-5** | BeiDou 反而多 5 个节点 |
+
+`Etc.wz/BlockReason`、`ChatBlockReason`、`Quest.wz/PQuest`、`Exclusive` 条目数一致。
+
+### 14.2 覆盖必须补回的 BeiDou 独有条目（全部查实）
+
+好消息：**极少**，而且本项目对 wz 的改动**全是纯新增、零修改**
+（`git diff --stat master..HEAD` 四个文件都是 `N insertions(+)`，无删除行）。
+
+| 文件 | BeiDou 独有 | 来源 |
+|---|---|---|
+| `Item.wz/Cash/0515.img` | `05159000`–`05159005` | LK 通用美容券六张 |
+| `Item.wz/Cash/0521.img` | `05211900` | LK 1.5 倍经验卡 |
+| `Item.wz/Cash/0536.img` | `05360900` | LK 1.5 倍爆率卡 |
+| `Map.wz/Map/Map2/240000000.img` | life 槽 `23`（NPC `9100111`） | 批次 7 神木村扭蛋机 |
+| `Quest.wz/{QuestInfo,Act,Check}.img` | 任务 `29580` | 上游；被 `OutstandingCitizenMedal.java:10` 引用，**不能丢** |
+| `Skill.wz`（7 个技能） | 「无 cooltime」状态 | 上游运营决策，见 §13.3 |
+| `wz-zh-CN/String.wz` | 23 条 | 已由 `c00176a21` 处理完 |
+
+`Item.wz/Etc/0403`、`Consume/0233`、`Etc/0416`、`Etc.wz/Commodity` 的 BeiDou 独有条目
+均为 **0**——ASM 是严格超集，可直接覆盖。
+
+### 14.3 建议的推进顺序
+
+按「收益 ÷ 风险」排：
+
+1. **`Etc.wz/Commodity.img`**（+130，独有 0）—— 纯覆盖，零风险
+2. **`Item.wz/Etc/{0400,0403,0422,0426,0431}`、`Consume/*` 11 个、`Install/0399`**
+   （合计 +400 余条，独有 0）—— 纯覆盖
+3. **`Item.wz/Install/0301.img`**（+543 椅子，独有 0）—— 纯覆盖
+4. **`Quest.wz` 四个文件**（+365 任务）—— 覆盖后补回 `29580` 一条。
+   收益最大，同时解开克雷塞尔入场门要的乌鲁城任务链 `4526`–`4530`
+5. **`Item.wz/Cash/{0515,0521,0536}`** —— 覆盖后补回 8 条 LK 道具
+6. **`Sound.wz/Mob.img`、`Bgm03`、`Bgm15`** —— 纯覆盖，仅音效
+7. **`UI.wz/UIWindow.img`** —— +14 条血槽白名单，需确认这 14 个怪的 canvas 有图像
+8. **`Map.wz`、`Mob.wz`、`Npc.wz`** —— 逐条目合并，不整文件覆盖（互有增删，见 §13.2）
+9. **`Skill.wz`** —— **不动**
+10. **`Effect.wz/BasicEff.img`** —— BeiDou 反而多 5 个节点，先查清再说
+
+> 每步做完都按 `c00176a21` 的口径复验：逐文件比对覆盖前后的条目 id 集合，确认丢失为 0。
