@@ -46,6 +46,10 @@ import java.util.List;
 
 
 public final class EnterMTSHandler extends AbstractPacketHandler {
+    /**
+     * 关闭拍卖行时替代拍卖行界面弹出的帮助脚本，位于 scripts-zh-CN/MapleLand/。
+     */
+    private static final String HELP_SCRIPT_NAME = "help";
 
     @Override
     public void handlePacket(InPacket p, Client c) {
@@ -275,11 +279,21 @@ public final class EnterMTSHandler extends AbstractPacketHandler {
     }
 
     /**
-     * 打开拍卖行脚本菜单中心
+     * 打开拍卖行脚本菜单中心。
+     * <p>
+     * 默认进的是「帮助」脚本（传送自由 / 每日签到 / 爆率一览），大GM及以上会在那里
+     * 多看到一条「脚本中心」入口，通往功能齐全的 npc/9900001.js。
      *
      * @param c 客户端
      */
     private void openCenterScript(Client c) {
-        NPCScriptManager.getInstance().start(c, NpcId.BEI_DOU_NPC_BASE, null);
+        NPCScriptManager nsm = NPCScriptManager.getInstance();
+        if (nsm.start(c, NpcId.MAPLE_ADMINISTRATOR, HELP_SCRIPT_NAME, null)) {
+            return;
+        }
+        // 帮助脚本只有中文层有，en-US 下开不起来。这里不能像指令那样提示一句就算完——
+        // 玩家按的是拍卖行按钮，脚本没开起来客户端就一直卡在等待里，
+        // 必须回退到两个语言层都有的 npc/9900001.js。
+        nsm.start(c, NpcId.BEI_DOU_NPC_BASE, null);
     }
 }

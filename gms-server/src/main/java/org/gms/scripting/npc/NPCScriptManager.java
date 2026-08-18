@@ -125,6 +125,11 @@ public class NPCScriptManager extends AbstractScriptManager {
                 if (!itemScript) {
                     if (fileName != null) {
                         engine = getInvocableScriptEngine("npc/" + fileName + ".js", c);
+                        // MapleLand/ 放本服自己写的脚本（英文文件名），排在 BeiDouSpecial/ 之前，
+                        // 同名时以 MapleLand/ 的版本为准。
+                        if (engine == null) {
+                            engine = getInvocableScriptEngine("MapleLand/" + fileName + ".js", c);
+                        }
                         if (engine == null) {
                             engine = getInvocableScriptEngine("BeiDouSpecial/" + fileName + ".js", c);
                         }

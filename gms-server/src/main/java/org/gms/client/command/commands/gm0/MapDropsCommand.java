@@ -25,15 +25,14 @@ import org.gms.constants.id.NpcId;
 import org.gms.util.I18nUtil;
 
 /**
- * 当前地图掉落查询的快捷入口。
+ * 掉落查询的快捷入口。
  * <p>
- * 只负责打开脚本中心已有的「当前地图掉落」脚本，查询逻辑本身不在这里实现——
- * BeiDou 的脚本版按 BOSS/普通分组、可逐个怪物下钻、显示怪物属性与立绘、
- * 区分基础掉率与角色实际掉率，比 LichKingMod 的一次性文本输出完善得多。
- * 此前该功能只能从 9900001 的菜单进入，这里补一个指令入口。
+ * 只负责打开 scripts-zh-CN/MapleLand/mapdrops.js，查询逻辑本身不在这里实现——
+ * 脚本版开头列出全服掉落，接着按 BOSS/普通分组列当前地图存活的怪物，可逐个下钻看
+ * 怪物属性、立绘、以及基础掉率与角色实际掉率，比 LichKingMod 的一次性文本输出完善得多。
  */
 public class MapDropsCommand extends Command {
-    private static final String SCRIPT_NAME = "当前地图掉落_当前地图";
+    private static final String SCRIPT_NAME = "mapdrops";
 
     {
         setDescription(I18nUtil.getMessage("MapDropsCommand.message1"));
@@ -41,8 +40,8 @@ public class MapDropsCommand extends Command {
 
     @Override
     public void execute(Client c, String[] params) {
-        // 脚本中心目前只有中文层有，en-US 下开不起来。开不起来要说一声，不能让玩家对着没反应的指令猜
-        if (!c.getPlayer().getAbstractPlayerInteraction().openNpc(NpcId.BEI_DOU_NPC_BASE, SCRIPT_NAME)) {
+        // MapleLand 的脚本目前只有中文层有，en-US 下开不起来。开不起来要说一声，不能让玩家对着没反应的指令猜
+        if (!c.getPlayer().getAbstractPlayerInteraction().openNpc(NpcId.MAPLE_ADMINISTRATOR, SCRIPT_NAME)) {
             c.getPlayer().yellowMessage(I18nUtil.getMessage("Command.scriptMissing", SCRIPT_NAME));
         }
     }
