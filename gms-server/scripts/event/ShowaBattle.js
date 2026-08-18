@@ -212,10 +212,7 @@ function monsterKilled(mob, eim) {
     if (isTheBoss(mob)) {
         eim.showClearEffect();
         eim.clearPQ();
-        // Item 3100000 does not exist in BeiDou yet: Item.wz/Install/0310.img.xml is missing
-        // entirely (manifest wz-missing, appendix D) and the name is absent from String.wz/Ins.img.xml.
-        // Handing it out now yields a nameless, icon-less item, so keep it commented out.
-        // eim.distributeBossCertificate(mob, 3100000, 4, 10);
+        eim.distributeBossCertificate(mob, 3100000, 4, 10);
     }
 }
 

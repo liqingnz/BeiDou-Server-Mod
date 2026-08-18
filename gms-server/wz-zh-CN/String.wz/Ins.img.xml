@@ -252,6 +252,30 @@
         <string name="name" value="我爱巧克力火锅"/>
         <string name="desc" value="两个人坐在一起将出现巨大的巧\n克力火锅，一起分享情人节巧克\n力的浓情蜜意吧\n每10秒钟恢复HP50。"/>
     </imgdir>
+    <imgdir name="3100000">
+        <string name="name" value="BOSS凭证"/>
+        <string name="desc" value="击败BOSS后获得的凭证"/>
+    </imgdir>
+    <imgdir name="3100001">
+        <string name="name" value="组队凭证"/>
+        <string name="desc" value="通过组队任务后获得的凭证"/>
+    </imgdir>
+    <imgdir name="3101000">
+        <string name="name" value="周年帽"/>
+        <string name="desc" value="枫之大陆一周年生日帽！"/>
+    </imgdir>
+    <imgdir name="3101001">
+        <string name="name" value="周年蜡烛"/>
+        <string name="desc" value="枫之大陆庆祝一周年的蜡烛~"/>
+    </imgdir>
+    <imgdir name="3101002">
+        <string name="name" value="龙年勋章（金）"/>
+        <string name="desc" value="枫之大陆龙年勋章！"/>
+    </imgdir>
+    <imgdir name="3101003">
+        <string name="name" value="龙年勋章（银）"/>
+        <string name="desc" value="枫之大陆龙年勋章！"/>
+    </imgdir>
     <imgdir name="3990000">
         <string name="name" value="红色数字 1"/>
         <string name="desc" value="可以装饰圣诞树的红色数字1"/>

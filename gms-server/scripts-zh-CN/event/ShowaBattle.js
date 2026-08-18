@@ -199,10 +199,7 @@ function monsterKilled(mob, eim) {
     if (isTheBoss(mob)) {
         eim.showClearEffect();
         eim.clearPQ();
-        // BOSS 凭证 3100000 目前在 BeiDou 不存在：整个 Item.wz/Install/0310.img.xml 缺失
-        // （清单 wz-missing，附录 D），名字也不在 String.wz/Ins.img.xml。
-        // 现在发出去只是一件无名无图标的道具，所以先注释掉；wz 随任务 #4 补齐后取消注释即可。
-        // eim.distributeBossCertificate(mob, 3100000, 4, 10);
+        eim.distributeBossCertificate(mob, 3100000, 4, 10);
     }
 }
 

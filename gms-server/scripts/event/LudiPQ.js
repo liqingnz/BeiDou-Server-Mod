@@ -278,10 +278,7 @@ function clearPQ(eim) {
     eim.setEventCleared();
     // Alterite shard
     eim.distributePQClearReward(4001198, 2);
-    // Item 3100001 does not exist in BeiDou yet: Item.wz/Install/0310.img.xml is missing
-    // entirely (manifest wz-missing, appendix D) and the name is absent from String.wz/Ins.img.xml.
-    // Handing it out now yields a nameless, icon-less item, so keep it commented out.
-    // eim.distributePQClearReward(3100001, 1);
+    eim.distributePQClearReward(3100001, 1);
 
     eim.startEventTimer(1 * 60000);
     eim.warpEventTeam(922011000);

@@ -242,10 +242,7 @@ function giveRandomEventReward(eim, player) {
 function clearPQ(eim) {
     eim.stopEventTimer();
     eim.setEventCleared();
-    // Item 3100001 does not exist in BeiDou yet: Item.wz/Install/0310.img.xml is missing
-    // entirely (manifest wz-missing, appendix D) and the name is absent from String.wz/Ins.img.xml.
-    // Handing it out now yields a nameless, icon-less item, so keep it commented out.
-    // eim.distributePQClearReward(3100001, 1);
+    eim.distributePQClearReward(3100001, 1);
 
     eim.warpEventTeam(910010100);
 }

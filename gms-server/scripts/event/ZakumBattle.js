@@ -204,10 +204,7 @@ function monsterKilled(mob, eim) {
         eim.setIntProperty("defeatedBoss", 1);
         eim.showClearEffect(mob.getMap().getId());
         eim.clearPQ();
-        // Item 3100000 does not exist in BeiDou yet: Item.wz/Install/0310.img.xml is missing
-        // entirely (manifest wz-missing, appendix D) and the name is absent from String.wz/Ins.img.xml.
-        // Handing it out now yields a nameless, icon-less item, so keep it commented out.
-        // eim.distributeBossCertificate(mob, 3100000, 3, 10);
+        eim.distributeBossCertificate(mob, 3100000, 3, 10);
 
         mob.getMap().broadcastZakumVictory();
     }

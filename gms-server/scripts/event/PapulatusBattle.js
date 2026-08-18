@@ -227,10 +227,7 @@ function monsterKilled(mob, eim) {
         eim.showClearEffect();
         eim.clearPQ();
         // LK: boss certificates are distributed by damage share, below 20% gets nothing
-        // Item 3100000 does not exist in BeiDou yet: Item.wz/Install/0310.img.xml is missing
-        // entirely (manifest wz-missing, appendix D) and the name is absent from String.wz/Ins.img.xml.
-        // Handing it out now yields a nameless, icon-less item, so keep it commented out.
-        // eim.distributeBossCertificate(mob, 3100000, 1, 20);
+        eim.distributeBossCertificate(mob, 3100000, 1, 20);
     }
 }
 

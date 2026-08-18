@@ -88,6 +88,30 @@
     <string name="name" value="Fishing Chair"/>
     <string name="desc" value="The perfect chair for fishing."/>
   </imgdir>
+  <imgdir name="3100000">
+    <string name="name" value="Boss Certificate"/>
+    <string name="desc" value="A certificate awarded for defeating a boss."/>
+  </imgdir>
+  <imgdir name="3100001">
+    <string name="name" value="Party Quest Certificate"/>
+    <string name="desc" value="A certificate awarded for clearing a party quest."/>
+  </imgdir>
+  <imgdir name="3101000">
+    <string name="name" value="Anniversary Hat"/>
+    <string name="desc" value="A birthday hat for MapleStory&apos;s first anniversary!"/>
+  </imgdir>
+  <imgdir name="3101001">
+    <string name="name" value="Anniversary Candle"/>
+    <string name="desc" value="A candle celebrating MapleStory&apos;s first anniversary~"/>
+  </imgdir>
+  <imgdir name="3101002">
+    <string name="name" value="Year of the Dragon Medal (Gold)"/>
+    <string name="desc" value="A MapleStory Year of the Dragon medal!"/>
+  </imgdir>
+  <imgdir name="3101003">
+    <string name="name" value="Year of the Dragon Medal (Silver)"/>
+    <string name="desc" value="A MapleStory Year of the Dragon medal!"/>
+  </imgdir>
   <imgdir name="3990000">
     <string name="name" value="Red No. 1"/>
     <string name="desc" value="A red #1 to decorate the tree."/>
