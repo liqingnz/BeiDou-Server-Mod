@@ -825,7 +825,7 @@ scripts/event/HorntailBattle.js	script	0	0	ported	批次7：凭证按伤害占�
 scripts/event/HorntailPQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
 scripts/event/KerningPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）。凭证 3100001 的发放已注释（BeiDou 缺 Item.wz/Install/0310.img.xml 与 String.wz/Ins.img.xml 条目），wz 补齐后取消注释。奖池已按用户 2026-08-17 决定改为两边取并集（保留 BeiDou 原池与数量，追加 LK 独有道具，重复项不动）
 scripts/event/KerningTrain.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/event/KrexelBattle.js	script	0	0	deferred	【2026-08-18 复核：deferred 前提已失效】原因写的是缺 Map5/541020700 与 541020800，但 9e9e9ad34 的 ASM 导入已补齐 541020000-541020800 全 30 张、Reactor.wz/5411001 也在，Item.wz/Install/0310 的 BOSS 凭证 3100000 已于 dd35605fc 补齐。用户 2026-08-18 选定走 LK 远征制。两层皆无此文件，须从 LK 取。已查实的移植问题（旧包名 Packages.server.expeditions、MapleExpeditionType 应为 ExpeditionType、distributeBossCertificate 少一个参数、奖池全空、等级门不生效）见 port 文档 §11.5
+scripts/event/KrexelBattle.js	script	0	0	ported	gms-server/scripts[-zh-CN]/event/KrexelBattle.js —— 40712e8db 走 LK 远征制（ExpeditionType.KREXEL），两个语言层齐备。原 deferred 理由「缺 Map5/541020700-800」在 ASM 导入后已不成立，见 §11.5
 scripts/event/LatanicaBattle.js	script	0	0	rejected	LK 改的是 minPlayers->1 / maxLevel 255->200；BeiDou 已把这两个量做成 GameConfig 开关（use_enable_solo_expeditions / use_enable_party_level_limit_lift，见 V1.8.3、V1.8.5），运营可热切，比写死更好
 scripts/event/LudiMazePQ.js	script	0	0	rejected	LK 改的是中间值，BeiDou 的两个远征开关覆盖不到（开=1/999，关=原版）。属服主口味；若要这个手感应新增 GameConfig 项，而不是改脚本常量
 scripts/event/LudiPQ.js	script	0	0	partial	gachapon 之后的 PQ 组（批次7）：采纳「通关奖励预览」（itemSet/itemQty 提到模块作用域 + setRewardList() 写入 em.setProperty("reward")，由 PQ NPC 的新菜单项读取）与通关发组队凭证 3100001。不采：阈值调参（BeiDou 已有 use_enable_solo_expeditions / use_enable_party_level_limit_lift 两个 GameConfig 开关）、奖池换血（LK 把大杂烩换成全卷轴，属高倍服的经济决策）。凭证 3100001 的发放已注释（BeiDou 缺 Item.wz/Install/0310.img.xml 与 String.wz/Ins.img.xml 条目），wz 补齐后取消注释。奖池已按用户 2026-08-17 决定改为两边取并集（保留 BeiDou 原池与数量，追加 LK 独有道具，重复项不动）
@@ -1509,7 +1509,7 @@ scripts/portal/secretgate1_open.js	script	0	0	noise	改动可证明只落在字�
 scripts/portal/secretgate2_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/secretgate3_open.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/timeQuest.js	script	0	0	done	时间神殿通道门。采纳 LK 的意图（GM gmLevel>2 免任务穿门）但重写实现：LK 在整条条件后接 || isGm，优先级使 isGm 为真时第一分支必中，GM 站换段图（5/105/205/300）会被 warp(mapid+10) 送进不存在的地图；改为把 isGm 放进每个分支的任务判断括号内，GM 仍走正常分段路由。两层同改
-scripts/portal/treeboss00.js	script	0	0	deferred	【2026-08-18 复核：deferred 前提已失效】同 KrexelBattle.js。ASM 版（组队制、查任务 4528）已随导入进入 scripts-zh-CN/，但用户选定 LK 远征制，本文件将被 LK 版取代。LK 版另有 bug：em.startInstance 第 4 参是 difficulty，LK 传的是频道号。前置来源问题（扳手 4031942 出自缺失的乌鲁城任务链 4526-4530）已写进现有文件的头部注释
+scripts/portal/treeboss00.js	script	0	0	ported	gms-server/scripts[-zh-CN]/portal/treeboss00.js —— 40712e8db 用 LK 远征制版本取代 ASM 组队制版本，两层齐备。见 §11.5
 scripts/portal/tristanEnter.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/tutorHelper.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/tutorquest.js	script	0	0	rejected	骑士团教程门。LK 加强制绑邮箱（pi.getEmail + openNpc verifyEmail），批次2 已定不做，BeiDou 无该 API
@@ -1711,7 +1711,7 @@ scripts/reactor/2619003.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上�
 scripts/reactor/2619004.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上游已有同名脚本，与 LK 版逐行同构，只差播报译文
 scripts/reactor/2619005.js	script	0	0	rejected	LK 新增文件，但 BeiDou 上游已有同名脚本，与 LK 版逐行同构，只差播报译文
 scripts/reactor/5411000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/reactor/5411001.js	script	0	0	deferred	【2026-08-18 复核：deferred 前提已失效】Reactor.wz/5411001 已随 ASM 导入补齐。ASM 版已在 scripts-zh-CN/，LK 版待移植（走远征制）。rm.getExpedition 经核实可用——ReactorActionManager extends AbstractPlayerInteraction，继承而来
+scripts/reactor/5411001.js	script	0	0	ported	gms-server/scripts[-zh-CN]/reactor/5411001.js —— 40712e8db 随克雷塞尔远征制一并落地，两层齐备。见 §11.5
 scripts/reactor/5511000.js	script	0	0	ported	LK 加 if (rm.getMapId() != 551030200) return; 修延迟召唤跑错图。BeiDou 已把这段重构进 ReactorActionManager.summonBossDelayed，症状不同：spawnMonster 走 reactor.getMap() 正确，但 changeMusic/mapMessage 走 getPlayer().getMap()，玩家在 3.2 秒内离开会把 BGM 与 BOSS 播报打到别的图。改法不照抄 LK——LK 的守卫用的是玩家的图，等于玩家一走就整个取消召唤、留守者白等。改为把三个动作统一绑 reactor.getMap()，不写死地图 ID，一次覆盖 5511000/5511001 及日后所有调用方
 scripts/reactor/5511001.js	script	0	0	ported	与 5511000 同一处 bug、同一处修复（ReactorActionManager.summonBossDelayed 把换曲与播报绑到 reactor.getMap()）。LK 侧另有一处硬编码 551030200 的守卫，同样不采
 scripts/reactor/8091000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）

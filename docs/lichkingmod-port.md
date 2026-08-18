@@ -4448,7 +4448,10 @@ Map 明细在 `docs/tools/asm-triage-detail-map.txt`。
 |---|---|---|
 | `Map.wz` | `info`、`life`、`portal`、`reactor`、`foothold`、`ladderRope`、`seat`、`area`、`clock`、`timeMob`、`monsterCarnival`、`shipObj` | `MapFactory` 里的 `getChildByPath` 全集 |
 | `Mob.wz` | `info` | `LifeFactory` 的 `monsterInfoData` 只取 `info`；怪物技能另走 `Skill.wz/MobSkill.img` |
-| `Npc.wz` | `info` | 同上 |
+| `Npc.wz` | **（无）** | **2026-08-18 更正**：服务端根本不读 `Npc.wz`。`LifeFactory.getNPC:595` 只从 `npcStringData`（即 `String.wz/Npc.img`）取名字构造 `NPCStats`，`Npc.wz/<id>.img/info` 一个字段都没解引用 |
+
+> 原表把 `Npc.wz` 的功能性段写成 `info`「同上」，是错的——这不影响 §19.5 与 §20
+> 「不合并 Npc.wz 16 个差异」的结论，反而加强了它：服务端连读都不读。
 
 `canvas` 子树整体排除——两边导出器记法不同（ASM 用 `format`/`scale`，
 BeiDou 用 `width`/`height`），比了全是噪音（§13.2 已踩过）。

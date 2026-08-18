@@ -65,10 +65,22 @@ UPDATE `drop_data` SET `itemid` = 2070002 WHERE `dropperid` = 9420509 AND `itemi
 UPDATE `drop_data` SET `chance` = 750 WHERE `dropperid` = 9400639 AND `itemid` = 2040602;
 UPDATE `drop_data` SET `chance` = 750 WHERE `dropperid` = 9400640 AND `itemid` = 2043700;
 
--- 猫眼石改由丁满掉落（LK 1e0978e0「修复猫眼石掉落，改为丁满」）。
--- drop_data 有 UNIQUE(dropperid, itemid)，先清目标行防止 UPDATE 撞唯一键。
-DELETE FROM `drop_data` WHERE `dropperid` = 2100108 AND `itemid` = 4031568;
-UPDATE `drop_data` SET `dropperid` = 2100108 WHERE `dropperid` = 2110301 AND `itemid` = 4031568;
+-- 猫眼石 4031568（LK 1e0978e0「修复猫眼石掉落，改为丁满」）。
+--
+-- LK 那条「从沙漠毒蝎 2110301 搬到丁满 2100108」在本库里搬不动任何东西：
+-- BeiDou 基线压根没有 2110301 掉这件道具的行（沙漠毒蝎的掉落见
+-- V1.0.51:634-642），而丁满 2100108 本来就有——V1.0.51:32602 的
+-- (2100108, 4031568, 1, 1, 3911, 80000)。也就是说基线早已是 LK 想要的状态。
+--
+-- 但原写法是「先 DELETE 目标行，再 UPDATE 源行」：DELETE 把基线那条正确的
+-- 任务掉落删掉，紧跟的 UPDATE 匹配零行，净结果是白丢一条 questid 3911 的掉落。
+-- 第一次跑就丢，不是重跑才丢。且该写法本身不在本文件允许的三种幂等写法之内。
+--
+-- 改成「缺了就补回、已有就不动」，顺带清掉理论上可能存在的源行。
+INSERT INTO `drop_data` (`dropperid`, `itemid`, `minimum_quantity`, `maximum_quantity`, `questid`, `chance`)
+SELECT 2100108, 4031568, 1, 1, 3911, 80000
+WHERE NOT EXISTS (SELECT 1 FROM `drop_data` WHERE `dropperid` = 2100108 AND `itemid` = 4031568);
+DELETE FROM `drop_data` WHERE `dropperid` = 2110301 AND `itemid` = 4031568;
 
 -- 魔力控制装置（遗弃研究室的哈闷 9300141）：BeiDou 基线本有 1 个 @10%，
 -- LK 调成 1–10 个 @5%（LK 9cb7af7f），按 LK 现值覆盖
@@ -158,7 +170,7 @@ INSERT IGNORE INTO `drop_data` (`dropperid`, `itemid`, `minimum_quantity`, `maxi
 --   * PKB（品克缤）额外掉 2–4 个祝福/混沌/5000 点券，带 distinctive 掉落指示；
 --   * 250/5000 点券道具、+15 HP 药丸走野外 BOSS 与副本 BOSS 分层；
 --   * 六一铅笔、周年帽/蜡烛、龙年勋章等活动物品终止掉落（对 BeiDou 多为无行可删，保留语句以对齐终态）。
--- 执行顺序依赖：distinctive 列由 V1000.1.1 先建。
+-- 执行顺序依赖：distinctive 列由 V1000.2.1__lk_schema.sql 先建（见本文件第 18 行）。
 
 -- ---------- 全服掉落 ----------
 DELETE FROM `drop_data_global` WHERE `itemid` = 2340000;

@@ -94,7 +94,7 @@ wz/UI.wz/UIWindow.img.xml
 | 项 | 说明 |
 |---|---|
 | ~~`Item.wz/Etc/0403` 的 `04033001`~~ | **不接入**（用户 2026-08-18 决定，客户端侧也已删除）。查实它在三方 `String.wz/Etc.img` 都没有名字，LK 的 `handbook`、`Quest.wz` 四个文件、全部脚本与 sql 也零引用——**LK 用作 BOSS 掉落的 5000 点券其实是 `4310100`**，见下 |
-| ~~`Item.wz/Etc/0431` 的 `04310100`~~ | **已接入**（2026-08-18，用户提供 `exports/0431.img.xml`）。服务端五处齐活：`wz/Item.wz/Etc/0431.img` 加条目（`slotMax=1`，`getSlotMax` 不再返回 0）、`wz/` 与 `wz-zh-CN/` 两层 `String.wz/Etc.img` 各加名字、`ItemId` 加 `NX_CARD_5000` 并入 `isNxCard`、新增 `getNxCardValue` 收掉三处硬编码三元式。`drop_data` 迁移本就在 `db/lkport/V1000.0.1`。**客户端仍需同步该 img** |
+| ~~`Item.wz/Etc/0431` 的 `04310100`~~ | **已接入**（2026-08-18，用户提供 `exports/0431.img.xml`）。服务端五处齐活：`wz/Item.wz/Etc/0431.img` 加条目（`slotMax=1`，`getSlotMax` 不再返回 0）、`wz/` 与 `wz-zh-CN/` 两层 `String.wz/Etc.img` 各加名字、`ItemId` 加 `NX_CARD_5000` 并入 `isNxCard`、新增 `getNxCardValue` 收掉三处硬编码三元式。`drop_data` 迁移在 `db/lkport/R__lk_40_drops.sql`。**客户端仍需同步该 img** |
 | `Sound.wz/{Bgm03,Bgm15,Mob}.img` | ASM 原件 XML 不合法（`<sound name="X"` 未闭合），已回退为 BeiDou 原版，本次不同步 |
 | `Map.wz` 各图的入口 portal | 已定位两张，见下表。其余按实测逐张补，不整树覆盖 |
 

@@ -30,7 +30,14 @@ sub leaves {
 printf "%-36s %7s %7s %7s\n", 'FILE', 'ASM新增', 'BD新增', '改值' unless $detail;
 open(my $lh,'<',$list) or die;
 while (my $r = <$lh>) {
-  chomp $r; next unless $r;
+  chomp $r;
+  $r =~ s/\r+$//;          # 清单文件带 CRLF 时，残留的 \r 会让后面所有 open 失败而工具不报错
+  next unless $r;
+  unless (-f "$B/$r" && -f "$A/$r") {
+    warn "跳过（文件不存在）：$r\n";   # 静默零差异比报错更危险，这里必须出声
+    next;
+  }
+
   my $b = leaves("$B/$r"); my $a = leaves("$A/$r");
   my (@anew,@bnew,@chg);
   for my $k (sort keys %$a) { next unless $FUNC{ (split m{[/=]},$k)[0] };

@@ -670,14 +670,9 @@ public class AbstractPlayerInteraction {
                     if (c.getPlayer().isUseCS()) {
                         Equip it = (Equip) item;
 
-                        // 制作出来的饰品补满 3 个卷孔，与 MakerProcessor.addBoostedMakerItem 的规则一致。
-                        // upgradeSlots 取自 wz 的 tuc，<= 0 意味着这件饰品本来就没有卷孔（戒指基本都是）。
-                        // 原实现这一条不受 isUseCS 约束，于是任务奖励、活动、扭蛋发出去的饰品也一并补孔，
-                        // 结果同一枚戒指怪掉的 0 孔、NPC 给的 3 孔。补孔是制作系统的设定，不该覆盖所有发放路径。
-                        // 注释掉，与LK一致
-//                        if (ItemConstants.isAccessory(it.getItemId()) && it.getUpgradeSlots() <= 0) {
-//                            it.setUpgradeSlots(3);
-//                        }
+                        // 这里原本给饰品补满 3 个卷孔（isAccessory 且 upgradeSlots <= 0 时设为 3）。
+                        // 已整段去掉，与 LK 一致：补孔是制作系统的设定，不该覆盖所有发放路径，
+                        // 否则同一枚戒指怪掉的 0 孔、NPC 给的 3 孔。见 lichkingmod-port.md §5。
 
                         if (GameConfig.getServerBoolean("use_enhanced_crafting")) {
                             if (!(c.getPlayer().isGM() && GameConfig.getServerBoolean("use_perfect_gm_scroll"))) {
