@@ -51,6 +51,11 @@ BeiDou-Server 是一个冒险岛（MapleStory v83，GMS 协议）私服服务端
 
 ### 数据库与持久层
 - MySQL 8+，库名 `beidou`（应用库）。Flyway 迁移脚本在 `src/main/resources/db/migration/V1.0.x__*.sql`，`validate-on-migrate: false`。新增表结构走新版本号迁移脚本。
+- **改已执行过的迁移文件是无效操作**：`validate-on-migrate: false` 意味着校验和变化既不报错也不重跑，改动静默失效，库停在旧状态。要让改动落库只有三条路——新版本号、`R__` 可重复迁移、或直接改库。
+- **lkport 的两层结构**（`db/lkport/`，与上游 `db/migration/` 分开，见 `application.yml` 的 `locations`）：
+  - `V1000.2.x__*.sql`：只放 DDL。MySQL 的 DDL 隐式提交，混进 `R__` 会导致重放失败时表结构卡在半路无法回滚；关在版本化文件里则 `R__` 只剩纯 DML，由 Flyway 包在单事务内执行。文件内语句要能重放（`CREATE TABLE IF NOT EXISTS`、`MODIFY COLUMN`、`ADD COLUMN` 用 `information_schema` 判断后动态执行）。
+  - `R__lk_<两位数>_<主题>.sql`：数据（`command_info`/`game_config`/`drop_data`/制作商店/扭蛋）。改内容即重跑，重启服务端生效——迁移期调数值走这里。文件名的两位数字就是执行顺序（Flyway 对 repeatable 按描述字典序排，且全部在 `V__` 之后）。
+  - **`R__` 必须幂等**，只用三种写法：`INSERT ... SELECT ... WHERE NOT EXISTS`、先 `DELETE` 同键再 `INSERT`、无条件 `UPDATE`/`DELETE`。不要写裸 `INSERT ... VALUES`。代价是重跑会覆盖 gms-ui 后台对同范围数据的手工改动——迁移期有意如此（文件是唯一真源），上线前把 `R__` 改名成 `V1000.3.x`（内容不动）即可冻结。
 - 持久层用 **MyBatis-Flex**（不是 MyBatis-Plus）：实体在 `org.gms.dao.entity`，后缀 `DO`，`@Table` + Lombok `@Data/@Builder`；Mapper 在 `org.gms.dao.mapper`，启动 `@MapperScan("org.gms.dao.mapper")`。连接池 Druid。
 - 生成实体/Mapper：跑 `CodeGen#genMapperAndEntity`（test 作用域，mybatis-flex-codegen），改 `globalConfig.setGenerateTable(...)` 指定表名，实体后缀固定 `DO`。
 
