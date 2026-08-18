@@ -3471,6 +3471,182 @@ BeiDou 两层 + LK 三份全是倒装，属上游祖传。两层一起补上 `!`
 
 ---
 
+## 11. ASM wz 增量导入与克雷塞尔定案（2026-08-18，分支 `port/asm-wz`）
+
+用户决定把 ASM 的 wz（除 `Character.wz`）整体导入当基础数据层。这与
+[asm-reference-assessment.md](asm-reference-assessment.md) 的结论**不冲突**：
+当时否决的是「用 ASM 版覆盖 23,024 个共有文件、把语言分层塌成中文单层」，
+而该文 §4 采集清单第 1 条推荐的正是「取纯增量文件」。红线不变：
+**7,691 个内容不同的共有文件一律不动**（Skill.wz 会丢我们多出的 140 个 cooltime）。
+
+### 11.1 增量文件不带中文，语言分层冲突不适用
+
+按字节扫描 `Mob/Npc/Item/Reactor/Character/Sound/Morph` 的增量文件共 645 个，
+**含中文 0 个**——名字全在 `String.wz`（共有文件，不在增量里），增量本身是纯数值/
+几何数据。故增量可直接落 `wz/` 英文基础层，不破坏 `gms.service.language` 双语机制。
+需单独按层处理的只有地图名、怪名这类 `String.wz` 子节点。
+
+### 11.2 已提交
+
+| 提交 | 内容 |
+|---|---|
+| `9e9e9ad34` | 1,740 个纯新增（wz 1,456 + 脚本 284），零覆盖 |
+| `113eeef91` | 修 11 个坏脚本（8 GBK 乱码 + 4 旧包名），删 `CashShop.imgX.xml` |
+| `dd35605fc` | 补 `Item.wz/Install/0310`，放开 37 处发奖调用 |
+| `072b51c9e` | 补扳手 `4031942`（三处共有文件子节点合并） |
+
+wz 改动逐条登记在 [wz-client-sync.md](wz-client-sync.md)，供客户端同步。
+
+### 11.3 加载即 NPE 的地图：34 张（其中 20 张是上游旧账）
+
+`XMLWZFile.getData` 对不存在的文件明确 `return null`，而两条路径都没接住：
+
+```
+缺 Reactor → ReactorFactory.getReactor():101   reactorData 为 null 直接 .getChildByPath()
+缺 Mob/NPC → MapFactory.loadLife():+1          myLife 为 null 直接 .setCy()
+```
+
+`ReactorFactory` 里 `getReactorS` 与 `getReactor` 是两份重复实现，`getReactorS`
+第 55 行写了 `if (reactorData == null) return stats;`，但第 47 行已先解引用炸了，
+那句是死代码。注意缺怪走的也是 `loadLife` 这条——`LifeFactory.getMonster` 虽然
+catch 了 NPE 返回 null，上层没接住。
+
+用与排版无关的解析器扫全部 5,692 张地图（**ASM 地图两种排版混用**，压缩单行与缩进
+多行都有；按缩进判断区块的扫描器会漏掉 6,099 条引用）：
+
+| 来源 | 张数 | 地图 |
+|---|---|---|
+| 本次导入 | 14 | `211042401`、`240060201`、`749050100–104`、`749050110–114`、`749050300`、`889300501` |
+| **BeiDou 原有** | 20 | `702300001–010`（采矿洞穴）、`749020000–800`（国庆蛋糕）、`749020910` |
+
+那 20 张来自上游提交 `fb18489b3`（2024-09-04「新增海外旅游地图：少林寺&上海」）
+——地图进来了，配套反应堆 `7022000-2`／`7492000-1`／`7496000-8` 从来没进过。
+**存在快两年的上游缺陷，与本次导入无关**，只是没人去过所以没暴露。
+
+缺失清单：反应堆 32 种（`2401100`、`2401200`、`7022000-2`、`7492000-1`、
+`7492003-6`、`7496000-8`、`7499000-9`、`8892006-7`），NPC 1 个（`2030016`）；
+**怪 0 个**。三方（BeiDou/ASM/LK）皆无。
+
+**建议改法**：在 Java 侧加 null 兜底（`ReactorFactory` 两处、`MapFactory.loadLife`
+与 `loadLifeRaw`、`MapFactory` 的 reactor 循环、`MapleMap:4558`），缺失时打 i18n
+warn 日志并跳过该槽。比逐个剔 34 张图的 wz 节点改动小、覆盖上游旧账、且不丢信息。
+**用户 2026-08-18 决定暂不做**（本人盯 IDEA terminal 实测，报错能第一时间看到）。
+
+### 11.4 怪物血条：`boss=1` 但不在白名单 → 完全不显示
+
+`Monster.broadcastMobHpBar` 只有两个分支：
+
+```java
+if (hasBossHPBar())   { 大血槽 }      // isBoss() && getTagColor() > 0
+else if (!isBoss())   { 百分比血条 }
+// isBoss=true 但 tagColor=0 → 两个分支都不进 → 什么都不显示
+```
+
+`tagColor` 仅当怪出现在 `UI.wz/UIWindow.img` 的 `MobGage/Mob` 白名单（693 条）里
+才非零（`LifeFactory:434`）。全仓库 **647 个怪**是 `boss=1` 且不在白名单。
+
+用户实测的**狮子王之城 `211060100`**（本次导入的新图，7 个刷怪点全是 `8210000`）：
+
+| 怪 | boss | hpTagColor | maxHP | 白名单 | 表现 |
+|---|---|---|---|---|---|
+| `8210000` 看门鳄鱼兵 | 1 | 无 | 420 万 | 不在 | **无血条** |
+| `8210001` 驯鹿 | 1 | 无 | 497.5 万 | 不在 | **无血条** |
+| `8210002` 血腥驯鹿 | 1 | 无 | 775 万 | 不在 | **无血条** |
+| `8210003` 贝尔武夫 | 1 | 无 | 980 万 | 不在 | **无血条** |
+| `8210004` 灰秃鹰 | 1 | 无 | 620 万 | 不在 | **无血条** |
+| `8210005` 城堡石头人 | 1 | 无 | 1250 万 | 不在 | **无血条** |
+| `8210010/11/12` 塔的阿尼 | 1 | 1 | 7500 万–1.88 亿 | 在 | 大血槽正常 |
+
+**不是血量数值溢出**——`remainingHP = hp * 100f / maxHp` 走 float，21 亿也不会溢出；
+是高血量怪被普遍打上 `boss=1`（顺带禁击退、固定刷新倍率），副作用带走了血条。
+
+修法一行：`else if (!isBoss())` → `else`，让没有大血槽的 boss 退回百分比血条。
+**待用户决定**。另：这 9 个怪的名字在 BeiDou 的 `String.wz/Mob.img` 里全缺
+（ASM 有），属共有文件待合并。
+
+### 11.5 克雷塞尔定案：走 LK 远征制（用户 2026-08-18 选 B）
+
+导入后出现两套互斥实现：
+
+| | ASM（已在树里） | LK（**选定**） |
+|---|---|---|
+| 组织形式 | 组队制 `em.startInstance(party, map, 1)` | 远征制 `ExpeditionType.KREXEL` |
+| 事件管理器 | `TreebossBattle` | `KrexelBattle` |
+| 入场门 | 全队完成任务 `4528` | `haveItem(4031942)` |
+| 配套件 | 全在（zh 层） | 四个脚本仍在 LK，`KrexelBattle.js` 两层皆无 |
+
+> **deferred 全量复核（2026-08-18）**：批次 5 把 `event/KrexelBattle.js`、`portal/treeboss00.js`、
+> `reactor/5411001.js`、`npc/9270045.js` 判为 deferred，理由是「缺 Map5/541020700 与
+> 541020800」。该前提**已不成立**——ASM 导入补齐了 541020000–541020800 全 30 张，
+> `Reactor.wz/5411001` 也在，BOSS 凭证 `3100000` 也补了。用户明确希望走这套逻辑。
+>
+> 既然「缺 wz」这个理由整体失效，manifest 里**全部 9 条 deferred 已逐条重过**：
+>
+> | 行 | 复核结果 |
+> |---|---|
+> | `event/KrexelBattle.js` | 前提失效，走 LK 远征制，须从 LK 取（两层皆无） |
+> | `portal/treeboss00.js` | 前提失效，ASM 版已在树里但将被 LK 版取代 |
+> | `reactor/5411001.js` | 前提失效，ASM 版已在树里 |
+> | `npc/9270045.js` | 前提失效，ASM 版已在树里，LK 版无移植问题 |
+> | `portal/mahavira_enter.js` | **理由本身就写错了**：不是缺地图，`Map7/702050000` 一直都有，只是没有 portal script 字段。属同名文件 MODIFY 型 diff（任务 #5），不是 wz-missing |
+> | `wz/Map.wz/Obj/trapSG` | 仍 deferred，随克雷塞尔线走 |
+> | `wz/Npc.wz/9400794` | 仍 deferred，舞狮区另缺三方皆无的 portal 脚本 `lionMask_enter` |
+> | `npc/9000036_accessory.js` | 与 wz 无关（批次 8 皇家系统），维持 |
+> | `npc/under_maintenance.js` | 与 wz 无关（批次 8），维持 |
+
+#### 已查实的移植问题（对着 BeiDou 现有 Java 逐个核过，尚未动手改）
+
+**四个脚本共有**：
+1. `importPackage(Packages.server.expeditions)` —— HeavenMS 旧包名。BeiDou 是
+   `org.gms.server.expeditions`，且本仓库惯用 `Java.type('org.gms...')` 而非 importPackage
+2. `MapleExpeditionType` —— BeiDou 的类名是 `ExpeditionType`（`KREXEL` 枚举已存在，
+   `ExpeditionType:46`，批次 6 加的）
+
+**`event/KrexelBattle.js`**：
+
+3. **`eim.distributeBossCertificate(mob, 2, 20)` 只有 3 个参数**，BeiDou 的签名是
+   `(Monster, int itemId, short quantity, short minimumDmgPercent)` **4 个**
+   （`EventInstanceManager:858`）。要补成 `(mob, 3100000, 2, 20)`——道具已于
+   `dd35605fc` 补齐
+4. 奖池全空（`itemSet = []`、`itemQty = []`、`expStages = []`），`giveEventReward`
+   发不出东西。要么按 §「PQ 通关奖池取并集」的口径配一份，要么明确留空
+5. `minLevel`/`maxLevel` 声明了但 `getEligibleParty` 里没用上，等级门实际不生效
+6. `setup()` 用 `getInstanceMap`、`playerEntry()` 用 `getMapInstance` ——
+   **两个都存在**（`:908` 与 `:736`），不是问题，但同一文件里混用两种写法
+7. `isFinalBoss` 判 `9420522` **正确**：已核 Mob.wz 召唤链 `9420520 → 9420521 →
+   9420522`，且 `Expedition.java:86` 的 KREXEL_LEFT_EYE/RIGHT_EYE 与之对应
+8. 其余 API 全部对得上：`isExpeditionTeamLackingNow(boolean,int,Character)`、
+   `showClearEffect()`、`setEventClearStageExp(List)`、`setExclusiveItems(List)`、
+   `setEventRewards(int,List,List)`、`registerExpedition`、`restartEventTimer`
+
+**`portal/treeboss00.js`**：
+
+9. `em.startInstance(-1, chr, chr, chr.getClient().getChannel())` 命中的是
+   `startInstance(int lobbyId, Character chr, Character leader, int difficulty)`
+   ——**LK 把频道号当成了 difficulty 传**，是 LK 自己的 bug，移植时要改
+10. `print("Type 1")` / `print("Type 2")` 是调试残留，删
+11. `pi.createExpedition`/`getExpedition`/`isRegistering`/`addMemberInt` 均存在，无问题
+
+**`reactor/5411001.js`**：
+
+12. `rm.getExpedition(exped)` —— `ReactorActionManager extends AbstractPlayerInteraction`，
+    `getExpedition` 继承得到，**无问题**（一度怀疑缺失，已核实）
+13. LK 版里大段注释掉的暗黑龙王抄袭代码，移植时清掉
+
+**`npc/9270045.js`**：仅 `cm.warp(541020700, 0)`，无问题。
+
+#### 仍缺的东西
+
+- `event/KrexelBattle.js` 两层皆无，须从 LK 取
+- `Map.wz/Obj/trapSG`（`541020700` 唯一用户）ASM 无、LK 有；服务端只在
+  `getMaxObstacleMobDamageFromWz` 扫 Obj，不影响逻辑，属客户端渲染资源
+- **入场门无正规来源**：扳手 `4031942` 是任务 `4528` 的奖励，而乌鲁城任务链
+  `4526/4527/4528/4529/4530` 五个任务在 BeiDou 的 `Quest.wz` 里全缺，链上道具
+  `4000434` 也缺（ASM/LK 均有，属共有文件待合并）。已把这段来龙去脉写进
+  `scripts-zh-CN/portal/treeboss00.js` 的文件头注释
+
+---
+
 ## 附录
 
 ### A. 可复现的分析命令
@@ -3572,12 +3748,30 @@ CREATE TABLE IF NOT EXISTS `messageBoard` (      -- → message_board
 
 ### D. BeiDou 完全缺失的非点装 wz（41 个）
 
+> **2026-08-18 结案**：41 个已解决 36 个。`9e9e9ad34` 的 ASM 增量导入补齐 **35 个**，
+> `dd35605fc` 从 LK 补齐 `Item.wz/Install/0310`。**仍缺 5 个**，全部零引用或纯渲染资源：
+>
+> | 文件 | 处置 | 依据 |
+> |---|---|---|
+> | `Item.wz/Etc/0490`（4900000 六一铅笔） | ❌ rejected | LK 自己的 `db_LichKingMod.sql` 里掉落行是注释掉的，属关掉的节日道具 |
+> | `Map.wz/Obj/glacierExplorer` | ❌ rejected | 两仓库 5,334 张地图里 `oS` 引用数为 0 |
+> | `Map.wz/Tile/grassySoil3` | ❌ rejected | 同上，`tS` 引用数为 0 |
+> | `Map.wz/Obj/trapSG` | ⏸ 待办 | `541020700` 唯一用户，随克雷塞尔线走。服务端只在 `getMaxObstacleMobDamageFromWz` 扫 Obj 取 `s1/mobdamage`，不影响逻辑 |
+> | `Npc.wz/9400794` | ⏸ 待办 | `749040000`（舞狮活动区）用；该区另缺 portal 脚本 `lionMask_enter`（三方皆无） |
+>
+> 服务端读取路径已查实：`Map.wz/Tile`、`Map.wz/Back`、`Map.wz/WorldMap` **完全不读**；
+> `Map.wz/Obj` 只被 `GameConstants.getMaxObstacleMobDamageFromWz` 扫一次取 `s1/mobdamage`
+> ——这 7 个候选 Obj 全无该节点，补不补都不改变障碍伤害上限（维持 1000），
+> 对批次 6 的 G8 反外挂无影响。
+
 > **2026-08-16 补充**：另一支 BeiDou 分支 `BeiDou-Server-ASM` 里有其中 **35 个**，
 > 包括卡住克雷塞尔整条线的 `Map5/541020700`、`541020800`。ASM 也没有的 6 个是
 > `Item.wz/Etc/0490`、**`Item.wz/Install/0310`（BOSS 凭证 3100000，仍须从 LK 取）**、
 > `Map.wz/Obj/{glacierExplorer,trapSG}`、`Map.wz/Tile/grassySoil3`、`Npc.wz/9400794`。
 > ASM 的完整评估与地图导入的依赖分析见 [asm-reference-assessment.md](asm-reference-assessment.md)
 > ——结论是 **ASM 只做素材参考，不作为迁移基础**（语言分层冲突 + 会丢 Skill.wz 的 cooltime 数据）。
+> 该结论 2026-08-18 由用户改为「取纯增量当基础数据层」，与本文 §11 一致：
+> 否决的只是覆盖共有文件，取增量本就是该评估 §4 采集清单的第 1 条。
 
 ```
 Item.wz/Etc/0490.img.xml

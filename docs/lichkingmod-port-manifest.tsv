@@ -1715,21 +1715,21 @@ scripts/reactor/8091003.js	script	0	0	noise	改动可证明只落在字符串字
 scripts/reactor/8091004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/reactor/8098000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/event/CentipedeBattle.js	script-new	0	0	already-fixed	gms-server/scripts-zh-CN/event/WuGongPQ.js:5 —— 同一场蜈蚣战，进出场地图（701010323/701010320/701010322）与BOSS（9600009）逐项相同，入口同为 npc/9310006.js。BeiDou 版另有难度倍率、掉落表与 GameConfig 人数/等级解限，比 LK 版完整
-scripts/event/KrexelBattle.js	script-new	0	0	deferred	缓，挪至批次7：整条克雷塞尔线依赖 BeiDou 缺失的两张地图 wz（Map5/541020700 与 541020800，LK 基线自带故不在本清单分母内）、新增的 ExpeditionType.KREXEL 与 ExpeditionBossLog 条目（批次6），以及 distributeBossCertificate 用的 BOSS凭证 3100000（Item.wz/Install/0310.img.xml，见附录D）。重启条件：批次7 补齐上述 wz 且批次6 敲定远征类型枚举
+scripts/event/KrexelBattle.js	script-new	0	0	deferred	【2026-08-18 复核：deferred 前提已失效】原因写的是缺 Map5/541020700 与 541020800，但 9e9e9ad34 的 ASM 导入已补齐 541020000-541020800 全 30 张、Reactor.wz/5411001 也在，Item.wz/Install/0310 的 BOSS 凭证 3100000 已于 dd35605fc 补齐。用户 2026-08-18 选定走 LK 远征制。两层皆无此文件，须从 LK 取。已查实的移植问题（旧包名 Packages.server.expeditions、MapleExpeditionType 应为 ExpeditionType、distributeBossCertificate 少一个参数、奖池全空、等级门不生效）见 port 文档 §11.5
 scripts/event/YaoSengBattle.js	script-new	0	0	already-fixed	gms-server/scripts-zh-CN/event/YaoSengPQ.js:5 —— 同一场妖僧战，BeiDou 版更完整且 LK 侧此文件零引用；批次7 已把 LK 的凭证（1张@20%）与每周4次配额（YAOSENG，两段式）接进 YaoSengPQ.js
 scripts/npc/1002103.js	script-new	0	0	rejected	正文是 LK 自造的一句寒暄「同学，想了解一下冒险学院吗？」，没有任何功能。而 1002103 在 Quest.wz/Check.img.xml 里出现 5 次，是任务NPC，给它挂一个只 sendOk 就 dispose 的脚本是净损失
 scripts/npc/1022007 .js	script-new	0	0	rejected	文件名带空格，是 LK 的笔误；内容是 NPC 2010000（Master Sergeant Fox，天空之城兑换）的脚本被错存成 1022007 这个id。BeiDou 已有正确归位的 scripts/npc/2010000.js
 scripts/npc/1022101_test.js	script-new	0	0	rejected	作者自用的兑换脚本试验稿，文案中英混杂（"are you sure you have..." 后半句突然变中文），兑换表是 2000000 蓝药换 1472053 武器这种随手填的测试数据。正式版是 scripts/npc/1022101.js（清单 script 档）
 scripts/npc/9000036_accessory.js	script-new	0	0	deferred	【认领：批次7】工作人员E的饰品分支，与主体 scripts/npc/9000036.js（script档，+102逻辑行）是一套，拆开搬没有意义。另需先确认入口：LK全仓库无任何地方 openNpc 到这个脚本名
-scripts/npc/9270045.js	script-new	0	0	deferred	【认领：批次7】"离开这里"传送到 541020700，该地图BeiDou没有。现在搬会把玩家送进不存在的地图。随 KrexelBattle.js
+scripts/npc/9270045.js	script-new	0	0	deferred	【2026-08-18 复核：deferred 前提已失效】541020800 已随 ASM 导入补齐，Npc.wz/9270045 本就有。ASM 版已在 scripts-zh-CN/。LK 版仅 cm.warp(541020700, 0)，无移植问题
 scripts/npc/changePassword.js	script-new	0	0	rejected	批次6收尾终局否决：随 ChangePasswordCommand
 scripts/npc/npcTemplate.js	script-new	0	0	rejected	NPC 脚本模板，BeiDou 已有自己的脚本写法（sendNextLevel/sendSelectLevel 那套），模板不通用
 scripts/npc/testScript.js	script-new	0	0	rejected	作者自用的排版试验稿：status 0 打一段 #i#t#c 混排就 dispose，status 1 之后是从 detected.js 整段复制来的死代码（永远走不到）
 scripts/npc/under_maintenance.js	script-new	0	0	deferred	缓，挪至批次8：正文只有一句「功能维护中」，真正的逻辑（cm.redeemDailyRoyalReward 领皇家月卡日奖励）连同 sendYesNo 一起被 LK 注释掉了。随皇家系统一并决策
 scripts/npc/verifyEmail.js	script-new	0	0	rejected	批次6收尾终局否决：随 VerifyEmailCommand
-scripts/portal/mahavira_enter.js	script-new	0	0	deferred	缓，挪至批次7：这个 portal 脚本名只出现在 LK 改过的 wz/Map.wz/Map/Map7/702050000.img.xml 里，BeiDou 同名文件没有任何 portal script 字段，脚本单独搬过来不会被触发。随该 wz 行一并处理
-scripts/portal/treeboss00.js	script-new	0	0	deferred	缓，挪至批次7：克雷塞尔入口，portal 脚本挂在缺失的 Map5/541020700 上，随 KrexelBattle.js 一并处理
-scripts/reactor/5411001.js	script-new	0	0	deferred	缓，挪至批次7：召唤克雷塞尔的反应堆，本体 Reactor.wz/5411001.img.xml 就在附录D 的缺失清单里，且所在地图 541020800 同样缺失。随 KrexelBattle.js 一并处理
+scripts/portal/mahavira_enter.js	script-new	0	0	deferred	【2026-08-18 复核】阻塞点不是缺地图：BeiDou 的 wz/Map.wz/Map/Map7/702050000.img.xml 本就存在，只是里面没有 portal script 字段。属同名文件的 MODIFY 型 diff（manifest 里 wz/Map.wz/Map/Map7/702050000.img.xml 那行，任务#5），不是 wz-missing
+scripts/portal/treeboss00.js	script-new	0	0	deferred	【2026-08-18 复核：deferred 前提已失效】同 KrexelBattle.js。ASM 版（组队制、查任务 4528）已随导入进入 scripts-zh-CN/，但用户选定 LK 远征制，本文件将被 LK 版取代。LK 版另有 bug：em.startInstance 第 4 参是 difficulty，LK 传的是频道号。前置来源问题（扳手 4031942 出自缺失的乌鲁城任务链 4526-4530）已写进现有文件的头部注释
+scripts/reactor/5411001.js	script-new	0	0	deferred	【2026-08-18 复核：deferred 前提已失效】Reactor.wz/5411001 已随 ASM 导入补齐。ASM 版已在 scripts-zh-CN/，LK 版待移植（走远征制）。rm.getExpedition 经核实可用——ReactorActionManager extends AbstractPlayerInteraction，继承而来
 sql/db_database.sql	sql	73	73	rejected	纯 latin1→gbk 建表噪音（§8 GBK 终局 rejected）
 sql/db_drops.sql	sql	1	1	already-fixed	仅实验室怪 DELETE 上界 9300154→9300153；BeiDou V1.0.51 该 DELETE 整段被注释，掉落本就保留
 sql/db_LichKingMod.sql	sql	492	0	ported	批次7 V1000.1.3-.6；fm店9000069/宝藏PQ 6742014 挂起随脚本组，见批次7节
@@ -2011,44 +2011,44 @@ wz/String.wz/TransferWorld.img.xml	wz	0	0	pending	BeiDou 中文层已有同名�
 wz/String.wz/TrialEULA.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
 wz/UI.wz/UIWindow.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Character.wz/**	wz-cosmetic	9423	0	pending	皇家点装/发型/脸型：LK 改动 9423 个，其中 BeiDou 完全没有 8807 个；批次 8 整体决策，不逐个列
-wz/Item.wz/Etc/0490.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Item.wz/Install/0310.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749040000.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749040001.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749040002.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749040003.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749040004.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749040005.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749040006.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749040007.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749040008.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749050500.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749050501.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Map/Map7/749050502.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Obj/FishingSystemTW.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Obj/Tokyo2JP.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Obj/TokyoJP.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Obj/beer1.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Obj/eventTW.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Obj/glacierExplorer.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Obj/trapSG.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Tile/TokyoJP.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Tile/grassySoil3.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Tile/lionCastle.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Tile/ninjaJP.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Tile/ninja_jp.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Tile/sakuraCastle_inside.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Tile/sakuraCastle_outside.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Tile/snowyLightrock3.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/Tile/thai.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Map.wz/WorldMap/WorldMap016.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Mob.wz/9601105.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Mob.wz/9601116.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Npc.wz/9250002.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Npc.wz/9250021.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Npc.wz/9330085.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Npc.wz/9330086.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Npc.wz/9330108.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Npc.wz/9390221.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Npc.wz/9400794.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
-wz/Reactor.wz/5411001.img.xml	wz-missing	0	0	pending	BeiDou 完全没有此文件
+wz/Item.wz/Etc/0490.img.xml	wz-missing	0	0	rejected	4900000 六一铅笔，节日道具。LK 自己的 db_LichKingMod.sql 里该 itemid 的 drop_data_global 插入行是注释掉的，只留 DELETE
+wz/Item.wz/Install/0310.img.xml	wz-missing	0	0	ported	dd35605fc 从 LK 补齐（ASM 也没有）。含 3100000/3100001 及 3101000-3101003 共 6 个道具；getSlotMax 在 getItemData 为 null 时返回 0，道具进不了背包，是 37 处发奖调用的唯一前置
+wz/Map.wz/Map/Map7/749040000.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749040001.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749040002.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749040003.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749040004.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749040005.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749040006.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749040007.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749040008.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749050500.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749050501.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Map/Map7/749050502.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Obj/FishingSystemTW.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Obj/Tokyo2JP.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Obj/TokyoJP.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Obj/beer1.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Obj/eventTW.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Obj/glacierExplorer.img.xml	wz-missing	0	0	rejected	两仓库 5334 张地图里 oS 引用数为 0，孤儿资产；服务端只扫 Obj 的 s1/mobdamage，该文件无此节点
+wz/Map.wz/Obj/trapSG.img.xml	wz-missing	0	0	deferred	541020700 唯一用户，随克雷塞尔线（LK 远征制）一并处理。ASM 无、LK 有。服务端只扫 s1/mobdamage，该文件无此节点，纯客户端渲染资源
+wz/Map.wz/Tile/TokyoJP.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Tile/grassySoil3.img.xml	wz-missing	0	0	rejected	两仓库 5334 张地图里 tS 引用数为 0，孤儿资产；服务端完全不读 Map.wz/Tile
+wz/Map.wz/Tile/lionCastle.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Tile/ninjaJP.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Tile/ninja_jp.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Tile/sakuraCastle_inside.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Tile/sakuraCastle_outside.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Tile/snowyLightrock3.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/Tile/thai.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Map.wz/WorldMap/WorldMap016.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Mob.wz/9601105.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Mob.wz/9601116.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Npc.wz/9250002.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Npc.wz/9250021.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Npc.wz/9330085.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Npc.wz/9330086.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Npc.wz/9330108.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Npc.wz/9390221.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
+wz/Npc.wz/9400794.img.xml	wz-missing	0	0	deferred	749040000 舞狮活动区用。ASM 无、LK 有。该区另缺 Mob 9420602（ASM 有）与 portal 脚本 lionMask_enter（三方皆无），且 LK 内部无任何地图链接进入该区
+wz/Reactor.wz/5411001.img.xml	wz-missing	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）

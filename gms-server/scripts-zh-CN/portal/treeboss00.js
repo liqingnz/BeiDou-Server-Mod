@@ -1,3 +1,23 @@
+/* 克雷塞尔入场门。
+ *
+ * 【本文件是 ASM 版（组队制），但项目已决定改走 LK 的远征制】
+ * 用户 2026-08-18 决定：克雷塞尔采用 LK 的远征实现（MapleExpeditionType.KREXEL +
+ * event/KrexelBattle.js），本文件将被 LK 版 treeboss00.js 取代。移植尚未动手，
+ * 待办与已查实的移植问题见 docs/lichkingmod-port.md「克雷塞尔线（LK 远征制）」一节。
+ *
+ * 【前置门的两种写法，以及为什么现在两种都走不通】
+ * 本文件（ASM）查的是任务 4528 完成状态：chr.getQuestStatus(4528) != 2 即拒绝。
+ * LK 版查的是道具：pi.haveItem(4031942, 1)（扳手）。
+ *
+ * 两者其实是同一条链——扳手 4031942 正是任务 4528 的完成奖励。但 BeiDou 的
+ * Quest.wz 里没有乌鲁城任务链：4522、4523 有，4526/4527/4528/4529/4530 五个全缺
+ * （Quest.wz 属 ASM 导入的红线共有文件，未合并），链上的道具 4000434 也缺。
+ * 所以：
+ *   - 走 ASM 版 → getQuestStatus(4528) 永远不是 2，任何人都进不来
+ *   - 走 LK 版  → 道具 4031942 已于 072b51c9e 补齐（Item.wz/Etc/0403 + 两层
+ *                 String.wz/Etc.img），但正规获取途径仍缺，只能 GM 发放
+ * 要让入场门有正规来源，得补齐 4526-4530 这条任务链与道具 4000434。
+ */
 var timeLimit = 2;
 function enter(pi) {
 
