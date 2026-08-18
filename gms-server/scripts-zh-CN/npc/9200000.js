@@ -3,8 +3,8 @@
 */
 
 function start() {
-    // cm.sendSimple("你想去别的地方吗？\r\n#b#L0#Beer Tent#l\r\n#L1#Mal Volence#l#k");
-    cm.sendSimple("你想去探索宝藏吗？\r\n#L1#Mal Volence#l#k");
+    // cm.sendSimple("浣犳兂鍘诲埆鐨勫湴鏂瑰悧锛焅r\n#b#L0#Beer Tent#l\r\n#L1#Mal Volence#l#k");
+    cm.sendSimple("浣犳兂鍘绘帰绱㈠疂钘忓悧锛焅r\n#L1#Mal Volence#l#k");
 }
 
 function action(mode,type,selection) {

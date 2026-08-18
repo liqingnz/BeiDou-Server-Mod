@@ -289,7 +289,7 @@ function action(mode, type, selection) {
                             		cm.sendOk("#b恭喜,您抽到" + pj + "!!!!!\r\n普通概率：" + gl[0]/10 + "%\r\n稀有概率：" + gl[1]/10 + "%\r\n极品概率："+ gl[2]/10+ "%\r\n神话概率："+ gl[3]/10+ "%\r\n你的概率："+ jiaru/10 + "%");
 	           		var text;
 	           		text = "[恭喜]" + cm.getPlayer().getName() + " : " + "在道具抽奖中抽到" + pj + "道具:    " + mz + qty +"个！！";
-	           		cm.getPlayer().getWorldServer().broadcastPacket(Packages.tools.MaplePacketCreator.serverNotice(6, text));
+	           		cm.getPlayer().getWorldServer().broadcastPacket(Packages.org.gms.util.PacketCreator.serverNotice(6, text));
 	        		cm.dispose();
                         	} else  {
                             		cm.gainMeso(-cost);

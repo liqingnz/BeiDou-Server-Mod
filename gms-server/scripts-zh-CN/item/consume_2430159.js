@@ -21,7 +21,7 @@ function start() {
     
     // 设置任务3182的自定义数据（标记已使用水晶）
     try {
-        var Quest = Java.type("org.gms.server.quest.MapleQuest");
+        var Quest = Java.type("org.gms.server.quest.Quest");
         var quest = Quest.getInstance(3182);
         var questRecord = player.getQuestNAdd(quest);
         if (questRecord != null) {

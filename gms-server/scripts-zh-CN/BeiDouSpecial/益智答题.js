@@ -192,7 +192,7 @@ function action(mode, type, selection) {
                 cm.gainExp(cm.getLevel()*jingyan);
                 cm.gainItem(jl,1);
 	var text = "[恭喜]" + cm.getPlayer().getName() + " : " + "在答题中答对5道题，获得混沌卷轴一张！！！";
-	cm.getPlayer().getWorldServer().broadcastPacket(Packages.tools.MaplePacketCreator.serverNotice(6, text));
+	cm.getPlayer().getWorldServer().broadcastPacket(Packages.org.gms.util.PacketCreator.serverNotice(6, text));
 	cm.dispose();
         } else {
             status = -1;

@@ -23,8 +23,8 @@ function action(mode, type, selection) {
 			return;
 		}
 		
-		//cm.getPlayer().dropMessage(5, "ÊäÈë: ¸¥ÀÊÎ÷Ë¹ÊÇÌì²ÅÈËÅ¼Ê¦");
-		cm.sendGetText("Ò»¸ö¿ÉÒÉµÄÉùÒô´©Í¸ÁË¼Å¾². #bÊäÈë°µÓï!");
+		//cm.getPlayer().dropMessage(5, "è¾“å…¥: å¼—æœ—è¥¿æ–¯æ˜¯å¤©æ‰äººå¶å¸ˆ");
+		cm.sendGetText("ä¸€ä¸ªå¯ç–‘çš„å£°éŸ³ç©¿é€äº†å¯‚é™. #bè¾“å…¥æš—è¯­!");
 		status = 1;
 	}
 	if(status === 1){
@@ -34,10 +34,10 @@ function action(mode, type, selection) {
 		}
 		var people = cm.getPlayer().getMap().getCharacters().size();
 		if(people > 1){
-			cm.getPlayer().dropMessage(5, "ÀïÃæÓĞÆäËûÈËÁË");
+			cm.getPlayer().dropMessage(5, "é‡Œé¢æœ‰å…¶ä»–äººäº†");
 			cm.dispose();
 		}
-		if(input === 'Francis is a genius Puppeteer!'|| input === '¸¥ÀÊÎ÷Ë¹ÊÇÌì²ÅÈËÅ¼Ê¦'){
+		if(input === 'Francis is a genius Puppeteer!'|| input === 'å¼—æœ—è¥¿æ–¯æ˜¯å¤©æ‰äººå¶å¸ˆ'){
 			cm.warp(910510000);
 			cm.dispose();
 		}else{

@@ -20,15 +20,14 @@ function action(mode, type, selection) {
 
 		if (status == 0) {
 			if (cm.getPlayer().haveItem(4032322)) {
-				cm.getPlayer().yellowMessage("ÄãÒ²¸ÒÀ´ÍµÈ¡µÄÎÒÑĞ¾¿?");
-				var ÈËÅ¼Ê¦ = Packages.server.life.MapleLifeFactory.getMonster(9300344);
+				cm.getPlayer().yellowMessage("ä½ ä¹Ÿæ•¢æ¥å·å–çš„æˆ‘ç ”ç©¶?");
 				cm.getPlayer().getMap().spawnMonsterOnGroundBelow(9300344,815,191);
 				cm.dispose();
 			} else {
-				cm.sendNext("ÕâÀïºÃÏñ·¢ÏÖÁËÊ²Ã´.");
+				cm.sendNext("è¿™é‡Œå¥½åƒå‘ç°äº†ä»€ä¹ˆ.");
 			}
 		} else if (status == 1) {
-			cm.sendNext("×ÀÉÏ·Å×ÅÊ²Ã´?");
+			cm.sendNext("æ¡Œä¸Šæ”¾ç€ä»€ä¹ˆ?");
 			cm.gainItem(4032322);
 		}
 	}
