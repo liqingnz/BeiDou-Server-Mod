@@ -78,12 +78,7 @@ public class GotoCommand extends Command {
     public void execute(Client c, String[] params) {
         Character player = c.getPlayer();
         if (params.length < 1) {
-            String sendStr = I18nUtil.getMessage("GotoCommand.message2") + "\r\n\r\n" + I18nUtil.getMessage("GotoCommand.message3") + "\r\n" + GOTO_TOWNS_INFO;
-            if (player.isGM()) {
-                sendStr += ("\r\n" + I18nUtil.getMessage("GotoCommand.message4") + "\r\n" + GOTO_AREAS_INFO);
-            }
-
-            player.getAbstractPlayerInteraction().npcTalk(NpcId.SPINEL, sendStr);
+            showDestinations(player, null);
             return;
         }
 
@@ -116,12 +111,32 @@ public class GotoCommand extends Command {
             player.changeMap(target, targetPortal);
         } else {
             // detailed info on goto available areas suggested thanks to Vcoc
-            String sendStr = I18nUtil.getMessage("GotoCommand.message7", params[0]) + "\r\n\r\n" + I18nUtil.getMessage("GotoCommand.message3") + GOTO_TOWNS_INFO;
-            if (player.isGM()) {
-                sendStr += ("\r\n" + I18nUtil.getMessage("GotoCommand.message4") + "\r\n" + GOTO_AREAS_INFO);
-            }
-
-            player.getAbstractPlayerInteraction().npcTalk(NpcId.SPINEL, sendStr);
+            showDestinations(player, params[0]);
         }
+    }
+
+    /**
+     * 列出可去的地方。走 npc/gotoList.js 的选单，选项点一下直接传送——
+     * 原实现只是 npcTalk 一段纯文本，玩家看完还得自己把名字敲对。
+     *
+     * @param badName 用户敲错的地图名；没带参数时传 null
+     */
+    private static void showDestinations(Character player, String badName) {
+        if (badName != null) {
+            player.dropMessage(1, I18nUtil.getMessage("GotoCommand.message7", badName));
+        }
+
+        if (player.getAbstractPlayerInteraction().openNpc(NpcId.SPINEL, "gotoList")) {
+            return;
+        }
+
+        // 脚本没开起来（已在跟别的 NPC 对话，或脚本文件缺失）就退回纯文本清单，
+        // 至少别让玩家看不到能去哪。
+        String sendStr = I18nUtil.getMessage("GotoCommand.message2") + "\r\n\r\n"
+                + I18nUtil.getMessage("GotoCommand.message3") + "\r\n" + GOTO_TOWNS_INFO;
+        if (player.isGM()) {
+            sendStr += ("\r\n" + I18nUtil.getMessage("GotoCommand.message4") + "\r\n" + GOTO_AREAS_INFO);
+        }
+        player.getAbstractPlayerInteraction().npcTalk(NpcId.SPINEL, sendStr);
     }
 }

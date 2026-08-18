@@ -40,18 +40,10 @@ public class OnlineTwoCommand extends Command {
         Character player = c.getPlayer();
         int total = 0;
         for (Channel ch : Server.getInstance().getChannelsFromWorld(player.getWorld())) {
-            int size = ch.getPlayerStorage().getAllCharacters().size();
-            total += size;
-            StringBuilder s = new StringBuilder(I18nUtil.getMessage("OnlineTwoCommand.message2", ch.getId(), size)).append("\r\n");
-            if (ch.getPlayerStorage().getAllCharacters().size() < 50) {
-                for (Character chr : ch.getPlayerStorage().getAllCharacters()) {
-                    s.append(Character.makeMapleReadable(chr.getName())).append(", ");
-                }
-                player.dropMessage(6, s.substring(0, s.length() - 2));
-            }
+            total += ch.getPlayerStorage().getAllCharacters().size();
         }
 
-        //player.dropMessage(6, "There are a total of " + total + " players online.");
+        // 只报总数，不再逐频道刷玩家名单：想看名单用 @online。
         player.showHint(I18nUtil.getMessage("OnlineTwoCommand.message3", total), 300);
     }
 }

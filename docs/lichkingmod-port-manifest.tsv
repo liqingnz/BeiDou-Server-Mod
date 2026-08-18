@@ -65,7 +65,7 @@ src/client/command/commands/gm0/HelpCommand.java	java	1	1	already-fixed	org/gms/
 src/client/command/commands/gm0/JoinEventCommand.java	java	5	5	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm0/LeaveEventCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm0/MapOwnerClaimCommand.java	java	22	15	rejected	LK 删掉了 countBosses()==0 的占图前置与退出时 unclaimOwnership 的处理；BeiDou 保留，见 MapOwnerClaimCommand.java:47-50
-src/client/command/commands/gm0/OnlineCommand.java	java	51	3	pending	
+src/client/command/commands/gm0/OnlineCommand.java	java	51	3	ported	org/gms/client/command/commands/gm0/OnlineCommand.java —— 采 LK 的 type 参数（不带=全频道，非0=只看当前频道）与按 gmLevel 分级的可见性；修掉 LK 两处缺陷：Short.parseShort 未捕获 NumberFormatException、type!=0 且非 GM 时 LK 把 else 分支整段注释掉导致无任何输出。文案走 I18nUtil，新增 OnlineCommand.message4
 src/client/command/commands/gm0/RanksCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm0/RatesCommand.java	java	1	0	ported	org/gms/client/command/commands/gm0/RatesCommand.java；增量只有一行——显示本图刷怪倍率与刷怪点数。原实现为此把 MapleMap.getMonsterSpawn() 从 private 改成 public，这里不改：那个方法返回的是整个列表的拷贝，只为取 size 暴露出去不划算，改为在 MapleMap 上加 getMonsterSpawnPointCount()。原实现调用处还得瞎传一个 getCurrentSpawnRate(1)，因为它保留了已经用不上的 numPlayers 参数；本次把该参数去掉了
 src/client/command/commands/gm0/ShowRatesCommand.java	java	1	1	rejected	不搬。增量只有一行 getExpRate() 改 getExpRate(player.getLevel())，其唯一目的是配合 World 上新增的三档阶梯经验重载，而那个重载已判不搬（见 src/config/WorldConfig.java 一行）。BeiDou 的等级相关经验加成挂在 Character 层而非 World 层，ShowRatesCommand 展示的世界基础倍率保持原样才对
@@ -76,7 +76,7 @@ src/client/command/commands/gm0/StatStrCommand.java	java	1	1	already-fixed	LK �
 src/client/command/commands/gm0/TimeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm0/UptimeCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm1/BossHpCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
-src/client/command/commands/gm1/GotoCommand.java	java	12	5	pending	
+src/client/command/commands/gm1/GotoCommand.java	java	12	5	ported	org/gms/client/command/commands/gm1/GotoCommand.java + scripts[-zh-CN]/npc/gotoList.js —— 不采 LK 的 isGM()→gmLevel()>=4 收紧（用户决定不动权限）；改为按 BeiDouSpecial/万能传送.js 的做法，把「没带参数」与「地图名打错」两条路径的纯文本清单换成 openNpc 拉起的 #L#..#l 选单，点一下直接传送。目的地取自同一份 GOTO_TOWNS/GOTO_AREAS 注册表，GOTO_AREAS 仅 GM 可见；openNpc 返回 false 时退回原 npcTalk 纯文本
 src/client/command/commands/gm1/MobHpCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
 src/client/command/commands/gm1/WhatDropsFromCommand.java	java	33	16	ported	批次7：吸收 #v/#z 物品图标富文本；保留按怪名搜索，不跟 LK 改按 id（同批次1的 id 化否决理由）
 src/client/command/commands/gm1/WhoDropsCommand.java	java	28	17	already-fixed	批次5已重定向脚本中心「当前地图掉落_物品查询」，LK 的掉率显示/空结果改进均被覆盖
@@ -112,7 +112,7 @@ src/client/command/commands/gm3/GiveVpCommand.java	java	3	2	rejected	LK 把 getC
 src/client/command/commands/gm3/MaxHpMpCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm3/MusicCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm3/NoticeCommand.java	java	1	1	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
-src/client/command/commands/gm3/OnlineTwoCommand.java	java	8	8	pending	
+src/client/command/commands/gm3/OnlineTwoCommand.java	java	8	8	ported	org/gms/client/command/commands/gm3/OnlineTwoCommand.java —— 采 LK 的行为：去掉「频道人数<50 时逐频道刷玩家名」，只报总数。保留 BeiDou 的 i18n showHint 而非 LK 的硬编码英文 dropMessage；连带删除已无引用的 OnlineTwoCommand.message2
 src/client/command/commands/gm3/QuestCompleteCommand.java	java	1	0	rejected	LK 唯一改动是注释掉 quest.complete(player, quest.getNpcRequirement(true))，是功能删除而非移植项
 src/client/command/commands/gm3/QuestResetCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm3/QuestStartCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
