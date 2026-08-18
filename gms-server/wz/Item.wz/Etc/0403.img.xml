@@ -10217,6 +10217,20 @@
       <int name="quest" value="1"/>
     </imgdir>
   </imgdir>
+  <imgdir name="04031942">
+    <imgdir name="info">
+      <canvas name="icon" width="33" height="30">
+        <vector name="origin" x="0" y="31"/>
+      </canvas>
+      <canvas name="iconRaw" width="33" height="27">
+        <vector name="origin" x="0" y="31"/>
+      </canvas>
+      <int name="price" value="1"/>
+      <int name="notSale" value="1"/>
+      <int name="only" value="1"/>
+      <int name="quest" value="1"/>
+    </imgdir>
+  </imgdir>
   <imgdir name="04031945">
     <imgdir name="info">
       <canvas name="icon" width="29" height="32">

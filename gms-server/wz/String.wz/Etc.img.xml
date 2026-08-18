@@ -5660,6 +5660,10 @@
       <string name="name" value="99% Dark Chocolate"/>
       <string name="desc" value="A 99% Cacao dark chocolate that tastes like crayon. It&apos;s so bitter, some call it a tearjerker."/>
     </imgdir>
+    <imgdir name="4031942">
+      <string name="name" value="Wrench"/>
+      <string name="desc" value="A very important item. It can awaken Krexel."/>
+    </imgdir>
     <imgdir name="4031945">
       <string name="name" value="Mysterious Cloth"/>
       <string name="desc" value="A mysterious cloth created by Arwen using Snow Silk. It&apos;s transparent and sparkly, but also very tightly woven."/>

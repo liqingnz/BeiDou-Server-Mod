@@ -6631,6 +6631,10 @@
             <string name="name" value="f"/>
             <string name="desc" value="A 99% Cacao dark chocolate that tastes like crayon. It's so bitter, some call it a tearjerker."/>
         </imgdir>
+        <imgdir name="4031942">
+            <string name="name" value="扳手"/>
+            <string name="desc" value="非常重要的道具，可以唤醒克雷塞尔。"/>
+        </imgdir>
         <imgdir name="4031945">
             <string name="name" value="神秘的织物"/>
             <string name="desc" value="艾温用雪花丝绸制作的布料。通\n体透明，看上去很漂亮，而且非\n常坚固。"/>
