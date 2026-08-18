@@ -3561,8 +3561,8 @@ else if (!isBoss())   { 百分比血条 }
 是高血量怪被普遍打上 `boss=1`（顺带禁击退、固定刷新倍率），副作用带走了血条。
 
 修法一行：`else if (!isBoss())` → `else`，让没有大血槽的 boss 退回百分比血条。
-**待用户决定**。另：这 9 个怪的名字在 BeiDou 的 `String.wz/Mob.img` 里全缺
-（ASM 有），属共有文件待合并。
+**已实施**（`9427aba5a`）。另：这 9 个怪的名字原先在 BeiDou 的 `String.wz/Mob.img` 里全缺，已由 `c00176a21`
+（中文层 String.wz 采用 ASM 版）补齐。
 
 ### 11.5 克雷塞尔定案：走 LK 远征制（用户 2026-08-18 选 B）
 
@@ -3635,9 +3635,14 @@ else if (!isBoss())   { 百分比血条 }
 
 **`npc/9270045.js`**：仅 `cm.warp(541020700, 0)`，无问题。
 
+#### 进展
+
+- `event/KrexelBattle.js` **已移植**（`9427aba5a`，两层各一份，代码同构）：
+  去掉了无用的 `importPackage` 与 `exped` 变量，`distributeBossCertificate` 补上道具 id
+
 #### 仍缺的东西
 
-- `event/KrexelBattle.js` 两层皆无，须从 LK 取
+- `portal/treeboss00.js` 与 `reactor/5411001.js` 目前仍是 ASM 的组队制版本，待换成 LK 远征制
 - `Map.wz/Obj/trapSG`（`541020700` 唯一用户）ASM 无、LK 有；服务端只在
   `getMaxObstacleMobDamageFromWz` 扫 Obj，不影响逻辑，属客户端渲染资源
 - **入场门无正规来源**：扳手 `4031942` 是任务 `4528` 的奖励，而乌鲁城任务链
@@ -3882,3 +3887,43 @@ Reactor.wz/5411001.img.xml
 | `server/gachapon/Leafre` | 里福抽奖池 | 7 |
 | `server/ultils/RoyalAccount` | 皇家账号（注意 LK 拼错了 `utils`） | 8 |
 | `constants/string/CNLanguageConstants` | 中文常量堆 | **不移植，化进 i18n** |
+
+---
+
+## 12. 共有文件的子节点缺口（2026-08-18 发现的一整类）
+
+ASM 增量导入按红线只取「BeiDou 没有的文件」，因此**共有文件里 ASM 多出来的子节点
+一条都没进来**。这不是一两个文件的事，是一整类：
+
+| 共有文件 | BeiDou | ASM | 差额 |
+|---|---|---|---|
+| `String.wz/Eqp.img`（zh） | 7,174 | 39,821 | +32,656 |
+| `String.wz/Ins.img`（zh） | 300 | 710 | +416 |
+| `String.wz/Npc.img`（zh） | 7,122 | 7,443 | +321 |
+| `String.wz/Mob.img`（zh） | 1,735 | 2,034 | +299 |
+| `String.wz/Etc.img`（zh） | 2,374 | 2,669 | +295 |
+| `String.wz/Consume.img`（zh） | 2,302 | 2,429 | +127 |
+| `String.wz/Map.img`（zh） | 5,402 | 5,432 | +30 |
+| `Item.wz/Etc/0403.img` | 1,168 | 1,360 | **+192** |
+| `Quest.wz/{Act,Check,QuestInfo,Say}.img` | — | — | 至少乌鲁城 5 个任务 |
+
+**String.wz 部分已于 `c00176a21` 解决**（中文层采用 ASM 版 + 补回 BeiDou 独有的 23 条，
+丢失 0）。`Item.wz`、`Quest.wz` 那两类**尚未处理**。
+
+处理这类缺口的通用做法（`c00176a21` 已验证）：
+
+1. 先算三个集合——ASM 独有（要补进来的）、BeiDou 独有（覆盖会丢的）、共有但内容不同
+2. BeiDou 独有的逐条抽出存好，覆盖后原样插回
+3. 共有但内容不同的抽样定夺孰优（`c00176a21` 的结论是 ASM 普遍更好：
+   BeiDou 有成批漏译的英文条目、繁体字、同名不分级的道具）
+4. 覆盖后逐文件比对 id 集合，确认丢失为 0
+
+**只动中文层。** ASM 的 `wz/` 内容是中文，拿它覆盖 BeiDou 的英文基础层会直接废掉
+`gms.service.language` 的 en-US 模式。这条对上面每一类都成立。
+
+> **两个反复踩到的坑，记下来免得再犯**：
+> 1. `Item.wz` 的条目 id **补零到 8 位**（`04031942`），`Reactor.wz` 文件名**补零到 7 位**
+>    （`0002000.img.xml`，对应 `StringUtil.getLeftPaddedStr(id + ".img", '0', 11)`）。
+>    用原始 id 去 grep 会漏。
+> 2. 抽 XML 属性值时 `[0-9]*"` 会把结尾引号一起吃进去，awk 拿到 `443"` 这种带引号的值
+>    会退化成**字符串比较**（`"443\"" >= "1000000"` 判真），得出完全错误的统计。

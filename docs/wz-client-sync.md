@@ -1,7 +1,7 @@
 # 服务端 wz 改动 → 客户端同步账本
 
 > 目的：服务端每一次 wz 改动都在此登记，便于同步到客户端。
-> 起点：分支 `port/asm-wz`（ASM wz 增量导入起）。更早的改动见
+> 起点：分支 `port/asm-wz`（ASM wz 增量导入起）。共 5 笔，其中 3 笔需要客户端动作。更早的改动见
 > [lichkingmod-port.md](lichkingmod-port.md) 各批次记录。
 
 ## 映射规则
@@ -51,10 +51,9 @@ ASM 服主 2021 年留的 `CashShop.img` 备份，扩展名不是 `.img`，加�
 六个道具：`3100000` BOSS凭证 / `3100001` 组队凭证 / `3101000` 周年帽 /
 `3101001` 周年蜡烛 / `3101002` 龙年勋章（金）/ `3101003` 龙年勋章（银）。
 
-**要点**：`0310.img.xml` 里的 `canvas` 只有尺寸和 origin，**没有实际图像数据**
-（LK 导出的 XML 本就如此）。所以同步过去道具仍然没有图标，只是不再报错。
-真要图标得另找 `.img` 二进制源——ASM 与 LK 客户端都没有 `Install/0310.img`，
-这一条目前无解，已知并接受。
+**图标**：`0310.img.xml` 里的 `canvas` 只有尺寸和 origin，没有图像数据（LK 导出的
+XML 本就如此），所以从这份 XML 编出来的 img 是无图标的。**用户 2026-08-18 已另行
+取得 `0310.img` 二进制**，图标问题解决，服务端这份 XML 只负责让道具在逻辑上存在。
 
 **客户端实测**（`BeiDou-Client-ASM`）：`Data/Item/Install/` 下只有 `0301.img` 与
 `0399.img`，**没有 `0310.img`** —— 属 ADD 整个新文件，不存在重复节点风险，可直接打。
@@ -77,13 +76,38 @@ ASM 客户端 `0403.img` 很可能也已经有这个子树——那样 patch 会
 
 ---
 
+### 5. `c00176a21` 中文层 String.wz 采用 ASM 版 — **需要同步（本批最大的一笔）**
+
+覆盖了 `wz-zh-CN/String.wz/` 下 11 个文件，并补回 BeiDou 独有的 23 条。
+**英文基础层 `wz/String.wz` 一个字没动**（ASM 的是中文，覆盖会废掉 en-US 模式）。
+
+| 服务端文件 | 条目数变化 | 客户端目标 |
+|---|---|---|
+| `wz-zh-CN/String.wz/Eqp.img.xml` | 7,174 → 39,830 | `Data/String/Eqp.img` |
+| `wz-zh-CN/String.wz/Ins.img.xml` | 300 → 716 | `Data/String/Ins.img` |
+| `wz-zh-CN/String.wz/Npc.img.xml` | 7,122 → 7,443 | `Data/String/Npc.img` |
+| `wz-zh-CN/String.wz/Mob.img.xml` | 1,735 → 2,034 | `Data/String/Mob.img` |
+| `wz-zh-CN/String.wz/Etc.img.xml` | 2,374 → 2,669 | `Data/String/Etc.img` |
+| `wz-zh-CN/String.wz/Consume.img.xml` | 2,302 → 2,429 | `Data/String/Consume.img` |
+| `wz-zh-CN/String.wz/Map.img.xml` | 5,402 → 5,432 | `Data/String/Map.img` |
+| `Cash` / `PetDialog` / `Skill` / `ToolTipHelp` | 条目数不变，取 ASM 修订 | `Data/String/<同名>.img` |
+
+**这批可以直接编译成 img 放进客户端**——底本就是 ASM 的，与 ASM 客户端同源，
+只多了 23 条 BeiDou 独有条目（LK 移植来的通用美容券、倍率卡、转职技能效果、两张凭证）。
+
+> **不必整包替换**：客户端 `Data/String/` 本来就来自 ASM 客户端，那 11 个文件的
+> 绝大部分内容它已经有了。真正只有客户端缺的是那 23 条，其中 `Ins.img` 的 6 条
+> （`3100000`/`3100001`/`3101000`–`3101003`）是本分支新造的。若嫌整包编译麻烦，
+> 只把这 23 条 patch 进去即可——但注意 ADD 语义，先 `--dry-run`。
+
+已核实：合并后逐文件比对覆盖前后的 id 集合，**丢失 0**；20 个文件全部 XML 良构。
+
 ## 已知缺口（服务端已引用，客户端与服务端都缺资源）
 
 | 缺什么 | 影响 | 状态 |
 |---|---|---|
-| `Install/0310.img` 的实际图标位图 | 6 个凭证道具无图标 | 三方（BeiDou/ASM/LK）皆无，无解 |
 | 18 个反应堆的 `Reactor.wz` | 14 张图加载抛 NPE（详见 port 文档） | 三方皆无 |
 | NPC `2030016` 的 `Npc.wz` | `211042401` 加载抛 NPE | 三方皆无 |
-| 乌鲁城任务链 `4526`–`4530`、道具 `4000434` | 克雷塞尔入场门无正规来源 | ASM/LK 有，待合并 |
-| 新地图的中文名（`String.wz/Map.img`） | 309 张缺名，ASM 能补 259 张 | 待办 |
-| 新怪的名字（`String.wz/Mob.img`） | 如狮子王之城 9 个怪全无名 | ASM 有，待合并 |
+| 乌鲁城任务链 `4526`–`4530`、道具 `4000434`（`Quest.wz` 四文件 x 两层） | 克雷塞尔入场门无正规来源 | ASM/LK 有，待合并 |
+| 共有文件里 ASM 更全的子节点（`Item.wz/Etc/0403` 等） | 例：0403 ASM 比 BeiDou 多 192 条 | 待办，与 String.wz 同性质 |
+
