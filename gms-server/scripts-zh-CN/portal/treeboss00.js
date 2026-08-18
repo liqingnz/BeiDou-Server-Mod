@@ -1,97 +1,78 @@
-/* 克雷塞尔入场门。
+/* 克雷塞尔入场门（LK 远征制）。
  *
- * 【本文件是 ASM 版（组队制），但项目已决定改走 LK 的远征制】
- * 用户 2026-08-18 决定：克雷塞尔采用 LK 的远征实现（MapleExpeditionType.KREXEL +
- * event/KrexelBattle.js），本文件将被 LK 版 treeboss00.js 取代。移植尚未动手，
- * 待办与已查实的移植问题见 docs/lichkingmod-port.md「克雷塞尔线（LK 远征制）」一节。
+ * @author LichKingNZ，移植自 LichKingMod
  *
- * 【前置门的两种写法，以及为什么现在两种都走不通】
- * 本文件（ASM）查的是任务 4528 完成状态：chr.getQuestStatus(4528) != 2 即拒绝。
- * LK 版查的是道具：pi.haveItem(4031942, 1)（扳手）。
+ * 【前置：任务 4528】
+ * 入场凭据是扳手 #4031942，它是乌鲁城任务链最后一环 4528「乌鲁城市能量」的完成奖励
+ * （链路 4526 → 4527 → 4528，NPC 9270044 发放）。本脚本只查道具不查任务状态，
+ * 这样 GM 直接发道具也能进；正常玩家的唯一来源仍是打通 4528。
+ * 任务链与道具 4000434 已随 7a09cbbc0 合入 wz-zh-CN/Quest.wz 与 Item.wz/Etc/0400。
  *
- * 两者其实是同一条链——扳手 4031942 正是任务 4528 的完成奖励。但 BeiDou 的
- * Quest.wz 里没有乌鲁城任务链：4522、4523 有，4526/4527/4528/4529/4530 五个全缺
- * （Quest.wz 属 ASM 导入的红线共有文件，未合并），链上的道具 4000434 也缺。
- * 所以：
- *   - 走 ASM 版 → getQuestStatus(4528) 永远不是 2，任何人都进不来
- *   - 走 LK 版  → 道具 4031942 已于 072b51c9e 补齐（Item.wz/Etc/0403 + 两层
- *                 String.wz/Etc.img），但正规获取途径仍缺，只能 GM 发放
- * 要让入场门有正规来源，得补齐 4526-4530 这条任务链与道具 4000434。
+ * 【与被替换掉的 ASM 版的区别】
+ * ASM 版是组队制（em.startInstance(party, map, 1) + 事件管理器 TreebossBattle），
+ * 入场门查 getQuestStatus(4528) == 2。用户 2026-08-18 决定改走 LK 的远征制。
+ *
+ * 【报名窗口】
+ * 这里刻意用 em.startInstance(-1, chr, chr, channel) 这个 Character 重载，
+ * 而不是更常见的 em.startInstance(expedition)——后者内部会立刻 exped.start()，
+ * 报名窗口当场关闭，后来的队友就再也进不来了。远征的 start() 交给
+ * reactor/5411001.js 在克雷塞尔被唤醒时调用。
+ * 第四个参数在 Java 侧叫 difficulty，实际是原样透传给本事件脚本的 setup(channel)，
+ * 传频道号是对的（EventManager.createInstance -> iv.invokeFunction("setup", args)）。
  */
-var timeLimit = 2;
+
+const ExpeditionType = Java.type('org.gms.server.expeditions.ExpeditionType');
+
+var exped = ExpeditionType.KREXEL;
+var ENTRY_ITEM = 4031942;   // 扳手
+
 function enter(pi) {
+    var chr = pi.getPlayer();
 
-    var em = pi.getEventManager("TreebossBattle");
-
-    if (pi.getPlayerCount(541020800) <= 0) {//BOSS地图无人
-        var player = pi.getPlayer();
-        var party = player.getParty();
-        if (party == null) {
-            pi.playerMessage(5, "你不在一个队伍中,请创建组队后进入挑战"); return false;
-        } else {
-            if (party.getLeaderId() != player.getId()) {
-                pi.playerMessage(5, "队长才可以穿过传送门"); return false;
-            } else {
-                var members = party.getPartyMembers();
-                if (members.size() != player.getPartyMembersOnSameMap().size()) {
-                    pi.playerMessage(5, "队伍里有人不在,无法穿过传送门"); return false;
-                }
-                var canGoIn = true;
-                var cause;
-                for (var i = 0; i < members.size(); i++) {
-                    var chr = members.get(i).getPlayer();
-                    if (chr.getQuestStatus(4528) != 2) {
-                        canGoIn = false;
-                        cause = chr.getName() + "没完成前置任务获得<扳手>,无法进入";
-                        break;
-                    }
-					//if (chr.getBossLog(0, "挑战克雷塞尔") >= timeLimit) {  //次数限制暂无法使用
-					//	canGoIn = false;
-					//	cause = chr.getName() + "玩家的挑战次数不足,无法进入";
-					//	break;
-					//}
-                }
-                if (canGoIn) {
-                    // 核心修正：先获取合格队伍列表，检查非空再启动实例
-                    var eli = em.getEligibleParty(party);
-                    if (eli != null && eli.size() > 0) {
-                        if (!em.startInstance(party, pi.getPlayer().getMap(), 1)) {
-                            pi.playerMessage(5, "暂时无法开始战斗，可能频道已有其他队伍在挑战，或队伍条件不满足。");
-                            return false;
-                        }
-                        pi.playPortalSound();
-					//for (var i = 0; i < members.size(); i++) {   //次数限制暂无法使用
-					//	members.get(i).setBossLog(0, "挑战克雷塞尔");
-					//}
-                        return true;
-                    } else {
-                        pi.playerMessage(5, "你的队伍不符合挑战条件，请检查任务或等级要求。");
-                        return false;
-                    }
-                } else {
-                    pi.playerMessage(5, cause); return false;
-                }
-            }
-        }
-    } else {
-        pi.playerMessage(5, "与BOSS的战斗已经开始了，所以你不能进入这个地方。");
+    if (!pi.haveItem(ENTRY_ITEM, 1)) {
+        chr.dropMessage(5, "你看不清入口的具体位置。");
         return false;
     }
-	//if (pi.getPlayerCount(541020800) <= 0) { //  后面是speedrun相关脚本，有问题，会造成打完boss后无法正确计时、服务端卡住，关闭使用。
-	//	var krexMap = pi.getMap(541020800);
-	//	krexMap.resetFully();
 
-	//	pi.playPortalSound();
-	//	pi.warp(541020800, "sp");
-	//	return true;
-	//} else {
-	//	if (pi.getMap(541020800).getSpeedRunStart() == 0 && (pi.getMonsterCount(541020800) <= 0 || pi.getMap(541020800).isDisconnected(pi.getPlayer().getId()))) {
-	//		pi.playPortalSound();
-	//		pi.warp(541020800, "sp");
-	//		return true;
-	//	} else {
-	//		pi.playerMessage(5, "与BOSS的战斗已经开始了，所以你不能进入这个地方。");
-	//		return false;
-	//	}
-	//}
+    var em = pi.getEventManager("KrexelBattle");
+    var expedition = pi.getExpedition(exped);
+
+    if (expedition != null) {           // 已有远征队：报名中就加入，否则回绝
+        if (!expedition.isRegistering()) {
+            pi.dropMessage(5, "克雷塞尔已被惊醒，请稍后再来。");
+            return false;
+        }
+        if (expedition.addMemberInt(chr) != 0) {
+            pi.dropMessage(5, "抱歉，你无法进入此次远征！请改天再试。");
+            return false;
+        }
+        var eim = em.getInstance("Krexel" + chr.getClient().getChannel());
+        if (eim == null) {
+            pi.dropMessage(5, "远征启动异常，请稍后再试。");
+            return false;
+        }
+        eim.registerPlayer(chr, true);
+        pi.playPortalSound();
+        return true;
+    }
+
+    var res = pi.createExpedition(exped, true);     // 没有就由他开一队
+    if (res > 0) {
+        pi.dropMessage(5, "抱歉，你已达到此次远征的尝试配额！请改天再试。");
+        return false;
+    }
+    if (res < 0) {
+        pi.dropMessage(5, "远征启动异常，请稍后再试。");
+        return false;
+    }
+
+    expedition = pi.getExpedition(exped);
+    if (!em.startInstance(-1, chr, chr, chr.getClient().getChannel())) {
+        pi.endExpedition(expedition);
+        pi.dropMessage(5, "远征启动异常，请稍后再试。");
+        return false;
+    }
+    em.getInstance("Krexel" + chr.getClient().getChannel()).registerExpedition(expedition);
+    pi.playPortalSound();
+    return true;
 }
