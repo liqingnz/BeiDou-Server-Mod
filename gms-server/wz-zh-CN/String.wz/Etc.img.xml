@@ -10506,6 +10506,10 @@
       <string name="desc" value="充斥着神秘魔力的魔女硬币"/>
       <string name="name" value="魔女币"/>
     </imgdir>
+    <imgdir name="4310100">
+      <string name="desc" value="一张价值5000点券的NX现金卡，可在商城兑换。"/>
+      <string name="name" value="NX现金卡 - 5000点券"/>
+    </imgdir>
     <imgdir name="4000673">
       <string name="desc" value="长草的烂兮兮的泥土。"/>
       <string name="name" value="长草的泥土"/>

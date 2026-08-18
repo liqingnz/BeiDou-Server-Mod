@@ -2072,7 +2072,7 @@ public class Character extends AbstractCharacterObject {
                                 this.getMap().pickItemDrop(pickupPacket, mapitem);
                             } else if (ItemId.isNxCard(mapitem.getItemId())) {
                                 // Add NX to account, show effect and make item disappear   //添加点券到账户，是否展示捡到点券，并移除物品
-                                int nxGain = (mapitem.getItemId() == ItemId.NX_CARD_100 ? 100 : 250) * mItem.getQuantity(); //使点券支持按数量相乘
+                                int nxGain = ItemId.getNxCardValue(mapitem.getItemId()) * mItem.getQuantity(); //使点券支持按数量相乘
                                 this.getCashShop().gainCash(CashShop.NX_CREDIT, nxGain);
 
                                 if (GameConfig.getServerBoolean("use_announce_nx_coupon_loot")) {       //捡到点券是否展示
@@ -2125,7 +2125,7 @@ public class Character extends AbstractCharacterObject {
                         }
                     } else if (ItemId.isNxCard(mapitem.getItemId())) {
                         // Add NX to account, show effect and make item disappear
-                        int nxGain = (mapitem.getItemId() == ItemId.NX_CARD_100 ? 100 : 250) * mItem.getQuantity(); //使点券支持按数量相乘
+                        int nxGain = ItemId.getNxCardValue(mapitem.getItemId()) * mItem.getQuantity(); //使点券支持按数量相乘
                         this.getCashShop().gainCash(CashShop.NX_CREDIT, nxGain);
 
                         if (GameConfig.getServerBoolean("use_announce_nx_coupon_loot")) {       //捡到点券是否展示

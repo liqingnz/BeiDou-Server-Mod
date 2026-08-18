@@ -316,9 +316,27 @@ public class ItemId {
 
     public static final int NX_CARD_100 = 4031865;
     public static final int NX_CARD_250 = 4031866;
+    // LK 移植：BOSS 掉落的 5000 点券，掉落表见 V1000.0.1__lichkingmod_port.sql
+    public static final int NX_CARD_5000 = 4310100;
 
     public static boolean isNxCard(int itemId) {
-        return itemId == NX_CARD_100 || itemId == NX_CARD_250;
+        return itemId == NX_CARD_100 || itemId == NX_CARD_250 || itemId == NX_CARD_5000;
+    }
+
+    /**
+     * 点券卡的面额。捡取逻辑分散在三处（Character 两处、ForceVacCommand 一处），
+     * 面额只在这里维护，避免再出现各处硬编码的三元式。
+     *
+     * @param itemId 道具 id，须先经 {@link #isNxCard(int)} 判定
+     * @return 该卡的点券面额；非点券卡返回 0
+     */
+    public static int getNxCardValue(int itemId) {
+        return switch (itemId) {
+            case NX_CARD_100 -> 100;
+            case NX_CARD_250 -> 250;
+            case NX_CARD_5000 -> 5000;
+            default -> 0;
+        };
     }
 
     public static boolean isCashPackage(int itemId) {
