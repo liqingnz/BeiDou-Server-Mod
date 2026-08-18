@@ -74,14 +74,17 @@ public class OnlineCommand extends Command {
     }
 
     /**
-     * 普通玩家看不到任何 GM；GM 只看得到权限**严格低于**自己的 GM——
-     * 同级之间互相不可见，也看不到自己。这一条照搬 LK，改成 &lt;= 就是同级可见。
+     * 普通玩家看不到任何 GM；GM 看得到同级及以下的 GM，看不到比自己权限高的。
+     *
+     * LK 原版这里是严格小于，同级互不可见。藏起上级有意义（低权限 GM 不该能
+     * 摸清管理层在哪），藏起同级没有，而 @onlinetwo 改成只报总数之后，
+     * 同级 GM 在游戏内就没有任何途径互查在线了，所以放开到 &lt;=。
      */
     private static boolean isVisibleTo(Character viewer, Character target) {
         if (!target.isGM()) {
             return true;
         }
-        return viewer.isGM() && target.gmLevel() < viewer.gmLevel();
+        return viewer.isGM() && target.gmLevel() <= viewer.gmLevel();
     }
 
     /**
