@@ -393,7 +393,11 @@ public class Monster extends AbstractLoadedLife {
         if (hasBossHPBar()) {
             from.setPlayerAggro(this.hashCode());
             from.getMap().broadcastBossHpMessage(this, this.hashCode(), makeBossHPBarPacket(), getPosition());
-        } else if (!isBoss()) {
+        } else {
+            // 原先此处是 else if (!isBoss())，导致 boss=1 却没有大血槽的怪两个分支都不进、完全不显示血量。
+            // 大血槽要求 tagColor > 0，而 tagColor 只在怪列于 UI.wz/UIWindow.img 的 MobGage/Mob 白名单时才非零，
+            // 那份白名单只有 693 条，仓库里却有 647 个 boss=1 的怪不在其中（狮子王之城 8210000-8210005 等）。
+            // 退回百分比血条，比什么都不显示合理。
             int remainingHP = (int) Math.max(1, hp.get() * 100f / getMaxHp());
             Packet packet = PacketCreator.showMonsterHP(getObjectId(), remainingHP);
             if (from.getParty() != null) {
