@@ -93,9 +93,9 @@ wz/UI.wz/UIWindow.img.xml
 
 | 项 | 说明 |
 |---|---|
-| `Item.wz/Etc/0403` 的 `04033001` | 三方里只有 LK 有，客户端用的是 ASM 版故也缺，待从 LK 取 |
+| ~~`Item.wz/Etc/0403` 的 `04033001`~~ | **判 rejected**（2026-08-18 查实）：三方 `String.wz/Etc.img` 都没有它的名字，LK 自己的 `handbook/Etc.txt`、`Quest.wz` 四个文件、全部脚本与 sql 也**零引用**。只是 LK 提交 `84c9b73b` 顺手带进来的一条无名死条目（Etc 道具，`timeLimited`/`tradeBlock`/`notSale`/`slotMax=100`）。不补 |
 | `Sound.wz/{Bgm03,Bgm15,Mob}.img` | ASM 原件 XML 不合法（`<sound name="X"` 未闭合），已回退为 BeiDou 原版，本次不同步 |
-| `Map.wz` 各图的入口 portal | 已知 `211040600`（狮子王之城）、`541020000` 缺入口，按实测逐张补，不整树覆盖 |
+| `Map.wz` 各图的入口 portal | 已定位两张，见下表。其余按实测逐张补，不整树覆盖 |
 
 ---
 
@@ -107,3 +107,18 @@ wz/UI.wz/UIWindow.img.xml
    （`0002000.img.xml`）。用原始 id 去搜会漏。
 3. Quest 改动要**完整重启进程**才生效——`Quest` 类把 `questInfo`/`questAct`/`questReq`
    存成 `static final`，`/server/restartServer` 与 `@clearquestcache` 都不重新读盘。
+
+---
+
+## D. 已定位的缺失入口 portal
+
+零覆盖导入漏掉的「改在已有地图文件内部」的 portal。两张都是 **`wz/` 基础层**
+（`wz-zh-CN/` 下没有 `Map.wz`，不存在分层问题），直接用 ASM 同名文件替换即可，
+客户端对应 `Data/Map/Map/MapN/`。
+
+| 服务端文件 | 目标区域 | BeiDou | ASM |
+|---|---|---|---|
+| `wz/Map.wz/Map/Map2/211040600.img.xml` | → `211060000` 沉寂原野（狮子王之城） | 8 个 portal | **9 个** |
+| `wz/Map.wz/Map/Map5/540020100.img.xml` | → `541020000` 乌鲁城 | 6 个 portal | **7 个** |
+
+替换后记得复验：portal 数应分别变成 9 和 7，且 `tm` 值里出现目标图 id。
