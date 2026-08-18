@@ -27,7 +27,8 @@ function start() {
     const GameConfig = Java.type('org.gms.config.GameConfig');
     if (GameConfig.getServerBoolean("use_enable_custom_npc_script")) {
         cm.dispose();
-        cm.openNpc(9201088, "scroll_generator");
+        // Scroll generator switched off, following LichKingMod. Swap back to "scroll_generator" to restore it.
+        cm.openNpc(9201088, "under_maintenance");
         return;
     }
 

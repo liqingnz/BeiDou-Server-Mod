@@ -38,6 +38,17 @@ public class TestScriptCommand extends Command {
             c.getPlayer().yellowMessage(I18nUtil.getMessage("TestScriptCommand.message2"));
             return;
         }
-        c.getPlayer().getAbstractPlayerInteraction().openNpc(NpcId.BEI_DOU_NPC_BASE, params[0]);
+        // 脚本按 NPC id 命名时就拿它当 npcid，让 cm.getNpc() 渲染出真正的 NPC 名；
+        // mapleTV 这类非数字脚本名回退到脚本中心 NPC。
+        String script = params[0];
+        int npcId;
+        try {
+            npcId = Integer.parseInt(script);
+        } catch (NumberFormatException e) {
+            npcId = NpcId.BEI_DOU_NPC_BASE;
+        }
+        if (!c.getPlayer().getAbstractPlayerInteraction().openNpc(npcId, script)) {
+            c.getPlayer().yellowMessage(I18nUtil.getMessage("TestScriptCommand.message3", script));
+        }
     }
 }

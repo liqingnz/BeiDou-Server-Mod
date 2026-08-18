@@ -44,12 +44,12 @@ function action(mode, type, selection) {
     if (status == 0) {
         const GameConfig = Java.type('org.gms.config.GameConfig');
         if (!GameConfig.getServerBoolean("use_enable_custom_npc_script")) {
-            cm.sendOk("The medal ranking system is currently unavailable...");
+            cm.sendOk("Hi, I'm #b#p" + cm.getNpc() + "##k.");
             cm.dispose();
             return;
         }
 
-        var selStr = "Hello, I am the #bBazaar NPC#k! Sell to me any item on your inventory you don't need. #rWARNING#b: Make sure you have your items ready to sell at the slots #rAFTER#b the item you have selected to sell.#k Any items #bunder#k the item selected will be sold thoroughly.";
+        var selStr = "Hello, I am the #bBazaar NPC#k! Sell to me any item on your inventory you don't need. #rWARNING#b: Make sure you have your items ready to sell at the slots #rAFTER#b the item you have selected to sell.#k Any items #bunder#k the item selected will be sold thoroughly. You can also use the #b@sellinv#k command to sell items directly!";
         for (var i = 0; i < options.length; i++) {
             selStr += "\r\n#L" + i + "# " + options[i] + "#l";
         }

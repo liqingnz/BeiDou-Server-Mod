@@ -4090,3 +4090,130 @@ ASM 在文件内部新增/修改的条目全部不可见。用户实测已撞到
 10. **`Effect.wz/BasicEff.img`** —— BeiDou 反而多 5 个节点，先查清再说
 
 > 每步做完都按 `c00176a21` 的口径复验：逐文件比对覆盖前后的条目 id 集合，确认丢失为 0。
+
+---
+
+## 15. `use_enable_custom_npc_script` 一组的全量移植（2026-08-18）
+
+用户要求把 LK 侧用到 `USE_ENABLE_CUSTOM_NPC_SCRIPT` 的脚本全部移植，
+排除 `2042000/1/2`（怪物嘉年华，§7 已定案不做）与 `9201083`（LK 自己在 `start()` 里
+无条件 `sendOk`+`dispose`，菜单全注释，功能本身是关着的）。
+
+### 15.1 LK 侧用到该开关的 12 个脚本
+
+Java 侧只有 `src/config/ServerConfig.java:144` 一处声明，无任何 Java 逻辑读取——只有脚本读。
+LK 三份 yaml（`config.yaml`/`configServer.yaml`/`configServer2.yaml`）第 313 行全是 `false`，
+BeiDou 的 `V1.7.0__create_game_config.sql:102` 默认值同样是 `'false'`：
+**门后面的东西两边生产环境都没跑过**，这是这一组的共同前提。
+
+BeiDou 侧这道门两层齐全（`scripts/` 10 个 + `scripts-zh-CN/` 12 个，多 `2082014_1`、`9000040_1`
+两个变体），**不同于** §7 记的 PQ 开关只在 zh 层的缺口。
+
+### 15.2 逐个结论
+
+判据是拿 **LK HEAD 与 BeiDou 现版**做结构比对（抹字符串字面量、行注释、空白），不是看 LK 自己的 diff。
+
+| 脚本 | LK 相对 BeiDou 的实质增量 | 处置 |
+|---|---|---|
+| `9201101` | **零**。唯一差异 `YamlConfig`→`GameConfig` 写法 | rejected（理由更新） |
+| `2082014` | **零**。另有 `} else if` 合并，BeiDou 写法更好 | rejected（理由更新） |
+| `9000017` | **零**。数据表逐值相同，仅 `new Array()` vs `[]` | noise（理由更新） |
+| `9000041` | 中文语序 + `@sellinv` 提示 | ✅ partial |
+| `9000036_accessory` | 图标渲染、Aran 勋章、眼饰缩表 | ✅ ported（替换 `9000036`） |
+| `9000040` | LK 把 NPC 整个关掉 | ✅ ported（用户决定照搬） |
+| `mapleTV` | 出口改 `under_maintenance` | ✅ ported（用户决定照搬） |
+| `1022101` | 换成凭证/枫叶兑换商 | ✅ ported（用户决定，传送注释） |
+
+**「LK 零增量」这一档占了 8 个里的 3 个**，是这次最主要的发现：先前给这些行写的
+rejected 理由（「LK 用 YamlConfig，BeiDou 已是 GameConfig 版」）描述的是写法差异，
+容易被读成「有东西但没搬」。已改写成「LK 侧零逻辑增量」并注明判据。
+
+### 15.3 `9000036_accessory` 不是「饰品分支」
+
+先前 deferred 的理由写的是「工作人员E的饰品分支，与主体 `9000036.js` 是一套，拆开搬没有意义」。
+**结构比对后确认两者就是同一个脚本**（都是 Agent E 饰品合成 NPC），LK 只是改了文件名。
+「LK 全仓库无任何地方 openNpc 到这个脚本名」也因此不再是阻塞点——它本来就是靠 NPC id 打开的。
+
+实质差异只有 3 处：
+
+1. **菜单加物品图标**：`"#L"+i+"##t"+items[i]+"##b"` → `"#L"+i+"# #i"+items[i]+"# #z"+items[i]+"##b"`。纯赚，采纳。
+2. **勋章池跳过 `1142129`–`1142133`**：查 String.wz 确认是 `Awakened Aran`/`Aran in Memory`/
+   `Aran in Misery`/`Aran in Hope`/`Aran the Hero`，Aran 剧情线勋章，不该进随机合成池。采纳。
+3. **眼饰列表 5 项砍到 2 项**：砍掉 `1022088`/`1022103`/`1022089`（考古学家眼镜三变体）。
+   LK 是因为把它们挪到了另一个 NPC（其提交信息「101增加考古学家眼镜兑换，需要20个阿尔泰碎片」），
+   BeiDou 没有那个 NPC。用户 2026-08-18 决定采纳。
+   **同时修掉 LK 自身的 bug**：LK 砍了 `items` 却没砍 `matSet`/`matQtySet`/`costSet`（仍 5 条），
+   导致 `1022082` 配到了 index 1 的考古学家眼镜配方。BeiDou 版把三个数组一并裁到 2 条并对齐。
+
+顺带修的两处 BeiDou 自身问题：zh 层 9 处漏翻（用 LK 中文补齐）、
+腰带分支 `selStr += "\r\n#L" + i + "##bTry it!#b"` 里 `i` 为 `undefined`（该分支没跑过循环，
+渲染成 `#Lundefined#`），改为 `#L0#`。这个 bug 两边共有。
+
+### 15.4 `1022101` 的 rejected 理由已经失效
+
+§7 判 rejected 时列的三条理由，**两条现在不成立**：
+
+| 当初理由 | 现状 |
+|---|---|
+| 3100000/3100001/3101001 三档货币数据缺失 | ✅ 全在 `String.wz/Ins.img.xml`（`Boss Certificate` / `Anniversary Candle`），后续批次补齐 |
+| 奖池椅子 3010121/3010135 缺 | ❌ 仍缺，但只占全池 26 项里的 2 项，其余 24 项逐个查过全在 |
+| Rooney 是快乐村唯一入口，在 23 张地图 | ✅ 属实，`Map.wz` 里 23 个文件，全是主城 |
+
+**真正的理由是这个：BeiDou 已经在发这两种凭证，却没有任何地方能花掉。**
+
+```
+3100000 BOSS凭证  ← ZakumBattle / HorntailBattle / PinkBeanBattle / PapulatusBattle /
+                    ScargaBattle / ShowaBattle / KrexelBattle 的 distributeBossCertificate
+3100001 PQ凭证    ← 11 个 PQ 的 distributePQClearReward
+```
+
+`grep` 全部 `scripts/npc/` 与 `scripts-zh-CN/npc/`：**零个消费方**。
+前面批次把产出端搬完了，消费端正好就是这个被判掉的 `1022101`。
+这不是可搬可不搬的额外功能，是当前半截系统缺的另一半。
+
+移植取舍（用户 2026-08-18 决定「搬 LK，传送入口进注释」）：
+
+- Rooney 的快乐村传送保留为注释块 `warpToHappyville()`，放回 `start()` 开头即可恢复
+- **不加 `use_enable_custom_npc_script` 门**，与 LK 一致（LK 自己把那段注释掉了）。
+  若加门且默认 false，传送已注释 + 兑换被门挡，NPC 会完全失能
+- 缺失的 `3010121`/`3010135` 从奖池剔除并注释说明
+- 30 件职业武器逐个核对 `String.wz/Eqp.img.xml` 与 `Character.wz/Weapon/`，缺失 0
+
+> **遗留**：快乐村 `209000000` 现在没有入口了。要么补一个别的 NPC 放置，
+> 要么把 `warpToHappyville()` 挂回菜单第一项。已记账，本批未做。
+
+### 15.5 `9000041` 顺带查出的 BeiDou 自身问题
+
+- zh 层主菜单与 `sendGetText` **整段没汉化**（还是英文）
+- 门关闭时的提示语是「勋章排名系统目前不可用」——那是 `9000040`(Dalair) 的文案。
+  `9000041` 实为 `Donation Box`/枫叶募捐箱。**LK 同错**，属 HeavenMS 上游遗留，不算 LK 的贡献
+- 错误提示语序颠倒：`"你的#b'"+name+"'#k物品栏中没有#b"+options[selectedType]+"#k！"`
+  渲染成「你的'龙之戟'物品栏中没有装备！」。LK 的语序是对的，采纳
+
+### 15.6 `9000040_1.js` 是孤儿文件
+
+zh 层独有，是 Dalair 的副本（`mergeFee` 500000 vs 50000），
+`grep -rn 9000040_1` 在 `scripts/`、`scripts-zh-CN/`、`src/main/java/` 全部零引用。
+本批未动它——关掉 `9000040` 不影响它，因为它本来就没人调。
+
+### 15.7 `@testscript` 修正
+
+用户先改成 `openNpc(Integer.valueOf(params[0]), params[0])`，解决了 `cm.getNpc()` 渲染错 NPC 名
+（原先固定传 `NpcId.BEI_DOU_NPC_BASE`=9900001）。但引入两个问题，本批一并修：
+
+1. **非数字脚本名抛 `NumberFormatException`**——`mapleTV`、`scroll_generator`、
+   `under_maintenance`、`BeiDouSpecial/` 下的脚本全会炸，而 `mapleTV` 正在本批清单里。
+   改为解析失败回退 `NpcId.BEI_DOU_NPC_BASE`
+2. **`openNpc` 的返回值没人接**——`AbstractPlayerInteraction:384` 的 javadoc 明写「调用方
+   尤其是指令应据此给玩家一句提示」。脚本名打错或已有未结束会话时会静默无反应。
+   新增 `TestScriptCommand.message3` 提示，两语言齐
+
+> **未修**：`CommandsExecutor:117` 的 `splitedMessage[1].toLowerCase()` 把参数强制小写，
+> `@testscript mapleTV` 实际查的是 `npc/mapletv.js`。Windows 上碰巧能命中，
+> Linux 部署会失败。这是指令框架的问题，不在本批范围。
+
+### 15.8 验收
+
+- 12 个脚本文件全部过 `node --check`
+- `mvn -pl gms-server compile` 通过
+- 30 件职业武器 + 26 项奖池道具 + 5 个眼饰 id + 7 个勋章边界 id 全部核对过 wz 存在性

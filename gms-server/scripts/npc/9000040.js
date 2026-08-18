@@ -29,8 +29,10 @@ var mergeFee = 50000;
 var name;
 
 function start() {
-    status = -1;
-    action(1, 0, 0);
+    // Equipment merge is switched off, following LichKingMod. To bring it back, swap these two lines
+    // for "status = -1; action(1, 0, 0);" - the merge flow below is left intact.
+    cm.sendOk("This service is currently unavailable.");
+    cm.dispose();
 }
 
 function action(mode, type, selection) {

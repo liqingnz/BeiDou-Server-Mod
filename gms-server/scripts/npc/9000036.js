@@ -22,8 +22,9 @@
 	
 	Refining NPC:
 	* Accessories refiner
-        * 
+        *
         * @author Ronan Lana
+        * @mod LichKing
 */
 
 var status = -1;
@@ -66,19 +67,20 @@ function action(mode, type, selection) {
             var selStr = "Well, I've got these pendants on my repertoire:#b";
             items = [1122018, 1122007, 1122001, 1122003, 1122004, 1122006, 1122002, 1122005, 1122058];
             for (var i = 0; i < items.length; i++) {
-                selStr += "\r\n#L" + i + "##t" + items[i] + "##b";
+                selStr += "\r\n#L" + i + "# #i" + items[i] + "# #z" + items[i] + "##b";
             }
         } else if (selection == 1) { //face accessory
             var selStr = "Hmm, face accessories? There you go: #b";
             items = [1012181, 1012182, 1012183, 1012184, 1012185, 1012186, 1012108, 1012109, 1012110, 1012111];
             for (var i = 0; i < items.length; i++) {
-                selStr += "\r\n#L" + i + "##t" + items[i] + "##b";
+                selStr += "\r\n#L" + i + "# #i" + items[i] + "# #z" + items[i] + "##b";
             }
         } else if (selection == 2) { //eye accessory
             var selStr = "Got hard sight? Okay, so which glasses do you want me to make?#b";
-            items = [1022073, 1022088, 1022103, 1022089, 1022082];
+            // Archaeologist Glasses (1022088/1022103/1022089) are handed out elsewhere, keep them off the crafting list
+            items = [1022073, 1022082];
             for (var i = 0; i < items.length; i++) {
-                selStr += "\r\n#L" + i + "##t" + items[i] + "##b";
+                selStr += "\r\n#L" + i + "# #i" + items[i] + "# #z" + items[i] + "##b";
             }
         } else if (selection == 3) { //belt & medal
             var selStr = "Hmm... For these, things get a little tricky. Since these items are too short and too similar one another, I don't really know what item will emerge when I finish the synthesis. Still wanna try for something?";
@@ -97,17 +99,22 @@ function action(mode, type, selection) {
                 items[maxEqp] = x;
             }
 
-            for (var x = 1142122; x < 1142143; maxEqp++, x++) {
+            for (var x = 1142122; x < 1142129; maxEqp++, x++) {
                 items[maxEqp] = x;
             }
-            selStr += "\r\n#L" + i + "##bTry it!#b";
+
+            // 1142129-1142133 are the Aran storyline medals, they have no business in a random pool
+            for (var x = 1142134; x < 1142143; maxEqp++, x++) {
+                items[maxEqp] = x;
+            }
+            selStr += "\r\n#L0##bTry it!#b";
 
         } else if (selection == 4) { //ring refine
             var selStr = "Rings, huh? These are my specialty, go check it yourself!#b";
             items = [1112407, 1112408, 1112401, 1112413, 1112414, 1112405, 1112402];
 
             for (var i = 0; i < items.length; i++) {
-                selStr += "\r\n#L" + i + "##t" + items[i] + "##b";
+                selStr += "\r\n#L" + i + "# #i" + items[i] + "# #z" + items[i] + "##b";
             }
 
         }/*else if (selection == 5) { //make necklace
@@ -132,9 +139,10 @@ function action(mode, type, selection) {
             var matQtySet = [[5, 5], [5, 5, 5], [5, 5, 5, 5, 1], [5, 5], [5, 5, 5], [5, 5, 5, 5, 1], [1, 1], [1, 1], [1, 1], [1, 1]];
             var costSet = [100000, 200000, 300000, 125000, 250000, 375000, 500000, 500000, 500000, 500000, 25000, 25000, 25000, 25000];
         } else if (selectedType == 2) { //eye accessory refine
-            var matSet = [[4001006, 4003002, 4000082, 4031203], [4001005, 4011008], [4001005, 4011008], [4001005, 4011008, 4000082], [4001006, 4003002, 4003000, 4003001]];
-            var matQtySet = [[2, 2, 5, 10], [3, 2], [4, 3], [5, 3, 10], [2, 2, 10, 5]];
-            var costSet = [250000, 250000, 300000, 400000, 200000];
+            // one row per entry of the items list above: 1022073, 1022082
+            var matSet = [[4001006, 4003002, 4000082, 4031203], [4001006, 4003002, 4003000, 4003001]];
+            var matQtySet = [[2, 2, 5, 10], [2, 2, 10, 5]];
+            var costSet = [250000, 200000];
         } else if (selectedType == 3) { //belt & medals refine
             var matSet = [[4001006, 4003005, 4003004], [7777, 7777]];
             var matQtySet = [[2, 5, 10], [7777, 7777]];

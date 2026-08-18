@@ -29,8 +29,10 @@ var mergeFee = 50000;
 var name;
 
 function start() {
-    status = -1;
-    action(1, 0, 0);
+    // 按 LichKingMod 关闭装备合并功能。要恢复就把这两行换回 status = -1; action(1, 0, 0);
+    // 下面的合并流程原样保留。
+    cm.sendOk("暂不可用~");
+    cm.dispose();
 }
 
 function action(mode, type, selection) {

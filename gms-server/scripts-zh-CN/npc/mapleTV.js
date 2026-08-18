@@ -27,7 +27,8 @@ function start() {
     const GameConfig = Java.type('org.gms.config.GameConfig');
     if (GameConfig.getServerBoolean("use_enable_custom_npc_script")) {
         cm.dispose();
-        cm.openNpc(9201088, "scroll_generator");
+        // 按 LichKingMod 关闭卷轴机。改回 "scroll_generator" 即可恢复。
+        cm.openNpc(9201088, "under_maintenance");
         return;
     }
 

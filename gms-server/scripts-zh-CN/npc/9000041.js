@@ -44,19 +44,19 @@ function action(mode, type, selection) {
     if (status == 0) {
         const GameConfig = Java.type('org.gms.config.GameConfig');
         if (!GameConfig.getServerBoolean("use_enable_custom_npc_script")) {
-            cm.sendOk("勋章排名系统目前不可用。");
+            cm.sendOk("你好，我是#b#p" + cm.getNpc() + "##k。");
             cm.dispose();
             return;
         }
 
-        var selStr = "Hello, I am the #bBazaar NPC#k! Sell to me any item on your inventory you don't need. #rWARNING#b: Make sure you have your items ready to sell at the slots #rAFTER#b the item you have selected to sell.#k Any items #bunder#k the item selected will be sold thoroughly.";
+        var selStr = "你好，你可以通过我回收你不需要的物品。#r注意#b：确保你输入的物品#r之后#b都是你要回收的物品。#k你也可以通过输入指令#b@sellinv#k更好的直接出售物品！";
         for (var i = 0; i < options.length; i++) {
             selStr += "\r\n#L" + i + "# " + options[i] + "#l";
         }
         cm.sendSimple(selStr);
     } else if (status == 1) {
         selectedType = selection;
-        cm.sendGetText("From what item on your #r" + options[selectedType] + "#k inventory do you want to start the transaction?");
+        cm.sendGetText("你想从#r" + options[selectedType] + "#k栏哪个物品开始回收？（输入物品名）");
     } else if (status == 2) {
         name = cm.getText();
         var res = cm.getPlayer().sellAllItemsFromName(selectedType + 1, name);
@@ -64,7 +64,7 @@ function action(mode, type, selection) {
         if (res > -1) {
             cm.sendOk("交易完成！你从这个行动中获得了#r" + cm.numberWithCommas(res) + "金币#k。");
         } else {
-            cm.sendOk("你的#b'" + name + "'#k物品栏中没有#b" + options[selectedType] + "#k！");
+            cm.sendOk("你#b" + options[selectedType] + "#k栏中没有 #b'" + name + "'#k！");
         }
 
         cm.dispose();

@@ -884,7 +884,7 @@ scripts/npc/1022000.js	script	0	0	rejected	通篇是 BeiDou 已做过的写法�
 scripts/npc/1022001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1022003.js	script	0	0	done	LK 把菜单从写死道具名改成 #i##z# 宏。BeiDou 的 scripts-zh-CN 早已是宏形式且保留了等级提示（LK 丢了），落后的是英文基础层。改英文层 44 项为 #i##t# + 保留原等级后缀：逐项与 String.wz 核对过，41 项精确匹配，7 项矿石是英文层用简称（Bronze vs Bronze Plate）、1 项是拼写错误（Mithrill Football Helmet），正是用宏要解决的。LK 其余改动不采纳：BeiDou 的 prompt 有单复数处理、matSet 用字面量数组
 scripts/npc/1022004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/1022101.js	script	0	0	rejected	LK 把快乐村传送 NPC「Rooney」整个换成枫叶兑换商。Rooney 是快乐村 209000000 唯一入口且放置在 23 张地图（其余碰该图的 NPC 都在里面，是出口），照搬等于圣诞活动区失联。四档兑换货币里 3100000/3100001/3101001 三档数据缺失，奖池另有椅子 3010121/3010135 缺。原文封存在 docs/lkport-parked/。可捞的一块是「枫叶换职业武器」（30 件武器 Character.wz 全有、货币 4001126 也有），但要挂新 NPC 并加 Map.wz 放置，归第 6 项
+scripts/npc/1022101.js	script	0	0	ported	用户 2026-08-18 决定采纳。凭证消费端：BOSS凭证 3100000 与 PQ凭证 3100001 已由 7 个 BOSS 脚本与 11 个 PQ 脚本发放却无任何消费方，本脚本是唯一出口。三档货币数据（3100000/3100001/3101001）经后续批次已补齐，原 rejected 理由失效。Rooney 的快乐村传送按用户要求保留为注释。奖池 3010121/3010135 仍缺 String.wz，已从池中剔除。落地 gms-server/scripts{,-zh-CN}/npc/1022101.js
 scripts/npc/1022104.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1022105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/1032000.js	script	0	0	rejected	只把变量名 mesos 改成中文标识符「金币」
@@ -1100,7 +1100,7 @@ scripts/npc/2082001.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字�
 scripts/npc/2082002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2082003.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2082004.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/2082014.js	script	0	0	rejected	LK 用 YamlConfig，BeiDou 已是 GameConfig 版且多一个兜底 else 分支
+scripts/npc/2082014.js	script	0	0	rejected	LK 侧零逻辑增量：结构比对仅剩 YamlConfig→GameConfig 与 } else if 合并写法，BeiDou 版更好。2026-08-18 全量复核确认
 scripts/npc/2083000.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2083001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/2083002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1191,15 +1191,15 @@ scripts/npc/9000010.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9000011.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000012.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000013.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9000017.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/npc/9000017.js	script	0	0	noise	LK 侧零逻辑增量：数据表逐值相同（2049100 / 8 种材料 / 数量 / 费用 1200000），仅 new Array() 与 [] 字面量写法之差。2026-08-18 全量复核确认
 scripts/npc/9000019.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000020.js	script	0	0	rejected	世界旅行社。LK 加第三条航线（上海 701000000 → 嵩山少林寺 702000000），但 BeiDou 的 scripts-zh-CN 早已是自己 2025 年的重写（Magical-H「北斗航旅」），5 个目的地含少林寺，数据结构也不同——中文层 ⊃ LK ⊃ 英文层。原文封存在 docs/lkport-parked/。英文层只有 2 个目的地，补齐要按中文层对象结构整份重写 + 翻译 10 段描述，属创作非移植，另记 BeiDou 双层一致性待办
 scripts/npc/9000021.js	script	0	0	rejected	LK 在 status==0 就 sendOk+dispose+return，等于把 BossRushPQ 的入口 NPC 废掉，后面 4 步再也走不到
 scripts/npc/9000036.js	script	0	0	rejected	LK 把亨内西的饰品制作 NPC「Agent E」整个换成皇家点券兑换台（原逻辑复制到 9000036_accessory.js，但脚本引擎按 npc/<id>.js 找文件，那份永远不会被加载，LK 也无任何 openNpc 引用它）。五个菜单项依赖 cm.gainRoyalPoint/gainRoyalTime、@redeem 指令、以及 3100000/3100001/3101000/3101001 四个两层 Item.wz 都没有的道具。用户 2026-08-17 决定皇家系统整个跳过，故判 rejected；照搬只会白白删掉一个能用的饰品制作 NPC
 scripts/npc/9000037.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9000038.js	script	0	0	done	BossRushPQ 奖励公示牌：不按 LK 的池子改，而是从 event/BossRushPQ.js 的实际奖池同步（lv4 +1、lv5/lv6 各 +24，与上一轮并集一致），并在两边加了互指注释。上一轮只合并了 event 侧，公示牌因此说了谎
-scripts/npc/9000040.js	script	0	0	rejected	LK 用 YamlConfig + USE_STARTER_MERGE，BeiDou 已是 GameConfig 版且变量更全
-scripts/npc/9000041.js	script	0	0	rejected	LK 用 YamlConfig，BeiDou 已是 GameConfig 版；其余是提示语参数顺序
+scripts/npc/9000040.js	script	0	0	ported	用户 2026-08-18 决定照搬 LK 的「关闭」。LK 版把整个装备合并 NPC 注释掉（含 var status 声明），action() 残留死代码引用已注释的 YamlConfig/MakerProcessor。BeiDou 实现为 start() 早返回提示语，合并流程原样保留可一键恢复。落地 gms-server/scripts{,-zh-CN}/npc/9000040.js
+scripts/npc/9000041.js	script	0	0	partial	LK 唯一实质增量是中文语序与 @sellinv 指令提示，两处均采纳（@sellinv 已于批次1移植）。顺带修 BeiDou 自身两处：zh 层主菜单与 sendGetText 漏翻、门关闭提示误用 9000040 的「勋章排名系统」文案（9000041 实为 Donation Box/枫叶募捐箱，LK 同错，属 HeavenMS 上游遗留）。落地 gms-server/scripts{,-zh-CN}/npc/9000041.js
 scripts/npc/9001105.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9010001.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9010002.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1290,7 +1290,7 @@ scripts/npc/9201096.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/npc/9201097.js	script	0	0	partial	乌鸦令牌兑换商。采纳 LK 的「先看奖励再兑换」预览，但重写：LK 那版三处坏——循环写成 i < listLength-1 漏掉倒数第二项、#z 传的是整个 [id,qty] 数组导致宏失效、发完菜单立刻 dispose 点了没反应。否决 LK 注释掉 eQuestChoices[4..7] 与 eQuestPrizes[4..7]（那不是重复项，是「25 个令牌换 350 万金币」这条路，删了等于砍功能）。奖池不动：LK 往法师档 eQuestPrizes[3] 加的 2044701 爪卷 / 2044501 弓卷跑题，会稀释该档的法师向产出
 scripts/npc/9201099.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201100.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9201101.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/9201101.js	script	0	0	rejected	LK 侧零逻辑增量：抹掉字符串/注释/空白后，与 BeiDou 现版唯一差异是 YamlConfig→GameConfig 的写法。2026-08-18 全量复核确认
 scripts/npc/9201102.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201106.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9201113.js	script	0	0	rejected	镇魂骑士团 PQ（CWKPQ）远征 NPC。LK 做了四件事，全拒：①importPackage + MapleExpeditionType/MaplePacketCreator 老类名（BeiDou 已 Java.type + 改名）；②要求文案改用他们 fork 的 exped.getPartInfo()（BeiDou 全仓库 8 个远征/PQ NPC 统一走 em.getProperty("party")）；③startInstance(...) != 0——LK fork 把返回值改成了 int，BeiDou 是 boolean，照搬类型就错；④译文与 dispose 后多余 return。无 9270047 那样的任务门可采
@@ -1352,7 +1352,7 @@ scripts/npc/detectMap.js	script	0	0	ported	gms-server/scripts/npc/detectMap.js �
 scripts/npc/detected.js	script	0	0	ported	gms-server/scripts/npc/detected.js 与 scripts-zh-CN/npc/detected.js —— getText() 返回的 java.lang.String 在 GraalVM 下与数字松散比较不做数值转换，改 parseInt 严格比较；去掉「通过检测发1000点券」，那是一条刷点券的路子
 scripts/npc/gachapon.js	script	0	0	ported	gachapon 工作包（批次7）：菜单加十连抽，地名从与 NPC ID 强耦合的硬编码数组改为客户端宏 #m<mapid>#；扣券与背包校验移到 Java 侧逐抽进行
 scripts/npc/gachaponInfo.js	script	0	0	rejected	LK 改动是硬编码汉化 + getCnName；BeiDou 该脚本已走 GachaponService 查实时奖池，比 LK 的 Java 硬编码数组强
-scripts/npc/mapleTV.js	script	0	0	rejected	LK 侧只有译文改动（抹掉字符串字面量后代码逐行相同）；按移植约定不搬译文
+scripts/npc/mapleTV.js	script	0	0	ported	用户 2026-08-18 决定照搬。出口由 scroll_generator 改为 under_maintenance。原 rejected 理由「只有译文改动」不确切——结构比对确有这一处逻辑差异
 scripts/npc/scroll_generator.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/waterOfLife.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/Depart_ToKerning.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1720,12 +1720,12 @@ scripts/event/YaoSengBattle.js	script-new	0	0	already-fixed	gms-server/scripts-z
 scripts/npc/1002103.js	script-new	0	0	rejected	正文是 LK 自造的一句寒暄「同学，想了解一下冒险学院吗？」，没有任何功能。而 1002103 在 Quest.wz/Check.img.xml 里出现 5 次，是任务NPC，给它挂一个只 sendOk 就 dispose 的脚本是净损失
 scripts/npc/1022007 .js	script-new	0	0	rejected	文件名带空格，是 LK 的笔误；内容是 NPC 2010000（Master Sergeant Fox，天空之城兑换）的脚本被错存成 1022007 这个id。BeiDou 已有正确归位的 scripts/npc/2010000.js
 scripts/npc/1022101_test.js	script-new	0	0	rejected	作者自用的兑换脚本试验稿，文案中英混杂（"are you sure you have..." 后半句突然变中文），兑换表是 2000000 蓝药换 1472053 武器这种随手填的测试数据。正式版是 scripts/npc/1022101.js（清单 script 档）
-scripts/npc/9000036_accessory.js	script-new	0	0	deferred	【认领：批次7】工作人员E的饰品分支，与主体 scripts/npc/9000036.js（script档，+102逻辑行）是一套，拆开搬没有意义。另需先确认入口：LK全仓库无任何地方 openNpc 到这个脚本名
+scripts/npc/9000036_accessory.js	script-new	0	0	ported	与 BeiDou 现有 scripts/npc/9000036.js 结构比对后确认两者是同一脚本（Agent E 饰品合成），LK 只改了文件名。实质增量 3 处：菜单加 #i 图标、勋章池跳过 Aran 剧情勋章 1142129-1142133、眼饰列表缩至 [1022073,1022082]。前两处采纳；第三处按用户 2026-08-18 决定采纳并修正 LK 自身的配方数组错位（LK 砍 items 未砍 matSet）。同时用 LK 中文补齐 zh 层 9 处漏翻。落地 gms-server/scripts{,-zh-CN}/npc/9000036.js
 scripts/npc/9270045.js	script-new	0	0	deferred	【2026-08-18 复核：deferred 前提已失效】541020800 已随 ASM 导入补齐，Npc.wz/9270045 本就有。ASM 版已在 scripts-zh-CN/。LK 版仅 cm.warp(541020700, 0)，无移植问题
 scripts/npc/changePassword.js	script-new	0	0	rejected	批次6收尾终局否决：随 ChangePasswordCommand
 scripts/npc/npcTemplate.js	script-new	0	0	rejected	NPC 脚本模板，BeiDou 已有自己的脚本写法（sendNextLevel/sendSelectLevel 那套），模板不通用
 scripts/npc/testScript.js	script-new	0	0	rejected	作者自用的排版试验稿：status 0 打一段 #i#t#c 混排就 dispose，status 1 之后是从 detected.js 整段复制来的死代码（永远走不到）
-scripts/npc/under_maintenance.js	script-new	0	0	deferred	缓，挪至批次8：正文只有一句「功能维护中」，真正的逻辑（cm.redeemDailyRoyalReward 领皇家月卡日奖励）连同 sendYesNo 一起被 LK 注释掉了。随皇家系统一并决策
+scripts/npc/under_maintenance.js	script-new	0	0	partial	正文「功能维护中」采纳（mapleTV 的新出口）；action() 里的皇家月卡分支否决——调用 cm.redeemDailyRoyalReward()，BeiDou 无此方法，属已整批否决的批次8皇家系统。落地 gms-server/scripts{,-zh-CN}/npc/under_maintenance.js
 scripts/npc/verifyEmail.js	script-new	0	0	rejected	批次6收尾终局否决：随 VerifyEmailCommand
 scripts/portal/mahavira_enter.js	script-new	0	0	deferred	【2026-08-18 复核】阻塞点不是缺地图：BeiDou 的 wz/Map.wz/Map/Map7/702050000.img.xml 本就存在，只是里面没有 portal script 字段。属同名文件的 MODIFY 型 diff（manifest 里 wz/Map.wz/Map/Map7/702050000.img.xml 那行，任务#5），不是 wz-missing
 scripts/portal/treeboss00.js	script-new	0	0	deferred	【2026-08-18 复核：deferred 前提已失效】同 KrexelBattle.js。ASM 版（组队制、查任务 4528）已随导入进入 scripts-zh-CN/，但用户选定 LK 远征制，本文件将被 LK 版取代。LK 版另有 bug：em.startInstance 第 4 参是 difficulty，LK 传的是频道号。前置来源问题（扳手 4031942 出自缺失的乌鲁城任务链 4526-4530）已写进现有文件的头部注释
