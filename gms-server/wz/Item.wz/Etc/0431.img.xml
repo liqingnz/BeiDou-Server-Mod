@@ -1,17 +1,1 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<imgdir name="0431.img">
-  <imgdir name="04310000">
-    <imgdir name="info">
-      <canvas name="icon" width="27" height="30">
-        <vector name="origin" x="-3" y="30"/>
-      </canvas>
-      <canvas name="iconRaw" width="26" height="28">
-        <vector name="origin" x="-3" y="30"/>
-      </canvas>
-      <int name="price" value="1"/>
-      <int name="slotMax" value="1000"/>
-      <int name="notSale" value="1"/>
-      <int name="tradeBlock" value="1"/>
-    </imgdir>
-  </imgdir>
-</imgdir>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><imgdir name="0431.img"><imgdir name="04310000"><imgdir name="info"><canvas name="icon" width="27" height="30"><vector name="origin" x="-3" y="30"/></canvas><canvas name="iconRaw" width="26" height="28"><vector name="origin" x="-3" y="30"/></canvas><int name="notSale" value="1"/><int name="price" value="1"/><int name="slotMax" value="1000"/><int name="tradeBlock" value="1"/></imgdir></imgdir><imgdir name="04310001"><imgdir name="info"><canvas name="icon" width="30" height="32"><vector name="origin" x="-3" y="30"/></canvas><canvas name="iconRaw" width="30" height="31"><vector name="origin" x="-3" y="30"/></canvas><int name="notSale" value="1"/><int name="price" value="1"/><int name="slotMax" value="1000"/><int name="tradeBlock" value="1"/></imgdir></imgdir><imgdir name="04310002"><imgdir name="info"><canvas name="icon" width="31" height="32"><vector name="origin" x="-3" y="30"/></canvas><canvas name="iconRaw" width="31" height="32"><vector name="origin" x="-3" y="30"/></canvas><int name="price" value="10000000"/><int name="slotMax" value="1000"/></imgdir></imgdir><imgdir name="04310059"><imgdir name="info"><canvas name="icon" width="31" height="31"><vector name="origin" x="-1" y="31"/></canvas><canvas name="iconRaw" width="31" height="31"><vector name="origin" x="-1" y="31"/></canvas><int name="notSale" value="1"/><int name="price" value="1"/><int name="slotMax" value="1000"/><int name="tradeBlock" value="1"/></imgdir></imgdir><imgdir name="04310009"><imgdir name="info"><canvas name="icon" width="29" height="31"><vector name="origin" x="-2" y="31"/><string name="_hash" value="be6d6420be339c2e707a94e25276bec5c8c569599deb920281ec420f051f564b"/></canvas><canvas name="iconRaw" width="29" height="29"><vector name="origin" x="-2" y="31"/><string name="_hash" value="3874ab6ecce45a58735ecf52bcefda6a792c07f679f918ec87313a5d95d18f9b"/></canvas><canvas name="iconShop" width="12" height="12"><vector name="origin" x="0" y="0"/><string name="_hash" value="d8b1b494cae02170593dcf433245721103cabb40c85bb6ad65f23af937258eb4"/></canvas><int name="notSale" value="1"/><int name="price" value="1"/><int name="slotMax" value="100"/><int name="tradeBlock" value="1"/></imgdir></imgdir><imgdir name="04310010"><imgdir name="info"><canvas name="icon" width="29" height="31"><vector name="origin" x="-2" y="31"/><string name="_hash" value="8b5b0dc517de9dedf8ab88b7b8be7cf96d65e6fe538f61f9862d1fec6b7341ee"/></canvas><canvas name="iconRaw" width="29" height="29"><vector name="origin" x="-2" y="31"/><string name="_hash" value="b05e2790957c72b89c697a6a67bb621113ae641072fe331296ebd4f48c0ee5aa"/></canvas><canvas name="iconShop" width="12" height="12"><vector name="origin" x="0" y="0"/><string name="_hash" value="9036ee946398104744231db8c16cb410abd52f440f61ab4146a31739c91cfbc9"/></canvas><int name="notSale" value="1"/><int name="price" value="1"/><int name="slotMax" value="3000"/><int name="tradeBlock" value="1"/></imgdir></imgdir></imgdir>
