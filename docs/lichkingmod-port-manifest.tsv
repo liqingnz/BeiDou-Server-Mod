@@ -104,7 +104,7 @@ src/client/command/commands/gm2/WarpMapCommand.java	java	0	0	noise	仅格式化/
 src/client/command/commands/gm2/WhereaMiCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm3/BanCommand.java	java	10	8	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName；LK 连 Syntax 提示都改成了 <characterId>
 src/client/command/commands/gm3/DebuffCommand.java	java	2	1	rejected	LK 把写死的 getMobSkill(128, 7) 改成读 params[1] 但无长度校验，省略参数即抛异常；BeiDou 已重构为 MobSkillType 枚举，见 DebuffCommand.java:69-75
-src/client/command/commands/gm3/FlyCommand.java	java	4	1	pending	
+src/client/command/commands/gm3/FlyCommand.java	java	4	1	rejected	用户 2026-08-18 决定不改。LK 新增的是 `@fly info <accId>` 查询子命令，BeiDou 已有 canFly（FlyCommand.java:50,57）只是没有查询入口，属可有可无的 GM 便利功能
 src/client/command/commands/gm3/GiveMesosCommand.java	java	6	4	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName
 src/client/command/commands/gm3/GiveNxCommand.java	java	14	8	rejected	LK 把 getCharacterByName(params[0]) 改成 getCharacterById(Integer.parseInt(params[0]))，GM 指令从传角色名改成传数字 id，传名字即抛未捕获的 NumberFormatException；BeiDou 保持 getCharacterByName
 src/client/command/commands/gm3/GiveRpCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -118,7 +118,7 @@ src/client/command/commands/gm3/QuestResetCommand.java	java	0	0	noise	仅格式�
 src/client/command/commands/gm3/QuestStartCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm3/ReloadMapCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm3/StartEventCommand.java	java	6	7	already-fixed	LK 的改动是汉化硬编码中文；BeiDou 走 I18nUtil，见 org/gms/client/command/CommandsExecutor.java:100,121,125 与各指令的 setDescription(I18nUtil.getMessage(...))
-src/client/command/commands/gm3/TimerMapCommand.java	java	4	3	pending	
+src/client/command/commands/gm3/TimerMapCommand.java	java	4	3	deferred	为什么缓：LK 只是把广播循环换成 map.timerMapPlayers(seconds)，而该方法直接遍历裸 characters 字段绕开 getCharacters()。查实两边同样不安全——getCharacters() 返回 unmodifiableCollection 视图而非副本，chrRLock 只保护包装那一瞬，调用方迭代不在锁内，30 个调用点都在无锁迭代非并发的 LinkedHashSet。什么条件下重启：随 getCharacters() 的并发隐患一并处理，见 lichkingmod-port.md §21
 src/client/command/commands/gm4/BossDropRateCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm4/PapCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/command/commands/gm4/PmobCommand.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）

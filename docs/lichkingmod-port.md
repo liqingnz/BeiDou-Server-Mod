@@ -4610,3 +4610,46 @@ perl docs/tools/triage2.pl <BeiDou的wz> <ASM的wz> <单文件清单> \
 
 **注意**：`Npc.wz` 16 个差异**永远不用管**——`info/script` 与 `hideName`
 服务端一个都不读（NPC 脚本按 id 找 `npc/<id>.js`），是纯客户端字段。
+
+---
+
+## 21. 待办：`MapleMap.getCharacters()` 返回视图而非副本（2026-08-18 发现）
+
+审 `TimerMapCommand` 时挖出来的，比那条指令本身重要得多。
+
+### 21.1 症状
+
+```java
+private final Collection<Character> characters = new LinkedHashSet<>();   // 非并发容器
+
+public Collection<Character> getCharacters() {
+    chrRLock.lock();
+    try {
+        return Collections.unmodifiableCollection(this.characters);       // 视图，不是副本
+    } finally {
+        chrRLock.unlock();                                                // 锁在这里就放了
+    }
+}
+```
+
+`chrRLock` 只保护「包装成 unmodifiableCollection」那一瞬间，**调用方后续的迭代完全不在锁内**。
+于是全仓库 **30 个 `getCharacters()` 调用点**都在无锁迭代一个普通 `LinkedHashSet`——
+玩家进出地图触发 `characters` 的增删时，理论上都可能 `ConcurrentModificationException`。
+
+### 21.2 与 LK 的关系
+
+LK 的 `TimerMapCommand` 把广播循环换成了 `map.timerMapPlayers(seconds)`，
+而那个新方法直接遍历裸 `characters` 字段、连 `getCharacters()` 都不走。
+乍看是「丢了锁」的回退，**实则两边一样不安全**——因为锁本来就没护住迭代。
+所以那条 manifest 行判 `deferred` 而非 `rejected`：改动本身无收益，
+但它指出的问题是真的，随本节一并处理。
+
+### 21.3 两条改法
+
+| 方案 | 做法 | 代价 |
+|---|---|---|
+| **A. 返回副本** | `getCharacters()` 改成 `List.copyOf(this.characters)`（仍在锁内） | 一处改动即可覆盖全部 30 个调用点；每次调用多一次拷贝，热路径需实测 |
+| **B. 逐调用点加锁** | 调用方自己取 `chrRLock` 再迭代 | 无额外拷贝，但 30 处都要审，且锁范围扩大易引入死锁 |
+
+**倾向 A**：一处改完全覆盖，且 `characters` 通常只有几十个元素，拷贝成本可忽略；
+B 的 30 处审查成本与死锁风险都更高。落地前需确认没有调用方依赖「视图会随原集合变化」这一语义。
