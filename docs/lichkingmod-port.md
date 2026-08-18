@@ -3542,8 +3542,20 @@ else if (!isBoss())   { 百分比血条 }
 // isBoss=true 但 tagColor=0 → 两个分支都不进 → 什么都不显示
 ```
 
-`tagColor` 仅当怪出现在 `UI.wz/UIWindow.img` 的 `MobGage/Mob` 白名单（693 条）里
-才非零（`LifeFactory:434`）。全仓库 **647 个怪**是 `boss=1` 且不在白名单。
+`tagColor` 仅当怪出现在 `UI.wz/UIWindow.img` 的 `MobGage/Mob` 白名单里
+才非零（`LifeFactory:434`）。
+
+> **2026-08-18 复核，两个数都要改**：白名单是 **1,358 条**不是 693；
+> 且「在白名单」只是必要条件——`LifeFactory:435` 取的是怪自己 `info` 里的
+> `hpTagColor`，缺这个字段一样得 0。按这两条重算：
+>
+> | | 怪数 |
+> |---|---|
+> | `boss=1` 总数 | **861** |
+> | 在白名单 **且** 有 `hpTagColor` → 大血槽正常 | 293 |
+> | 在白名单但**无** `hpTagColor` → 无血条 | 64 |
+> | **不在白名单** → 无血条 | **504** |
+> | **合计无血条** | **568** |
 
 用户实测的**狮子王之城 `211060100`**（本次导入的新图，7 个刷怪点全是 `8210000`）：
 
@@ -4048,9 +4060,9 @@ ASM 在文件内部新增/修改的条目全部不可见。用户实测已撞到
 | `Item.wz/Etc/0422.img`、`0426`、`0431` | — | — | +7/+3/+5 | |
 | `Item.wz/Consume/0207`、`0243`、`0245` 等 | — | — | +7/+4/+4 | |
 | `Sound.wz/Mob.img` | 6,212 | 7,174 | +962 节点 | 怪物音效 |
-| `UI.wz/UIWindow.img` | 693 | 707 | +14 | `MobGage/Mob` 血槽白名单 |
+| `UI.wz/UIWindow.img` | ~~693~~ 1,358 | ~~707~~ 1,358 | ~~+14~~ **0** | `MobGage/Mob` 白名单**两边完全一致**，见 §11.4 复核 |
 | `Sound.wz/Bgm03`、`Bgm15` | — | — | +2/+3 | |
-| `Effect.wz/BasicEff.img` | 1,204 | 1,199 | **-5** | BeiDou 反而多 5 个节点 |
+| `Effect.wz/BasicEff.img` | 1,204 | 1,199 | ~~-5~~ | **测量假象，ASM 该文件畸形，见 §16.3** |
 
 `Etc.wz/BlockReason`、`ChatBlockReason`、`Quest.wz/PQuest`、`Exclusive` 条目数一致。
 
@@ -4074,20 +4086,29 @@ ASM 在文件内部新增/修改的条目全部不可见。用户实测已撞到
 
 ### 14.3 建议的推进顺序
 
+> **2026-08-18 进度复核**：第 1–5 项按「实际加载的语言层」重核，**均已完成**
+> （第 4 项余下的 6 条判为不导入）。第 6、10 项**作废**。详见 §17.2 与 §16.3。
+
 按「收益 ÷ 风险」排：
 
-1. **`Etc.wz/Commodity.img`**（+130，独有 0）—— 纯覆盖，零风险
-2. **`Item.wz/Etc/{0400,0403,0422,0426,0431}`、`Consume/*` 11 个、`Install/0399`**
-   （合计 +400 余条，独有 0）—— 纯覆盖
-3. **`Item.wz/Install/0301.img`**（+543 椅子，独有 0）—— 纯覆盖
-4. **`Quest.wz` 四个文件**（+365 任务）—— 覆盖后补回 `29580` 一条。
-   收益最大，同时解开克雷塞尔入场门要的乌鲁城任务链 `4526`–`4530`
-5. **`Item.wz/Cash/{0515,0521,0536}`** —— 覆盖后补回 8 条 LK 道具
-6. **`Sound.wz/Mob.img`、`Bgm03`、`Bgm15`** —— 纯覆盖，仅音效
-7. **`UI.wz/UIWindow.img`** —— +14 条血槽白名单，需确认这 14 个怪的 canvas 有图像
+1. ~~**`Etc.wz/Commodity.img`**（+130，独有 0）~~ —— **已完成**（中文层 9,076 = 9,076）
+2. ~~**`Item.wz/Etc/{0400,0403,0422,0426,0431}`、`Consume/*` 11 个、`Install/0399`**
+   （合计 +400 余条，独有 0）~~ —— **已完成**（基础层，ASM 独有 0）
+3. ~~**`Item.wz/Install/0301.img`**（+543 椅子，独有 0）~~ —— **已完成**（基础层）
+4. ~~**`Quest.wz` 四个文件**（+365 任务）—— 覆盖后补回 `29580` 一条~~
+   —— **已完成**（中文层）。`29580` 已保住；余下 `30000`–`30005` 是 ASM 私货
+   且脚本两边皆无，判为不导入，见 §17.3
+5. ~~**`Item.wz/Cash/{0515,0521,0536}`** —— 覆盖后补回 8 条 LK 道具~~
+   —— **已完成**（基础层，8 条 LK 道具已在）
+6. ~~**`Sound.wz/Mob.img`、`Bgm03`、`Bgm15`** —— 纯覆盖，仅音效~~
+   —— **作废**：三个 ASM 源文件的 `<sound>` 标签全部未闭合，见 §16.2
+7. ~~**`UI.wz/UIWindow.img`** —— +14 条血槽白名单~~ —— **作废**：`MobGage/Mob`
+   两边都是 1,358 条、逐条相同，ASM 在这里没有任何增量。血条要解得自己加条目，
+   见 §11.4 复核
 8. **`Map.wz`、`Mob.wz`、`Npc.wz`** —— 逐条目合并，不整文件覆盖（互有增删，见 §13.2）
 9. **`Skill.wz`** —— **不动**
-10. **`Effect.wz/BasicEff.img`** —— BeiDou 反而多 5 个节点，先查清再说
+10. ~~**`Effect.wz/BasicEff.img`**~~ —— **已查清并关闭**：节点差是 ASM 畸形导致的
+    解析假象；`Catch/Fail` 真差异上 BeiDou 更全（5 帧 vs 单图），覆盖是回退。见 §16.3
 
 > 每步做完都按 `c00176a21` 的口径复验：逐文件比对覆盖前后的条目 id 集合，确认丢失为 0。
 
@@ -4217,3 +4238,191 @@ zh 层独有，是 Dalair 的副本（`mergeFee` 500000 vs 50000），
 - 12 个脚本文件全部过 `node --check`
 - `mvn -pl gms-server compile` 通过
 - 30 件职业武器 + 26 项奖池道具 + 5 个眼饰 id + 7 个勋章边界 id 全部核对过 wz 存在性
+
+---
+
+## 16. ASM 的 wz XML 有畸形文件：未闭合 `<sound>` 标签（2026-08-18）
+
+排查 §14.3 第 6 项（`Sound.wz` 纯覆盖）时发现 ASM 侧的导出本身是坏的。
+
+### 16.1 症状
+
+ASM 的 `<sound>` 标签**既没有 `>` 也没有 `/>`**，标签在属性后直接断掉：
+
+```xml
+<!-- ASM：3,124 个 <sound> 全部如此 -->
+  <imgdir name="0100100">
+    <sound name="Damage"
+    <sound name="Die"
+  </imgdir>
+
+<!-- BeiDou：2,681 个全部自闭合，格式正确 -->
+  <imgdir name="0100100">
+    <sound name="Damage"/>
+    <sound name="Die"/>
+  </imgdir>
+```
+
+`Sound.wz/Mob.img.xml` 里畸形 / 总数 = **3,124 / 3,124**，无一幸免。
+
+### 16.2 受影响文件：全树 5 个
+
+按 `<sound name="..."` 后无 `>` 扫描 ASM 全部 wz 树：
+
+| 文件 | 备注 |
+|---|---|
+| `Sound.wz/Mob.img.xml` | §14.3 第 6 项的主目标 |
+| `Sound.wz/Bgm03.img.xml` | 同上 |
+| `Sound.wz/Bgm15.img.xml` | 同上 |
+| `Effect.wz/BasicEff.img.xml` | §14.1 最后一行 / §14.3 第 10 项 |
+| `Map.wz/MapHelper.img.xml` | 不在任何清单里 |
+
+其余树（`Mob`/`Item`/`Skill`/`Quest`/`String`/`Npc`/`Reactor`/`UI`/`Etc`/`Character`/`Morph`/`TamingMob`/`Base`）**全部为 0**。
+畸形只出现在带 `<sound>` 节点的文件里，是 ASM 那侧导出器的固有缺陷，不是传输损坏。
+
+### 16.3 两条结论直接改写既有计划
+
+**§14.3 第 6 项作废**：`Sound.wz/Mob.img`、`Bgm03`、`Bgm15` 三个源文件全部畸形，
+「纯覆盖、仅音效、零风险」不成立。要合就得先修 ASM 的导出（把 `<sound name="X"`
+补成 `<sound name="X"/>`），或改从客户端 img 重抽。
+
+**§14.1 末行「`Effect.wz/BasicEff.img` BeiDou 反而多 5 个节点」是测量假象**：
+ASM 的 `BasicEff.img` 里 `<sound name="sound0"`、`<sound name="sound2"` 未闭合，
+解析器把后面的兄弟节点全吞进去当子树了。逐路径比对后真实情况是——
+
+| | BeiDou | ASM |
+|---|---|---|
+| `Flame/sound0`、`sound1`、`sound2` | 三个自闭合 `<sound/>` 叶子 | `sound0`/`sound2` 未闭合，`sound1` 缺失 |
+| `Flame/3`、`Flame/SquibEffect` | 真实兄弟节点，有完整帧数据 | 被吞进 `sound0`/`sound2` 的假子树 |
+| `Catch/Fail` | `<imgdir>` + 5 帧 canvas（带 `delay`） | 单个 `<canvas name="Fail">`，无帧 |
+
+`Catch/Fail` 是**真差异且 BeiDou 更全**（5 帧动画 vs 单图）。
+**§14.3 第 10 项就此关闭：不动 `BasicEff.img`，覆盖会是回退。**
+
+### 16.4 对既有统计口径的影响
+
+§13.1 / §13.2 的全树 MD5 与叶子键值统计跑在这 5 个文件上时结果不可信
+（解析器会把畸形处之后的层级全部算错）。但影响面被限制在这 5 个文件内，
+`Map.wz` 157 / `Mob.wz` 178 / `Npc.wz` 16 那三组差异文件里只有 `MapHelper.img`
+一个受影响，且它不在任何合并清单上——**§13 的结论整体仍然成立**。
+
+---
+
+## 17. 语言层是「整文件覆盖」而非「节点合并」（2026-08-18）
+
+复核 §14.3 前 5 项进度时才注意到这条，它决定了所有「哪层缺了什么」的判断口径。
+
+### 17.1 机制
+
+`LocalizedDataProvider.getData` 只有一句话的逻辑：
+
+```java
+Data data = localized.getData(path);
+// 语言目录里没有该 XML 时，使用原始 WZ，避免为了少量翻译复制整包资源。
+return data != null ? data : fallback.getData(path);
+```
+
+**只要 `wz-zh-CN/` 下存在同名 xml，英文基础层的那份就完全不参与**——不是按节点合并，
+是整文件顶掉。所以在 `language: zh-CN`（`application.yml:56` 的默认值）下：
+
+- `wz-zh-CN/` 里有的文件 → 基础层 `wz/` 的对应内容**一个节点都读不到**
+- `wz-zh-CN/` 里没有的文件 → 才回落到 `wz/`
+
+另注：`getRoot()` 返回的是 **fallback（英文层）** 的目录树，
+只在 `wz-zh-CN/` 存在、`wz/` 不存在的文件无法被枚举到（`getData` 仍能取到）。
+
+### 17.2 §14.3 前 5 项的真实进度（按「实际加载的那层」核）
+
+| §14.3 项 | 实际加载层 | BeiDou | ASM | 状态 |
+|---|---|---|---|---|
+| 1 `Etc.wz/Commodity.img` | `wz-zh-CN/` | 9,076 | 9,076 | **已完成** |
+| 2 `Item.wz/Etc`、`Consume/*`、`Install/0399` | `wz/` | — | — | **已完成**（ASM 独有 0） |
+| 3 `Item.wz/Install/0301.img` | `wz/` | — | — | **已完成**（ASM 独有 0） |
+| 4 `Quest.wz` 四个 | `wz-zh-CN/` | 见下 | 见下 | **差 6 条，见 §17.3** |
+| 5 `Item.wz/Cash/{0515,0521,0536}` | `wz/` | — | — | **已完成**（ASM 独有 0） |
+
+Quest 四个文件在中文层的实际差距：
+
+| | BeiDou | ASM | ASM 独有 | BeiDou 独有 |
+|---|---|---|---|---|
+| `QuestInfo.img` | 3,178 | 3,183 | `30000`–`30005` | `29580` |
+| `Act.img` | 3,179 | 3,184 | 同上 | `29580` |
+| `Check.img` | 3,178 | 3,183 | 同上 | `29580` |
+| `Say.img` | 3,166 | 3,166 | 无 | 无 |
+
+`29580` 保住了（§14.2 要求的那条，`OutstandingCitizenMedal.java:10` 在用）。
+
+> **英文基础层仍然落后**：`wz/Quest.wz` 四个文件比 ASM 少 365 条，
+> `wz/Etc.wz/Commodity.img` 少 129 条。在 `zh-CN` 下这些**完全不影响运行**，
+> 但切 `language: en-US` 就会露出来。要不要补齐是独立决策，不属于本批。
+
+### 17.3 缺的 6 条任务 `30000`–`30005`：**不导入**
+
+查实是 ASM 自己的私货，不是上游 GMS 内容：
+
+```xml
+<imgdir name="30000">
+  <string name="name" value="来自北斗开发者的问候"/>
+  <string name="type" value="[北斗冒险岛]"/>
+  <int name="autoStart" value="1"/>
+  ...
+```
+
+`Check.img` 里指定 `startscript="q30000s"` / `endscript="q30000e"`（NPC `9900001`
+即 `NpcId.BEI_DOU_NPC_BASE`）。**`q3000*` 这批脚本在 ASM 与 BeiDou 两边的
+`scripts/`、`scripts-zh-CN/` 里全都不存在**——在 ASM 自己那儿就是死内容，
+且 `autoStart=1` 意味着导进来会对所有新号自动触发一条点不动的任务。
+
+**结论：§14.3 第 4 项就此关闭，Quest 中文层视为完成。**
+
+---
+
+## 18. 怪物血条：ASM 帮不上忙，得自己加条目（2026-08-18 复核）
+
+§11.4 的定性没错（`boss=1` 但拿不到 `tagColor` 的怪两个分支都不进，什么都不显示），
+但两处定量错了，且 §14.3 第 7 项「从 ASM 补 14 条白名单」这条路根本不存在。
+
+### 18.1 判定链（`LifeFactory:434-436`）
+
+```java
+boolean hpbarBoss = stats.isBoss() && hpbarBosses.contains(mid);
+stats.setTagColor  (hpbarBoss ? DataTool.getIntConvert("hpTagColor",   monsterInfoData, 0) : 0);
+stats.setTagBgColor(hpbarBoss ? DataTool.getIntConvert("hpTagBgcolor", monsterInfoData, 0) : 0);
+```
+
+两个条件是**与**关系，缺一个就是 0：
+
+1. 怪在 `UI.wz/UIWindow.img` 的 `MobGage/Mob` 白名单里（`LifeFactory:58` 装载）
+2. 怪自己 `Mob.wz/<id>.img` 的 `info` 下有 `hpTagColor`
+
+`Monster.hasBossHPBar()` 要 `isBoss() && getTagColor() > 0`；不满足又因 `isBoss()`
+为真而进不了 `broadcastMobHpBar` 的 `else if (!isBoss())` 百分比分支——两头落空。
+
+### 18.2 实际分布（全仓库实测）
+
+| | 怪数 |
+|---|---|
+| `boss=1` | **861** |
+| 白名单 ∩ 有 `hpTagColor` → 大血槽 | 293 |
+| 白名单 ∩ 无 `hpTagColor` → **无血条** | 64 |
+| 不在白名单 → **无血条** | **504** |
+| **合计无血条** | **568** |
+
+白名单本身 **BeiDou 1,358 条 = ASM 1,358 条，逐条相同**。
+§14.1 记的「693 / 707 / +14」两个数都是错的，**ASM 在这里零增量**。
+
+### 18.3 三条可选路，都不是「从 ASM 抄」
+
+以用户实测的狮子王之城 `8210000`–`8210005` 为例（六只都 `boss=1`、
+都不在白名单、都无 `hpTagColor`；同图的 `8210010`–`8210012` 两个条件齐全，大血槽正常）：
+
+| 方案 | 做法 | 代价 |
+|---|---|---|
+| **A. 补 wz 条目** | 给这批怪加 `MobGage/Mob/<id>` + `info/hpTagColor` | 服务端两个文件，**客户端 `UIWindow.img` 必须同步**，否则客户端画不出槽 |
+| **B. 改 Java 退回百分比条** | `else if (!isBoss())` → `else` | 一行。`9427aba5a` 试过，`7c5f612f9` 因实测不生效回退，**原因未查清** |
+| **C. 削 `boss` 标记** | 把这批怪的 `boss` 改 0 | 连带解除禁击退与固定刷新倍率，是玩法改动，不只是 UI |
+
+方案 B 目前代码已回到原状（`Monster.java:395` 仍是 `else if (!isBoss())`）。
+**在查清 B 为什么不生效之前，不要动 A**——A 要拖客户端补丁，成本高得多。
+B 不生效的可能方向：`showMonsterHP` 包对 `boss=1` 的怪被客户端忽略（那样 A 也白搭，
+只能走 C），或回退时改的位置不对。**这一条是继续之前必须先做的实验**。
