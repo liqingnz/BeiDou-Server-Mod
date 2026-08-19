@@ -720,7 +720,9 @@ public class CharacterService {
     }
 
     /**
-     * 安全清理角色登录缓存：账号未登录时其 entry 未初始化，直接调用 deleteCharacterEntry 会 NPE，此处兜底忽略。
+     * 安全清理角色登录缓存。账号未登录时其 entry 未初始化，缺条目的判空已下沉到
+     * {@link Server#deleteCharacterEntry(Integer, Integer)} 本身（那里才知道哪张表缺、缺了要跳过什么），
+     * 这里的 catch 只作为兜底，不再是唯一防线。
      */
     public void safeDeleteCharacterEntry(int accountId, int cid) {
         try {

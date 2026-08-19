@@ -51,6 +51,10 @@ public final class ItemConstants {
     public final static short ACCOUNT_SHARING = 0x100;
     public final static short MERGE_UNTRADEABLE = 0x200;
 
+    /** 披风 id 段（前闭后开），与 String.wz 的 Eqp/Cape 目录一致。 */
+    public final static int CAPE_MIN_ID = 1102000;
+    public final static int CAPE_MAX_ID = 1104000;
+
     public final static Set<Integer> permanentItemids = new HashSet<>();
 
     static {
@@ -236,6 +240,14 @@ public final class ItemConstants {
 
     public static boolean isMedal(int itemId) {
         return itemId >= 1140000 && itemId < 1143000;
+    }
+
+    /**
+     * 披风。上界取到 1104000 而不是 1103000：中文 String.wz 的 Eqp/Cape 下有 148 个
+     * 1103xxx 披风，按 1103000 划界时它们会被判成非披风，取名字/描述全为空。
+     */
+    public static boolean isCape(int itemId) {
+        return itemId >= CAPE_MIN_ID && itemId < CAPE_MAX_ID;
     }
 
     public static boolean isFace(int itemId) {

@@ -30,6 +30,7 @@ import org.gms.provider.DataTool;
 import org.gms.server.ItemInformationProvider;
 import org.gms.server.quest.Quest;
 import org.gms.server.quest.QuestRequirementType;
+import org.gms.util.I18nUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +82,7 @@ public class ItemRequirement extends AbstractQuestRequirement {
                 } else {
                     if (count < countNeeded) {
                         if (chr.getInventory(InventoryType.EQUIPPED).countById(itemId) + count >= countNeeded) {
-                            chr.dropMessage(5, "Unequip the required " + ii.getName(itemId) + " before trying this quest operation.");
+                            chr.dropMessage(5, I18nUtil.getMessage("ItemRequirement.message1", ii.getName(itemId)));
                             return false;
                         }
                     }

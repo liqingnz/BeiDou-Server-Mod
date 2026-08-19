@@ -151,7 +151,10 @@ public class ModifiedCashItemDO implements Serializable, Cloneable {
                     item.setExpiration(Server.getInstance().getCurrentTime() + DAYS.toMillis(1));
                     break;
             }
-        } else if (period == -1) {
+        } else if (period == -1 || period == 0) {
+            // 0 与 -1 都表示永久。别把 0 落到 else：DAYS.toMillis(0) 会让过期时间等于创建时间，
+            // 物品一出生就是过期状态，下一轮过期扫描（Character.checkExpirationTasks）直接删掉。
+            // CashShop.generateCouponItem 给非宠物道具传的正是 0，兑换码发的道具全中招
             item.setExpiration(-1);
         } else {
             item.setExpiration(Server.getInstance().getCurrentTime() + DAYS.toMillis(period));

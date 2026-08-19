@@ -255,7 +255,7 @@ public class ItemAction extends AbstractQuestAction {
     private void announceInventoryLimit(List<Integer> itemids, Character chr) {
         for (Integer id : itemids) {
             if (ItemInformationProvider.getInstance().isPickupRestricted(id) && chr.haveItemWithId(id, true)) {
-                chr.dropMessage(1, "Please check if you already have a similar one-of-a-kind item in your inventory.");
+                chr.dropMessage(1, I18nUtil.getMessage("ItemAction.Message2"));
                 return;
             }
         }

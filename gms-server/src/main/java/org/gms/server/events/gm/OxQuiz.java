@@ -28,6 +28,7 @@ import org.gms.provider.DataTool;
 import org.gms.provider.wz.WZFiles;
 import org.gms.server.TimerManager;
 import org.gms.server.maps.MapleMap;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 import org.gms.util.Randomizer;
 
@@ -54,7 +55,7 @@ public final class OxQuiz {
         double x = chr.getPosition().getX();
         double y = chr.getPosition().getY();
         if ((x > -234 && y > -26 && answer == 0) || (x < -234 && y > -26 && answer == 1)) {
-            chr.dropMessage("Correct!");
+            chr.dropMessage(I18nUtil.getMessage("OxQuiz.message1"));
             return true;
         }
         return false;
@@ -91,7 +92,7 @@ public final class OxQuiz {
             }
             //send question
             if (map.getCharacters().size() - number <= 2) {
-                map.broadcastMessage(PacketCreator.serverNotice(6, "The event has ended"));
+                map.broadcastMessage(PacketCreator.serverNotice(6, I18nUtil.getMessage("OxQuiz.message2")));
                 map.getPortal("join00").setPortalStatus(true);
                 map.setOx(null);
                 map.setOxQuiz(false);

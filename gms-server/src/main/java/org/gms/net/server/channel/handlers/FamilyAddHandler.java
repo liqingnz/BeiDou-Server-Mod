@@ -28,6 +28,7 @@ import org.gms.net.AbstractPacketHandler;
 import org.gms.net.packet.InPacket;
 import org.gms.net.server.coordinator.world.InviteCoordinator;
 import org.gms.net.server.coordinator.world.InviteCoordinator.InviteType;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 
 /**
@@ -62,7 +63,7 @@ public final class FamilyAddHandler extends AbstractPacketHandler {
         } else {
             InviteCoordinator.createInvite(InviteType.FAMILY, chr, addChr, addChr.getId());
             addChr.getClient().sendPacket(PacketCreator.sendFamilyInvite(chr.getId(), chr.getName()));
-            chr.dropMessage("The invite has been sent.");
+            chr.dropMessage(I18nUtil.getMessage("FamilyAddHandler.handlePacket.message1"));
             c.sendPacket(PacketCreator.enableActions());
         }
     }

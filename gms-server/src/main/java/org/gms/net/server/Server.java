@@ -1244,10 +1244,15 @@ public class Server {
     public void deleteCharacterEntry(Integer accountid, Integer chrid) {
         lgnWLock.lock();
         try {
-            accountCharacterCount.put(accountid, (short) (accountCharacterCount.get(accountid) - 1));
-
+            // 账号未登录过时这两张表没有它的条目，直接取值会在拆箱/成员集合上抛 NPE。
+            // 更麻烦的是先减计数再取集合：计数已经减掉、集合那步才炸，缓存会停在半路。
+            // 两张表都判空后再动，缺哪张就整体跳过登录缓存的清理，不影响后面 worldChars 的清理
+            Short chrCount = accountCharacterCount.get(accountid);
             Set<Integer> accChars = accountChars.get(accountid);
-            accChars.remove(chrid);
+            if (chrCount != null && accChars != null) {
+                accountCharacterCount.put(accountid, (short) (chrCount - 1));
+                accChars.remove(chrid);
+            }
 
             Integer world = worldChars.remove(chrid);
             if (world != null) {

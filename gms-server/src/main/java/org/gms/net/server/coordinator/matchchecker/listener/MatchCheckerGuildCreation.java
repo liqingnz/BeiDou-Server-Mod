@@ -31,6 +31,7 @@ import org.gms.net.server.guild.Guild;
 import org.gms.net.server.guild.GuildCharacter;
 import org.gms.net.server.guild.GuildPackets;
 import org.gms.net.server.world.Party;
+import org.gms.util.I18nUtil;
 
 import java.util.Set;
 
@@ -83,30 +84,30 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                 matchPlayers.remove(leader);
 
                 if (leader.getGuildId() > 0) {
-                    leader.dropMessage(1, "You cannot create a new Guild while in one.");
+                    leader.dropMessage(1, I18nUtil.getMessage("MatchCheckerGuildCreation.message1"));
                     broadcastGuildCreationDismiss(matchPlayers);
                     return;
                 }
                 int partyid = leader.getPartyId();
                 if (partyid == -1 || !leader.isPartyLeader()) {
-                    leader.dropMessage(1, "You cannot establish the creation of a new Guild without leading a party.");
+                    leader.dropMessage(1, I18nUtil.getMessage("MatchCheckerGuildCreation.message2"));
                     broadcastGuildCreationDismiss(matchPlayers);
                     return;
                 }
                 if (leader.getMapId() != MapId.GUILD_HQ) {
-                    leader.dropMessage(1, "You cannot establish the creation of a new Guild outside of the Guild Headquarters.");
+                    leader.dropMessage(1, I18nUtil.getMessage("MatchCheckerGuildCreation.message3"));
                     broadcastGuildCreationDismiss(matchPlayers);
                     return;
                 }
                 for (Character chr : matchPlayers) {
                     if (leader.getMap().getCharacterById(chr.getId()) == null) {
-                        leader.dropMessage(1, "You cannot establish the creation of a new Guild if one of the members is not present here.");
+                        leader.dropMessage(1, I18nUtil.getMessage("MatchCheckerGuildCreation.message4"));
                         broadcastGuildCreationDismiss(matchPlayers);
                         return;
                     }
                 }
                 if (leader.getMeso() < GameConfig.getServerInt("create_guild_cost")) {
-                    leader.dropMessage(1, "You do not have " + GameConstants.numberWithCommas(GameConfig.getServerInt("create_guild_cost")) + " mesos to create a Guild.");
+                    leader.dropMessage(1, I18nUtil.getMessage("MatchCheckerGuildCreation.message5", GameConstants.numberWithCommas(GameConfig.getServerInt("create_guild_cost"))));
                     broadcastGuildCreationDismiss(matchPlayers);
                     return;
                 }
@@ -124,7 +125,7 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                 Server.getInstance().changeRank(gid, leader.getId(), 1);
 
                 leader.sendPacket(GuildPackets.showGuildInfo(leader));
-                leader.dropMessage(1, "You have successfully created a Guild.");
+                leader.dropMessage(1, I18nUtil.getMessage("MatchCheckerGuildCreation.message6"));
 
                 for (Character chr : matchPlayers) {
                     boolean cofounder = chr.getPartyId() == partyid;
@@ -140,9 +141,9 @@ public class MatchCheckerGuildCreation implements MatchCheckerListenerRecipe {
                         chr.sendPacket(GuildPackets.showGuildInfo(chr));
 
                         if (cofounder) {
-                            chr.dropMessage(1, "You have successfully cofounded a Guild.");
+                            chr.dropMessage(1, I18nUtil.getMessage("MatchCheckerGuildCreation.message7"));
                         } else {
-                            chr.dropMessage(1, "You have successfully joined the new Guild.");
+                            chr.dropMessage(1, I18nUtil.getMessage("MatchCheckerGuildCreation.message8"));
                         }
                     }
 

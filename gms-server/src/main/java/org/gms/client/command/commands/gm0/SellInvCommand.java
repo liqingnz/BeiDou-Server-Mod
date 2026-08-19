@@ -87,9 +87,7 @@ public class SellInvCommand extends Command {
 
         Map<Item, Short> soldItems = new HashMap<>();
         Inventory inventory = player.getInventory(type);
-        // BeiDou 的 Shop.sell 返回 void、直接给玩家结算金币，
-        // 不像 LichKingMod 那样返回本次成交额，因此用前后金币差额统计
-        int mesoBefore = player.getMeso();
+        int totalSold = 0;
         // 上限取实际格数而非写死的 96，扩容过的背包才不会漏格
         for (short slot = fromSlot; slot <= inventory.getSlotLimit(); slot++) {
             Item item = inventory.getItem((byte) slot);
@@ -97,8 +95,10 @@ public class SellInvCommand extends Command {
                 continue;
             }
             short quantity = item.getQuantity();
-            shop.sell(c, type, slot, quantity);
-            // Shop.sell 有两条静默拒收路径（数量为负直接 return、canSell 为假只回一个包），
+            // 用 Shop.sell 的返回值而非前后金币差额：循环期间别的线程给的金币
+            // （组队分成、掉落拾取）会被差额法算进售出额，进而抬高回收指令的买回价
+            totalSold += shop.sell(c, type, slot, quantity);
+            // Shop.sell 有两条静默拒收路径（数量为负直接返回、canSell 为假只回一个包），
             // 物品会原样留在格子里。按实际减少的数量记账，否则回购单里会出现根本没卖掉的东西
             Item remaining = inventory.getItem((byte) slot);
             short sold = remaining == null ? quantity : (short) (quantity - remaining.getQuantity());
@@ -106,7 +106,6 @@ public class SellInvCommand extends Command {
                 soldItems.put(item, sold);
             }
         }
-        int totalSold = player.getMeso() - mesoBefore;
 
         player.yellowMessage(I18nUtil.getMessage("SellInvCommand.message4",
                 params[0].toLowerCase(), fromSlot, totalSold));

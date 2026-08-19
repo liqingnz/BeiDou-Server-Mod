@@ -17,9 +17,9 @@
 # deferred 不等于做完：它是一笔记在账上的待办，跟 rejected（终局不做）是两回事，
 # 不给它单独一档的话，暂缓项会混进 rejected 里再也没人翻出来。
 path	area	added	deleted	disposition	evidence
-config.yaml	config	70	46	pending	真配置：倍率/开关/投票回调/召回限制等，须落成 game_config 记录（批次 0）
-configServer.yaml	config	70	46	pending	真配置：倍率/开关/投票回调/召回限制等，须落成 game_config 记录（批次 0）
-configServer2.yaml	config	483	0	pending	真配置：倍率/开关/投票回调/召回限制等，须落成 game_config 记录（批次 0）
+config.yaml	config	70	46	already-fixed	LK 三份 yaml 是同一套 schema 的三个生产快照，逐键核完（基线 vs ac7830b5 全量比对，新增 20 个键、删除 4 个）：已落 game_config 11 个 —— aran_combo_last_time / cygnus_max_level_cap / max_level_cap / merchant_expire_time / mob_spawn_base_rate / mob_spawnrate_to_player_count / max_recall_time / recall_cooldown / equip_stat_randomize_range（db/lkport/R__lk_30_config_gameplay.sql）、item_slot_max 与 use_elemental_weapon_gms_levelup（db/migration/V1.7.0）；拆得更细 1 个 —— BATTLESHIP_HP_FACTOR 在 BeiDou 拆成 battleship_hp_per_skill_level + battleship_hp_per_level，且 Character.resetBattleshipHp 对非正值有退回默认；随消费代码否决 8 个 —— CHECK_FOR_VOTE_POINT/GTOP_PING_BACK_URL/NX_DECLINE_FACTOR/NX_REWARD_PER_VOTE（投票链路整条否决，见 lichkingmod-port.md:685）、USE_MTS_TO_FM（拍卖行出口改挂脚本）、exp_rate_30/exp_rate_70（随 WorldConfig 否决）、EXP_MOB_LEECH_INTERVAL（LK 把两个旋钮并成一个，BeiDou 保留 exp_split_level_interval 与 exp_split_leech_interval 各自可调）；LK 删掉的 4 个里 PET_AUTOHP_RATIO/PET_AUTOMP_RATIO BeiDou 本就没有，EXP_SPLIT_* 两个 BeiDou 保留。余下全部是 LK 自服的调参（倍率、频道数、世界名、公告语），不是移植对象
+configServer.yaml	config	70	46	already-fixed	LK 三份 yaml 是同一套 schema 的三个生产快照，逐键核完（基线 vs ac7830b5 全量比对，新增 20 个键、删除 4 个）：已落 game_config 11 个 —— aran_combo_last_time / cygnus_max_level_cap / max_level_cap / merchant_expire_time / mob_spawn_base_rate / mob_spawnrate_to_player_count / max_recall_time / recall_cooldown / equip_stat_randomize_range（db/lkport/R__lk_30_config_gameplay.sql）、item_slot_max 与 use_elemental_weapon_gms_levelup（db/migration/V1.7.0）；拆得更细 1 个 —— BATTLESHIP_HP_FACTOR 在 BeiDou 拆成 battleship_hp_per_skill_level + battleship_hp_per_level，且 Character.resetBattleshipHp 对非正值有退回默认；随消费代码否决 8 个 —— CHECK_FOR_VOTE_POINT/GTOP_PING_BACK_URL/NX_DECLINE_FACTOR/NX_REWARD_PER_VOTE（投票链路整条否决，见 lichkingmod-port.md:685）、USE_MTS_TO_FM（拍卖行出口改挂脚本）、exp_rate_30/exp_rate_70（随 WorldConfig 否决）、EXP_MOB_LEECH_INTERVAL（LK 把两个旋钮并成一个，BeiDou 保留 exp_split_level_interval 与 exp_split_leech_interval 各自可调）；LK 删掉的 4 个里 PET_AUTOHP_RATIO/PET_AUTOMP_RATIO BeiDou 本就没有，EXP_SPLIT_* 两个 BeiDou 保留。余下全部是 LK 自服的调参（倍率、频道数、世界名、公告语），不是移植对象
+configServer2.yaml	config	483	0	already-fixed	LK 三份 yaml 是同一套 schema 的三个生产快照，逐键核完（基线 vs ac7830b5 全量比对，新增 20 个键、删除 4 个）：已落 game_config 11 个 —— aran_combo_last_time / cygnus_max_level_cap / max_level_cap / merchant_expire_time / mob_spawn_base_rate / mob_spawnrate_to_player_count / max_recall_time / recall_cooldown / equip_stat_randomize_range（db/lkport/R__lk_30_config_gameplay.sql）、item_slot_max 与 use_elemental_weapon_gms_levelup（db/migration/V1.7.0）；拆得更细 1 个 —— BATTLESHIP_HP_FACTOR 在 BeiDou 拆成 battleship_hp_per_skill_level + battleship_hp_per_level，且 Character.resetBattleshipHp 对非正值有退回默认；随消费代码否决 8 个 —— CHECK_FOR_VOTE_POINT/GTOP_PING_BACK_URL/NX_DECLINE_FACTOR/NX_REWARD_PER_VOTE（投票链路整条否决，见 lichkingmod-port.md:685）、USE_MTS_TO_FM（拍卖行出口改挂脚本）、exp_rate_30/exp_rate_70（随 WorldConfig 否决）、EXP_MOB_LEECH_INTERVAL（LK 把两个旋钮并成一个，BeiDou 保留 exp_split_level_interval 与 exp_split_leech_interval 各自可调）；LK 删掉的 4 个里 PET_AUTOHP_RATIO/PET_AUTOMP_RATIO BeiDou 本就没有，EXP_SPLIT_* 两个 BeiDou 保留。余下全部是 LK 自服的调参（倍率、频道数、世界名、公告语），不是移植对象
 handbook/Cash.txt	handbook	15	5	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
 handbook/Equip/Accessory.txt	handbook	5	5	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
 handbook/Equip/Cape.txt	handbook	4	4	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
@@ -39,11 +39,11 @@ src/client/BuddyList.java	java	0	0	noise	仅格式化/空白改动（git diff -w
 src/client/BuddylistEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/MapleBuffStat.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/MapleCharacter.java	java	277	198	ported	批次6-G16：按组拆散。多数 hunk 归 G2/G3/G8/G9/G10/G11/G12/G15 及批次5；买活与升级提示语 BeiDou 无此代码。本组落地：满级广播走i18n、中文屏蔽词、角色名GBK字节上限、魔法盾/回声免驱散、圣盾挡魅惑、龙血safeAddHP。捡物 pickItemDrop 提前是 LK 引入的物品销毁回归，不搬；家族级联删除改为过继下级+加载判空（原改法解决不了删族长导致的启动NPE）
-src/client/MapleClient.java	java	47	12	pending	
+src/client/MapleClient.java	java	47	12	already-fixed	client/Client.java:756-772 recordLoginIp —— 登录 IP 与 login_history 已实现且严格更好：走 MyBatis 实体而非内联 SQL、表名不带 loginHistroy 的拼写错误、且刻意放在 finishLogin() 而非 login()（注释说明了原因：LK 的位置漏掉 bcrypt 迁移与首次接受条款两条成功路径，还会把随后被封禁拦下的尝试记成功）。deleteCharacter 重载与 deleteCharFromDB 的 force 旁路由 CharacterService 取代，见 DeleteAccountCommand / DeleteCharacterCommand 两行
 src/client/MapleDisease.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/MapleDiseaseValueHolder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/MapleFamily.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/MapleFamilyEntitlement.java	java	11	11	pending	
+src/client/MapleFamilyEntitlement.java	java	11	11	already-fixed	LK 只把枚举的 name 译成中文、效果描述仍留英文；BeiDou 的 client/FamilyEntitlement.java 已全部走 I18nUtil（12 处，键 FamilyEntitlement.message1~，见 message_zh_CN.properties:897-）
 src/client/MapleFamilyEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/MapleJob.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/MapleMount.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -155,22 +155,22 @@ src/client/inventory/MaplePet.java	java	0	0	noise	仅格式化/空白改动（gi
 src/client/inventory/ModifyInventory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/inventory/PetDataFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/inventory/manipulator/MapleCashidGenerator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/inventory/manipulator/MapleInventoryManipulator.java	java	19	1	pending	
+src/client/inventory/manipulator/MapleInventoryManipulator.java	java	19	1	rejected	三处改动都不搬：(1) 两条 System.out.println 调试残留，BeiDou 用 log4j2；(2) drop 前打印 source.toString() 却放在 source == null 判空之前，必 NPE；(3) 给飞镖单开一条按「格」而非按数量删除的分支，让 removeById 的 quantity 参数对飞镖变成格数、语义分裂，且末尾的 removeQuantity > 0 抛错检查跟着一起变味。BeiDou 保持统一的按数量语义，见 client/inventory/manipulator/InventoryManipulator.java:458-481
 src/client/inventory/manipulator/MapleKarmaManipulator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/keybind/MapleQuickslotBinding.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/newyear/NewYearCardRecord.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/processor/action/BuybackProcessor.java	java	1	1	pending	
+src/client/processor/action/BuybackProcessor.java	java	1	1	rejected	BeiDou 无买活系统——Cosmic 已整块删除，全服搜 buyback 零命中，无对应文件；LK 改动仅是买活广播的汉化
 src/client/processor/action/MakerProcessor.java	java	8	8	ported	搬 isShield 并入 removeOddMakerReagents 的 isWeapon 判定（1092xxx 落在 isWeapon 的 1302000 下界外，制作数据里有 20 个可锻造护盾，原先被误判成非武器直接拒绝攻击类宝石）。LK 的 6 处中文硬编码不照抄，连同 BeiDou 原有的 4 处英文硬编码一并转 i18n（MakerProcessor.message1..10）
 src/client/processor/action/PetAutopotProcessor.java	java	2	2	already-fixed	LK 的改动是把两行 System.out.println 调试输出注释掉，BeiDou 早已没有。而「重复消耗」这个问题本身 BeiDou 修得更好：用 useInv.lockInventory() 把「吃满就不要吃了」的判断放进锁内，注释明确写着「避免已排队的数据跳过限制」，是根治而非 LK 的加宽迟滞带
 src/client/processor/action/SpawnPetProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/processor/npc/DueyProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/client/processor/npc/FredrickProcessor.java	java	2	2	pending	
+src/client/processor/npc/FredrickProcessor.java	java	2	2	noise	纯汉化。BeiDou 已有更完整的中文，见 client/processor/npc/FredrickProcessor.java:103,105
 src/client/processor/npc/StorageProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/processor/stat/AssignAPProcessor.java	java	3	3	rejected	LK 实质改动只有升级 HP 随机区间 +2（飞侠/弓箭手 14-18→16-20、海盗 16-20→18-22），纯数值口味且照搬会失效：BeiDou 重写过 calcHpChange，随机分支被反成 useRandomizeHpmpGain && usedAPReset（AssignAPProcessor.java:860），升级永远走固定值、只有洗点卷才随机，抄进 randomMin/Max 影响的是洗点而非升级。查出的两个 BeiDou 侧问题（不在移植范围，已记入 §7）：随机分支反向；洗点 HP 疑似双算——:856 与 :865 都加了 resetValue，而同文件 calcMpChange 没有这个额外分支
 src/client/processor/stat/AssignSPProcessor.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/status/MonsterStatus.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/status/MonsterStatusEffect.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/config/ServerConfig.java	java	20	8	pending	
+src/config/ServerConfig.java	java	20	8	already-fixed	ServerConfig 是 config.yaml 的 Java 映射类，BeiDou 无此类——配置改由 GameConfig 从 game_config 表加载（org/gms/config/GameConfig.java），可热重载且 gms-ui 后台可见。LK 在本文件增删的字段与三份 yaml 的键一一对应，逐键处置见 config.yaml 那行
 src/config/WorldConfig.java	java	3	1	rejected	不搬。两处改动：新增 exp_rate_30/exp_rate_70 两个世界级阶梯经验字段——BeiDou 已有四套按等级调经验的机制且都更细（use_add_rates_by_level 每20级取斐波那契档并按角色经 ExtendValue 持久化；level_exp_rate 线性随等级；quick_level/quick_level_rate 低于目标等级越多加成越高，正是这两个键的意图但为连续斜坡而非两个断崖；use_enforce_novice_exp_rate 初心者11级前恒1x），再叠一层世界级三档只会与它们连乘。quest_rate 由 int 改 float——BeiDou 的 World.questRate 本就是 float。另 BeiDou 没有 WorldConfig 这个类，世界级配置走 game_config 表的 world 类型
 src/config/YamlConfig.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/game/ExpTable.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -234,10 +234,10 @@ src/constants/skills/Warrior.java	java	0	0	noise	仅格式化/空白改动（git
 src/constants/skills/WhiteKnight.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/skills/WindArcher.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/constants/string/CharsetConstants.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/constants/string/LanguageConstants.java	java	28	13	pending	
+src/constants/string/LanguageConstants.java	java	28	13	already-fixed	constants/string/LanguageConstants.java:92-108 —— BeiDou 新开 LANG_CN 档位填中文并保留英文原文；LK 是把中文写进 LANG_ENG 槽、把英文整段注释掉，属清单里的高频模式 1（多语言查表换硬编码）
 src/net/AbstractMaplePacketHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/MaplePacketHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/MapleServerHandler.java	java	9	2	pending	
+src/net/MapleServerHandler.java	java	9	2	already-fixed	client/Client.java:226（opcode 已按 0x%02X 十六进制打印，即 LK 第一段改动）与 client/Client.java:234-237（catch 里把 Throwable 作为最后一个参数交给 log4j2，堆栈完整打印，即 LK 第二段改动，且没有 LK 那份把 slea.toString() 重复拼两遍的 bug）。BeiDou 还保留了 enableActions() 解客户端假死，LK 把它注释掉了
 src/net/mina/MaplePacketDecoder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/mina/MaplePacketEncoder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/opcodes/RecvOpcode.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -247,7 +247,7 @@ src/net/server/PlayerBuffValueHolder.java	java	0	0	noise	仅格式化/空白改�
 src/net/server/PlayerCoolDownValueHolder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/PlayerDiseaseValueHolder.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/PlayerStorage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/Server.java	java	39	67	pending	
+src/net/server/Server.java	java	39	67	ported	net/server/Server.java:1244 deleteCharacterEntry 采纳 LK 的判空并加强：LK 只挡 accountCharacterCount 缺键，BeiDou 两张表都判（原代码先减计数再取 accountChars，缺后者会让计数停在减掉一半的状态）。CLAUDE.md 点名的这条 NPE 从此在源头挡住，CharacterService.safeDeleteCharacterEntry 的 catch 降级为兜底。其余 hunk 不搬：couponRates 的 Float 化 BeiDou 已有（Server.java:105）、排行榜查询的 try-with-resources BeiDou 已有、activeFly 预置账号 id 2 是作者给自己开的后门、CHECK_FOR_VOTE_POINT/UpdateVotePointTask 已终局否决、exprate_30/70 随 WorldConfig 否决、import 通配与启动横幅是噪音
 src/net/server/audit/LockCollector.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/audit/ThreadTracker.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/audit/locks/MonitoredLockType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -265,23 +265,23 @@ src/net/server/audit/locks/empty/EmptyWriteLock.java	java	0	0	noise	仅格式化
 src/net/server/audit/locks/factory/MonitoredReadLockFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/audit/locks/factory/MonitoredReentrantLockFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/audit/locks/factory/MonitoredWriteLockFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/Channel.java	java	6	6	pending	
+src/net/server/channel/Channel.java	java	6	6	already-fixed	LK 的改动是婚礼预约剩余时间与场地名的硬编码汉化；BeiDou 的 net/server/channel/Channel.java 已走 I18nUtil（6 处）
 src/net/server/channel/CharacterIdChannelPair.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AbstractDealDamageHandler.java	java	18	12	ported	（1）Shadower.ASSASSINATE 并入 +40000 距离容差组，Hero.BRANDISH/SPEAR_CRUSHER/POLE_ARM_CRUSHER 由 40000 提到 120000（LK 是 200000，用户决定取3倍而非5倍，放宽容差会相应削弱位移检测）。（2）真 BUG：Bandit.STEAL 无任何 BOSS 保护，全仓库也没别处兜，补 !monster.isBoss()。（3）伤害检测三档全部配置化：damage_hack_alert_ratio(1.5=原值)、damage_hack_point_ratio(5=原值)、damage_hack_severe_ratio(30)+damage_hack_severe_points(15)。LK 把告警阈值放到5倍并注释掉计分那段（净效果是伤害外挂永不计分），不采纳；配置化后运营想要 LK 口径改值即可。（4）采纳 LK 的 GM 豁免：addPoint 本就跳过 GM，只有 alert 会对 GM 触发，GM 用 @maxstats 测伤害会刷屏；加在调用点而非改 alert() 本身以免静音其他告警类型。（5）Marksman.SNIPE 固定伤害 → marksman_snipe_damage（默认195000=原值，LK直接三倍），hitDmgMax 由它 +5000 推出保持联动。（6）setLastAttack 批次5已加，already-fixed。所有新配置读取处均按上轮复查的教训做了非正数回落
 src/net/server/channel/handlers/AbstractMovementPacketHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AcceptFamilyHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AdminChatHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/AdminCommandHandler.java	java	1	1	pending	
+src/net/server/channel/handlers/AdminCommandHandler.java	java	1	1	rejected	LK 把 Character.ban(victim, ...) 改成 ban(target.getId(), ...)，但该分支正是 if (target != null) 的 else 支，target 必为 null——改完每次走到都 NPE。BeiDou 保持传角色名
 src/net/server/channel/handlers/AllianceOperationHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AranComboHandler.java	java	12	1	ported	3 秒断连窗口 → aran_combo_last_time（默认3=原值，配置缺失返回0会让连击每刀清零，故非正数退回3）；GM 连击加成 → aran_combo_gm_bonus（默认5，0=关）；满连后续期。复查修正三条：原 combo>100 分支无条件 getEffect(10) 会让低等级战神在第101连拿满级buff → 档位改取 min(skillLevel,10)、初心者例外；原 switch 只认恰好等于10的倍数，GM 每次+6 会整段跳过10/20档 → 改判「是否跨进新的十位档」；满连后每刀重登 buff（applyComboBuff 服务端 Long.MAX_VALUE 不过期，每刀一个包+一次三锁 registerEffect）→ 改为每10连续期一次。另有 LK 没有的 Short.MAX_VALUE 溢出钳位
 src/net/server/channel/handlers/AutoAggroHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/AutoAssignHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/BBSOperationHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/BeholderHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/BuddylistModifyHandler.java	java	4	4	pending	
+src/net/server/channel/handlers/BuddylistModifyHandler.java	java	4	4	already-fixed	net/server/channel/handlers/BuddylistModifyHandler.java:89 —— BeiDou 已放宽到 addName.length() < 2，比 LK 的 < 3 更宽；其余改动是好友列表提示文案的汉化
 src/net/server/channel/handlers/CancelBuffHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/CancelChairHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/CashOperationHandler.java	java	30	5	pending	
+src/net/server/channel/handlers/CashOperationHandler.java	java	30	5	rejected	两处实质改动都不搬：(1) 按 SN/10000000 == 1 强制皇家点券支付、canBuy 加 useRoyalPoint 形参（形参在方法体里根本没用到），属批次 8 皇家系统，整批不做；(2) 给 5211060（3倍经验卡）硬编码 120 级购买门槛——物品 id 与等级都写死在处理器里，BeiDou 这类运营规则走 game_config。其余是五条提示文案的汉化
 src/net/server/channel/handlers/CashShopSurpriseHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/ChangeChannelHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/ChangeMapHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -290,7 +290,7 @@ src/net/server/channel/handlers/CharInfoRequestHandler.java	java	0	0	noise	仅�
 src/net/server/channel/handlers/ClickGuideHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/CloseChalkboardHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/CloseRangeDamageHandler.java	java	6	4	rejected	LK 重新启用上游注释掉的 FAST_ATTACK 检测（共用 spam 槽位8 + 固定300ms阈值）。BeiDou 有 detectionAttackInterval：per-skill 滑动窗口+变异系数分析，带持续施法技能跳过集（暴风箭雨等）、网络抖动透明跳过、稳定高速计分/突发仅告警的分级，配独立的 ATTACK_INTERVAL 积分类型。LK 那版连暴风箭雨都会误报，整段不搬。道场秘技提示改硬编码中文亦不搬，BeiDou 已 i18n
-src/net/server/channel/handlers/CoconutHandler.java	java	2	2	pending	
+src/net/server/channel/handlers/CoconutHandler.java	java	2	2	ported	net/server/channel/handlers/CoconutHandler.java:72,75 —— 采纳 LK 的中文播报，按 CLAUDE.md 第 2 条改走 I18nUtil：新增 CoconutHandler.handlePacket.message1/message2，玩家名作为 {0} 参数（LK 是字符串拼接）
 src/net/server/channel/handlers/CouponCodeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/DamageSummonHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/DenyAllianceRequestHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -300,20 +300,20 @@ src/net/server/channel/handlers/DistributeAPHandler.java	java	0	0	noise	仅格�
 src/net/server/channel/handlers/DistributeSPHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/DoorHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/DueyHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/EnterCashShopHandler.java	java	20	2	pending	
-src/net/server/channel/handlers/EnterMTSHandler.java	java	21	6	pending	
+src/net/server/channel/handlers/EnterCashShopHandler.java	java	20	2	rejected	唯一实质改动是进商城时把投票点数兑换成点券（votePoints * NX_REWARD_PER_VOTE）。整条投票链路已终局否决——UpdateVotePointTask、UpdateVoteCommand、VotePingBackHandler 三行都是 rejected，没有点数来源这段就是死代码。其余是两条提示文案的汉化
+src/net/server/channel/handlers/EnterMTSHandler.java	java	21	6	already-fixed	net/server/channel/handlers/EnterMTSHandler.java:58-61 —— 拍卖行关闭时的替代出口已实现且更好：LK 是硬编码传送到自由市场（910000000）并自带一串等级/职业/地图白名单，BeiDou 改成挂帮助脚本 scripts-zh-CN/MapleLand/help.js（提交 a95441b1b），出口做什么由脚本定而不是写死在处理器里。其余是三条提示文案的汉化
 src/net/server/channel/handlers/FaceExpressionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/FamilyAddHandler.java	java	1	1	pending	
+src/net/server/channel/handlers/FamilyAddHandler.java	java	1	1	ported	net/server/channel/handlers/FamilyAddHandler.java:66 —— LK 的意图（中文提示）照做，但按 CLAUDE.md 第 2 条走 I18nUtil 而非硬编码：新增 FamilyAddHandler.handlePacket.message1，中英两份 message_*.properties 都补齐
 src/net/server/channel/handlers/FamilyPreceptsHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/FamilySeparateHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/FamilySummonResponseHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/FamilyUseHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/FieldDamageMobHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/FredrickHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/GeneralChatHandler.java	java	2	2	pending	
+src/net/server/channel/handlers/GeneralChatHandler.java	java	2	2	rejected	LK 给聊天日志加 && show == 0，等于只记录不带气泡的发言，另一半普通聊天不再入库——日志完整性的倒退。BeiDou 把开关下沉到 server/ChatLogger.java:15（GameConfig use_enable_chat_log），处理器侧无条件调用
 src/net/server/channel/handlers/GiveFameHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/GrenadeEffectHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/GuildOperationHandler.java	java	13	10	pending	
+src/net/server/channel/handlers/GuildOperationHandler.java	java	13	10	already-fixed	net/server/channel/handlers/GuildOperationHandler.java:51-53 —— 家族名校验已改成正则并放行中文，且比 LK 的 [a-zA-Z一-龥]+ 更宽（额外允许数字与下划线）；其余改动是建会提示文案的汉化
 src/net/server/channel/handlers/HealOvertimeHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/HiredMerchantRequest.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/InnerPortalHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -352,12 +352,12 @@ src/net/server/channel/handlers/PartySearchRegisterHandler.java	java	0	0	noise	�
 src/net/server/channel/handlers/PartySearchStartHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/PartySearchUpdateHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/PetAutoPotHandler.java	java	1	1	rejected	LK 把 setAutopotHpAlert(hp + 0.05f) 改成 +0.1f，靠加宽迟滞带缓解重复消耗。该机制在 BeiDou 不存在——Cosmic 把整套 autopot alert 换掉了，PetAutoPotHandler 只剩 8 行纯转发。不适用
-src/net/server/channel/handlers/PetChatHandler.java	java	3	3	pending	
+src/net/server/channel/handlers/PetChatHandler.java	java	3	3	rejected	LK 直接把宠物聊天日志整段注释掉。BeiDou 保留调用并由 ChatLogger 内部统一开关，见 net/server/channel/handlers/PetChatHandler.java:56
 src/net/server/channel/handlers/PetCommandHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/PetExcludeItemsHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/PetFoodHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/PetLootHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/PlayerInteractionHandler.java	java	16	13	pending	
+src/net/server/channel/handlers/PlayerInteractionHandler.java	java	16	13	rejected	除十余条汉化文案外，唯一实质改动是两处 LogHelper.logMerchantListing 调用；LogHelper 类本身已判 already-fixed（BeiDou 无此类，交易日志吸收进 Trade.logTrade），雇佣商店上架/下架日志无对应落点
 src/net/server/channel/handlers/PlayerLoggedinHandler.java	java	8	3	ported	判定下沉到 EventRecallCoordinator.recallEventInstance 后，本文件的召回调用点无需改动。LK 侧另两处：未使用的 import client.command.commands.gm4.LichDebugCommand（批次5残留）为噪声；GM 登录广播改中文，BeiDou :402 早已是中文，已是同等状态。记录不做：该行硬编码中文违反规则2，属存量且不在本次改动行上
 src/net/server/channel/handlers/PlayerMapTransitionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/QuestActionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -370,7 +370,7 @@ src/net/server/channel/handlers/ReactorHitHandler.java	java	0	0	noise	仅格式�
 src/net/server/channel/handlers/RemoteGachaponHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/RemoteStoreHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/ReportHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/RingActionHandler.java	java	3	3	pending	
+src/net/server/channel/handlers/RingActionHandler.java	java	3	3	ported	net/server/channel/handlers/RingActionHandler.java —— LK 只译了 3 条，这里把整个文件 27 条面向玩家的文案统一走 I18nUtil（键 RingActionHandler.message1~message27），半汉化的文件比全英文更难维护。注意英文侧带撇号又带占位符的三条（message23/24/25）已按 MessageFormat 规则把 ' 双写，否则占位符不会被替换
 src/net/server/channel/handlers/ScriptedItemHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/ScrollHandler.java	java	1	0	ported	去掉格式噪声后 LK 只改了一行：白医不可用时补一条文字提示。已搬为 I18nUtil.getMessage("ScrollHandler.message1")。canScroll 的 20492 饰品分支 BeiDou 早已有（ScrollHandler.java:201）
 src/net/server/channel/handlers/SkillBookHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -388,7 +388,7 @@ src/net/server/channel/handlers/TransferNameHandler.java	java	0	0	noise	仅格�
 src/net/server/channel/handlers/TransferNameResultHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/TransferWorldHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/TrockAddMapHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/channel/handlers/UseCashItemHandler.java	java	5	5	pending	
+src/net/server/channel/handlers/UseCashItemHandler.java	java	5	5	already-fixed	LK 的改动是四条提示的硬编码汉化；BeiDou 已全部走 I18nUtil（UseCashItemHandler.handlePacket.error1 / message0~message3，见 resources/i18n/message_zh_CN.properties:822-826），文件内 18 处 I18nUtil 调用
 src/net/server/channel/handlers/UseCatchItemHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/UseChairHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/UseGachaExpHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -410,7 +410,7 @@ src/net/server/coordinator/matchchecker/MapleMatchCheckerCoordinator.java	java	0
 src/net/server/coordinator/matchchecker/MatchCheckerListenerFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/coordinator/matchchecker/MatchCheckerListenerRecipe.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/coordinator/matchchecker/listener/MatchCheckerCPQChallenge.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/coordinator/matchchecker/listener/MatchCheckerGuildCreation.java	java	3	3	pending	
+src/net/server/coordinator/matchchecker/listener/MatchCheckerGuildCreation.java	java	3	3	ported	net/server/coordinator/matchchecker/listener/MatchCheckerGuildCreation.java —— LK 只译了 3 条，这里把整个文件 8 条建会提示统一走 I18nUtil（键 MatchCheckerGuildCreation.message1~message8），建会费用作为 {0} 参数
 src/net/server/coordinator/partysearch/MaplePartySearchCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/coordinator/partysearch/PartySearchCharacter.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/coordinator/partysearch/PartySearchEchelon.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -419,7 +419,7 @@ src/net/server/coordinator/session/MapleSessionCoordinator.java	java	0	0	noise	�
 src/net/server/coordinator/world/MapleEventRecallCoordinator.java	java	9	2	ported	召回后不再 remove 条目（改为可重复召回、由冷却约束），并加入掉线时刻与上次召回时刻。不照搬 LK 的实现，两处从数据结构上改掉：（1）LK 另开一张 lastRecallTime map，只 put 从不 remove 也不在 manageEventInstances 清理范围内，是按角色 id 无限增长的内存泄漏——这里把两个时间戳并进 RecallEntry record，交给已有的清理任务回收。（2）LK 用 player.getLastLogoutTime() 判断掉线多久，BeiDou 没有这个东西（lastLogoutTime 只是 characters 表一列，logOff 写入从不读回内存）——改用 storedAt，因为 storeEventInstance 正是在 EventInstanceManager.playerDisconnected 里调用的，那就是掉出活动的时刻，语义比登出时刻更准。判定整个下沉到 recallEventInstance，用 CAS(replace) 避免并发重复召回。另加 peekEventInstance 供 GM 指令使用（不受时限冷却约束、不计冷却）。已知取舍已写进 javadoc：v83 客户端退出游戏与网络掉线都是直接关 socket（同走 Client.channelInactive），服务端无法区分，故脱战重登也会被放回活动；异常状态本身不会被刷掉（playerdiseases 表持久化剩余时长，登录时重新施加），收益有限，当前有意接受
 src/net/server/coordinator/world/MapleInviteCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/coordinator/world/MapleMonsterAggroCoordinator.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/guild/MapleAlliance.java	java	1	1	pending	
+src/net/server/guild/MapleAlliance.java	java	1	1	noise	纯汉化，只改默认联盟职阶名字符串常量。BeiDou net/server/guild/Alliance.java:58 保持英文默认值；职阶名建盟后由玩家自定义并落库，默认值只在首次创建瞬间可见
 src/net/server/guild/MapleGuild.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/guild/MapleGuildCharacter.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/guild/MapleGuildResponse.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -473,7 +473,7 @@ src/net/server/task/MountTirednessTask.java	java	0	0	noise	仅格式化/空白�
 src/net/server/task/PartySearchTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/task/PetFullnessTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/task/RankingCommandTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/net/server/task/RankingLoginTask.java	java	6	3	pending	
+src/net/server/task/RankingLoginTask.java	java	6	3	already-fixed	net/server/task/RankingLoginTask.java:48,62,73 —— MySQL 8 把 rank 列为保留字，LK 的解法是把列改名 rankNumber，BeiDou 的解法是反引号 `rank`，同一个问题两种修法，BeiDou 无需改表；LK 另加的两行 System.out.println 是调试残留
 src/net/server/task/ReleaseLockTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/task/RespawnTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/task/ServerMessageTask.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -483,7 +483,7 @@ src/net/server/task/WeddingReservationTask.java	java	0	0	noise	仅格式化/空�
 src/net/server/world/MapleMessenger.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/world/MapleParty.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/world/MaplePartyCharacter.java	java	5	0	ported	新增 attemptBoss(String) 转调 ExpeditionBossLog 的字符串重载，供批次7的 PapulatusBattle.js 使用。注意它固定 log=true 是「查即扣」：LK 的脚本在构造 eligible 列表时逐成员调用，整队最终进不去也不回滚。当前无调用者不构成活缺陷，接脚本时要么拆出不记账的 canAttemptBoss 再统一登记，要么接受损耗
-src/net/server/world/World.java	java	17	6	pending	
+src/net/server/world/World.java	java	17	6	already-fixed	net/server/world/World.java:1667-1670 —— 雇佣商店过期时长已走 GameConfig merchant_expire_time，且比 LK 多一层 expireDays > 0 兜底（LK 版配 0 会让所有商店立刻关闭）。同文件另一半是三档阶梯经验（exprate_30/exprate_70）与 questrate 转 float，该重载在批次7 已随 src/config/WorldConfig.java 判为不搬，见 ShowRatesCommand 行
 src/provider/MapleCanvas.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/provider/MapleData.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/provider/MapleDataDirectoryEntry.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -503,7 +503,7 @@ src/provider/wz/WZIMGFile.java	java	0	0	noise	仅格式化/空白改动（git di
 src/provider/wz/WZTool.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/provider/wz/XMLDomMapleData.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/provider/wz/XMLWZFile.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/scripting/AbstractPlayerInteraction.java	java	338	15	pending	
+src/scripting/AbstractPlayerInteraction.java	java	338	15	ported	大头在批次6/7 已落地：startQuestPro（scripting/AbstractPlayerInteraction.java:557）、weakenAreaBoss（:1278）、isRecyclableScroll（:1312）、detectPlayer（:1357）、createExpedition 重载均已在 BeiDou。剩余两组终局不搬：皇家三方法（redeemDailyRoyalReward/gainRoyalPoint/gainRoyalTime）随批次 8 整批不做，唯一调用方 npc/9000036 已 rejected、npc/under_maintenance.js 已注明原因；邮箱五方法（getEmail/sendVerificationCode/checkEmailAndSendVerificationCode/verifyEmail/verifyChangePassword）随 MailManager 终局否决，且 LK 版把邮箱正则写死只收 qq.com、verifyChangePassword 直接把明文口令 UPDATE 进 accounts.password（BeiDou 是 bcrypt）。另 rejected：LK 把配饰 upgradeSlots 补 3 的那段注释掉并批注 why this line exist
 src/scripting/AbstractScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/event/EventInstanceManager.java	java	30	0	ported	gms-server/src/main/java/org/gms/scripting/event/EventInstanceManager.java（distributeBossCertificate 加了 itemId 参数、补角色不在地图时的空值判断；distributePQClearReward 走 getPlayers() 持读锁取快照）。registerPlayer 里那句 storeEventInstance(chr.getId(), null) 未搬——两边的 isRecallableEvent 都会把 null 挡掉，是空操作
 src/scripting/event/EventManager.java	java	12	9	rejected	startInstance(Expedition) 由 boolean 改 int 返回码，唯一意图是给远征入口脚本区分失败原因，但 LK 自己的 treeboss00.js 里那句 em.startInstance(expedition) 是注释掉的，全仓库无人消费这个返回码；改签名反而会让 BeiDou 现有远征脚本的 if (!em.startInstance(...)) 判断整体反掉。其余全是花括号换行重排
@@ -522,20 +522,20 @@ src/scripting/quest/QuestActionManager.java	java	0	0	noise	仅格式化/空白�
 src/scripting/quest/QuestScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/scripting/reactor/ReactorActionManager.java	java	1	1	already-fixed	gms-server/src/main/java/org/gms/scripting/reactor/ReactorActionManager.java:230 —— generateDropList 的 dropRate 已经是 float
 src/scripting/reactor/ReactorScriptManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/CashShop.java	java	3	2	pending	
+src/server/CashShop.java	java	3	2	ported	dao/entity/ModifiedCashItemDO.java:153 —— 采纳 LK 的 period == 0 视为永久（LK 写作 else if (period != 0)）。BeiDou 原先 period 0 会走到 setExpiration(now + DAYS.toMillis(0))，即物品一出生就是过期状态，下一轮过期扫描（client/Character.java:2857）即删；CashShop.generateCouponItem 给非宠物道具传的正是 0，兑换码发的道具全中招。LK 另一半「去掉 period == 0 ? 90 : period 默认值」不采纳：那会让 Commodity.img 里 Period=0 的商品全部变永久，是经济改动而非修 bug
 src/server/DueyPackage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MTSItemInfo.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MakerItemFactory.java	java	2	1	rejected	LK 把配方数据源从 makercreatedata/makerrecipedata 两张表换成 Etc.wz/ItemMake.img。不搬：覆盖率等价（wz 834 个 itemid vs 迁移脚本 836 行），DB 源可运营（一条 SQL vs 改 wz+重启+客户端同步），且 LK 的 getMakerRecipe 在缓存未命中且 wz 也查不到时返回 null，调用方 MakerItemFactory:41 紧接着 makerEntry.isInvalid() 会 NPE；BeiDou 的 DB 版返回全 -1 的 entry 被 getCreateStatus 的 case -1 正常拦住
-src/server/MapleItemInformationProvider.java	java	154	28	pending	
+src/server/MapleItemInformationProvider.java	java	154	28	ported	constants/inventory/ItemConstants.java:54-56,240-246（CAPE_MIN_ID/CAPE_MAX_ID + isCape）与 server/ItemInformationProvider.java:221 —— 采纳 LK 的 Eqp/Cape 上界 1102000..1103000 改 1104000，id 段提到 ItemConstants 里，判定改走 isCape()，与同一 if 链上已有的 isFace()/isHair() 一致。实测中文 String.wz 的 Eqp/Cape 下有 148 个 1103xxx 披风，卡在 1103000 时它们在 getStringData 的 if 链上一条都匹配不上，直接落到末尾 return null，取名字/描述全为空。其余 hunk 不搬或已有：Face/Hair 的 id 段 BeiDou 已用 ItemConstants.isFace/isHair 覆盖（itemType 2/5 与 3/4/6，范围与 LK 修完后一致）；ITEM_MAX_SLOT 已是 GameConfig item_slot_max 且多一层 canChangeSlotMax 判定（ItemInformationProvider.java:369-380）；EQUIP_STAT_RANDOMIZE_RANGE 已是 GameConfig equip_stat_randomize_range（:1303）；getMakerRecipe 即 BeiDou 的 getMakerItemEntry（:2156）；getItemDataById 只服务已 already-fixed 的 WhoDrops2Command。三处 rejected：godlyRandomNum 给每件掉落装备加 5% 概率的 +1~+5 属性，是 LK 自服的平衡取向而非修 bug，BeiDou 的对应旋钮是可配的 randomize range；canUseCleanSlate 被改成「只有剩余孔数为 0 才可用」并硬编码物品 1122000，BeiDou 版有 tuc==0 判定（:1053）更稳；canWearEquipment 里新增「成长装备按 reqLevel+(itemLevel-1)*5 提高穿戴等级」是 LK 自造的规则，且 <200 级、gmLevel<8 两个阈值都是拍脑袋
 src/server/MapleMarriage.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/MapleShop.java	java	4	2	pending	
+src/server/MapleShop.java	java	4	2	ported	server/Shop.java:204 sell 改为返回本次成交金额；配套 client/command/commands/gm0/SellInvCommand.java 改用返回值累加，替掉原先「前后金币差额」的估算——差额法会把循环期间其他线程给的金币（组队分成、掉落拾取）算进本次售出额，进而污染回收指令的买回价
 src/server/MapleShopFactory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MapleShopItem.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MapleSkillbookInformationProvider.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/MapleStatEffect.java	java	20	5	ported	（1）真 BUG：isHerosWill() 漏了 Corsair.HEROS_WILL，导致船长英雄意志不解除异常状态（isCureAllAbnormalStatus→StatEffect.java:955），已补；isInfusion() 里残留的 Corsair 已删——Cosmic 改名只改了一半，LK 这两行是本批唯一「LK 比 BeiDou 对」的地方。复查补充：PacketCreator.givePirateBuff/giveForeignPirateBuff 里同口径的 buffid==Corsair.HEROS_WILL 判断一并删除。（2）战舰/魔力反射/黑暗的额外防击退落成 battleship_stance=30、mana_reflection_stance=30、marksman_blind_stance=100（V1000.0.13），0=恢复原版；配套 isExtraStance() 广播 Hero.STANCE 特效——复查修正：该方法原先读实时配置而 statups 在技能加载时就固化进 SkillFactory 缓存，热改配置会「有特效无防击退」或反之，改为检查 statups 里有没有 STANCE，与 isWkCharge() 同源。战舰那条经查不是死代码——StatEffect.java:1376 会还原被 MONSTER_RIDING 覆盖的 statups。（3）USE_ULTRA_RECOVERY 条件对调纯短路顺序，噪声。（4）LK 把时空门提示改成硬编码中文违反规则2 不搬，改为补 StatEffect.message1~4
-src/server/MapleStorage.java	java	1	1	pending	
+src/server/MapleStorage.java	java	1	1	noise	纯汉化。BeiDou 已是中文，见 server/Storage.java:235
 src/server/MapleStorageInventory.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/MapleTrade.java	java	22	22	pending	
+src/server/MapleTrade.java	java	22	22	already-fixed	LK 的改动是十余条交易提示的硬编码汉化；BeiDou 的 server/Trade.java 已全部走 I18nUtil（39 处调用）
 src/server/ThreadManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/TimerManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/TimerManagerMBean.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -546,7 +546,7 @@ src/server/events/gm/MapleCoconuts.java	java	0	0	noise	仅格式化/空白改动
 src/server/events/gm/MapleEvent.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/events/gm/MapleFitness.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/events/gm/MapleOla.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/events/gm/MapleOxQuiz.java	java	2	2	pending	
+src/server/events/gm/MapleOxQuiz.java	java	2	2	ported	server/events/gm/OxQuiz.java:57,94 —— 采纳 LK 的中文文案，改走 I18nUtil：新增 OxQuiz.message1/message2
 src/server/events/gm/MapleSnowball.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/expeditions/MapleExpedition.java	java	63	39	ported	统一 addMember/addMemberInt 的判定：检查搬进 addMemberInt（返回码4），addMember 改为委托+返回码映射，保持 BeiDou 的 i18n。【复查更正】初稿称此为「活的配额绕过 BUG」，不成立——addMemberInt 的唯一调用者 scripts/npc/2101014.js 用的是 ARIANT/ARIANT1/ARIANT2，三者都没有 BossLogEntry，attemptBoss 恒放行；而 7 个 BOSS NPC 脚本调的是本来就有检查的 addMember。此次重构是消除两个入口的判定分歧（预防性收敛），不是修复。批次7给BOSS脚本接配额时须处理 2101014.js:169 对返回码4的兜底。EXPEDITION_BOSSES 补克雷塞尔双眼（MobId 新增两个常量）。其余英文→中文硬编码与缩进为噪声
 src/server/expeditions/MapleExpeditionBossLog.java	java	17	9	ported	（1）新增 BALROG_NORMAL/KREXEL/SHOWA/YAOSENG 四个条目——此前无条目使 attemptBoss 直接放行。配套 V1000.0.14 把 bosslog_daily/weekly.bosstype 从 ENUM 改为 VARCHAR(32)：V1.0.3 的 ENUM 只有原五种，新名字严格模式下 INSERT 报错、非严格模式写空串，而 insertPlayerEntry 吞掉 SQLException 后 attemptBoss 仍返回 true，不改表等于白加。（2）PINKBEAN/SCARGA entries 1→2 取 LK 值。（3）新增 attemptBoss(cid, channel, String, log) 重载。（4）修两个真 BUG 且不跟 LK 写法：Calendar.HOUR 是12小时制不动 AM_PM，下午启动会把清空点算成中午、删掉当天上午记录 → 改 HOUR_OF_DAY；set(DAY_OF_WEEK,THURSDAY) 在周日到周三指向未来周四致判定恒真、整张周榜被删 → 回退到最近一个已过去的周四。复查后再去掉12小时窗口：DELETE 按 attempttime<=该周四限定，幂等安全，带窗口时停服跨过周四会让上周记录卡到下周四
@@ -600,7 +600,7 @@ src/server/maps/MapleFootholdTree.java	java	0	0	noise	仅格式化/空白改动�
 src/server/maps/MapleGenericPortal.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MapleHiredMerchant.java	java	5	2	ported	批次6-G13：存续天数配置化（getTimeOpen 偏移按 LK 原样 + short 溢出钳制）、成交流水日志改 log4j2+i18n；其余为格式化噪声
 src/server/maps/MapleKite.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/maps/MapleMap.java	java	91	40	pending	
+src/server/maps/MapleMap.java	java	91	40	already-fixed	逐 hunk 都已有落点：(1) chRate 由 int 改 float —— server/maps/MapleMap.java:659,743,973 已是 float；(2) MOB_COUNT_MULTIPLIER 刷怪倍率 —— LK 自己在第二段就把它拆成 MOB_SPAWN_BASE_RATE/MOB_SPAWNRATE_TO_PLAYER_COUNT，BeiDou 已落成 game_config（db/lkport/R__lk_30_config_gameplay.sql:123-135）并叠加 wz 的 mobRate，见 MapleMap.java:3797,3821；(3) isDistinctive —— MonsterDropEntry 行已 ported，且 BeiDou 在装载期展开成多条掉落（server/life/MonsterInformationProvider.java:129）而非 LK 那样把数量压成 1（会把 N 个直接吞成 1 个）；(4) 四条 boss 胜利广播是汉化，BeiDou 已是中文（MapleMap.java:1387）
 src/server/maps/MapleMapFactory.java	java	3	1	ported	批次7：加 7亿段→chinese（zh-CN String.wz 已有该节点）；singapore→SG rejected（BeiDou 两层 String.wz 均无 SG 节点）
 src/server/maps/MapleMapItem.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/maps/MapleMapManager.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -642,7 +642,7 @@ src/server/quest/actions/BuffAction.java	java	0	0	noise	仅格式化/空白改�
 src/server/quest/actions/ExpAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/actions/FameAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/actions/InfoAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/quest/actions/ItemAction.java	java	3	3	pending	
+src/server/quest/actions/ItemAction.java	java	3	3	ported	server/quest/actions/ItemAction.java:258 —— 三条提示里 BeiDou 已有两条走 ItemAction.Message1，补上漏掉的唯一道具那条为 ItemAction.Message2（LK 是硬编码中文）
 src/server/quest/actions/MapleQuestAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/actions/MesoAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/actions/NextQuestAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -659,7 +659,7 @@ src/server/quest/requirements/FieldEnterRequirement.java	java	0	0	noise	仅格�
 src/server/quest/requirements/InfoExRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/requirements/InfoNumberRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/requirements/IntervalRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/quest/requirements/ItemRequirement.java	java	1	1	pending	
+src/server/quest/requirements/ItemRequirement.java	java	1	1	ported	server/quest/requirements/ItemRequirement.java:84 —— 采纳 LK 的中文文案，改走 I18nUtil：新增 ItemRequirement.message1，装备名作为 {0} 参数
 src/server/quest/requirements/JobRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/requirements/MapleQuestRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/requirements/MaxLevelRequirement.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -676,7 +676,7 @@ src/tools/ArrayMap.java	java	3	0	noise	LK 改动仅 `// HanHuaMod, remove final 
 src/tools/AutoJCE.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/tools/BCrypt.java	java	73	57	noise	LK 改动仅数组声明风格 `int P[]` → `int[] P` 与一个 import；BeiDou 侧 org/gms/util/BCrypt.java
 src/tools/DatabaseConnection.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/tools/FilePrinter.java	java	11	0	deferred	为什么缓：LK 新增的常量含 LOG_ROYAL / LOG_REDEEM_ROYAL_DAILY，属批次 8 皇家系统；BeiDou 已用 log4j2 取代 FilePrinter（仅存三处注释掉的引用），不会重建该类。什么条件下重启：批次 8 落地皇家系统时，决定这两类日志改用 log4j2 还是入库
+src/tools/FilePrinter.java	java	11	0	rejected	deferred 解除：两个触发条件都已落定。BeiDou 用 log4j2 取代 FilePrinter，全仓只剩三处注释掉的引用，不会重建该类；LK 新增常量里的 LOG_ROYAL/LOG_REDEEM_ROYAL_DAILY 随批次 8 整批不做而失效；其余审计日志（DropItem/PickupItem/QuestItemGain/MerchantList）的去向由 src/tools/LogHelper.java 那行承载（已 already-fixed）
 src/tools/HexTool.java	java	24	10	already-fixed	org/gms/util/HexTool.java —— LK 改动是增强 for 改写 + 去掉对 CharsetConstants 的耦合，BeiDou 版本本就不含字符集逻辑
 src/tools/IntervalBuilder.java	java	3	2	rejected	不搬。唯一改动是把 private final List<Line2D> intervalLimits 的 final 去掉并留了句 // HanHuaMod 注释，无行为变化；该对象是 distributePartyExperience 每次新建的局部实例，final 该留。连带本文件的消费方判定见 src/server/life/MapleMonster.java
 src/tools/LogHelper.java	java	66	16	already-fixed	org/gms/server/Trade.java:588 —— 交易日志功能已被吸收进 Trade.logTrade 并接入 i18n，BeiDou 无 LogHelper 类
@@ -711,7 +711,7 @@ src/client/command/commands/gm0/ChangePasswordCommand.java	java-new	40	0	rejecte
 src/client/command/commands/gm0/DetectCommand.java	java-new	78	0	ported	gms-server/src/main/java/org/gms/client/command/commands/gm0/DetectCommand.java + V1000.0.5 注册；判定与处罚在 AbstractPlayerInteraction.detectPlayer，参数落成 V1000.0.6 的五个 game_config 键，use_player_detect 默认关闭
 src/client/command/commands/gm0/MapDropsCommand.java	java-new	88	0	ported	org/gms/client/command/commands/gm0/MapDropsCommand.java；退化为入口，逻辑复用 scripts-zh-CN/BeiDouSpecial/当前地图掉落_当前地图.js
 src/client/command/commands/gm0/QianDaoCommand.java	java-new	86	0	already-fixed	gms-server/scripts-zh-CN/BeiDouSpecial/每日签到.js:26 已实现每日签到（角色级，走 ExtendValue 的 daily 类型自动重置，发道具 2430033）。LK 版是账号级发点券，粒度不同但功能重叠，且其实现是坏的：oneDay 被写成 10000 毫秒（真正的 24 小时被注释掉）、两行调试用 dropMessage 残留会直接打给玩家、并把签到时间存进 accounts.lastVoteTime 与投票系统抢同一列，而 BeiDou 的 AccountsDO 根本没有这一列。如需账号级签到应走 ExtendValue 的 ACCOUNT_EXTEND_DAILY 另立新需求，不是移植
-src/client/command/commands/gm0/RedeemCommand.java	java-new	90	0	deferred	为什么缓：新增文件，读写 royalAccounts 表，属批次 8 皇家系统（见 lichkingmod-port.md:403 已从批次 4 挪来）。什么条件下重启：批次 8 落地 RoyalAccount 与 royalAccounts 表时一并移植
+src/client/command/commands/gm0/RedeemCommand.java	java-new	90	0	rejected	deferred 解除：批次 8 皇家系统已由用户 2026-08-17 决定整批不做（lichkingmod-port.md §批次 8），royalAccounts 表不建，本指令随之终局不搬
 src/client/command/commands/gm0/RetrieveCommand.java	java-new	84	0	ported	org/gms/client/command/commands/gm0/RetrieveCommand.java；配套给 CommandManager 加 clearItemSold —— 原实现用 set(id, null) 清空，而批次1 已把那些 map 换成 ConcurrentHashMap，put 空值会直接抛异常。另修两处：改为整批预检背包空间再扣钱（原实现先扣钱、忽略 addFromDrop 返回值，背包满时钱扣了物品没进包、记录还被清空）；逐件按自身背包类型分支（原实现只要清单里有一件装备就把全部当装备处理）。发放一律走 addFromDrop 发原物品对象 —— 原实现对非装备用 addById(c, itemId, quantity)，那个重载新建的是 owner=null/flag=0/expiration=-1 的干净物品，而 Shop.canSell:174 只校验数量不看这些字段，两条指令又都是 gm0，普通玩家可靠 @sellinv+@retrieve 洗掉 USE/ETC 的 UNTRADEABLE、SANDBOX 标记并把限时物品变永久。预检用 checkSpaceProgressively 并按背包类型分别累加 usedSlots（checkSpace 对装备只判断还有没有一格，逐件问会得出一格能放五件的错误结论），非装备还先按 itemId+flag+owner 聚合再检查（清单一个原背包格一条记录，逐条问会让每条都看到同一份剩余堆叠容量而低估格数）。发放逐件检查返回值，放不下的留在记录里待重试并把待付金额清零，不再二次收费
 src/client/command/commands/gm0/RollCommand.java	java-new	51	0	ported	org/gms/client/command/commands/gm0/RollCommand.java
 src/client/command/commands/gm0/SellInvCommand.java	java-new	101	9	ported	org/gms/client/command/commands/gm0/SellInvCommand.java；三分支合并，格数上限改用 Inventory.getSlotLimit()
@@ -732,9 +732,9 @@ src/client/command/commands/gm4/RateEventCommand.java	java-new	88	0	rejected	不
 src/client/command/commands/gm4/SendMailCommand.java	java-new	51	0	rejected	批次6收尾终局否决：随 MailManager（另依赖同被否决的 UpdateVotePointTask）
 src/client/command/commands/gm4/UpdateVoteCommand.java	java-new	49	0	rejected	批次6收尾终局否决：随 UpdateVotePointTask。点数读写BeiDou已有 gm0/ReadPointsCommand 与 gm3/GiveVpCommand
 src/client/command/commands/gm5/ReloadConfigCommand.java	java-new	40	0	rejected	不搬。函数体只有一句 YamlConfig.fromFile("config.yaml")，而 BeiDou 没有 YamlConfig，配置走 GameConfig 单例 + game_config 表，GameConfig 的 update/remove/add 本身就是热重载，gms-ui 后台改完即时生效，不需要一个重载指令
-src/client/command/commands/gm5/RoyalCommand.java	java-new	114	0	deferred	为什么缓：新增文件，皇家点数/时长指令，属批次 8（见 lichkingmod-port.md:1074）。什么条件下重启：同 RedeemCommand
+src/client/command/commands/gm5/RoyalCommand.java	java-new	114	0	rejected	deferred 解除：同 RedeemCommand，批次 8 整批不做（lichkingmod-port.md §批次 8）
 src/client/command/commands/gm5/TestScriptCommand.java	java-new	58	0	ported	org/gms/client/command/commands/gm5/TestScriptCommand.java
-src/constants/string/CNLanguageConstants.java	java-new	41	0	pending	
+src/constants/string/CNLanguageConstants.java	java-new	41	0	already-fixed	constants/string/LanguageConstants.java:92-108 —— LK 另起一个 CNLanguageConstants 类装中文；BeiDou 把中文并进原查表的 LANG_CN 档位，无需新增类
 src/net/mailing/MailConst.java	java-new	15	0	rejected	批次6收尾终局否决：随 MailManager
 src/net/mailing/MailManager.java	java-new	131	0	rejected	批次6收尾终局否决：站外SMTP邮件，需运营邮件服务凭据；BeiDou已有JWT/AuthTokenFilter鉴权体系，账号找回真要做按自身体系写比移植这版干净
 src/net/mailing/Verifier.java	java-new	30	0	rejected	批次6收尾终局否决：随 MailManager
@@ -742,13 +742,13 @@ src/net/server/handlers/VotePingBackHandler.java	java-new	52	0	rejected	LK 全�
 src/net/server/task/UpdateVotePointTask.java	java-new	143	0	rejected	批次6收尾终局否决：是"接入gtop100这一特定站点"的运营集成而非通用功能。需真实siteid/pass；依赖已否决的邮箱验证；accounts.lastVoteTime 列BeiDou没有；调度要改接BeiDou方式属重写。将来真要接投票站按BeiDou自身体系写
 src/server/MessageBoard.java	java-new	91	0	ported	批次6收尾：重写为 Spring MessageBoardService + AbstractPlayerInteraction 两个脚本入口。去缓存（消除并发/顺序/空表白查三个坑）、按自增id排序、颜色码与角色名不入库改渲染时拼、单条DELETE替代循环泄漏、入库失败返回false不再骗调用方扣钱、入库前剥控制码防伪造GM行。注意：NPC 9800001 的 wz（String.wz/Npc.img + Map9/910000000 摆放）BeiDou 缺失，补齐前功能不可达
 src/server/gachapon/Leafre.java	java-new	74	0	ported	gachapon 工作包（批次7）：类整体移入 org.gms.server.gachapon.Leafre；扭蛋机改挂 9100111（Npc.wz 已有资源、无地图放置），不照 LK 删掉神木村的 9200000；奖池见 V1000.1.9
-src/server/ultils/RoyalAccount.java	java-new	69	0	pending	
+src/server/ultils/RoyalAccount.java	java-new	69	0	rejected	批次 8 皇家系统整批不做（用户 2026-08-17 决定，lichkingmod-port.md §批次 8）。royalAccounts 表不建，本类无消费方。附注：LK 把包名拼成了 ultils
 HeavenMS_LichKingMod.iml	other	22	0	noise	IDE 工程文件
 build.xml	other	73	0	noise	Ant 构建脚本；BeiDou 用 Maven
-cores/javax.mail-1.6.2.jar	other	0	0	pending	第三方依赖 jar；BeiDou 用 Maven 声明依赖而非入库
-helperTools/questWriter.js	other	11	0	pending	未分类，需人工判定
+cores/javax.mail-1.6.2.jar	other	0	0	rejected	JavaMail 依赖，只服务 net/mailing 那套站外 SMTP 邮件（MailManager/Verifier/MailConst 三行均已终局否决）。且 BeiDou 用 Maven 管依赖，不放 jar 进仓库
+helperTools/questWriter.js	other	11	0	rejected	11 行的 Node 单文件小工具，把 itemId/quantity 拼成一条任务对话用的 #i#t#b#c 富文本，作者自己写脚本时手动跑。不属于服务端运行时，BeiDou 也无 helperTools 目录
 hs_err_pid15580.log	other	341	0	noise	JVM 崩溃/回放日志，误提交的垃圾文件
-launch.bat	other	2	2	pending	未分类，需人工判定
+launch.bat	other	2	2	already-fixed	gms-server/launch.bat —— BeiDou 是完全不同的启动脚本（捆绑 JRE + spring.config.location + jar 启动，非 net.server.Server 主类）。LK 那两行改动的意图都已覆盖：编码用 chcp 65001 而非 -Dfile.encoding、堆大小交给 JVM 默认与运维调整
 replay_pid15580.log	other	1270	0	noise	JVM 崩溃/回放日志，误提交的垃圾文件
 tools/MapleArrowFetcher/MapleArrowFetcher.iml	other	11	0	noise	IDE 工程文件
 tools/MapleBossHpBarFetcher/MapleBossHpBarFetcher.iml	other	11	0	noise	IDE 工程文件
@@ -2046,7 +2046,7 @@ wz/String.wz/ToolTipHelp.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文�
 wz/String.wz/TransferWorld.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/String.wz/TransferWorld.img.xml
 wz/String.wz/TrialEULA.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/String.wz/TrialEULA.img.xml
 wz/UI.wz/UIWindow.img.xml	wz	0	0	rejected	LK 唯一增量是 Attendance 子树（18 个叶子），LK 自身 src/scripts/sql 零引用、BeiDou 亦零引用，是没有功能挂钩的孤儿 UI
-wz/Character.wz/**	wz-cosmetic	9423	0	pending	皇家点装/发型/脸型：LK 改动 9423 个，其中 BeiDou 完全没有 8807 个；批次 8 整体决策，不逐个列
+wz/Character.wz/**	wz-cosmetic	9423	0	rejected	批次 8 皇家系统整批不做（用户 2026-08-17 决定，lichkingmod-port.md §批次 8 与 §250 F 类）。这 8807 个点装/发型/脸型/坐骑是皇家点券商店的货架，皇家系统不落地就没有购买入口；且全部需要配套的客户端 img 补丁
 wz/Item.wz/Etc/0490.img.xml	wz-missing	0	0	rejected	4900000 六一铅笔，节日道具。LK 自己的 db_LichKingMod.sql 里该 itemid 的 drop_data_global 插入行是注释掉的，只留 DELETE
 wz/Map.wz/Obj/glacierExplorer.img.xml	wz-missing	0	0	rejected	两仓库 5334 张地图里 oS 引用数为 0，孤儿资产；服务端只扫 Obj 的 s1/mobdamage，该文件无此节点
 wz/Map.wz/Obj/trapSG.img.xml	wz-missing	0	0	deferred	541020700 唯一用户，随克雷塞尔线（LK 远征制）一并处理。ASM 无、LK 有。服务端只扫 s1/mobdamage，该文件无此节点，纯客户端渲染资源

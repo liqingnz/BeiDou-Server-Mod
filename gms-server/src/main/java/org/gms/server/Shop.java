@@ -201,11 +201,16 @@ public class Shop {
         return quantity;
     }
 
-    public void sell(Client c, InventoryType type, short slot, short quantity) {
+    /**
+     * 卖出指定格子的物品，返回本次实际入账的金币数；未成交时返回 0。
+     * 调用方（如 @sellinv 批量出售）要靠这个返回值记账，不能拿前后金币差额估算——
+     * 循环期间其他线程给的金币（组队分成、掉落拾取）会被算进本次售出额。
+     */
+    public int sell(Client c, InventoryType type, short slot, short quantity) {
         if (quantity == 0xFFFF || quantity == 0) {
             quantity = 1;
         } else if (quantity < 0) {
-            return;
+            return 0;
         }
 
         Inventory inventory = c.getPlayer().getInventory(type);
@@ -222,8 +227,10 @@ public class Shop {
                     c.getPlayer().gainMeso(recvMesos, false);
                 }
                 c.sendPacket(PacketCreator.shopTransaction((byte) 0x8));
+                return recvMesos;
             } else {
                 c.sendPacket(PacketCreator.shopTransaction((byte) 0x5));
+                return 0;
             }
         } finally {
             inventory.unlockInventory();
