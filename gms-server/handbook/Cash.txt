@@ -487,3 +487,11 @@
 5390005 - Cute Tiger Messenger - Shout to everyone in the world your character is on with this megaphone. Now available with your avatar on the top of everyone's screen! Comes with a tiger background for your avatar.
 5390006 - Roaring Tiger Messenger - Shout to everyone in the world your character is on with this megaphone. Now available with your avatar on the top of everyone's screen! Comes with a screen shaked.
 5120034 - Cloudy Meatballs - Meatballs will drop from the sky in the map your character is in for 30 seconds.
+5159000 - universal hair style coupon (VIP)
+5159001 - universal hair style coupon (REG)
+5159002 - universal face coupon (VIP)
+5159003 - universal face coupon (REG)
+5159004 - universal hair color coupon (VIP)
+5159005 - universal hair color coupon (REG)
+5211900 - 1.5x Exp Coupon
+5360900 - 1.5x Drop Coupon

@@ -4446,3 +4446,21 @@ Episode1GL
 677000011 - Mini Dungeon - Astaroth Strolling Place
 677000012 - Mini Dungeon - Astaroth Hiding Place
 
+701000000 - shanghai 上海外滩
+701010000 - 上海郊外
+701010100 - 上海北部平原
+701010200 - 上海北部小山
+701010300 - 徐州岔道
+701010600 - 徐州平原3
+701010310 - 中原山丘地带1
+701010320 - 中原山丘地带2
+701010322 - 通道
+701010323 - 危险的山丘 （蜈蚣BOSS地图）
+702070100 - 藏经阁一到二
+702060000 - 少林密室（妖僧）
+541020000 - Singapre - ulu entrance，新加坡-乌鲁入口
+541020100 - Singapre - ulu 1，新加坡-乌鲁1
+541020200 - Singapre - ulu 2，新加坡-乌鲁2
+541020500 - Singapre - ulu city，新加坡-乌鲁城中心
+541020700 - Singapre - entrance to krexel
+541020800 - Singapre - krexel

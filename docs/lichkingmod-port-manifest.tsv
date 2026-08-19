@@ -20,19 +20,19 @@ path	area	added	deleted	disposition	evidence
 config.yaml	config	70	46	already-fixed	LK 三份 yaml 是同一套 schema 的三个生产快照，逐键核完（基线 vs ac7830b5 全量比对，新增 20 个键、删除 4 个）：已落 game_config 11 个 —— aran_combo_last_time / cygnus_max_level_cap / max_level_cap / merchant_expire_time / mob_spawn_base_rate / mob_spawnrate_to_player_count / max_recall_time / recall_cooldown / equip_stat_randomize_range（db/lkport/R__lk_30_config_gameplay.sql）、item_slot_max 与 use_elemental_weapon_gms_levelup（db/migration/V1.7.0）；拆得更细 1 个 —— BATTLESHIP_HP_FACTOR 在 BeiDou 拆成 battleship_hp_per_skill_level + battleship_hp_per_level，且 Character.resetBattleshipHp 对非正值有退回默认；随消费代码否决 8 个 —— CHECK_FOR_VOTE_POINT/GTOP_PING_BACK_URL/NX_DECLINE_FACTOR/NX_REWARD_PER_VOTE（投票链路整条否决，见 lichkingmod-port.md:685）、USE_MTS_TO_FM（拍卖行出口改挂脚本）、exp_rate_30/exp_rate_70（随 WorldConfig 否决）、EXP_MOB_LEECH_INTERVAL（LK 把两个旋钮并成一个，BeiDou 保留 exp_split_level_interval 与 exp_split_leech_interval 各自可调）；LK 删掉的 4 个里 PET_AUTOHP_RATIO/PET_AUTOMP_RATIO BeiDou 本就没有，EXP_SPLIT_* 两个 BeiDou 保留。余下全部是 LK 自服的调参（倍率、频道数、世界名、公告语），不是移植对象
 configServer.yaml	config	70	46	already-fixed	LK 三份 yaml 是同一套 schema 的三个生产快照，逐键核完（基线 vs ac7830b5 全量比对，新增 20 个键、删除 4 个）：已落 game_config 11 个 —— aran_combo_last_time / cygnus_max_level_cap / max_level_cap / merchant_expire_time / mob_spawn_base_rate / mob_spawnrate_to_player_count / max_recall_time / recall_cooldown / equip_stat_randomize_range（db/lkport/R__lk_30_config_gameplay.sql）、item_slot_max 与 use_elemental_weapon_gms_levelup（db/migration/V1.7.0）；拆得更细 1 个 —— BATTLESHIP_HP_FACTOR 在 BeiDou 拆成 battleship_hp_per_skill_level + battleship_hp_per_level，且 Character.resetBattleshipHp 对非正值有退回默认；随消费代码否决 8 个 —— CHECK_FOR_VOTE_POINT/GTOP_PING_BACK_URL/NX_DECLINE_FACTOR/NX_REWARD_PER_VOTE（投票链路整条否决，见 lichkingmod-port.md:685）、USE_MTS_TO_FM（拍卖行出口改挂脚本）、exp_rate_30/exp_rate_70（随 WorldConfig 否决）、EXP_MOB_LEECH_INTERVAL（LK 把两个旋钮并成一个，BeiDou 保留 exp_split_level_interval 与 exp_split_leech_interval 各自可调）；LK 删掉的 4 个里 PET_AUTOHP_RATIO/PET_AUTOMP_RATIO BeiDou 本就没有，EXP_SPLIT_* 两个 BeiDou 保留。余下全部是 LK 自服的调参（倍率、频道数、世界名、公告语），不是移植对象
 configServer2.yaml	config	483	0	already-fixed	LK 三份 yaml 是同一套 schema 的三个生产快照，逐键核完（基线 vs ac7830b5 全量比对，新增 20 个键、删除 4 个）：已落 game_config 11 个 —— aran_combo_last_time / cygnus_max_level_cap / max_level_cap / merchant_expire_time / mob_spawn_base_rate / mob_spawnrate_to_player_count / max_recall_time / recall_cooldown / equip_stat_randomize_range（db/lkport/R__lk_30_config_gameplay.sql）、item_slot_max 与 use_elemental_weapon_gms_levelup（db/migration/V1.7.0）；拆得更细 1 个 —— BATTLESHIP_HP_FACTOR 在 BeiDou 拆成 battleship_hp_per_skill_level + battleship_hp_per_level，且 Character.resetBattleshipHp 对非正值有退回默认；随消费代码否决 8 个 —— CHECK_FOR_VOTE_POINT/GTOP_PING_BACK_URL/NX_DECLINE_FACTOR/NX_REWARD_PER_VOTE（投票链路整条否决，见 lichkingmod-port.md:685）、USE_MTS_TO_FM（拍卖行出口改挂脚本）、exp_rate_30/exp_rate_70（随 WorldConfig 否决）、EXP_MOB_LEECH_INTERVAL（LK 把两个旋钮并成一个，BeiDou 保留 exp_split_level_interval 与 exp_split_leech_interval 各自可调）；LK 删掉的 4 个里 PET_AUTOHP_RATIO/PET_AUTOMP_RATIO BeiDou 本就没有，EXP_SPLIT_* 两个 BeiDou 保留。余下全部是 LK 自服的调参（倍率、频道数、世界名、公告语），不是移植对象
-handbook/Cash.txt	handbook	15	5	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Equip/Accessory.txt	handbook	5	5	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Equip/Cape.txt	handbook	4	4	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Equip/Ring.txt	handbook	1	0	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Equip/Weapon.txt	handbook	5	1	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Etc.txt	handbook	19	15	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Map.txt	handbook	31	7	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Mob.txt	handbook	12	0	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/NPC.txt	handbook	3	0	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Quest.txt	handbook	26	2	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Setup.txt	handbook	156	37	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Skill.txt	handbook	1	1	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
-handbook/Use.txt	handbook	245	229	pending	GM 手册参考数据；BeiDou 有自己的 gms-server/handbook，需比对
+handbook/Cash.txt	handbook	15	5	ported	handbook/Cash.txt 487 → 495，并入 LK 新增的全部 8 条，Item.wz/Cash 数据齐全：5159000-5159005 六张通用美容券（lichkingmod-port.md:3413 记的待上架 SKU，脚本与 SQL 共 22 处引用）与 5211900/5360900 两张 1.5 倍券
+handbook/Equip/Accessory.txt	handbook	5	5	noise	LK 相对 HeavenMS 基线一条都没加（基线 497 = LK 497 = BeiDou 497），差异只是行序与空白
+handbook/Equip/Cape.txt	handbook	4	4	noise	LK 相对基线一条都没加（基线 178 = LK 178 = BeiDou 178）
+handbook/Equip/Ring.txt	handbook	1	0	ported	handbook/Equip/Ring.txt 112 → 113，并入 1112593 全能戒指，BeiDou 中文层 String.wz/Eqp 有该 id
+handbook/Equip/Weapon.txt	handbook	5	1	rejected	LK 新增的唯一一条 1799000「寒冰破魔 点装」是 LK 自造的点装武器，BeiDou 中文层 String.wz/Eqp 查无此 id，无装备数据
+handbook/Etc.txt	handbook	19	15	rejected	LK 新增 2 条都不并：4900000 六一铅笔 BeiDou 无 Item.wz/Etc 数据（属 Etc 孤儿名那批，用户 2026-08-19 已定案不搬）；4310100 是 LK 自造的 Nexon 点卡，条目正文直接署了「by LichKing」
+handbook/Map.txt	handbook	31	7	ported	handbook/Map.txt 4412 → 4430，并入 LK 新增的全部 18 条，逐个复验 BeiDou 的 Map.wz 都有对应地图数据（上海线 701000000-701010600、少林 702060000/702070100、新加坡乌鲁与克雷塞尔 541020000-541020800）。本文件是 IdCommand 实读的五张表之一（IdCommand.java:34）
+handbook/Mob.txt	handbook	12	0	ported	handbook/Mob.txt 1597 → 1607，并入 LK 新增的全部 10 条，BeiDou 的 Mob.wz 数据 10/10 齐全（9420514-9420522 克雷塞尔线怪物、9600025 妖僧）
+handbook/NPC.txt	handbook	3	0	rejected	LK 新增的唯一一条是 9800001 - MessageBoard (from 9040011)，但 BeiDou 的 Npc.wz 两层都没有 9800001 数据，手册里登记一个放不出来的 NPC 是误导。该条目里的关键线索「from 9040011」已收录进 lichkingmod-port.md §22，NPC 数据落地时再补手册
+handbook/Quest.txt	handbook	26	2	noise	LK 相对基线一条都没加（基线 10 = LK 10 = BeiDou 10）
+handbook/Setup.txt	handbook	156	37	ported	handbook/Setup.txt 251 → 355，并入 LK 新增 105 条里有数据的 104 条（BeiDou 的 Item.wz/Install 确有对应物品）。含 3100000/3100001 组队与BOSS凭证、3101000-3101003 周年帽/蜡烛/龙年勋章等——lichkingmod-port.md 早前记的「Item.wz/Install/0310.img.xml 整个缺失」在后续批次已补上，本次复验该文件存在且含这些 id。唯一未并的是 3010171，BeiDou 无对应物品数据
+handbook/Skill.txt	handbook	1	1	noise	LK 相对基线一条都没加（基线 543 = LK 543 = BeiDou 543）
+handbook/Use.txt	handbook	245	229	ported	handbook/Use.txt 2299 → 2301，并入 4 条里有数据的 2 条：2000100/2000101 血液精华（BeiDou 的 Item.wz/Consume 有数据，且 ItemId.java:57-58 已有 HP_PILL_LARGE/HP_PILL_SMALL 常量）。未并 2044890/2044990 两张卷轴，BeiDou 无物品数据。本文件是 IdCommand 实读的五张表之一
 src/client/AbstractCharacterListener.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/AbstractMapleCharacterObject.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/client/BuddyList.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
@@ -1330,7 +1330,7 @@ scripts/npc/9270036.js	script	0	0	ported	批次7 美容券统一：造型券→5
 scripts/npc/9270037.js	script	0	0	ported	批次7 美容券统一：造型券→5159001、染发券→5159005（双层）；实验发型分支保留样式池、菜单改标基础/实验以免与基础项重名
 scripts/npc/9270038.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/npc/9270041.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
-scripts/npc/9270045.js	script	0	0	deferred	【2026-08-18 复核：deferred 前提已失效】541020800 已随 ASM 导入补齐，Npc.wz/9270045 本就有。ASM 版已在 scripts-zh-CN/。LK 版仅 cm.warp(541020700, 0)，无移植问题
+scripts/npc/9270045.js	script	0	0	rejected	deferred 解除：2026-08-18 复核已判定前提失效，本次复验确认 scripts-zh-CN/npc/9270045.js 已存在（ASM 版），LK 版正文仅 cm.warp(541020700, 0) 一句，无可移植内容
 scripts/npc/9270047.js	script	0	0	partial	Scarga 远征 NPC。采纳 LK 的任务 4576（前往梦幻主题公园）前置门，加在「加入远征队」与「组建远征队」两处：该任务开启的正是远征所在的阴森世界，卡住它可避免把没走正常流程解锁该区域的玩家直接丢进去。提示语用 #q4576# 宏渲染任务名，不写死文案。否决：exped.getPartInfo() 对 BeiDou 统一的 em.getProperty("party")（全仓库 8 个 NPC 都用后者）、MapleExpeditionType/MaplePacketCreator 老类名、importPackage 死代码、若干 dispose 后多余的 return
 scripts/npc/9310004.js	script	0	0	rejected	东方神舟撞车：LK 与 BeiDou 各自独立做了蜈蚣入口守卫，同目标图 701010321。BeiDou 更完整——兼顾 4103/8512 两个版本的任务、支持资格证明道具 4031289 进入、带重复进入/是否扣券开关、用地图名宏；LK 只查 isQuestStarted(8512)，还带个零调用的 generateSelectionMenu
 scripts/npc/9310005.js	script	0	0	rejected	东方神舟撞车：黑羊守卫，同目标图 701010322、同退出图 701010320。BeiDou 走任务模式（任务 4109 + 完成后自动 reset）、显示收集进度、可指定落点传送门 h000；LK 只是直接扣 50 个黑羊毛，等价于 BeiDou 的 QuestMode=false 分支
@@ -2049,6 +2049,6 @@ wz/UI.wz/UIWindow.img.xml	wz	0	0	rejected	LK 唯一增量是 Attendance 子树�
 wz/Character.wz/**	wz-cosmetic	9423	0	rejected	批次 8 皇家系统整批不做（用户 2026-08-17 决定，lichkingmod-port.md §批次 8 与 §250 F 类）。这 8807 个点装/发型/脸型/坐骑是皇家点券商店的货架，皇家系统不落地就没有购买入口；且全部需要配套的客户端 img 补丁
 wz/Item.wz/Etc/0490.img.xml	wz-missing	0	0	rejected	4900000 六一铅笔，节日道具。LK 自己的 db_LichKingMod.sql 里该 itemid 的 drop_data_global 插入行是注释掉的，只留 DELETE
 wz/Map.wz/Obj/glacierExplorer.img.xml	wz-missing	0	0	rejected	两仓库 5334 张地图里 oS 引用数为 0，孤儿资产；服务端只扫 Obj 的 s1/mobdamage，该文件无此节点
-wz/Map.wz/Obj/trapSG.img.xml	wz-missing	0	0	deferred	541020700 唯一用户，随克雷塞尔线（LK 远征制）一并处理。ASM 无、LK 有。服务端只扫 s1/mobdamage，该文件无此节点，纯客户端渲染资源
+wz/Map.wz/Obj/trapSG.img.xml	wz-missing	0	0	rejected	deferred 解除：判据与批次11 给另外 10 个 Map.wz/Obj 文件用的完全一致。服务端只有 constants/game/GameConstants.java:748 一处读 Map.wz/Obj 且只扫 s1/mobdamage，实测 LK 这份 mobdamage 节点数为 0，纯客户端渲染资源。原 deferred 理由「541020700 唯一用户，随克雷塞尔线一并处理」也已失效——克雷塞尔线随 LK 远征制整体未采纳
 wz/Map.wz/Tile/grassySoil3.img.xml	wz-missing	0	0	rejected	两仓库 5334 张地图里 tS 引用数为 0，孤儿资产；服务端完全不读 Map.wz/Tile
-wz/Npc.wz/9400794.img.xml	wz-missing	0	0	deferred	749040000 舞狮活动区用。ASM 无、LK 有。该区另缺 Mob 9420602（ASM 有）与 portal 脚本 lionMask_enter（三方皆无），且 LK 内部无任何地图链接进入该区
+wz/Npc.wz/9400794.img.xml	wz-missing	0	0	rejected	deferred 解除：舞狮活动区 749040000 复验——该图内一个 94xxxxx NPC 都没引用（grep id 节点零命中），即这个 NPC 在 LK 侧也没被放进地图；全服只有同区的 749040006 指向它，属区域内部跳转，没有任何主世界地图链接进入该区。同区另缺 Mob 9420602 与 portal 脚本 lionMask_enter（三方皆无）。整条活动线不落地，NPC 数据搬来无处可用

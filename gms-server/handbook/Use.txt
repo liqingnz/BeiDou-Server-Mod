@@ -2297,3 +2297,5 @@
 2022632 - Freesia Scent - As you are surrounded by the refreshing scent of Freesias, you get a strange headache and your feet start to feel heavy. Go see Lana before the scent disappears.
 2022633 - Lavender Scent - As you are surrounded by the sweet scent of Lavenders, you get a strange headache and your feet start to feel heavy. Go see Lana before the scent disappears.
 2012008 - Unripe Onyx Apple - A mysterious and unripe Onyx Apple. When consumed, it grants the following: ATT +60, Magic ATT +70, DEF +10 for 1 minute.
+2000100 - Hp Pill - increase max hp by 500.
+2000101 - Hp Pill - increase max hp by 15.

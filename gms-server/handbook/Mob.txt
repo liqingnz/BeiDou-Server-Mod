@@ -1595,3 +1595,13 @@
 9700037 - ??? ??
 9700038 - ??? ??? ??
 2100108 - Meerkat
+9420514 - Berserkie
+9420515 - Veetron
+9420516 - Slygie
+9420517 - Petrifighter
+9420518 - Montrecer
+9420519 - Duku
+9420520 - Krexel (fake)
+9420521 - Krexel left eye
+9420522 - Krexel right eye
+9600025 - YaoSeng 妖僧

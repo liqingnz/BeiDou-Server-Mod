@@ -110,3 +110,4 @@
 1112414 - Lilin's Ring - Lilin's Ring that can be shared with any character in the same account. Cannot be put in a transaction with other accounts.
 1112812 - Shared Umbrella Ring - (no description)
 1112916 - Solo Ring - (no description)
+1112593 - almighty ring 全能戒指
