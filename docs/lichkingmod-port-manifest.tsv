@@ -1462,6 +1462,7 @@ scripts/portal/kpq2.js	script	0	0	noise	改动可证明只落在字符串字面�
 scripts/portal/kpq3.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/kpq4.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/magatia_dark0.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
+scripts/portal/mahavira_enter.js	script	0	0	ported	用户 2026-08-19 决定「6 个 portal 全挂」。scripts-zh-CN/portal/mahavira_enter.js 与 scripts/portal/mahavira_enter.js 两层各一份，并给全部 6 个通往 702100000（东方神州/大雄宝殿）的入口挂上 script 字段：702030000#5 h-top04、702050000#8 out00、702070100#1 in00、702080000#3/#4/#5。大雄宝殿自身的 4 个内部传送（h-00~h-03，类型冲撞2）不动。两处不照抄 LK：(1) LK 把落点写死成 warp(702100000, 8)，而 6 个入口的目标 portal 各不相同（h-bottom01/in00/out00/h-top03/out01），改用 pi.getPortal() 取本 portal 自身的 tm 与 tn；(2) LK 在 702030000 挂的是 mahavira_secret，而该脚本文件在 LK 仓库里根本不存在，那个入口在 LK 自己服上是坏的（脚本查不到即返回 false，玩家被弹回且无提示）。任务 8530 的正文本就写着「就可以让我进 #m702100000# 参观」，本就是为大雄宝殿设计的门槛
 scripts/portal/minar_elli.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/move_elin.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
 scripts/portal/obstacle.js	script	0	0	noise	改动可证明只落在字符串字面量与注释内（代码骨架未变）
@@ -1729,7 +1730,6 @@ scripts/npc/changePassword.js	script-new	0	0	rejected	批次6收尾终局否决�
 scripts/npc/npcTemplate.js	script-new	0	0	rejected	NPC 脚本模板，BeiDou 已有自己的脚本写法（sendNextLevel/sendSelectLevel 那套），模板不通用
 scripts/npc/testScript.js	script-new	0	0	rejected	作者自用的排版试验稿：status 0 打一段 #i#t#c 混排就 dispose，status 1 之后是从 detected.js 整段复制来的死代码（永远走不到）
 scripts/npc/verifyEmail.js	script-new	0	0	rejected	批次6收尾终局否决：随 VerifyEmailCommand
-scripts/portal/mahavira_enter.js	script-new	0	0	rejected	deferred 解除。脚本本身是给少林寺（702100000）加任务 8530「拜山门」的准入门槛，前置在 BeiDou 都齐：任务 8530 有、两张图都有、702050000 里通往 702100000 的 portal 也有，只是没挂 script 字段。不搬的理由是这道门在 LK 自己服上就形同虚设——实测全服通往 702100000 的 portal 共 6 个，分布在 702030000(1)、702050000(1)、702070100(1)、702080000(3)，而 LK 只给前两个挂了脚本（mahavira_secret 与 mahavira_enter），玩家从 702070100 或 702080000 那 4 个口进去照样不需要任务。搬一个只关 6 分之 1 的门没有意义。BeiDou 若真要做少林准入，需要 6 个 portal 全挂 + 脚本，那是 BeiDou 自己的玩法设计而非 LK 移植项。另注：702050000 的 Map.wz 行已在批次10 判 rejected（客户端一致性），但 portal script 是服务端只读字段、不影响客户端渲染，将来真要加不受那条判定阻挡
 sql/db_LichKingMod.sql	sql	492	0	ported	批次7 V1000.1.3-.6；fm店9000069/宝藏PQ 6742014 挂起随脚本组，见批次7节
 sql/db_LichKingMod_patch.sql	sql	765	0	ported	批次7 V1000.1.1-.2；GBK ALTER 全套 rejected，4张建表归批次2/4/8，nxcoupons 1.5倍券随 Java float 化
 sql/db_database.sql	sql	73	73	rejected	纯 latin1→gbk 建表噪音（§8 GBK 终局 rejected）
