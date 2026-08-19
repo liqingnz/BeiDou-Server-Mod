@@ -6003,7 +6003,7 @@ public class Character extends AbstractCharacterObject {
             if (GameConfig.getServerBoolean("use_add_slots_by_level")) {
                 if (!isGM()) {
                     for (byte i = 1; i < 5; i++) {
-                        gainSlots(i, 4, true);
+                        gainSlots(i, GameConfig.getServerInt("slots_gain_by_level", 4), true);
                     }
 
                     this.yellowMessage(I18nUtil.getMessage("Character.levelUp.USE_ADD_SLOTS_BY_LEVEL", level));

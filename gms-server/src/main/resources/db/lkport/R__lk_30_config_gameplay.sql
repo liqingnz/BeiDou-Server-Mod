@@ -535,3 +535,34 @@ WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'zh-CN' AND
 INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`)
 SELECT 'en-US', 'game_config', 'use_quest_hp_pill', 'Grant a small HP pill (permanent +10 max HP) on completing a non-repeatable quest; requires the wz data for item 2000101 first', NULL
 WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'en-US' AND `lang_code` = 'use_quest_hp_pill');
+
+-- ---------------------------------------------------------------------------
+-- [本地新增] insert_game_config_slots_gain_by_level.sql
+-- ---------------------------------------------------------------------------
+-- 每 20 级扩包时，四类背包（装备/消耗/设置/其他，不含现金栏）各增加多少格。
+-- 原实现在 Character.levelUp 里写死 4，这里参数化。本服种子值取 12：
+-- 建号时四类背包各 24 格，每 20 级 +12，到 120 级正好顶满 96 格（24 + 12*6），
+-- 再往上的扩包节点因为超过 96 会整笔跳过。想回到原版节奏把本节的 12 改回 4 即可。
+--
+-- 只有 use_add_slots_by_level 打开时才生效，且 GM 角色不参与。
+-- 上限由 canGainSlots 钳在 96 格：本次增量会让某类背包超过 96 时，
+-- 该类整笔不发（不是发到 96 封顶），玩家侧只会少一次扩包而不会报错。
+-- 因此调大本值主要是加快前中期扩包节奏，96 格的天花板不受影响。
+--
+-- 消费方 Character.levelUp 用 getServerInt(key, 4)：配置行缺失时回落到原版的 4，
+-- 而不是无参重载那个会让「开关开着但一格不加」的 0。本文件仍是这一行的唯一真源。
+--
+-- 注意本节是 WHERE NOT EXISTS，只补缺不改值：库里已经有这行的环境改本文件的 12 不会生效，
+-- 要么在 gms-ui 后台改，要么临时把本节换成先 DELETE 再 INSERT。
+
+INSERT INTO `game_config`(`config_type`, `config_sub_type`, `config_clazz`, `config_code`, `config_value`, `config_desc`, `update_time`)
+SELECT 'server', 'Game Mechanics', 'java.lang.Integer', 'slots_gain_by_level', '12', 'slots_gain_by_level', '2026-08-19 12:00:00'
+WHERE NOT EXISTS (SELECT 1 FROM `game_config` WHERE `config_code` = 'slots_gain_by_level');
+
+INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`)
+SELECT 'zh-CN', 'game_config', 'slots_gain_by_level', '开启每20级扩包后，每次为装备/消耗/设置/其他四类背包各增加的格数，原版为4；单类超过96格时该类本次不发', NULL
+WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'zh-CN' AND `lang_code` = 'slots_gain_by_level');
+
+INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`)
+SELECT 'en-US', 'game_config', 'slots_gain_by_level', 'Slots added to each of the equip/use/setup/etc inventories on every 20th level when use_add_slots_by_level is on; vanilla is 4. A type is skipped when the gain would push it past 96', NULL
+WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'en-US' AND `lang_code` = 'slots_gain_by_level');
