@@ -2383,3 +2383,4 @@
 4310000 - Perfect Pitch - This Music Note gives Inkwell the perfect pitch he's been dying to find. You can trade it for a rare item if you go to the Free Market Entrance or talk to Inkwell in Henesys before March 30th.
 4160044 - Pet Command Guide : Baby Tiger - A guide that contains commands for Baby Tiger. \n#cYou can open the book by double-clicking on it.#
 4001434 - Gachapon Food Coupon - Use this coupon on a Gachapon machine to het a veriety of food. 
+4310100 - NX现金卡 - 5000点券 - 一张价值5000点券的NX现金卡，可在商城兑换。

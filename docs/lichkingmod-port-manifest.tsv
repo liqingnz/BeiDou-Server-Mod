@@ -25,7 +25,7 @@ handbook/Equip/Accessory.txt	handbook	5	5	noise	LK 相对 HeavenMS 基线一条�
 handbook/Equip/Cape.txt	handbook	4	4	noise	LK 相对基线一条都没加（基线 178 = LK 178 = BeiDou 178）
 handbook/Equip/Ring.txt	handbook	1	0	ported	handbook/Equip/Ring.txt 112 → 113，并入 1112593 全能戒指，BeiDou 中文层 String.wz/Eqp 有该 id
 handbook/Equip/Weapon.txt	handbook	5	1	rejected	LK 新增的唯一一条 1799000「寒冰破魔 点装」是 LK 自造的点装武器，BeiDou 中文层 String.wz/Eqp 查无此 id，无装备数据
-handbook/Etc.txt	handbook	19	15	rejected	LK 新增 2 条都不并：4900000 六一铅笔 BeiDou 无 Item.wz/Etc 数据（属 Etc 孤儿名那批，用户 2026-08-19 已定案不搬）；4310100 是 LK 自造的 Nexon 点卡，条目正文直接署了「by LichKing」
+handbook/Etc.txt	handbook	19	15	ported	handbook/Etc.txt 2384 → 2385，补入 4310100「NX现金卡 - 5000点券」。此前判 rejected 判过严了——该物品 BeiDou 确有 Item.wz/Etc/0431.img.xml 数据，中文层 String.wz/Etc.img 也有正式名字，且本文件是 IdCommand.java:35 实读的五张表之一。名字用 BeiDou 自己的中文，不抄 LK 那行（LK 文案署着「by LichKing」，且自相矛盾：标题写 5000 points，正文写 worth 250 points）。另一条 4900000 六一铅笔仍不并：Item.wz/Etc/0490.img.xml 文件不存在、中文层 String.wz 也查无名字，确实无数据
 handbook/Map.txt	handbook	31	7	ported	handbook/Map.txt 4412 → 4430，并入 LK 新增的全部 18 条，逐个复验 BeiDou 的 Map.wz 都有对应地图数据（上海线 701000000-701010600、少林 702060000/702070100、新加坡乌鲁与克雷塞尔 541020000-541020800）。本文件是 IdCommand 实读的五张表之一（IdCommand.java:34）
 handbook/Mob.txt	handbook	12	0	ported	handbook/Mob.txt 1597 → 1607，并入 LK 新增的全部 10 条，BeiDou 的 Mob.wz 数据 10/10 齐全（9420514-9420522 克雷塞尔线怪物、9600025 妖僧）
 handbook/NPC.txt	handbook	3	0	rejected	LK 新增的唯一一条是 9800001 - MessageBoard (from 9040011)，但 BeiDou 的 Npc.wz 两层都没有 9800001 数据，手册里登记一个放不出来的 NPC 是误导。该条目里的关键线索「from 9040011」已收录进 lichkingmod-port.md §22，NPC 数据落地时再补手册
