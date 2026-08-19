@@ -42,7 +42,7 @@ public class SetGmLevelCommand extends Command {
         }
 
         int newLevel = Integer.parseInt(params[1]);
-        Character target = c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]);
+        Character target = resolveTarget(c, params[0]);
         if (target != null) {
             target.setGMLevel(newLevel);
             target.getClient().setGMLevel(newLevel);

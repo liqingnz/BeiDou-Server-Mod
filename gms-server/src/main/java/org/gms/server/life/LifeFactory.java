@@ -246,8 +246,31 @@ public class LifeFactory {
      * 如果这里不沿着 link 查找，后续 bbox 会退化为“没有碰撞数据”，DISTANCE_HACK 就会误判。</p>
      */
     private static Data resolveMonsterVisualData(int mid, Data monsterData) {
+        int visualMid = resolveVisualMonsterId(mid, monsterData);
+        return visualMid == mid ? monsterData : getMonsterData(visualMid);
+    }
+
+    /**
+     * 沿 {@code info/link} 找到真正持有动作帧的那只怪的 id。
+     *
+     * <p>全仓 2380 个 Mob img 里有 475 个自己一个 {@code stand}/{@code fly} 节点都没有
+     * （全部是 link 怪），其中 474 个走一跳 link 就能找到帧，剩 1 个（{@code 0000027} →
+     * {@code 0000025}）的 link 目标在 wz 里根本不存在。</p>
+     *
+     * <p><b>要拿这个 id 去拼客户端资源路径的调用方注意</b>：
+     * {@code #fMob/<id>.img/stand/0#} 里的 id 必须是本方法返回的这个，
+     * 不能是原始 mid——link 怪自己的 img 里只有 {@code info}，客户端解引用一张不存在的画布会闪退。
+     * 见 {@link org.gms.util.MobTextUtil}。</p>
+     *
+     * @return 持有动作帧的怪 id；一路找不到时返回传入的 mid（调用方自行兜底）
+     */
+    public static int resolveVisualMonsterId(int mid) {
+        return resolveVisualMonsterId(mid, getMonsterData(mid));
+    }
+
+    private static int resolveVisualMonsterId(int mid, Data monsterData) {
         if (monsterData == null) {
-            return null;
+            return mid;
         }
 
         Set<Integer> visitedMobs = new HashSet<>();
@@ -255,7 +278,7 @@ public class LifeFactory {
         int currentMid = mid;
         while (currentMonsterData != null && visitedMobs.add(currentMid)) {
             if (hasVisualBoundingBoxSource(currentMonsterData)) {
-                return currentMonsterData;
+                return currentMid;
             }
 
             Data currentInfoData = currentMonsterData.getChildByPath("info");
@@ -267,7 +290,33 @@ public class LifeFactory {
             currentMonsterData = getMonsterData(linkMid);
             currentMid = linkMid;
         }
-        return monsterData;
+        return mid;
+    }
+
+    /**
+     * 找到一帧**客户端能直接按路径取到**的怪物动作帧。
+     *
+     * <p>与 {@link #resolveVisualFrame} 的区别是这里<b>不接受 UOL</b>：那个方法为了填 bbox 会把
+     * UOL 解引用到最终 canvas，而调用方（{@link org.gms.util.MobTextUtil}）要把这个 id 和动作名
+     * 拼成 {@code #fMob/<id>.img/<action>/0#} 交给客户端自己去取——中途要不要跟 UOL 由客户端决定，
+     * 服务端这边替它下结论不安全。全仓只有 {@code 9400294} 一只怪的 {@code stand/0} 是跨 img 的 UOL，
+     * 为它多担一份不确定性不划算，直接当作没有立绘。</p>
+     *
+     * @return (持有该帧的怪 id, 动作名)；一路找不到直接可取的帧时返回 null
+     */
+    public static Pair<Integer, String> resolveRenderableFrame(int mid) {
+        int visualMid = resolveVisualMonsterId(mid);
+        Data visualData = getMonsterData(visualMid);
+        if (visualData == null) {
+            return null;
+        }
+        for (String action : new String[]{"fly", "stand"}) {
+            Data frame = visualData.getChildByPath(action + "/0");
+            if (frame != null && frame.getType() == DataType.CANVAS) {
+                return new Pair<>(visualMid, action);
+            }
+        }
+        return null;
     }
 
     /**

@@ -28,7 +28,6 @@ import org.gms.client.Client;
 import org.gms.client.command.Command;
 import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
-import org.gms.util.StringUtil;
 
 public class TimerCommand extends Command {
     {
@@ -43,10 +42,7 @@ public class TimerCommand extends Command {
             return;
         }
 
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim == null && StringUtil.isNumeric(params[0])) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterById(Integer.parseInt(params[0]));
-        }
+        Character victim = resolveTarget(c, params[0]);
         if (victim != null) {
             if (params[1].equalsIgnoreCase("remove") || "移除".equals(params[1])) {
                 victim.sendPacket(PacketCreator.removeClock());

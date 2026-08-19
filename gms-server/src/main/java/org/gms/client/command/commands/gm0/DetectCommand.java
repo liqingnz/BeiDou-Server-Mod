@@ -45,7 +45,7 @@ public class DetectCommand extends Command {
         }
 
         // 原实现逐个频道遍历 getPlayerStorage()，改用全区在线列表，省得为了测别人先跳频道
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        Character victim = resolveTarget(c, params[0]);
         if (victim == null || !victim.isLoggedInWorld()) {
             player.dropMessage(6, I18nUtil.getMessage("DetectCommand.message2", params[0]));
             return;

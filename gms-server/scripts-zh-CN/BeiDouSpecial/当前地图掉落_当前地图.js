@@ -149,22 +149,29 @@ function countAllSymbols(str) {
 }
 
 /**
- * 以下函数在某些特定的情况下可能会导致客户端闪退
+ * 怪物立绘。
+ *
+ * 原实现顶上写着「以下函数在某些特定的情况下可能会导致客户端闪退」，
+ * 2026-08-20 定位到根因并修掉，改调 Java 侧统一实现 org.gms.util.MobTextUtil。
+ * 两个坑（全仓 2380 个 Mob img 实测）：
+ *
+ *   1. 475 个怪自己的 img 里只有 info，动作帧全挂在 info/link 指向的怪身上。而 movetype 是
+ *      LifeFactory 沿 link 取回来的，描述的是 link 目标那只怪；拿它去拼**本怪自己**的路径，
+ *      客户端解引用一张不存在的画布 → 闪退。MobTextUtil 会把路径里的 id 也解析到持有帧的那只怪，
+ *      所以 link 怪拿到的是真图而不是占位图。
+ *      （同目录的 怪物手册.js 一直没炸，是因为它多判了一句 mobImg.getChildByPath(type) == null，
+ *        但那样 link 怪只能显示占位图。）
+ *
+ *   2. 尺寸守卫原本是 width > 160 && height > 250，是「与」。实测 442 个超标的怪里有 312 个
+ *      只超一边（最大 1310x642），全从 && 底下漏过去了。Java 侧改成「或」。
+ *
  * @param mob
  * @returns {string}
  */
 function getMobImage(mob){
-    let type = [null,'stand','fly']
-        type = type[mob.getStats().getMovetype() + 1];    //-1=未知类型，0=陆地类型，1=飞天类型
-    if(type == null) {
-        return `#fUI/UIWindow.img/Maker/randomRecipe#`;     //没有怪物图片时显示一个问号。
-    } else if (mob.getStats().getImgwidth() > 160 && mob.getStats().getImgheight() > 250) { //如果图片超过指定范围会造成客户端假死，因此这里需要替换成别的图片或者干脆不要。
-        return `#fMap/Obj/Tdungeon.img/mushCatle/npc/0/0#\r\n(形象过大，不能展示)`;
-    } else {
-        //当前怪物ID最多7位数，不足7位数则需要在前面补0
-        return `#fMob/${mob.getId().toString().padStart(7, '0')}.img/${type}/0#`;
-    }
+    return Java.type('org.gms.util.MobTextUtil').mobImage(mob);
 }
+
 
 function getLevelImage(level,type) {
     let UI = []

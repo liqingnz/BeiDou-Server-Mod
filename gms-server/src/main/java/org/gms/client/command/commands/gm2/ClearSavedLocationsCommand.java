@@ -39,7 +39,7 @@ public class ClearSavedLocationsCommand extends Command {
         Character player = c.getPlayer(), victim;
 
         if (params.length > 0) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            victim = resolveTarget(c, params[0]);
             if (victim == null) {
                 player.message(I18nUtil.getMessage("BombCommand.message3", params[0]));
                 return;

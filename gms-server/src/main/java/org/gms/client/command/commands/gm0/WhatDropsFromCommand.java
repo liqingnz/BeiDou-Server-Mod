@@ -21,7 +21,7 @@
 /*
    @Author: Arthur L - Refactored command content into modules
 */
-package org.gms.client.command.commands.gm1;
+package org.gms.client.command.commands.gm0;
 
 import org.gms.client.Character;
 import org.gms.client.Client;
@@ -31,11 +31,21 @@ import org.gms.server.ItemInformationProvider;
 import org.gms.server.life.MonsterDropEntry;
 import org.gms.server.life.MonsterInformationProvider;
 import org.gms.util.I18nUtil;
+import org.gms.util.MobTextUtil;
 import org.gms.util.Pair;
 
 import java.util.Iterator;
 
 public class WhatDropsFromCommand extends Command {
+    /**
+     * 每只怪最多列几件掉落。
+     * <p>
+     * 客户端对话框高度固定且没有滚动条，装不下的部分不会画出来——服务端这边一个字都没截
+     * （{@code npcTalk} 直到 {@code writeString} 全程无长度检查），所以只能自己收着发。
+     * 超出的件数在末尾明说，免得玩家以为就这么多。
+     */
+    private static final int DROP_LIMIT = 12;
+
     {
         setDescription(I18nUtil.getMessage("WhatDropsFromCommand.message1"));
     }
@@ -56,20 +66,34 @@ public class WhatDropsFromCommand extends Command {
                 Pair<Integer, String> data = listIterator.next();
                 int mobId = data.getLeft();
                 String mobName = data.getRight();
-                output.append(mobName).append(" ").append(I18nUtil.getMessage("WhatDropsFromCommand.message3")).append("\r\n\r\n");
+                // 立绘走 MobTextUtil：路径里的怪 id 必须是 link 解析过的，
+                // 直接用 mobId 会让 20% 的怪（自己没有动作帧的 link 怪）把客户端搞崩
+                output.append(MobTextUtil.mobImage(mobId)).append("\r\n")
+                        .append("#r").append(mobName).append("#k ")
+                        .append(I18nUtil.getMessage("WhatDropsFromCommand.message3")).append("\r\n\r\n");
+                int shown = 0;
+                int omitted = 0;
                 for (MonsterDropEntry drop : MonsterInformationProvider.getInstance().retrieveDrop(mobId)) {
                     try {
                         String name = ItemInformationProvider.getInstance().getName(drop.itemId);
                         if (name == null || name.equals("null") || drop.chance == 0) {
                             continue;
                         }
+                        if (shown >= DROP_LIMIT) {
+                            omitted++;
+                            continue;   // 继续走完循环才能数清剩几件，不能直接 break
+                        }
                         // 计算精度丢失的问题
                         float chance = Math.max(1000000F / drop.chance / (!MonsterInformationProvider.getInstance().isBoss(mobId) ? player.getDropRate() : player.getBossDropRate()), 1);
                         // #v 物品图标 + #z 物品名，客户端富文本渲染（LK ac7830b5 的显示改进；保留按怪名搜索，不跟 LK 改成按 id）
                         output.append("- #v").append(drop.itemId).append("##z").append(drop.itemId).append("# (1/").append((int) chance).append(")\r\n");
+                        shown++;
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
+                }
+                if (omitted > 0) {
+                    output.append(I18nUtil.getMessage("WhatDropsFromCommand.message4", omitted)).append("\r\n");
                 }
                 output.append("\r\n");
             }

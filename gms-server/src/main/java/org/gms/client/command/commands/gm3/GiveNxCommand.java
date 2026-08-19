@@ -27,7 +27,6 @@ import org.gms.client.Character;
 import org.gms.client.Client;
 import org.gms.client.command.Command;
 import org.gms.util.I18nUtil;
-import org.gms.util.StringUtil;
 
 public class GiveNxCommand extends Command {
     {
@@ -72,13 +71,11 @@ public class GiveNxCommand extends Command {
             value = Integer.parseInt(params[0]);
         }
 
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(recv);
-        if (victim == null && StringUtil.isNumeric(recv)) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterById(Integer.parseInt(recv));
-        }
+        Character victim = resolveTarget(c, recv);
         if (victim != null) {
             victim.getCashShop().gainCash(type, value);
-            player.message(I18nUtil.getMessage("GiveNxCommand.message3", typeStr.toUpperCase()));
+            // 回执带上金额与目标名：批量发券时只回一句「已发放」看不出发给了谁、发了多少
+            player.message(I18nUtil.getMessage("GiveNxCommand.message3", value, typeStr.toUpperCase(), victim.getName()));
         } else {
             player.message(I18nUtil.getMessage("BombCommand.message3", recv));
         }

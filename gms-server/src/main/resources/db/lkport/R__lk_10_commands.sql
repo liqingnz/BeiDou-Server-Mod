@@ -142,3 +142,28 @@ WHERE NOT EXISTS (SELECT 1 FROM `command_info` WHERE `syntax` = 'recall');
 INSERT INTO `command_info`(`syntax`, `level`, `enabled`, `clazz`, `default_level`)
 SELECT 'analysis', 2, 1, 'BossDmgAnalysisCommand', 2
 WHERE NOT EXISTS (SELECT 1 FROM `command_info` WHERE `syntax` = 'analysis');
+
+-- ---------------------------------------------------------------------------
+-- 掉落查询三件套：重排入口 + 整组降到 gm0
+-- ---------------------------------------------------------------------------
+-- 批次 1 把 @whodrops 整个改成了脚本入口（按分类浏览），LK 那份「按物品名/id 直接查」
+-- 的文本查询就此没了着落。这里拆回两个入口：
+--   @whodrops   按物品名或物品 id 查掉落源，带角色实际掉率        gm0/WhoDropsCommand（新）
+--   @droptable  原来的分类浏览脚本入口                            gm0/DropTableCommand（原 WhoDropsCommand 改名）
+--   @whatdropsfrom 按怪物查掉落                                   gm0/WhatDropsFromCommand（从 gm1 移包）
+-- 三个都是纯查询，和早就在 gm0 的 @mapdrops 齐平，故 level 与 default_level 一并降到 0。
+-- 上游 V1.5.1__create_command_info.sql 把 whodrops/whatdropsfrom 播种在 level 1，本段覆盖它。
+--
+-- 【为什么是 DELETE + INSERT 而不是 UPDATE】
+--   WhoDropsCommand 这个类名被复用了（旧实现改叫 DropTableCommand，新实现顶上原名）。
+--   写成 UPDATE ... WHERE clazz='WhoDropsCommand' 的话，第二次重跑会把**新的** WhoDropsCommand
+--   也改名成 droptable。按 syntax 先删后插才是幂等的。
+--
+-- 【副作用】重跑会覆盖运营在 gms-ui 后台对这三行 level/enabled 的手工调整——迁移期有意如此。
+--   若上线后发现 @whodrops / @whatdropsfrom 的模糊搜索（要遍历全量物品/怪物名）被玩家刷，
+--   最省事的处置就是把这里的 level 调回 1，不必改代码。
+DELETE FROM `command_info` WHERE `syntax` IN ('whodrops', 'droptable', 'whatdropsfrom');
+INSERT INTO `command_info`(`syntax`, `level`, `enabled`, `clazz`, `default_level`) VALUES
+    ('whodrops',      0, 1, 'WhoDropsCommand',      0),
+    ('droptable',     0, 1, 'DropTableCommand',     0),
+    ('whatdropsfrom', 0, 1, 'WhatDropsFromCommand', 0);

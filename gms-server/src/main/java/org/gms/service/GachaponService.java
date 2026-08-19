@@ -10,6 +10,7 @@ import org.gms.dao.entity.GachaponRewardDO;
 import org.gms.dao.entity.GachaponRewardPoolDO;
 import org.gms.dao.mapper.GachaponRewardMapper;
 import org.gms.dao.mapper.GachaponRewardPoolMapper;
+import org.gms.model.dto.GachaponPoolRewardsDTO;
 import org.gms.model.dto.GachaponPoolSearchReqDTO;
 import org.gms.model.dto.GachaponPoolSearchRtnDTO;
 import org.gms.net.server.Server;
@@ -27,8 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -173,18 +177,40 @@ public class GachaponService {
         }
     }
 
-    private void setRealProb(List<GachaponPoolSearchRtnDTO> pools) {
-        int probTotal = pools.stream().mapToInt(GachaponPoolSearchRtnDTO::getProb).sum();
-        int probPoint = 100 * probTotal;
-        int weightPoint = 1000000 - probPoint;
+    /**
+     * 一组奖池各自的命中概率，单位 1/1000000。
+     * <p>
+     * 公共奖池（{@code is_public}）吃固定的 {@code prob}，其余奖池按 {@code weight} 瓜分剩下的额度。
+     * 注意 {@code is_public} 不是「是否对玩家可见」，而是「用固定概率而非权重分配」，
+     * 且公共池跨所有扭蛋机共享（见 {@link #getActivePools}）。
+     * <p>
+     * 这段公式有三个消费方——真正抽奖的 {@link #pickPool}、gms-ui 后台列表的 {@link #setRealProb}、
+     * 游戏内展示的 {@link #getRewardsGroupedByNpcId}。**只能有这一份**，各抄一份必然漂移，
+     * 变成「后台显示的概率、实际抽到的概率、游戏里写的概率」三者对不上。
+     *
+     * @return poolId → realProb，顺序与入参无关
+     */
+    private static Map<Integer, Integer> computeRealProbs(List<? extends GachaponRewardPoolDO> pools) {
+        int probTotal = pools.stream().mapToInt(GachaponRewardPoolDO::getProb).sum();
+        int probPoint = 100 * probTotal;            // 公共奖池积分总额
+        int weightPoint = 1000000 - probPoint;      // 非公共奖池积分总额
+        int totalWeight = pools.stream().mapToInt(GachaponRewardPoolDO::getWeight).sum();
 
-        int totalWeight = pools.stream().mapToInt(GachaponPoolSearchRtnDTO::getWeight).sum(); // 总权重
-        for (GachaponPoolSearchRtnDTO pool : pools) {
+        Map<Integer, Integer> probs = new LinkedHashMap<>();
+        for (GachaponRewardPoolDO pool : pools) {
             if (pool.getIsPublic()) {
-                pool.setRealProb(pool.getProb() * 100);
+                probs.put(pool.getId(), pool.getProb() * 100);
             } else {
-                pool.setRealProb(Math.round((float) weightPoint * pool.getWeight() / totalWeight));
+                probs.put(pool.getId(), Math.round((float) weightPoint * pool.getWeight() / totalWeight));
             }
+        }
+        return probs;
+    }
+
+    private void setRealProb(List<GachaponPoolSearchRtnDTO> pools) {
+        Map<Integer, Integer> probs = computeRealProbs(pools);
+        for (GachaponPoolSearchRtnDTO pool : pools) {
+            pool.setRealProb(probs.get(pool.getId()));
         }
     }
 
@@ -267,25 +293,12 @@ public class GachaponService {
                 return null;
             }
 
-            int point; // 积分
+            Map<Integer, Integer> probs = computeRealProbs(pools);   // 公式只此一份，见 computeRealProbs
             int pointTotal = 0; // 累计积分
-
-            int probTotal = pools.stream().mapToInt(GachaponRewardPoolDO::getProb).sum();
-            int probPoint = 100 * probTotal; // 公共奖池积分总额
-            int weightPoint = 1000000 - probPoint; // 非公共奖池积分总额
-
-            int totalWeight = pools.stream().mapToInt(GachaponRewardPoolDO::getWeight).sum(); // 总权重
             int random = Randomizer.nextInt(1000000); // 随机数
             GachaponRewardPoolDO target = null;
             for (GachaponRewardPoolDO pool : pools) {
-                // 按权重分配积分
-                if (pool.getIsPublic()) {
-                    point = pool.getProb() * 100;
-                } else {
-                    point = Math.round((float) weightPoint * pool.getWeight() / totalWeight);
-                }
-
-                pointTotal += point;
+                pointTotal += probs.get(pool.getId());
 
                 if (pointTotal > random) {
                     target = pool;
@@ -303,9 +316,40 @@ public class GachaponService {
         }
     }
 
-    public List<GachaponRewardDO> getRewardsByNpcId(Integer npcId) {
-        List<GachaponRewardPoolDO> activePools = getActivePools(npcId);
-        return activePools.stream().flatMap(pool -> getRewards(pool.getId()).stream()).toList();
+    /**
+     * 某台扭蛋机的奖励，**按奖池分组**，稀有的排前面。
+     * <p>
+     * LichKingMod 的展示按 tier 2/1/0 分三档；BeiDou 把整套抽奖换成了 DB 奖池模型，
+     * 奖池就是那个「档」，而且档数可配、每档有真实概率、还带生效时间窗。
+     * 原先那份平铺的 getRewardsByNpcId 看不出稀有度，已由本方法取代并删除。
+     * <p>
+     * 池内奖励走 {@link #getPoolRewards}——也就是 {@code doReward} 真正抽取的那份，
+     * 保证「列出来的」就是「抽得到的」。
+     *
+     * @return 按命中概率升序（越稀有越靠前），空池不出现在结果里
+     */
+    public List<GachaponPoolRewardsDTO> getRewardsGroupedByNpcId(Integer npcId) {
+        rLock.lock();
+        try {
+            List<GachaponRewardPoolDO> pools = getActivePools(npcId);
+            if (pools.isEmpty()) {
+                return List.of();
+            }
+
+            Map<Integer, Integer> probs = computeRealProbs(pools);
+            List<GachaponPoolRewardsDTO> grouped = new ArrayList<>(pools.size());
+            for (GachaponRewardPoolDO pool : pools) {
+                List<GachaponRewardDO> rewards = getPoolRewards(pool.getId());
+                if (rewards.isEmpty()) {
+                    continue;
+                }
+                grouped.add(new GachaponPoolRewardsDTO(pool.getName(), probs.get(pool.getId()), rewards));
+            }
+            grouped.sort(Comparator.comparingInt(GachaponPoolRewardsDTO::getRealProb));
+            return grouped;
+        } finally {
+            rLock.unlock();
+        }
     }
 
     /**

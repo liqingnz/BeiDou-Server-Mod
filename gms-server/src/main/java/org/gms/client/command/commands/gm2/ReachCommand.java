@@ -28,7 +28,6 @@ import org.gms.client.Client;
 import org.gms.client.command.Command;
 import org.gms.server.maps.MapleMap;
 import org.gms.util.I18nUtil;
-import org.gms.util.StringUtil;
 
 public class ReachCommand extends Command {
     {
@@ -43,10 +42,7 @@ public class ReachCommand extends Command {
             return;
         }
 
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim == null && StringUtil.isNumeric(params[0])) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterById(Integer.parseInt(params[0]));
-        }
+        Character victim = resolveTarget(c, params[0]);
         if (victim != null && victim.isLoggedIn()) {
             if (player.getClient().getChannel() != victim.getClient().getChannel()) {
                 player.dropMessage(5, I18nUtil.getMessage("ReachCommand.message3", victim.getName() ,victim.getClient().getChannel()));

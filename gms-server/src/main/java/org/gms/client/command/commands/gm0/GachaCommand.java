@@ -28,21 +28,33 @@ import org.gms.client.command.Command;
 import org.gms.constants.id.NpcId;
 import org.gms.dao.entity.GachaponRewardDO;
 import org.gms.manager.ServerManager;
+import org.gms.model.dto.GachaponPoolRewardsDTO;
 import org.gms.server.gachapon.Gachapon;
 import org.gms.service.GachaponService;
 import org.gms.util.I18nUtil;
 
-import java.util.List;
-
 public class GachaCommand extends Command {
+    /** 不带参数时拉起的选单脚本，与 NPC「扭蛋奖励播报员」是同一份 */
+    private static final String SCRIPT_NAME = "gachaponInfo";
+
     {
         setDescription(I18nUtil.getMessage("GachaCommand.message1"));
     }
 
     @Override
     public void execute(Client c, String[] params) {
+        String search = c.getPlayer().getLastCommandMessage().trim();
+
+        // 不带参数就开选单，别逼玩家把城镇名一字不差地敲对。脚本本身早就在，只是没接到指令上，
+        // 与 @goto / @cospreview / @droptable 一个做法
+        if (search.isEmpty()) {
+            if (!c.getPlayer().getAbstractPlayerInteraction().openNpc(NpcId.MAPLE_ADMINISTRATOR, SCRIPT_NAME)) {
+                c.getPlayer().yellowMessage(I18nUtil.getMessage("Command.scriptMissing", SCRIPT_NAME));
+            }
+            return;
+        }
+
         Gachapon.GachaponType gacha = null;
-        String search = c.getPlayer().getLastCommandMessage();
         String gachaName = "";
         String[] names = Gachapon.GachaponType.getLootNames();
         int[] ids = Gachapon.GachaponType.getLootIds();
@@ -61,15 +73,28 @@ public class GachaCommand extends Command {
         }
         StringBuilder talkStr = new StringBuilder("#b" + gachaName + "#k");
         talkStr.append(I18nUtil.getMessage("GachaCommand.message13"));
-        talkStr.append("\r\n\r\n");
+        talkStr.append("\r\n");
         GachaponService gachaponService = ServerManager.getApplicationContext().getBean(GachaponService.class);
-        List<GachaponRewardDO> gachaponRewardDOS = gachaponService.getRewardsByNpcId(gacha.getNpcId());
-        for (GachaponRewardDO gachaponRewardDO : gachaponRewardDOS) {
-            talkStr.append("#v").append(gachaponRewardDO.getItemId()).append("#   -  #z").append(gachaponRewardDO.getItemId()).append("#\r\n");
+        // 按奖池分档展示：平铺一大列看不出稀有度。奖池就是 BeiDou 这边的「档」
+        for (GachaponPoolRewardsDTO pool : gachaponService.getRewardsGroupedByNpcId(gacha.getNpcId())) {
+            talkStr.append("\r\n#r").append(pool.getPoolName()).append("#k  ")
+                    .append(I18nUtil.getMessage("GachaCommand.message18", formatProb(pool.getRealProb())))
+                    .append("\r\n");
+            // 一件一行会把奖池撑成好几屏，而客户端对话框没有滚动条、看不见的部分就是看不见。
+            // 图标+名连排，换行交给客户端自己折
+            for (GachaponRewardDO reward : pool.getRewards()) {
+                talkStr.append("#v").append(reward.getItemId()).append("##z").append(reward.getItemId()).append("#  ");
+            }
+            talkStr.append("\r\n");
         }
         talkStr.append("\r\n");
         talkStr.append(I18nUtil.getMessage("GachaCommand.message14"));
 
         c.getAbstractPlayerInteraction().npcTalk(NpcId.MAPLE_ADMINISTRATOR, talkStr.toString());
+    }
+
+    /** realProb 单位是 1/1000000，化成百分数保留两位 */
+    static String formatProb(int realProb) {
+        return String.format("%.2f", realProb / 10000f);
     }
 }

@@ -30,7 +30,6 @@ import org.gms.constants.id.MapId;
 import org.gms.server.maps.MapleMap;
 import org.gms.server.maps.Portal;
 import org.gms.util.I18nUtil;
-import org.gms.util.StringUtil;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -56,10 +55,7 @@ public class JailCommand extends Command {
             }
         }
 
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim == null && StringUtil.isNumeric(params[0])) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterById(Integer.parseInt(params[0]));
-        }
+        Character victim = resolveTarget(c, params[0]);
         if (victim != null) {
             if (victim.isGM()) {
                 player.yellowMessage(I18nUtil.getMessage("JailCommand.message5"));

@@ -36,7 +36,7 @@ public class HealPersonCommand extends Command {
     @Override
     public void execute(Client c, String[] params) {
         Character player = c.getPlayer();
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        Character victim = resolveTarget(c, params[0]);
         if (victim != null) {
             victim.healHpMp();
         } else {

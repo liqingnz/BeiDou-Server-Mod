@@ -30,7 +30,6 @@ import org.gms.client.command.Command;
 import org.gms.constants.inventory.ItemConstants;
 import org.gms.server.ItemInformationProvider;
 import org.gms.util.I18nUtil;
-import org.gms.util.StringUtil;
 
 public class HairCommand extends Command {
     {
@@ -63,10 +62,7 @@ public class HairCommand extends Command {
                     return;
                 }
 
-                Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-                if (victim == null && StringUtil.isNumeric(params[0])) {
-                    victim = c.getWorldServer().getPlayerStorage().getCharacterById(Integer.parseInt(params[0]));
-                }
+                Character victim = resolveTarget(c, params[0]);
                 if (victim != null) {
                     victim.setHair(itemId);
                     victim.updateSingleStat(Stat.HAIR, itemId);

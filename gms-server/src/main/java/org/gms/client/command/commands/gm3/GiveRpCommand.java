@@ -22,7 +22,7 @@ public class GiveRpCommand extends Command {
             player.setRewardPoints(player.getRewardPoints() + Integer.parseInt(params[0]));
             player.message(I18nUtil.getMessage("GiveRpCommand.message3"));
         } else {
-            Character victim = client.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            Character victim = resolveTarget(client, params[0]);
             if (victim == null) {
                 player.message(I18nUtil.getMessage("BombCommand.message3", params[0]));
             } else {

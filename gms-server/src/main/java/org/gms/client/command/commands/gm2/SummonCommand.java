@@ -26,11 +26,8 @@ package org.gms.client.command.commands.gm2;
 import org.gms.client.Character;
 import org.gms.client.Client;
 import org.gms.client.command.Command;
-import org.gms.net.server.Server;
-import org.gms.net.server.channel.Channel;
 import org.gms.server.maps.MapleMap;
 import org.gms.util.I18nUtil;
-import org.gms.util.StringUtil;
 
 public class SummonCommand extends Command {
     {
@@ -45,10 +42,7 @@ public class SummonCommand extends Command {
             return;
         }
 
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim == null && StringUtil.isNumeric(params[0])) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterById(Integer.parseInt(params[0]));
-        }
+        Character victim = resolveTarget(c, params[0]);
         if (victim != null) {
             if (!victim.isLoggedInWorld()) {
                 player.dropMessage(6, I18nUtil.getMessage("SummonCommand.message3"));

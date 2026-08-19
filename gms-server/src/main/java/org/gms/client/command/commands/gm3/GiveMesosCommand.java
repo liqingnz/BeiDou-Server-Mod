@@ -27,7 +27,6 @@ import org.gms.client.Character;
 import org.gms.client.Client;
 import org.gms.client.command.Command;
 import org.gms.util.I18nUtil;
-import org.gms.util.StringUtil;
 
 public class GiveMesosCommand extends Command {
     {
@@ -68,10 +67,7 @@ public class GiveMesosCommand extends Command {
             }
         }
 
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(recv);
-        if (victim == null && StringUtil.isNumeric(recv)) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterById(Integer.parseInt(recv));
-        }
+        Character victim = resolveTarget(c, recv);
         if (victim != null) {
             victim.gainMeso((int) mesos_, true);
             player.message(I18nUtil.getMessage("GiveMesosCommand.message3"));

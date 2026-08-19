@@ -37,7 +37,11 @@ public class CheckDmgCommand extends Command {
     @Override
     public void execute(Client c, String[] params) {
         Character player = c.getPlayer();
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        if (params.length < 1) {
+            player.yellowMessage(I18nUtil.getMessage("CheckDmgCommand.message6"));
+            return;
+        }
+        Character victim = resolveTarget(c, params[0]);
         if (victim != null) {
             int maxBase = victim.calculateMaxBaseDamage(victim.getTotalWatk());
             Integer watkBuff = victim.getBuffedValue(BuffStat.WATK);

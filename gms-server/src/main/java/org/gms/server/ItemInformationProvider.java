@@ -2283,6 +2283,37 @@ public class ItemInformationProvider {
         return itemid;
     }
 
+    /**
+     * 某件物品的掉落来源，带基础掉率。
+     * <p>
+     * 与 {@link #getWhoDrops(Integer)} 的区别：那个把结果去重成怪物名集合，丢了掉率也丢了怪物 id，
+     * 只够脚本拿去列个名单；这里保留 dropperId 与 chance，供 {@code @whodrops} 算出角色的实际掉率
+     * 并用 {@code #o<mobid>#} 交给客户端渲染怪物名。
+     *
+     * 不设 LIMIT：调用方要知道**总共**有多少个掉落源才能说清「还有几条没列出来」，
+     * 而单个物品的 drop_data 行数是几十量级，全取回来不贵。截断交给调用方。
+     *
+     * @return (dropperId, chance) 列表，chance 是 drop_data 里的原始值（满值 1000000 = 100%），按掉率从高到低
+     */
+    public List<Pair<Integer, Integer>> getWhoDropsWithChance(int itemId) {
+        List<Pair<Integer, Integer>> list = new ArrayList<>();
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                     "SELECT dropperid, chance FROM drop_data WHERE itemid = ? ORDER BY chance DESC")) {
+            ps.setInt(1, itemId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new Pair<>(rs.getInt("dropperid"), rs.getInt("chance")));
+                }
+            }
+        } catch (Exception e) {
+            log.warn(I18nUtil.getLogMessage("ItemInformationProvider.getWhoDropsWithChance.warn1"), itemId, e);
+        }
+
+        return list;
+    }
+
     public Set<String> getWhoDrops(Integer itemId) {
         Set<String> list = new HashSet<>();
         try (Connection con = DatabaseConnection.getConnection();

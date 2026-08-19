@@ -52,7 +52,7 @@ public class SpCommand extends Command {
 
             player.updateRemainingSp(newSp);
         } else {
-            Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            Character victim = resolveTarget(c, params[0]);
             if (victim != null) {
                 int newSp = Integer.parseInt(params[1]);
                 if (newSp < 0) {

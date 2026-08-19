@@ -43,7 +43,7 @@ public class IgnoreCommand extends Command {
             player.yellowMessage(I18nUtil.getMessage("IgnoreCommand.message2"));
             return;
         }
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        Character victim = resolveTarget(c, params[0]);
         if (victim == null) {
             player.message(I18nUtil.getMessage("BombCommand.message3", params[0]));
             return;

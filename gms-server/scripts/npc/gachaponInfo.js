@@ -57,14 +57,24 @@ function action(mode, type, selection) {
             }
             cm.sendSimple(sendStr);
         } else if (status == 1) {
-            var sendStr = "Loots from #b" + lootNames[selection] + "#k\r\n\r\n";
+            // Grouped by reward pool: a flat list hides rarity. A pool is this server's "tier",
+            // and the odds come from GachaponService (same formula as the admin panel and the actual roll)
+            var sendStr = "Loots from #b" + lootNames[selection] + "#k, grouped by rarity\r\n";
             var ServerManager = Java.type('org.gms.manager.ServerManager');
             var gachaponService = ServerManager.getApplicationContext().getBean("gachaponService");
-            var gachaponRewardDOS = gachaponService.getRewardsByNpcId(lootIds[selection]);
-            for (let i = 0; i < gachaponRewardDOS.length; i++) {
-                var gachaponRewardDO = gachaponRewardDOS[i];
-                sendStr += "#v" + gachaponRewardDO.getItemId() + "#   -  #z" + gachaponRewardDO.getItemId() + "#\r\n";
+            var pools = gachaponService.getRewardsGroupedByNpcId(lootIds[selection]);
+            for (let i = 0; i < pools.length; i++) {
+                var pool = pools[i];
+                sendStr += "\r\n#r" + pool.getPoolName() + "#k  (tier chance " + (pool.getRealProb() / 10000).toFixed(2) + "%)\r\n";
+                // One per line blows the pool up to several screens, and the client dialog has no
+                // scrollbar; pack icon+name inline and let the client wrap
+                var rewards = pool.getRewards();
+                for (let j = 0; j < rewards.length; j++) {
+                    sendStr += "#v" + rewards[j].getItemId() + "##z" + rewards[j].getItemId() + "#  ";
+                }
+                sendStr += "\r\n";
             }
+            sendStr += "\r\nItems within a tier are drawn with equal chance. Shared pools common to every gachapon are already listed above.";
             cm.sendPrev(sendStr);
         } else if (status == 2) {
             cm.dispose();

@@ -28,7 +28,6 @@ import org.gms.client.Client;
 import org.gms.client.Job;
 import org.gms.client.command.Command;
 import org.gms.util.I18nUtil;
-import org.gms.util.StringUtil;
 
 public class JobCommand extends Command {
     {
@@ -48,10 +47,7 @@ public class JobCommand extends Command {
             player.changeJob(Job.getById(jobid));
             player.equipChanged();
         } else if (params.length == 2) {
-            Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-            if (victim == null && StringUtil.isNumeric(params[0])) {
-                victim = c.getWorldServer().getPlayerStorage().getCharacterById(Integer.parseInt(params[0]));
-            }
+            Character victim = resolveTarget(c, params[0]);
             if (victim != null) {
                 int jobid = Integer.parseInt(params[1]);
                 if (jobid < 0 || jobid >= 2200) {

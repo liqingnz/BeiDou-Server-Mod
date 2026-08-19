@@ -40,7 +40,7 @@ public class GetAccCommand extends Command {
             player.yellowMessage(I18nUtil.getMessage("GetAccCommand.message2"));
             return;
         }
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+        Character victim = resolveTarget(c, params[0]);
         if (victim != null) {
             player.message(I18nUtil.getMessage("GetAccCommand.message3", victim.getName(), victim.getClient().getAccountName()));
         } else {

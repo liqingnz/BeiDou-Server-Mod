@@ -29,7 +29,6 @@ import org.gms.client.command.Command;
 import org.gms.net.server.Server;
 import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
-import org.gms.util.StringUtil;
 
 public class KillCommand extends Command {
     {
@@ -44,10 +43,7 @@ public class KillCommand extends Command {
             return;
         }
 
-        Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
-        if (victim == null && StringUtil.isNumeric(params[0])) {
-            victim = c.getWorldServer().getPlayerStorage().getCharacterById(Integer.parseInt(params[0]));
-        }
+        Character victim = resolveTarget(c, params[0]);
         if (victim != null) {
             victim.updateHpMp(0);
             Server.getInstance().broadcastGMMessage(c.getWorld(), PacketCreator.serverNotice(5, I18nUtil.getMessage("KillCommand.message3", player.getName(), victim.getName())));

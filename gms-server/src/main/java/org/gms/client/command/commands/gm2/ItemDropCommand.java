@@ -124,7 +124,10 @@ public class ItemDropCommand extends Command {
             toDrop.setExpiration(System.currentTimeMillis() + MINUTES.toMillis(minutes));
         }
 
-        toDrop.setOwner(player.getName());
+        // gm4 以上不打归属标签。Item.owner 不是掉落物的拾取权（拾取权在 MapItem.character_ownerid，
+        // 而下面 spawnItemDrop 传的是 ffaDrop=true，本就人人可捡），它真正的影响在 Inventory.java:241：
+        // owner 不同的两堆物品不合并。刷出来的药水挂着 GM 名字就跟玩家背包里已有的同种药水叠不到一起
+        toDrop.setOwner(player.gmLevel() > 3 ? "" : player.getName());
         if (player.gmLevel() < 3) {
             short f = toDrop.getFlag();
             f |= ItemConstants.ACCOUNT_SHARING;

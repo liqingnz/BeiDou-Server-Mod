@@ -52,7 +52,7 @@ public class ApCommand extends Command {
 
             player.changeRemainingAp(newAp, false);
         } else {
-            Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            Character victim = resolveTarget(c, params[0]);
             if (victim != null) {
                 int newAp = Integer.parseInt(params[1]);
                 if (newAp < 0) {

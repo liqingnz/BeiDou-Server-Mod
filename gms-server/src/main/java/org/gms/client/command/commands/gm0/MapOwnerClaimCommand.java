@@ -58,7 +58,12 @@ public class MapOwnerClaimCommand extends Command {
                             if (map.claimOwnership(chr)) {
                                 chr.dropMessage(5, I18nUtil.getMessage("MapOwnerClaimCommand.message3"));
                             } else {
-                                chr.dropMessage(5, I18nUtil.getMessage("MapOwnerClaimCommand.message4"));
+                                // 说清是谁占着，否则玩家只知道「有人占了」，没法判断要不要换图或去交涉。
+                                // 抢占失败到取名之间对方可能已经离开，那种情况按无人占图提示
+                                String owner = map.getMapOwnerName();
+                                chr.dropMessage(5, owner != null
+                                        ? I18nUtil.getMessage("MapOwnerClaimCommand.message4", owner)
+                                        : I18nUtil.getMessage("MapOwnerClaimCommand.message6"));
                             }
                         } else {
                             chr.dropMessage(5, I18nUtil.getMessage("MapOwnerClaimCommand.message5"));

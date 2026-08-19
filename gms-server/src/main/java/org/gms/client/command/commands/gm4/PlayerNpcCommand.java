@@ -42,7 +42,7 @@ public class PlayerNpcCommand extends Command {
             return;
         }
 
-        if (!PlayerNPC.spawnPlayerNPC(player.getMapId(), player.getPosition(), c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]))) {
+        if (!PlayerNPC.spawnPlayerNPC(player.getMapId(), player.getPosition(), resolveTarget(c, params[0]))) {
             player.dropMessage(5, I18nUtil.getMessage("PlayerNpcCommand.message3"));
         }
     }

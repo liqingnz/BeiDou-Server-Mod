@@ -50,7 +50,10 @@ public class BanCommand extends Command {
         }
         String ign = params[0];
         String reason = joinStringFrom(params, 1);
-        Character target = c.getChannelServer().getPlayerStorage().getCharacterByName(ign);
+        // 原实现只在本频道找人（getChannelServer）。目标在别的频道时 target 为 null，
+        // 于是静默落到下面的离线分支——那条路不封 IP、不封 MAC、不给目标提示、也不踢线，
+        // 等于跨频道封人被悄悄降级成「只标记账号」。改用全区在线列表
+        Character target = resolveTarget(c, ign);
         if (target != null) {
             String readableTargetName = Character.makeMapleReadable(target.getName());
             String ip = target.getClient().getRemoteAddress();
@@ -77,7 +80,8 @@ public class BanCommand extends Command {
             c.sendPacket(PacketCreator.getGMEffect(4, (byte) 0));
             final Character rip = target;
             TimerManager.getInstance().schedule(() -> rip.getClient().disconnect(false, false), 5000); //5 Seconds
-            Server.getInstance().broadcastMessage(c.getWorld(), PacketCreator.serverNotice(6, I18nUtil.getMessage("BanCommand.message8", ign)));
+            // 播报用查到的角色名而不是 ign：现在 ign 也可能是一串角色 id，全服公告不该显示数字
+            Server.getInstance().broadcastMessage(c.getWorld(), PacketCreator.serverNotice(6, I18nUtil.getMessage("BanCommand.message8", readableTargetName)));
         } else if (Character.ban(ign, reason, false)) {
             c.sendPacket(PacketCreator.getGMEffect(4, (byte) 0));
             Server.getInstance().broadcastMessage(c.getWorld(), PacketCreator.serverNotice(6, I18nUtil.getMessage("BanCommand.message8", ign)));

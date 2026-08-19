@@ -21,7 +21,7 @@
 /*
    @Author: Arthur L - Refactored command content into modules
 */
-package org.gms.client.command.commands.gm1;
+package org.gms.client.command.commands.gm0;
 
 import org.gms.client.Client;
 import org.gms.client.command.Command;
@@ -29,16 +29,20 @@ import org.gms.constants.id.NpcId;
 import org.gms.util.I18nUtil;
 
 /**
- * 物品掉落查询入口。
+ * 掉落总表浏览入口（{@code @droptable}）。
  * <p>
  * 查询逻辑本身在脚本中心的「当前地图掉落_物品查询」里：按 11 个大类浏览、分页展示，
- * 点开单个物品可看掉落来源、基础爆率与角色实际爆率，比原先的按名搜索完善。
+ * 点开单个物品可看掉落来源、基础爆率与角色实际爆率。
+ * <p>
+ * 与 {@link WhoDropsCommand} 分工：知道要找什么就敲 {@code @whodrops <物品名或id>} 直接查，
+ * 只想翻翻有什么就用本指令。本指令原先占着 {@code @whodrops} 这个名字，
+ * 让「按名查掉落」这个更常用的入口无处安放，故改名。
  */
-public class WhoDropsCommand extends Command {
+public class DropTableCommand extends Command {
     private static final String SCRIPT_NAME = "当前地图掉落_物品查询";
 
     {
-        setDescription(I18nUtil.getMessage("WhoDropsCommand.message1"));
+        setDescription(I18nUtil.getMessage("DropTableCommand.message1"));
     }
 
     @Override

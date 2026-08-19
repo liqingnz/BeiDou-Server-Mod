@@ -4375,6 +4375,18 @@ public class MapleMap {
         }
     }
 
+    /**
+     * 当前占图者的名字，无人占图时返回 null。
+     * <p>
+     * 只暴露名字而不是 {@code mapOwner} 本身：调用方（提示文案）只需要一个名字，
+     * 把 {@link Character} 引用递出去等于把一个随时可能下线的可变对象交给外部，
+     * 与 {@link #getCharacters()} 那次返回视图踩的是同一类坑。
+     */
+    public String getMapOwnerName() {
+        Character owner = mapOwner;     // 读一次到本地，避免判空与取名之间被置 null
+        return owner != null ? owner.getName() : null;
+    }
+
     public boolean claimOwnership(Character chr) {
         if (mapOwner == null) {
             this.mapOwner = chr;

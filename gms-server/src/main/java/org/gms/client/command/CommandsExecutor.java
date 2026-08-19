@@ -210,6 +210,10 @@ public class CommandsExecutor {
         addCommand("enableauth", EnableAuthCommand.class);
         addCommand("toggleexp", ToggleExpCommand.class);
         addCommand("mylawn", MapOwnerClaimCommand.class);
+        // 掉落查询整组降到 gm0（原先在 Lv1），与同为查询入口的 @mapdrops 齐平
+        addCommand("whatdropsfrom", WhatDropsFromCommand.class);
+        addCommand("whodrops", WhoDropsCommand.class);
+        addCommand("droptable", DropTableCommand.class);
 
         commandsNameDesc.add(levelCommandsCursor);
     }
@@ -220,8 +224,6 @@ public class CommandsExecutor {
 
         addCommand("bosshp", 1, BossHpCommand.class);
         addCommand("mobhp", 1, MobHpCommand.class);
-        addCommand("whatdropsfrom", 1, WhatDropsFromCommand.class);
-        addCommand("whodrops", 1, WhoDropsCommand.class);
         addCommand("buffme", 1, BuffMeCommand.class);
         addCommand("goto", 1, GotoCommand.class);
 

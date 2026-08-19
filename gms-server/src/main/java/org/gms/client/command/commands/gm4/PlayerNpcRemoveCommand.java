@@ -41,6 +41,6 @@ public class PlayerNpcRemoveCommand extends Command {
             player.yellowMessage(I18nUtil.getMessage("PlayerNpcRemoveCommand.message2"));
             return;
         }
-        PlayerNPC.removePlayerNPC(c.getChannelServer().getPlayerStorage().getCharacterByName(params[0]));
+        PlayerNPC.removePlayerNPC(resolveTarget(c, params[0]));
     }
 }

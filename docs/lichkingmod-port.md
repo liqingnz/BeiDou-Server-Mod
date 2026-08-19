@@ -4818,3 +4818,246 @@ LK 那份改法**不采纳**——把循环换成 `map.timerMapPlayers(seconds)`
 真正的拦截点在使用传送石的那一刻，已经覆盖。
 
 GM（`gmLevel > 2`）一律放行，与 `timeQuest.js` 的口径一致。
+
+---
+
+## 24. 指令层复核：47 个「修改既有指令」的判断（2026-08-19）
+
+### 24.1 为什么要复核
+
+批次 1 的正文只写了 LK **新增**的 12 个指令类。但 LK 在 `src/client/command/` 下动过的文件是
+**76 个（29 新增 + 47 修改）**，那 47 个「修改既有指令」的判断从头到尾只存在于
+`lichkingmod-port-manifest.tsv` 的 evidence 列里，正文一个字没有。这个落差就是本轮复核的由来。
+
+先把覆盖率这条排掉：**76 个文件在 manifest 里一条不漏，全部有 disposition，无 pending**。
+不完整的是记录，不是移植。
+
+### 24.2 LK 那 47 处修改的成分
+
+逐个 diff 之后，成分很集中：
+
+| 类别 | 数量 | 处置 |
+|---|---|---|
+| 纯汉化（`setDescription` 填中文、提示文案） | 约 30 | BeiDou 已走 I18nUtil，全部 `already-fixed` |
+| **name→id 化**（收角色名改成收角色 id） | 9 | 实现拒、想法采，见 §24.3 |
+| 客户端富文本转义（`#z`/`#o`/`#v`/`#i`/`#m`） | 4 | 已在批次 7 吸收进 `@whatdropsfrom`，本轮补 `@whodrops` |
+| 功能删除（注释掉 BOSS 前置、掉落归属、跨频道兜底） | 5 | 一律不采 |
+| 真增量 | 4 | `@shutdown` 倒计时钟、`@fly info`、`@debuff` 等级参数、`@online` 分级可见性 |
+
+### 24.3 「id 化」：实现是错的，想法是对的
+
+LK 把 `@ban`/`@dc`/`@jail`/`@unjail`/`@reach`/`@summon`/`@givenx`/`@givemesos`/`@givevp`
+从 `getCharacterByName(params[0])` 改成 `getCharacterById(Integer.parseInt(params[0]))`。
+**拒得对**——那是裸 `parseInt`，传名字直接抛未捕获异常，还丢掉了按名字操作的能力。
+
+但动机成立：中文角色名在聊天栏敲指令很痛苦。而 BeiDou 自己早就有更好的零件——
+「先按名查、查不到且是数字再按 id 查」——问题是**只铺了 21 个指令，还有 14 个是纯名字**，
+`@givevp` 跟有兜底的 `@givenx`/`@givemesos` 就在隔壁。这是「LK 指了方向、BeiDou 有更好的
+零件、但没人把两者接起来」。
+
+本轮抽出 `Command.resolveTarget(Client, String)` 统一这 35 处，并修掉原内联写法的隐患：
+`StringUtil.isNumeric` 的正则是 `-?\d+(\.\d+)?`，对 `"1.5"` 和超出 int 范围的长数字都返回 true，
+随后的 `parseInt` 抛 `NumberFormatException`，而 `CommandsExecutor.handleInternal` 里
+`command.execute(...)` **没有 try/catch**。`resolveTarget` 直接 try/catch 解析，解析不了就是「找不到」。
+
+不走这条路的两个：`@patrol`/`@gmbot` 拿的是内部登记的 id，不是玩家敲进来的 token。
+`@dc` 保留它自己后面那两级（本频道 → 当前地图）兜底。
+
+### 24.4 `@ban` 的判据只覆盖了一半，漏掉一个真 bug
+
+manifest 原来那条 evidence 只谈 name→id。LK 同一处还把 `getChannelServer()` 换成了
+`getWorldServer()`——**这是 BeiDou 侧的真 bug**：原实现只在本频道找人，目标在别的频道时
+`target == null`，静默落到离线分支 `Character.ban(ign, ...)`，而那条路
+**不封 IP、不封 MAC、不给目标提示、不做 5 秒后踢线**。跨频道封人等于被降级成「只标记账号」。
+
+同类的 `@setgmlevel`/`@playernpc`/`@playernpcremove` 也是频道级查找，一并随 `resolveTarget` 转全区。
+
+### 24.5 `Item.owner` 不是拾取权（manifest 原判据写错了）
+
+`@drop` 那条原来写的是「LK 注释掉 setOwner 等于放开 GM 掉落物归属让任何人可捡」。**不对**：
+
+- 拾取权在 `MapItem.character_ownerid`，而 `ItemDropCommand` 调的是
+  `spawnItemDrop(..., ffaDrop=true, ...)`，本来就人人可捡；
+- `Item.owner` 是物品上的归属**标签**，真正的影响在 `Inventory.java:241`——
+  **owner 不同的两堆物品不合并**。GM 刷出来的药水跟玩家背包里已有的同种药水叠不到一起，
+  还在道具说明里挂着 GM 的名字。
+
+落地为 `gmLevel() > 3` 时不打标记；`gmLevel() < 3` 的 TRIAL-MODE 分支不动。
+
+### 24.6 掉落查询三件套重排
+
+批次 1 把 `@whodrops` 整个改成脚本入口（按分类浏览），LK 那份「按物品名/id 直接查」就此没了着落。
+本轮拆回两个入口，并把整组降到 gm0（与早就在 gm0 的 `@mapdrops` 齐平）：
+
+| 指令 | 类 | 说明 |
+|---|---|---|
+| `@whodrops <物品名或id>` | `gm0/WhoDropsCommand`（新） | 纯数字按 id 精确查，否则按名模糊查——合并了 LK 的 `WhoDrops2Command` |
+| `@droptable` | `gm0/DropTableCommand`（原 `WhoDropsCommand` 改名） | 分类浏览脚本入口 |
+| `@whatdropsfrom <怪物名>` | `gm0/WhatDropsFromCommand`（从 gm1 移包） | 不动逻辑，只降权限 |
+
+只动**查询**指令。`@drop`（刷物品）、`@proequip` 这类**生成**指令与 `@bossdroprate`
+这类**调参**指令一律不动。
+
+移植 LK 的 `@whodrops` 时修掉四处：
+
+1. **删掉嵌套的 `c.tryacquireClient()`**——`CommandsExecutor.handle` 已经在外层拿了这把锁，
+   命令里再拿一次拿不到，会直接吐「请稍候」。LK 那边没有这层外锁，照抄必坏。
+2. 裸 JDBC 无 try-with-resources → 新增 `ItemInformationProvider.getWhoDropsWithChance`
+   （既有的 `getWhoDrops` 把结果去重成怪物名集合，丢了掉率也丢了怪物 id，不够用）。
+3. `Integer.parseInt` 未捕获 → 改成「纯数字才按 id」且解析包 try/catch。
+4. 硬编码 npc `9010000` → `NpcId.MAPLE_ADMINISTRATOR`；文案全部走 `I18nUtil`。
+
+> **注册的坑**：`CommandsExecutor` 里的 `registerLvXCommands()` **从不被调用**
+> （`loadCommandsExecutor` 里全注释掉了，实际注册走 `CommandService.loadCommands` 读
+> `command_info` 表），但它们是**活代码**，类名/包一改不跟就编译失败。
+>
+> **迁移的坑**：`WhoDropsCommand` 这个类名被复用了（旧实现改叫 `DropTableCommand`，
+> 新实现顶上原名），所以 SQL 里**不能**写 `UPDATE ... WHERE clazz='WhoDropsCommand'`——
+> 第二次重跑会把新的那个也改名成 `droptable`。用「先 `DELETE` 同键再 `INSERT`」。
+
+### 24.7 扭蛋：LK 的 tier 分档在 BeiDou 对应的是「奖池」
+
+LK 的 `gachaponInfo.js` 逻辑（`#L#..#l` 选单 → 选中后列该机奖励）**BeiDou 早就有同名脚本**，
+而且更强：奖池读 DB、13 台机器（LK 10 台）、名字走 i18n、`#v` 图标 + `#z` 名。
+LK 那边唯一多的是按 **tier 2/1/0** 分档。
+
+这不是「加一列 tier」的事：**BeiDou 已经把整套抽奖换成了 DB 奖池模型**
+（`gachapon_reward_pool` 的 `weight`/`prob`/`is_public`/生效时间窗 + `gachapon_reward`），
+`Gachapon.GachaponType.getItems(tier)` 那套硬编码数组现在是**死代码**
+（全仓库除 `Gachapon.java` 自身外零调用方）。奖池就是 tier 的等价物，而且是严格超集——
+档数可配、每档有真实概率、还带活动时间窗。
+
+落地：新增 `GachaponService.getRewardsGroupedByNpcId` + `GachaponPoolRewardsDTO`，
+按命中概率升序（稀有在前）分段，两个语言层的 `npc/gachaponInfo.js` 与 `@gacha` 共用。
+
+**顺带收掉一处将要三重复制的公式**：那段「积分」概率算法原先有两份拷贝——
+`pickPool`（真抽奖）与 `setRealProb`（gms-ui 后台列表）。给游戏内展示再抄一份就是三份，
+迟早漂移成「后台显示的概率、实际抽到的概率、游戏里写的概率」三者对不上。
+抽成 `computeRealProbs` 一处，三家共用。
+
+两个容易读错的点记在这里：
+
+- **`is_public` 不是「是否对玩家可见」**，而是「该池用固定 `prob` 而非 `weight` 分配积分」，
+  且公共池跨所有扭蛋机共享（相当于 LK 的 `GLOBAL`）。展示时全部都列。
+- 正因为公共池被 `getActivePools` 算了进来，`@gacha` 原先那句
+  「所有扭蛋机都有的奖励不会在这里显示」**已经是错的**，本轮一并改掉。
+
+`@gacha` 另接上「不带参数开选单」，与 `@goto`/`@cospreview`/`@droptable` 同一模式。
+LK 在 `getLootInfo()` 里写过的 `#m<mapId>#` 菜单行**是他们自己注释掉的**，不跟。
+
+### 24.8 本轮明确不做
+
+- **`@shutdown` 倒计时钟**：LK 会 `chr.announce(getClock(time/1000))` 推屏幕顶部官方倒计时，
+  BeiDou 只发一条 `dropMessage` 聊天框文字，玩家刷图时基本看不到。缺口仍在，用户本轮未选。
+- **`@fly info <accId>`**：用户 2026-08-18 已定不做。
+- **`@debuff` 的等级参数**：LK 读 `params[1]` 但无长度校验，BeiDou 至今写死 level 7。
+- **`@buyback`（消耗金币复活）**：唯一一条「BeiDou 整个功能都没有」的——Cosmic 把买活系统
+  整块删了。想要的话得当**新功能**立项，不算移植。
+
+### 24.9 追加：怪物立绘、扭蛋连排、以及「对话框会截断」的真相
+
+用户实测反馈后的四处调整：
+
+**① 扭蛋形象统一到枫叶管理员（9010000）。** `@gacha` 无参开的选单、`@gachalist`
+都改用 `NpcId.MAPLE_ADMINISTRATOR`（`@gachalist` 原先是硬编码的 `9900001`）。
+中文层 `gachaponInfo.js` 的问候语从写死的 `#p9900001#` 改成 `cm.getNpc()`，
+这样不管谁拉起它，自称和头像都对得上。
+
+**② `@whodrops` / `@whatdropsfrom` 加怪物立绘。**（先炸过一轮，根因见下）
+
+`#f` 引用客户端画布的路径是 `#fMob/<7位id>.img/stand|fly/0#`，选 `stand` 还是 `fly` 看
+`MonsterStats.getMovetype()`。第一版直接照抄 `@mapdrops` 脚本里的 `getMobImage`，结果闪退。
+
+**根因（全仓 2380 个 Mob img 实测）**：
+
+| | 数量 | 说明 |
+|---|---|---|
+| 自己就有 `stand`/`fly` | 1905 | 直接引用没问题 |
+| **自己一个动作帧都没有** | **475（20%）** | 全是 link 怪，img 里只有 `info`，帧挂在 `info/link` 指向的怪身上 |
+
+而 `movetype` 是 `LifeFactory.resolveMonsterVisualData` **沿 link 一路走到别的怪**才填出来的
+（`LifeFactory.java` 那个 while 循环，注释写得很清楚）。于是服务端算出的 movetype 描述的是
+**link 目标**，路径里的 id 却是**本怪自己**——客户端解引用一张不存在的画布，直接闪退。
+
+**为什么 `@mapdrops` 没炸、`@whodrops` 一敲就炸**：不是实现不同，是取值范围不同。
+`@mapdrops` 只列当前地图刷出来的那几种怪，撞上 475 个 link 怪的概率低（作者也确实撞到过，
+所以在函数顶上留了「以下函数在某些特定的情况下可能会导致客户端闪退」）；
+`@whodrops` 按掉落表全表扫，20% 的命中率下撞上是必然。
+
+> 顺带查明：同目录的 `怪物手册.js` 等 5 份 `getMobImage` 拷贝**多判了一句**
+> `mobImg.getChildByPath(type) == null`，所以它们一直没炸——代价是 link 怪只能显示占位图。
+> 唯独 `当前地图掉落_当前地图.js` 这份漏了那句判断，本轮一并修掉（改调 Java 实现）。
+
+**做法**：新增 `LifeFactory.resolveRenderableFrame(mid)`，返回「哪只怪的哪个动作有一帧
+客户端能按路径直接取到」，id 和动作名一次性对齐；`org.gms.util.MobTextUtil` 拿它拼路径。
+两处比脚本原版更严：
+
+- **link 怪拿到的是真图**（路径指向持有帧的那只怪），而不是像 `怪物手册.js` 那样退成占位图；
+- **不接受 UOL 帧**。`resolveVisualFrame` 为了填 bbox 会把 UOL 解引用到最终 canvas，
+  但 `#f` 是交给客户端自己去取的，中途跟不跟 UOL 由客户端决定，服务端替它下结论不安全。
+  全仓只有 `9400294` 一只怪的 `stand/0` 是跨 img 的 UOL，为它多担一份不确定性不划算；
+- 尺寸守卫从 `width>160 **&&** height>250` 改成 **`||`**。实测 442 个超标的怪里，
+  只超宽的 300 个（最大 1310×642）、只超高的 12 个——这 312 个全从 `&&` 底下漏过去了。
+
+**验证**：对全部 2380 个 mob 离线跑一遍这套判定，结果 1816 个发真实路径、533 个因超标换占位图、
+30 个因取不到帧换占位图，**指向空节点的 0 个**。
+
+**③ 扭蛋奖励连排。** 原先一件一行，一个奖池能撑成好几屏。改成 `#v图标##z名#` 连着排、
+换行交给客户端折——与 LK `getLootInfo()` 的写法一致。`@gacha` 与两个语言层的脚本同步改。
+
+**④ 「掉落太多就被截掉」不是服务端截的。**
+
+查证：`npcTalk` → `PacketCreator.getNPCTalk` → `OutPacket.writeString`，**全程没有任何长度检查**。
+（`NPCConversationManager` 里那两处 `msg.length() > msgLen` 是怪物嘉年华在判「这一轮有没有
+往 msg 里追加过内容」，不是截断。）
+
+真正的两道边界：
+
+| 边界 | 值 | 越界表现 |
+|---|---|---|
+| 协议硬上限 | **65535 字节** | `ByteBufOutPacket.writeString` 用 `writeShort(bytes.length)` 写 2 字节长度域；超了会对 65536 取模，客户端按错误长度解包 → 花屏或断线，**不是**干净的截断 |
+| 客户端对话框 | 未知，远低于上限 | v83 的 NPC 对话框高度固定且**没有滚动条**，画不下的部分就是看不见 |
+
+注意编码是客户端字符集（`CharsetConstants.getCharset(...)`），中文一个字 **2 字节**，
+所以中文层比英文层更早撞上限。
+
+用户看到的「被截取掉」是干净的尾部消失，符合第二种（客户端画不下），不符合第一种。
+因此处置不是「调大缓冲」而是**服务端自己收着发、并明说少了多少**：
+
+- `@whodrops` 每件物品最多列 `DROPPER_LIMIT = 20` 个掉落源（LK 是 80）；
+- `@whatdropsfrom` 每只怪最多列 `DROP_LIMIT = 12` 件；
+- 两者超出的部分都在末尾补一句「还有 N 条未列出，可用 `@droptable` 分页查看」，
+  而不是让玩家以为就这么多。
+
+`getWhoDropsWithChance` 相应去掉了 SQL 的 `LIMIT`——要数清「还有几条」就得知道总数，
+而单个物品的 `drop_data` 行数是几十量级，全取回来不贵。
+
+> 这两个数字是**保守取值，不是实测出来的客户端上限**——我没有客户端渲染侧的量具。
+> 真嫌少就直接调这两个常量，撞到看不见为止再往回收。
+
+### 24.10 追加：BOSS 立绘、选单化、连排（实测反馈第二轮）
+
+**① BOSS 基本看不到立绘 → 尺寸阈值改用 `怪物手册.js` 的 311。**
+第一版照 `当前地图掉落_当前地图.js` 取 160×250，实测下来太紧：1841 只有立绘的怪里
+686 只是 BOSS，其中 **310 只（45%）** 会被打回占位图——BOSS 立绘本来就大，等于全军覆没。
+换成 `BeiDouSpecial/怪物手册.js` 用的 311×311，只剩 89 只（13%）。
+选这个数不是拍脑袋：那个脚本长期在生产里展示任意怪（含 BOSS），是本仓库唯一有实跑背书的阈值。
+
+**② 怪名不再按 BOSS 标红。** 那是我加的标记（抄 `@mapdrops` 的
+`obj.isBoss() ? 'r' : 'b'`），用户当成 bug 报上来了，说明它没传达出「红=BOSS」的意思，
+去掉。想要的话把 `showDroppers` 里那句加回来即可。
+
+**③ 按名搜到多件时先开选单。** 「智力卷轴」一搜就是头盔／铠甲／披风各一版，
+原先只取前 3 件铺出来，既看不清也选不着。改为：
+
+- 0 件 → 直接提示没找到
+- 1 件 → 直接出结果，不多一次点击
+- 多件 → `scripts[-zh-CN]/npc/whoDropsList.js` 开 `#L#..#l` 选单，挑完再查
+
+候选清单由指令算好后暂存（`WhoDropsCommand.takeChoices` 取走即清），脚本不重跑那趟
+`getItemDataByName` 全表模糊匹配；查掉落源回调 `WhoDropsCommand.showDroppers`，
+与「只搜到一件」走同一条路，免得立绘／掉率折算／条数上限两边漂。
+选单上限 30 件，超了先给一句黄字提示让玩家缩窄关键字——而不是给一份看不出被截过的清单。
+
+**④ 掉落源连排，不再一只怪一行。** 与扭蛋奖励同样处理，换行交给客户端折。
+连排后一条占的高度小得多，`DROPPER_LIMIT` 从 8 放回 12。

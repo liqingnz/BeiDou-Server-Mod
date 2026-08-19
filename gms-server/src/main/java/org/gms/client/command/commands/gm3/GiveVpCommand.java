@@ -44,7 +44,7 @@ public class GiveVpCommand extends Command {
             c.addVotePoints(Integer.parseInt(params[0]));
             player.message(I18nUtil.getMessage("GiveVpCommand.message3"));
         } else {
-            Character victim = c.getWorldServer().getPlayerStorage().getCharacterByName(params[0]);
+            Character victim = resolveTarget(c, params[0]);
             if (victim == null) {
                 player.message(I18nUtil.getMessage("BombCommand.message3", params[0]));
             } else {
