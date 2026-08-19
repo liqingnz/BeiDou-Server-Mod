@@ -1,25 +1,40 @@
-/* @whodrops 按物品名搜到多件时的选择清单。
+/* @whodrops 的对话界面：物品选单 + 掉落源翻页。
  *
- * 「智力卷轴」这类关键字一搜就是头盔／铠甲／披风各一版，全铺出来既看不清也撑爆对话框，
- * 所以先让玩家挑一件，再查那件的掉落源。只搜到一件时 WhoDropsCommand 直接出结果，
- * 不会拉起本脚本。
+ * 为什么要走脚本：掉落源多的物品实测能到 800 多个，一屏装不下，而客户端对话框高度固定
+ * 又没有滚动条——装不下的部分不是被服务端截掉，是压根没画出来。翻页需要「点了还能回到
+ * 服务端」，npcTalk 那种一发了之的对话框做不到。
  *
- * 候选清单在指令里已经算好并暂存（takeChoices 取走即清），这里不重跑那趟全表模糊匹配。
- * 查掉落源也交回 WhoDropsCommand.showDroppers：立绘、掉率折算、条数上限的口径
- * 与「只搜到一件」那条路必须一致，在这儿抄一遍迟早会漂。
+ * 分工：数据、掉率折算、立绘、每页条数全在 WhoDropsCommand 里（i18n 也在那边），
+ * 这里只负责把一页正文摆出来、加上翻页控件、把点击回传。会话状态挂在角色身上，
+ * 翻页不会把 drop_data 查询或全表模糊匹配重跑一遍。
  */
 var WhoDropsCommand = Java.type("org.gms.client.command.commands.gm0.WhoDropsCommand");
 
-var choices = [];   // [[物品id, 物品名], ...]，下标即选项序号
+// 翻页与导航用大正数，避开物品 id
+var PREV = 9000001;
+var NEXT = 9000002;
+var BACK = 9000003;
+
+var choices = [];     // [[物品id, 物品名], ...]，下标即选项序号
+var page = 0;
 
 function start() {
-    choices = WhoDropsCommand.takeChoices(cm.getPlayer());
-    if (choices.length === 0) {
-        cm.sendOk("没有待选的物品，请重新执行 #b@whodrops#k。");
-        cm.dispose();
+    choices = WhoDropsCommand.getChoices(cm.getPlayer());
+    if (choices.length > 1) {
+        showChoices();
         return;
     }
+    // 只搜到一件时指令已经把掉落源载好了，直接翻页
+    if (WhoDropsCommand.getPageCount(cm.getPlayer()) === 0) {
+        cm.sendOk("没有待查的物品，请重新执行 #b@whodrops#k。");
+        finish();
+        return;
+    }
+    page = 0;
+    showPage();
+}
 
+function showChoices() {
     var text = "搜到 #b" + choices.length + "#k 件物品，想看哪一件的掉落来源？\r\n";
     for (var i = 0; i < choices.length; i++) {
         text += "#L" + i + "##v" + choices[i][0] + "##z" + choices[i][0] + "##l\r\n";
@@ -27,11 +42,65 @@ function start() {
     cm.sendNextSelectLevel("WhoDrops", text);
 }
 
-function levelWhoDrops(selection) {
-    if (selection >= 0 && selection < choices.length) {
-        // 与 gotoList.js 同序：先干活再 dispose。dispose 只是发 enableActions 解锁客户端，
-        // 不会关掉 showDroppers 刚开的那个对话框
-        WhoDropsCommand.showDroppers(cm.getPlayer(), choices[selection][0]);
+function showPage() {
+    var body = WhoDropsCommand.renderPage(cm.getPlayer(), page);
+    if (body === "") {
+        finish();
+        return;
     }
+
+    var totalPages = WhoDropsCommand.getPageCount(cm.getPlayer());
+    var text = body + "\r\n";
+    if (page > 0) {
+        text += "#L" + PREV + "#<< 上一页#l\r\n";
+    }
+    if (page < totalPages - 1) {
+        text += "#L" + NEXT + "#下一页 >>#l\r\n";
+    }
+    if (totalPages > 1) {
+        text += "当前第 " + (page + 1) + " 页，共 " + totalPages + " 页\r\n";
+    }
+    if (choices.length > 1) {
+        // 从选单进来的才给「返回」，直接查一件的没有上一级可回
+        text += "\r\n#L" + BACK + "#返回物品列表#l";
+    }
+
+    cm.sendNextSelectLevel("WhoDrops", text);
+}
+
+function levelWhoDrops(selection) {
+    var sel = parseInt(selection);
+
+    if (sel === PREV) {
+        page--;
+        showPage();
+        return;
+    }
+    if (sel === NEXT) {
+        page++;
+        showPage();
+        return;
+    }
+    if (sel === BACK) {
+        showChoices();
+        return;
+    }
+    // 其余是物品选单的下标
+    if (sel >= 0 && sel < choices.length) {
+        if (!WhoDropsCommand.selectItem(cm.getPlayer(), choices[sel][0])) {
+            cm.sendOk("#r这件物品没有掉落记录。#k");
+            finish();
+            return;
+        }
+        page = 0;
+        showPage();
+        return;
+    }
+    finish();
+}
+
+/** 收尾：会话不清会把整份掉落源一直挂在内存里 */
+function finish() {
+    WhoDropsCommand.endSession(cm.getPlayer());
     cm.dispose();
 }
