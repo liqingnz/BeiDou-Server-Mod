@@ -18,14 +18,21 @@
  */
 var WhoDropsCommand = Java.type("org.gms.client.command.commands.gm0.WhoDropsCommand");
 
+// 物品选单的翻页项：用大正数，避开页内下标 0..n-1
+var PREV = 9000001;
+var NEXT = 9000002;
+
 var query = null;   // 本次查询的句柄，随对话框关闭一起消失（服务端不留）
-var choices = [];     // [[物品id, 物品名], ...]，下标即选项序号
+var choiceRows = [];  // 物品选单当前这一页的 [[物品id, 物品名], ...]
+var choiceCount = 0;  // 搜到的物品总数（不是当前页的条数）
+var choicePage = 0;
 var page = 0;
 
 function start() {
     query = WhoDropsCommand.takeQuery(cm.getPlayer());
-    choices = WhoDropsCommand.getChoices(query);
-    if (choices.length > 1) {
+    choiceCount = WhoDropsCommand.getChoiceCount(query);
+    if (choiceCount > 1) {
+        choicePage = 0;
         showChoices();
         return;
     }
@@ -40,20 +47,50 @@ function start() {
 }
 
 function showChoices() {
-    var text = "搜到 #b" + choices.length + "#k 件物品，想看哪一件的掉落来源？\r\n";
-    for (var i = 0; i < choices.length; i++) {
-        text += "#L" + i + "##v" + choices[i][0] + "##z" + choices[i][0] + "##l\r\n";
+    choiceRows = WhoDropsCommand.getChoices(query, choicePage);
+    if (choiceRows.length === 0) {
+        finish();
+        return;
+    }
+    var totalPages = WhoDropsCommand.getChoicePageCount(query);
+
+    var text = "搜到 #b" + choiceCount + "#k 件物品，想看哪一件的掉落来源？\r\n";
+    for (var i = 0; i < choiceRows.length; i++) {
+        text += "#L" + i + "##v" + choiceRows[i][0] + "##z" + choiceRows[i][0] + "##l\r\n";
+    }
+    // 选单是 sendSimple 类型的对话框，只认 #L 选项，没有原生的上一步／下一步按钮，
+    // 所以这里的翻页只能自己拼。选项值用大正数，避开上面的页内下标
+    if (totalPages > 1) {
+        text += "\r\n";
+        if (choicePage > 0) {
+            text += "#L" + PREV + "#<< 上一页#l\r\n";
+        }
+        if (choicePage < totalPages - 1) {
+            text += "#L" + NEXT + "#下一页 >>#l\r\n";
+        }
+        text += "当前第 " + (choicePage + 1) + " 页，共 " + totalPages + " 页";
     }
     cm.sendNextSelectLevel("WhoDropsPick", text);
 }
 
+
 function levelWhoDropsPick(selection) {
     var sel = parseInt(selection);
-    if (sel < 0 || sel >= choices.length) {
+    if (sel === PREV) {
+        choicePage--;
+        showChoices();
+        return;
+    }
+    if (sel === NEXT) {
+        choicePage++;
+        showChoices();
+        return;
+    }
+    if (sel < 0 || sel >= choiceRows.length) {
         finish();
         return;
     }
-    if (!WhoDropsCommand.selectItem(query, choices[sel][0])) {
+    if (!WhoDropsCommand.selectItem(query, choiceRows[sel][0])) {
         cm.sendOk("#r这件物品没有掉落记录。#k");
         finish();
         return;
@@ -61,6 +98,7 @@ function levelWhoDropsPick(selection) {
     page = 0;
     showPage();
 }
+
 
 function showPage() {
     var text = WhoDropsCommand.renderPage(query, cm.getPlayer(), page);
@@ -75,7 +113,7 @@ function showPage() {
     }
 
     // 第 0 页的「上一步」用来回物品选单——只有从选单进来的才有得回
-    var hasPrev = page > 0 || choices.length > 1;
+    var hasPrev = page > 0 || choiceCount > 1;
     var hasNext = page < totalPages - 1;
     if (hasPrev && hasNext) {
         cm.sendLastNextLevel("WhoDropsPrev", "WhoDropsNext", text);

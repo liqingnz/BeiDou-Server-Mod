@@ -69,8 +69,13 @@ public class WhoDropsCommand extends Command {
      */
     private static final int DROPPERS_PER_PAGE = 25;
 
-    /** 选单里最多列几件物品 */
-    private static final int MENU_LIMIT = 30;
+    /**
+     * 物品选单每页几件。
+     * <p>
+     * 与 {@link #DROPPERS_PER_PAGE} 分开：这里一行是物品图标 + 名字，比带怪物立绘的一行矮，
+     * 但要多留两行给翻页项。同样是估的，实测后各调各的。
+     */
+    private static final int ITEMS_PER_PAGE = 25;
 
     private static final String SCRIPT_NAME = "whoDropsList";
 
@@ -125,12 +130,8 @@ public class WhoDropsCommand extends Command {
                 return;
             }
         } else {
-            if (items.size() > MENU_LIMIT) {
-                // 选单装不下就明说，让玩家自己把关键字缩窄，
-                // 而不是对着一份看不出被截过的清单挑
-                player.yellowMessage(I18nUtil.getMessage("WhoDropsCommand.message7", items.size(), MENU_LIMIT));
-                items = items.subList(0, MENU_LIMIT);
-            }
+            // 不截断：选单自己会翻页。原先砍到前 30 件，既够不着后面的，
+            // 显示的「搜到 N 件」还是砍完的数，看着像只搜到 30 件
             query.choices = items;
         }
 
@@ -150,20 +151,35 @@ public class WhoDropsCommand extends Command {
         return handoff.remove(chr.getId());
     }
 
+    /** 搜到的物品总数；只搜到一件（已经直接进分页）时返回 0 */
+    public static int getChoiceCount(Query query) {
+        return (query == null || query.choices == null) ? 0 : query.choices.size();
+    }
+
+    /** 物品选单的总页数 */
+    public static int getChoicePageCount(Query query) {
+        int total = getChoiceCount(query);
+        return (total + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
+    }
+
     /**
-     * 待挑的物品清单。
+     * 物品选单的一页。
      *
-     * @return [[物品id, 物品名], ...]；只搜到一件（已经直接进分页）时返回空数组
+     * @param page 从 0 开始
+     * @return [[物品id, 物品名], ...]；下标是**页内**序号，脚本按它取 id 即可，不必换算全局下标
      */
-    public static Object[][] getChoices(Query query) {
-        if (query == null || query.choices == null) {
+    public static Object[][] getChoices(Query query, int page) {
+        int total = getChoiceCount(query);
+        int start = page * ITEMS_PER_PAGE;
+        if (page < 0 || start >= total) {
             return new Object[0][];
         }
-        List<Pair<Integer, String>> choices = query.choices;
-        Object[][] rows = new Object[choices.size()][2];
-        for (int i = 0; i < choices.size(); i++) {
-            rows[i][0] = choices.get(i).getLeft();
-            rows[i][1] = choices.get(i).getRight();
+        int end = Math.min(start + ITEMS_PER_PAGE, total);
+
+        Object[][] rows = new Object[end - start][2];
+        for (int i = start; i < end; i++) {
+            rows[i - start][0] = query.choices.get(i).getLeft();
+            rows[i - start][1] = query.choices.get(i).getRight();
         }
         return rows;
     }

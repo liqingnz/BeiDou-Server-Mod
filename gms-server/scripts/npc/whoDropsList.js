@@ -21,14 +21,21 @@
  */
 var WhoDropsCommand = Java.type("org.gms.client.command.commands.gm0.WhoDropsCommand");
 
-var query = null;   // 本次查询的句柄，随对话框关闭一起消失（服务端不留）
-var choices = [];     // [[itemId, itemName], ...], index is the option number
+// Picker paging options: large values so they cannot collide with the per-page indices 0..n-1
+var PREV = 9000001;
+var NEXT = 9000002;
+
+var query = null;      // handle for this query; dies with the dialog (nothing kept server-side)
+var choiceRows = [];   // [[itemId, itemName], ...] for the current picker page
+var choiceCount = 0;   // total matches, not the size of the current page
+var choicePage = 0;
 var page = 0;
 
 function start() {
     query = WhoDropsCommand.takeQuery(cm.getPlayer());
-    choices = WhoDropsCommand.getChoices(query);
-    if (choices.length > 1) {
+    choiceCount = WhoDropsCommand.getChoiceCount(query);
+    if (choiceCount > 1) {
+        choicePage = 0;
         showChoices();
         return;
     }
@@ -43,20 +50,51 @@ function start() {
 }
 
 function showChoices() {
-    var text = "Found #b" + choices.length + "#k items. Which one do you want the droppers for?\r\n";
-    for (var i = 0; i < choices.length; i++) {
-        text += "#L" + i + "##v" + choices[i][0] + "##z" + choices[i][0] + "##l\r\n";
+    choiceRows = WhoDropsCommand.getChoices(query, choicePage);
+    if (choiceRows.length === 0) {
+        finish();
+        return;
+    }
+    var totalPages = WhoDropsCommand.getChoicePageCount(query);
+
+    var text = "Found #b" + choiceCount + "#k items. Which one do you want the droppers for?\r\n";
+    for (var i = 0; i < choiceRows.length; i++) {
+        text += "#L" + i + "##v" + choiceRows[i][0] + "##z" + choiceRows[i][0] + "##l\r\n";
+    }
+    // The picker is a sendSimple dialog: it only accepts #L options and has no native
+    // prev/next buttons, so paging has to be spelled out. Large option values keep them
+    // clear of the per-page indices above
+    if (totalPages > 1) {
+        text += "\r\n";
+        if (choicePage > 0) {
+            text += "#L" + PREV + "#<< Previous#l\r\n";
+        }
+        if (choicePage < totalPages - 1) {
+            text += "#L" + NEXT + "#Next >>#l\r\n";
+        }
+        text += "Page " + (choicePage + 1) + " of " + totalPages;
     }
     cm.sendNextSelectLevel("WhoDropsPick", text);
 }
 
+
 function levelWhoDropsPick(selection) {
     var sel = parseInt(selection);
-    if (sel < 0 || sel >= choices.length) {
+    if (sel === PREV) {
+        choicePage--;
+        showChoices();
+        return;
+    }
+    if (sel === NEXT) {
+        choicePage++;
+        showChoices();
+        return;
+    }
+    if (sel < 0 || sel >= choiceRows.length) {
         finish();
         return;
     }
-    if (!WhoDropsCommand.selectItem(query, choices[sel][0])) {
+    if (!WhoDropsCommand.selectItem(query, choiceRows[sel][0])) {
         cm.sendOk("#rThat item has no drop data.#k");
         finish();
         return;
@@ -64,6 +102,7 @@ function levelWhoDropsPick(selection) {
     page = 0;
     showPage();
 }
+
 
 function showPage() {
     var text = WhoDropsCommand.renderPage(query, cm.getPlayer(), page);
@@ -78,7 +117,7 @@ function showPage() {
     }
 
     // Prev on page 0 goes back to the item picker -- only there if we came from one
-    var hasPrev = page > 0 || choices.length > 1;
+    var hasPrev = page > 0 || choiceCount > 1;
     var hasNext = page < totalPages - 1;
     if (hasPrev && hasNext) {
         cm.sendLastNextLevel("WhoDropsPrev", "WhoDropsNext", text);
