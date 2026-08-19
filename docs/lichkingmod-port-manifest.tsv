@@ -1736,16 +1736,16 @@ sql/db_database.sql	sql	73	73	rejected	纯 latin1→gbk 建表噪音（§8 GBK �
 sql/db_drops.sql	sql	1	1	already-fixed	仅实验室怪 DELETE 上界 9300154→9300153；BeiDou V1.0.51 该 DELETE 整段被注释，掉落本就保留
 wz/Etc.wz/BlockReason.img.xml	wz	0	0	rejected	客户端专用展示数据，服务端一行代码都不读（全 Java 目录 grep 该 img 名零命中），改服务端这份对玩家零效果——玩家看到的文案来自他自己客户端的 Data/Etc/。要改得走客户端 img 补丁，属 docs/wz-client-sync-list.md 的范畴，不是服务端移植项
 wz/Etc.wz/CashPackage.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/CashPackage.img.xml
-wz/Etc.wz/Category.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/Category.img.xml	wz	0	0	rejected	随 Commodity 一起判。Category.img 是商城分类页签，service/CashShopService.java:39 读它建分类树、getCommodityByCategory 再按 SN 前缀（Category + CategorySub 两位）过滤商品，页签必须和货架对得上。LK 42 条 vs BeiDou 31 条，且不是包含关系——LK 独有会员卡/喜庆商品/椅子/热销，BeiDou 独有婚礼/新品/活动/美容美发。搬 LK 的页签会出现点进去空无一物的分类
 wz/Etc.wz/ChatBlockReason.img.xml	wz	0	0	rejected	客户端专用展示数据，服务端一行代码都不读（全 Java 目录 grep 该 img 名零命中），改服务端这份对玩家零效果——玩家看到的文案来自他自己客户端的 Data/Etc/。要改得走客户端 img 补丁，属 docs/wz-client-sync-list.md 的范畴，不是服务端移植项
-wz/Etc.wz/Commodity.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/Commodity.img.xml	wz	0	0	rejected	各自的商城货架，不是数据修正。三方 SN 集合：HeavenMS 基线 8948，LK 最终 8945（增 259 删 262），BeiDou 9077（增 130 删 1）。两边都从基线朝自己的方向走，LK 那 248 个独有 SN 是他自服的商品。BeiDou 的 +130 是已完成的自有增量（见 lichkingmod-port.md:4096，中文层 9076 = 9076），且另有 modified_cash_item 表 + gms-ui 后台可在线改价上下架，不需要靠换 wz 调货架
 wz/Etc.wz/Curse.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/Curse.img.xml
 wz/Etc.wz/DeveloperNpc.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/DeveloperNpc.img.xml
 wz/Etc.wz/EmotionEffect.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/EmotionEffect.img.xml
 wz/Etc.wz/ForbiddenName.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/ForbiddenName.img.xml
 wz/Etc.wz/Halloween.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/Halloween.img.xml
-wz/Etc.wz/ItemMake.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Etc.wz/MakeCharInfo.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/ItemMake.img.xml	wz	0	0	rejected	配方数据源批次6 已定案不跟 LK 换到 wz（lichkingmod-port.md:1512-1527 三条理由：覆盖率等价、DB 源可运营、LK 的 getMakerRecipe 有 NPE）。BeiDou 的配方在 makercreatedata/makerrecipedata 两张表，改一条是一条 SQL；ItemMake.img 只用于 getMakerStimulant（ItemInformationProvider.java:2255）。LK 在本文件新增的三个配方（01072344/01082223/02070016）与上调的 meso（75万→1000万/1300万）都属他自服的制作台配置
+wz/Etc.wz/MakeCharInfo.img.xml	wz	0	0	rejected	LK 那份是英文原文（Black/Light/Tanned/Blond/Pale），BeiDou 已是中文（黑色/浅色肌肤/小麦色肌肤/金色/苍白肌肤）。且服务端只用它的 id 骨架做建角合法性校验（client/creator/MakeCharInfoValidator.java:17 读 Info/CharFemale 等六棵子树），骨架两边逐节点一致（diff imgdir 列表为空），展示名根本不参与校验
 wz/Etc.wz/MapNeighbors.img.xml	wz	0	0	rejected	LK 在最终态把整个文件删了（ac7830b5 树里不存在）。BeiDou 保留且在用——net/server/coordinator/partysearch/PartySearchCoordinator.java:84 读它做组队搜索的邻近地图判定，删掉即失能。语义比对也显示 BeiDou 侧 59793 个节点、LK 侧 0 个
 wz/Etc.wz/MedalQuestCategory.img.xml	wz	0	0	rejected	LK 那份还是韩文原文（직업/일반/도전/이벤트），BeiDou 已是中文（职业/普通/挑战/活动）。客户端专用展示数据，服务端一行代码都不读（全 Java 目录 grep 该 img 名零命中），改服务端这份对玩家零效果——玩家看到的文案来自他自己客户端的 Data/Etc/。要改得走客户端 img 补丁，属 docs/wz-client-sync-list.md 的范畴，不是服务端移植项
 wz/Etc.wz/NPT_exception.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/NPT_exception.img.xml
@@ -1763,22 +1763,22 @@ wz/Item.wz/Cash/0521.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 �
 wz/Item.wz/Cash/0536.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Cash/0536.img.xml
 wz/Item.wz/Consume/0200.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Consume/0200.img.xml
 wz/Item.wz/Consume/0202.img.xml	wz	0	0	already-fixed	语义比对后 LK 零新增，BeiDou 是超集（多 28 个节点，含 3 个 mhpRRate 对 LK 的 2 个）。先前清单里的「LK+2」是按行比对时重复行造成的假差异
-wz/Item.wz/Consume/0204.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Item.wz/Consume/0207.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Consume/0204.img.xml	wz	0	0	rejected	三方物品 id 集合：基线 754 / LK 756 / BeiDou 773。BeiDou 自己已补 19 条且一条没删，是 LK 的超集加自有增量；LK 独有的只有 02044890、02044990 两个，且这两个 id 在 BeiDou 中文层 String.wz/Consume.img 里查无名字——搬进来就是无名道具，还得配套客户端 img 补丁。另有 cursed 值差异属数值调参
+wz/Item.wz/Consume/0207.img.xml	wz	0	0	rejected	基线 17 / LK 17 / BeiDou 24。LK 相对基线一个物品都没加，BeiDou 自己补了 7 个，是严格超集；剩下的 unitPrice 差异属定价调参
 wz/Item.wz/Consume/0210.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Consume/0210.img.xml
 wz/Item.wz/Consume/0212.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Consume/0212.img.xml
 wz/Item.wz/Consume/0226.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Consume/0226.img.xml
 wz/Item.wz/Consume/0234.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Consume/0234.img.xml
-wz/Item.wz/Etc/0400.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Item.wz/Etc/0403.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0400.img.xml	wz	0	0	rejected	基线 812 / LK 830 / BeiDou 934。BeiDou 相对基线 +122 且一条没删，把 LK 的 +20 全覆盖了（仅 LK 有的 id 为 0）；剩下 price/lv 差异属数值调参
+wz/Item.wz/Etc/0403.img.xml	wz	0	0	rejected	基线 1165 / LK 1169 / BeiDou 1360。BeiDou 相对基线 +195 且一条没删；LK 独有的只有 04033001 一个，在 BeiDou 中文层 String.wz 里查无名字
 wz/Item.wz/Etc/0413.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Etc/0413.img.xml
-wz/Item.wz/Etc/0416.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Etc/0416.img.xml	wz	0	0	rejected	基线 91 / LK 99 / BeiDou 91。LK 加的 8 个（04160021/04160038/04160046-49/04161052/04161053）在 BeiDou 中文层 String.wz/Etc.img 里全部查无名字，搬进来是一批无名道具，且必须配套客户端 img 补丁才看得见。要补得整条链一起走，属 docs/wz-client-sync-list.md 的范畴
 wz/Item.wz/Etc/0425.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Etc/0425.img.xml
 wz/Item.wz/Etc/0426.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Etc/0426.img.xml
 wz/Item.wz/Etc/0428.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Etc/0428.img.xml
 wz/Item.wz/Etc/0429.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Etc/0429.img.xml
 wz/Item.wz/Etc/0431.img.xml	wz	0	0	ported	gms-server/wz/Item.wz/Etc/0431.img.xml —— LK 增量为 04310100（5000点券，已接入，见 f3de64529）与 04310101（BOSS凭证，LK 自身 sql/scripts/src 零引用，不接）
-wz/Item.wz/Install/0301.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Install/0301.img.xml	wz	0	0	rejected	基线 63 / LK 638 / BeiDou 607——两边都从基线大幅扩过，方向不同。BeiDou 的 +544 一条没删；LK 独有 34 个 id（03010609、03015092、0301569x、0301984x-5x 等）在 BeiDou 中文层 String.wz/Ins.img 里查无名字。另 LK 侧 _hash 节点差异 311 处属导出工具差异，非内容
 wz/Item.wz/Install/0310.img.xml	wz	0	0	ported	dd35605fc 从 LK 补齐（ASM 也没有）。含 3100000/3100001 及 3101000-3101003 共 6 个道具；getSlotMax 在 getItemData 为 null 时返回 0，道具进不了背包，是 37 处发奖调用的唯一前置
 wz/Map.wz/Back/ShanghaiCN.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Back/ShanghaiCN.img.xml
 wz/Map.wz/Effect.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Effect.img.xml
@@ -1831,29 +1831,29 @@ wz/Map.wz/Map/Map7/749050500.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导�
 wz/Map.wz/Map/Map7/749050501.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Map/Map7/749050502.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Map/Map9/910000000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
-wz/Map.wz/Obj/Christmas.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/Christmas.img.xml	wz	0	0	rejected	纯客户端渲染资源，服务端读不到。全服只有 constants/game/GameConstants.java:748 getMaxObstacleMobDamageFromWz 一处消费 Map.wz/Obj，且只扫 s1/mobdamage 取全局最大值。实测这 9 个文件 LK 侧与 BeiDou 侧的 mobdamage 节点数都是 0，LK 多出来的那些节点（贴图、装饰物、动画帧）服务端一个都不会看。要补得走客户端 img 补丁
 wz/Map.wz/Obj/EnSchoolCN.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/EnSchoolCN.img.xml
 wz/Map.wz/Obj/FishingSystemTW.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Obj/ShanghaiCN.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/ShanghaiCN.img.xml
 wz/Map.wz/Obj/Tokyo2JP.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Obj/TokyoJP.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
-wz/Map.wz/Obj/acc1.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Obj/acc10.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/acc1.img.xml	wz	0	0	rejected	纯客户端渲染资源，服务端读不到。全服只有 constants/game/GameConstants.java:748 getMaxObstacleMobDamageFromWz 一处消费 Map.wz/Obj，且只扫 s1/mobdamage 取全局最大值。实测这 9 个文件 LK 侧与 BeiDou 侧的 mobdamage 节点数都是 0，LK 多出来的那些节点（贴图、装饰物、动画帧）服务端一个都不会看。要补得走客户端 img 补丁
+wz/Map.wz/Obj/acc10.img.xml	wz	0	0	rejected	纯客户端渲染资源，服务端读不到。全服只有 constants/game/GameConstants.java:748 getMaxObstacleMobDamageFromWz 一处消费 Map.wz/Obj，且只扫 s1/mobdamage 取全局最大值。实测这 9 个文件 LK 侧与 BeiDou 侧的 mobdamage 节点数都是 0，LK 多出来的那些节点（贴图、装饰物、动画帧）服务端一个都不会看。要补得走客户端 img 补丁
 wz/Map.wz/Obj/acc3.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/acc3.img.xml
-wz/Map.wz/Obj/acc6.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/acc6.img.xml	wz	0	0	rejected	纯客户端渲染资源，服务端读不到。全服只有 constants/game/GameConstants.java:748 getMaxObstacleMobDamageFromWz 一处消费 Map.wz/Obj，且只扫 s1/mobdamage 取全局最大值。实测这 9 个文件 LK 侧与 BeiDou 侧的 mobdamage 节点数都是 0，LK 多出来的那些节点（贴图、装饰物、动画帧）服务端一个都不会看。要补得走客户端 img 补丁
 wz/Map.wz/Obj/acc9.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/acc9.img.xml
 wz/Map.wz/Obj/beer1.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Obj/connect.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/connect.img.xml
 wz/Map.wz/Obj/dungeon.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/dungeon.img.xml
 wz/Map.wz/Obj/dungeon2.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/dungeon2.img.xml
 wz/Map.wz/Obj/dungeon3.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/dungeon3.img.xml
-wz/Map.wz/Obj/dungeon4.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/dungeon4.img.xml	wz	0	0	rejected	纯客户端渲染资源，服务端读不到。全服只有 constants/game/GameConstants.java:748 getMaxObstacleMobDamageFromWz 一处消费 Map.wz/Obj，且只扫 s1/mobdamage 取全局最大值。实测这 9 个文件 LK 侧与 BeiDou 侧的 mobdamage 节点数都是 0，LK 多出来的那些节点（贴图、装饰物、动画帧）服务端一个都不会看。要补得走客户端 img 补丁
 wz/Map.wz/Obj/etc.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/etc.img.xml
-wz/Map.wz/Obj/event.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/event.img.xml	wz	0	0	rejected	纯客户端渲染资源，服务端读不到。全服只有 constants/game/GameConstants.java:748 getMaxObstacleMobDamageFromWz 一处消费 Map.wz/Obj，且只扫 s1/mobdamage 取全局最大值。实测这 9 个文件 LK 侧与 BeiDou 侧的 mobdamage 节点数都是 0，LK 多出来的那些节点（贴图、装饰物、动画帧）服务端一个都不会看。要补得走客户端 img 补丁
 wz/Map.wz/Obj/eventTW.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
-wz/Map.wz/Obj/globalJP.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/globalJP.img.xml	wz	0	0	rejected	纯客户端渲染资源，服务端读不到。全服只有 constants/game/GameConstants.java:748 getMaxObstacleMobDamageFromWz 一处消费 Map.wz/Obj，且只扫 s1/mobdamage 取全局最大值。实测这 9 个文件 LK 侧与 BeiDou 侧的 mobdamage 节点数都是 0，LK 多出来的那些节点（贴图、装饰物、动画帧）服务端一个都不会看。要补得走客户端 img 补丁
 wz/Map.wz/Obj/guide.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/guide.img.xml
-wz/Map.wz/Obj/halloween.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/halloween.img.xml	wz	0	0	rejected	纯客户端渲染资源，服务端读不到。全服只有 constants/game/GameConstants.java:748 getMaxObstacleMobDamageFromWz 一处消费 Map.wz/Obj，且只扫 s1/mobdamage 取全局最大值。实测这 9 个文件 LK 侧与 BeiDou 侧的 mobdamage 节点数都是 0，LK 多出来的那些节点（贴图、装饰物、动画帧）服务端一个都不会看。要补得走客户端 img 补丁
 wz/Map.wz/Obj/houseDW.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/houseDW.img.xml
 wz/Map.wz/Obj/houseGS.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/houseGS.img.xml
 wz/Map.wz/Obj/houseVPT.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/houseVPT.img.xml
@@ -1866,8 +1866,8 @@ wz/Map.wz/Obj/pachinko.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 
 wz/Map.wz/Obj/shop.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/shop.img.xml
 wz/Map.wz/Obj/shop2.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/shop2.img.xml
 wz/Map.wz/Obj/shouwaDungeon.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/shouwaDungeon.img.xml
-wz/Map.wz/Obj/signboard.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Obj/trap.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/signboard.img.xml	wz	0	0	rejected	纯客户端渲染资源，服务端读不到。全服只有 constants/game/GameConstants.java:748 getMaxObstacleMobDamageFromWz 一处消费 Map.wz/Obj，且只扫 s1/mobdamage 取全局最大值。实测这 9 个文件 LK 侧与 BeiDou 侧的 mobdamage 节点数都是 0，LK 多出来的那些节点（贴图、装饰物、动画帧）服务端一个都不会看。要补得走客户端 img 补丁
+wz/Map.wz/Obj/trap.img.xml	wz	0	0	rejected	同组唯一含 s1/mobdamage 的文件，也是服务端唯一会读的部分（GameConstants.java:748 取全局最大障碍物伤害）。实测两侧 mobdamage 节点数同为 4、最大值同为 1000，对服务端行为零影响；LK 多出的 67 个节点是陷阱贴图与动画帧，纯客户端渲染
 wz/Map.wz/Obj/tutorial_jp.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/tutorial_jp.img.xml
 wz/Map.wz/Tile/TokyoJP.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Tile/grassySoil.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Tile/grassySoil.img.xml
@@ -1930,8 +1930,8 @@ wz/Mob.wz/9601105.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（�
 wz/Mob.wz/9601116.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Morph.wz/1001.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Morph.wz/1001.img.xml
 wz/Morph.wz/1101.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Morph.wz/1101.img.xml
-wz/Npc.wz/2140000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Npc.wz/9120015.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/2140000.img.xml	wz	0	0	rejected	服务端只从 Npc.wz 读两样东西：info/trunkPut 与 info/trunkGet（仓库存取手续费，server/Storage.java:319,337），以及文件是否存在（server/life/PlayerNPCFactory.java:31 isExistentScriptid）。info/script 是客户端对话菜单里显示的条目名，服务端挂脚本靠 scripts/npc/<npcid>.js 文件名，不看这个节点。LK 这里新增的 script 条目「我想重置任务」服务端读不到
+wz/Npc.wz/9120015.img.xml	wz	0	0	rejected	同 2140000：info/script 服务端不读。LK 的改动是把菜单条目名从英文译成中文（To the Showa manor... → 到昭和庄园...），属客户端展示文案，要改得走客户端 img 补丁
 wz/Npc.wz/9250000.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9250000.img.xml
 wz/Npc.wz/9250001.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9250001.img.xml
 wz/Npc.wz/9250002.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
@@ -1949,7 +1949,7 @@ wz/Npc.wz/9250013.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同�
 wz/Npc.wz/9250014.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9250014.img.xml
 wz/Npc.wz/9250016.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9250016.img.xml
 wz/Npc.wz/9250021.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
-wz/Npc.wz/9250022.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9250022.img.xml	wz	0	0	rejected	同 2140000。LK 把 info/quest = "fortuneteller" 挪成 info/script/0/script = "fortuneteller"，两个节点服务端都不读；算命 NPC 的实际逻辑在脚本层
 wz/Npc.wz/9250027.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9250027.img.xml
 wz/Npc.wz/9250028.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9250028.img.xml
 wz/Npc.wz/9250029.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9250029.img.xml
@@ -1974,7 +1974,7 @@ wz/Npc.wz/9310041.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同�
 wz/Npc.wz/9310042.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310042.img.xml
 wz/Npc.wz/9310043.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310043.img.xml
 wz/Npc.wz/9310044.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310044.img.xml
-wz/Npc.wz/9310045.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310045.img.xml	wz	0	0	rejected	改的是 MapleTVadX/adY/msgX/msgY 四个坐标（枫叶电视广告与字幕的贴图位置），纯客户端渲染参数，服务端只读 trunkPut/trunkGet。LK 版把广告框左移 15px、上移 14px，是他自己客户端的排版口径
 wz/Npc.wz/9310046.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310046.img.xml
 wz/Npc.wz/9310047.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310047.img.xml
 wz/Npc.wz/9310048.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310048.img.xml
@@ -1986,7 +1986,7 @@ wz/Npc.wz/9310053.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同�
 wz/Npc.wz/9310054.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310054.img.xml
 wz/Npc.wz/9310055.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310055.img.xml
 wz/Npc.wz/9310056.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310056.img.xml
-wz/Npc.wz/9310057.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Npc.wz/9310057.img.xml	wz	0	0	rejected	LK 新增的是四个 uol 软链接节点（动画帧复用），纯客户端渲染资源，服务端不读
 wz/Npc.wz/9310058.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310058.img.xml
 wz/Npc.wz/9310060.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310060.img.xml
 wz/Npc.wz/9310061.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Npc.wz/9310061.img.xml
@@ -1998,51 +1998,51 @@ wz/Npc.wz/9330085.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（�
 wz/Npc.wz/9330086.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Npc.wz/9330108.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Npc.wz/9390221.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
-wz/Quest.wz/Act.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Quest.wz/Check.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Quest.wz/Act.img.xml	wz	0	0	rejected	BeiDou 的任务覆盖远在 LK 之上：基线 2987，BeiDou +355 一条没删（3342），LK 只 +108 且删了 1 条（3094）。仅 LK 有的 7 个是 18000-18004 与 8723、8724 —— 18000 段是 LK 自建的任务号段（Check/QuestInfo/Say 三张表里独有的也正好是这五个），不是官方任务，搬进来要连带他那套 NPC 脚本
+wz/Quest.wz/Check.img.xml	wz	0	0	rejected	同 Act：基线 2872，BeiDou 3243（+371），LK 2941（+69）。仅 LK 有 18000-18004 五个自建任务号
 wz/Quest.wz/Exclusive.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Quest.wz/Exclusive.img.xml
-wz/Quest.wz/PQuest.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Quest.wz/QuestInfo.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Quest.wz/Say.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Quest.wz/PQuest.img.xml	wz	0	0	noise	唯一差异是组队任务名的译法：LK「The 2nd Monster Carnival」（英文原文），BeiDou「怪物嘉年华2」。十个 id 完全一致
+wz/Quest.wz/QuestInfo.img.xml	wz	0	0	rejected	同 Act：基线 2818，BeiDou 3178（+360），LK 2887（+69）。仅 LK 有 18000-18004
+wz/Quest.wz/Say.img.xml	wz	0	0	rejected	同 Act：基线 2809，BeiDou 3174（+365），LK 2878（+69）。仅 LK 有 18000-18004
 wz/Reactor.wz/5411001.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
-wz/Skill.wz/110.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/112.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/120.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/121.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/122.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/110.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/112.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/120.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/121.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/122.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
 wz/Skill.wz/131.img.xml	wz	0	0	noise	语义比对两侧完全一致（去掉 canvas/png 等图像资源后 0 差异），只是 LK 把 XML 压成了单行
-wz/Skill.wz/132.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/210.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/211.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/132.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/210.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/211.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
 wz/Skill.wz/2111.img.xml	wz	0	0	already-fixed	语义比对后 LK 零新增，BeiDou 多 4 个节点，是超集
-wz/Skill.wz/212.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/222.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/312.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/321.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/322.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/422.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/512.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/522.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/MobSkill.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/212.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/222.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/312.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/321.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/322.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/422.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/512.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/522.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
+wz/Skill.wz/MobSkill.img.xml	wz	0	0	rejected	LK 自服的技能调参，BeiDou 侧与 HeavenMS 基线（b0671161）逐节点完全一致，改动全部只出现在 LK 一方。抽样：110 加 mastery=13；210/211 加 attackCount=2；312 加 cooltime=180/damage=120/eva=30-90；512 把 cooltime 从 240/340/430 砍到 5 并改成消耗魔法石（itemCon=4006000）；MobSkill 新增召唤条目 187，召的是 9300167 与 9600026——后者正是本轮已判 rejected 的 LK 活动 boss
 wz/Sound.wz/BgmCN.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Sound.wz/BgmCN.img.xml
 wz/String.wz/Cash.img.xml	wz	0	0	partial	批次7：仅取 8 条新道具名（6 张通用美容券 + 1.5倍经验/爆率卡 5211900/5360900），中英双层各补一份。其余改动为纯汉化，按 §8 rejected
-wz/String.wz/Consume.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/String.wz/EULA.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Consume.img.xml	wz	0	0	rejected	基线 2292 / LK 2296 / BeiDou 2431。BeiDou 相对基线 +140，LK 只 +4；LK 独有的 3 个 id 在 BeiDou 的 Item.wz/Consume 里查无对应物品数据，是孤儿名字
+wz/String.wz/EULA.img.xml	wz	0	0	rejected	服务端不读 EULA.img（只读 Consume/Etc/Ins/Map/Mob/Npc/Pet/Skill 八张表），是客户端登录时弹的条款页。且 BeiDou 这份是有意换过的——正文是「#e《BeiDou》开源声明#n 本项目为开源项目，所有商业行为与 BeiDou 团队无关」，LK 那份是官方《冒险岛最终用户使用许可协议》原文，搬回去等于把开源声明换掉
 wz/String.wz/Eqp.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/String.wz/Eqp.img.xml
-wz/String.wz/Etc.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Etc.img.xml	wz	0	0	deferred	为什么缓：同 Mob.img，但可动的比例小得多——仅 LK 有 318 个名字，只有 21 个在 BeiDou 的 Item.wz/Etc 有对应物品数据，其余 297 个是孤儿名（LK 自己加的道具，BeiDou 没有物品数据）。什么条件下重启：与 String.wz/Mob.img 同批，只并那 21 条
 wz/String.wz/GLcloneC.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/String.wz/GLcloneC.img.xml
 wz/String.wz/GuestEULA.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/String.wz/GuestEULA.img.xml
-wz/String.wz/Ins.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/String.wz/Map.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/String.wz/Mob.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/String.wz/MonsterBook.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/String.wz/NameChange.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/String.wz/Npc.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/String.wz/Pet.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/String.wz/PetDialog.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/String.wz/Skill.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/Ins.img.xml	wz	0	0	deferred	为什么缓：同 Mob.img。仅 LK 有 187 个名字，其中 152 个在 BeiDou 的 Item.wz/Install 有对应物品数据却无名字。什么条件下重启：与 String.wz/Mob.img 同批处理，一次性并名字 + 定客户端同步口径
+wz/String.wz/Map.img.xml	wz	0	0	deferred	为什么缓：同 Mob.img。仅 LK 有 51 个地图名，其中 23 个在 BeiDou 的 Map.wz 有对应地图数据却无名字（另 28 个是孤儿名）。地图名会出现在传送/搜索类指令输出里。什么条件下重启：与 String.wz/Mob.img 同批
+wz/String.wz/Mob.img.xml	wz	0	0	deferred	为什么缓：这是真缺口不是噪音。仅 LK 有的 230 个怪物名里，178 个在 BeiDou 的 Mob.wz 有对应数据却没有名字——语言层是整文件覆盖，wz-zh-CN/String.wz/Mob.img.xml 存在就把英文基础层整个挡住，zh 层查不到的 id（实测 9400206、6230203 两层都是 0 命中）就是彻底没名字，@whodrops、掉落播报、怪物图鉴都会显示空。另 52 个是 BeiDou 无怪物数据的孤儿名，不搬。什么条件下重启：把这 178 条名字并进 wz-zh-CN/String.wz/Mob.img.xml，并同步决定客户端 Data/String/Mob.img 是否一起打补丁（映射见 docs/wz-client-sync-list.md）
+wz/String.wz/MonsterBook.img.xml	wz	0	0	rejected	服务端不读，怪物图鉴的客户端展示文本。语义比对两侧节点数相同（各 10224 处独有），是同一批内容的两种译法
+wz/String.wz/NameChange.img.xml	wz	0	0	rejected	服务端不读，客户端改名页说明文案。且 LK 那份还是英文原文（RULES FOR CHARACTER NAME CHANGE...），BeiDou 已是中文
+wz/String.wz/Npc.img.xml	wz	0	0	deferred	为什么缓：同 Mob.img，量最小——仅 LK 有 13 个 NPC 名，其中 8 个在 BeiDou 的 Npc.wz 有对应数据却无名字。什么条件下重启：与 String.wz/Mob.img 同批
+wz/String.wz/Pet.img.xml	wz	0	0	already-fixed	LK 相对 HeavenMS 基线一个 id 都没加（基线 54 = LK 54），BeiDou 已扩到 849，是严格超集
+wz/String.wz/PetDialog.img.xml	wz	0	0	rejected	服务端不读，宠物对话气泡的客户端文本。BeiDou 侧 11998 个独有节点对 LK 的 991，内容远比 LK 全
+wz/String.wz/Skill.img.xml	wz	0	0	already-fixed	三方 id 集合完全相同（基线 613 = LK 613 = BeiDou 613），LK 侧无任何新增；剩下的差异是技能描述文案的译法
 wz/String.wz/TestEULA.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/String.wz/TestEULA.img.xml
-wz/String.wz/ToolTipHelp.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/String.wz/ToolTipHelp.img.xml	wz	0	0	rejected	服务端不读。LK 多 112 个节点（新增 501000000、702060001 两张图的提示），BeiDou 多 264 个，两边各有各的；要补得走客户端 img 补丁
 wz/String.wz/TransferWorld.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/String.wz/TransferWorld.img.xml
 wz/String.wz/TrialEULA.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/String.wz/TrialEULA.img.xml
 wz/UI.wz/UIWindow.img.xml	wz	0	0	rejected	LK 唯一增量是 Attendance 子树（18 个叶子），LK 自身 src/scripts/sql 零引用、BeiDou 亦零引用，是没有功能挂钩的孤儿 UI
