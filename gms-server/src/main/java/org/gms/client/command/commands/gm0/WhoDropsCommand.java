@@ -63,9 +63,11 @@ public class WhoDropsCommand extends Command {
      * 掉落源每页几条。
      * <p>
      * 服务端量不到客户端的渲染高度，只能按排版估：一条占一行、行首一张立绘（比文字行高）。
+     * 每条前面带的序号是**跨页连续**的，正是为了实测「翻到第几条开始看不见」——
+     * 页底显示的条数区间与看得见的最后一个序号一对，就知道该往回收多少。
      * 嫌少嫌多直接调这里，翻页本身不受影响。
      */
-    private static final int DROPPERS_PER_PAGE = 12;
+    private static final int DROPPERS_PER_PAGE = 25;
 
     /** 选单里最多列几件物品 */
     private static final int MENU_LIMIT = 30;
@@ -73,18 +75,26 @@ public class WhoDropsCommand extends Command {
     private static final String SCRIPT_NAME = "whoDropsList";
 
     /**
-     * 每个角色一份查询会话，key 是角色 id。
+     * 一次查询的全部状态：候选物品 + 当前物品的掉落源。
      * <p>
-     * 候选物品与掉落源都放在这里：脚本翻页时按页取，不必把
-     * {@code getItemDataByName} 那趟全表模糊匹配、或 {@code drop_data} 查询重跑一遍。
+     * 对脚本是个不透明句柄——脚本在 {@code start()} 里取走，之后每次调用再传回来。
+     * <b>不放在服务端的静态表里</b>：玩家用右上角叉掉对话框时走的是
+     * {@code NPCScriptManager.dispose}，那条路不会回调脚本，脚本也就没机会通知服务端清理，
+     * 静态表会留下一份最多几百条的掉落源。挂在脚本变量上则随
+     * {@code resetContext} 一起消失，不用惦记回收。
      */
-    private static final Map<Integer, Session> sessions = new ConcurrentHashMap<>();
-
-    private static final class Session {
-        List<Pair<Integer, String>> choices;            // 待挑的物品；只搜到一件时为 null
-        int itemId;
-        List<Pair<Integer, Integer>> droppers;          // (怪物id, 原始 chance)
+    public static final class Query {
+        private List<Pair<Integer, String>> choices;    // 待挑的物品；只搜到一件时为 null
+        private int itemId;
+        private List<Pair<Integer, Integer>> droppers;  // (怪物id, 原始 chance)
     }
+
+    /**
+     * 指令 → 脚本的交接台，key 是角色 id。
+     * <p>
+     * 只在 {@code openNpc} 与脚本 {@code start()} 之间存在一瞬，脚本一取就删。
+     */
+    private static final Map<Integer, Query> handoff = new ConcurrentHashMap<>();
 
     {
         setDescription(I18nUtil.getMessage("WhoDropsCommand.message1"));
@@ -107,10 +117,10 @@ public class WhoDropsCommand extends Command {
             return;
         }
 
-        Session session = new Session();
+        Query query = new Query();
         if (items.size() == 1) {
             // 只有一件就别多一次点击，直接进掉落源分页
-            if (!loadDroppers(session, items.getFirst().getLeft())) {
+            if (!loadDroppers(query, items.getFirst().getLeft())) {
                 player.dropMessage(5, I18nUtil.getMessage("WhoDropsCommand.message5"));
                 return;
             }
@@ -121,12 +131,12 @@ public class WhoDropsCommand extends Command {
                 player.yellowMessage(I18nUtil.getMessage("WhoDropsCommand.message7", items.size(), MENU_LIMIT));
                 items = items.subList(0, MENU_LIMIT);
             }
-            session.choices = items;
+            query.choices = items;
         }
 
-        sessions.put(player.getId(), session);
+        handoff.put(player.getId(), query);
         if (!player.getAbstractPlayerInteraction().openNpc(NpcId.MAPLE_ADMINISTRATOR, SCRIPT_NAME)) {
-            sessions.remove(player.getId());
+            handoff.remove(player.getId());
             player.yellowMessage(I18nUtil.getMessage("Command.scriptMissing", SCRIPT_NAME));
         }
     }
@@ -135,17 +145,21 @@ public class WhoDropsCommand extends Command {
     // 以下 public static 供 scripts[-zh-CN]/npc/whoDropsList.js 调用
     // ---------------------------------------------------------------------
 
+    /** 脚本在 start() 里取走本次查询；取走即从交接台删除。没有则返回 null */
+    public static Query takeQuery(Character chr) {
+        return handoff.remove(chr.getId());
+    }
+
     /**
      * 待挑的物品清单。
      *
-     * @return [[物品id, 物品名], ...]；只搜到一件（已经直接进分页）或没有会话时返回空数组
+     * @return [[物品id, 物品名], ...]；只搜到一件（已经直接进分页）时返回空数组
      */
-    public static Object[][] getChoices(Character chr) {
-        Session session = sessions.get(chr.getId());
-        if (session == null || session.choices == null) {
+    public static Object[][] getChoices(Query query) {
+        if (query == null || query.choices == null) {
             return new Object[0][];
         }
-        List<Pair<Integer, String>> choices = session.choices;
+        List<Pair<Integer, String>> choices = query.choices;
         Object[][] rows = new Object[choices.size()][2];
         for (int i = 0; i < choices.size(); i++) {
             rows[i][0] = choices.get(i).getLeft();
@@ -159,22 +173,20 @@ public class WhoDropsCommand extends Command {
      *
      * @return 是否有掉落源；false 时脚本该提示「查不到」而不是翻一页空的
      */
-    public static boolean selectItem(Character chr, int itemId) {
-        Session session = sessions.get(chr.getId());
-        if (session == null) {
+    public static boolean selectItem(Query query, int itemId) {
+        if (query == null) {
             return false;
         }
-        // choices 保留不清：翻页界面上的「返回物品列表」还要用它
-        return loadDroppers(session, itemId);
+        // choices 保留不清：翻页界面上的「上一步」要靠它回到物品列表
+        return loadDroppers(query, itemId);
     }
 
-    /** 当前物品的掉落源总页数；没有会话时返回 0 */
-    public static int getPageCount(Character chr) {
-        Session session = sessions.get(chr.getId());
-        if (session == null || session.droppers == null) {
+    /** 当前物品的掉落源总页数 */
+    public static int getPageCount(Query query) {
+        if (query == null || query.droppers == null) {
             return 0;
         }
-        return (session.droppers.size() + DROPPERS_PER_PAGE - 1) / DROPPERS_PER_PAGE;
+        return (query.droppers.size() + DROPPERS_PER_PAGE - 1) / DROPPERS_PER_PAGE;
     }
 
     /**
@@ -185,12 +197,11 @@ public class WhoDropsCommand extends Command {
      * @param page 从 0 开始
      * @return 该页正文；页码越界或没有会话时返回空串
      */
-    public static String renderPage(Character chr, int page) {
-        Session session = sessions.get(chr.getId());
-        if (session == null || session.droppers == null) {
+    public static String renderPage(Query query, Character chr, int page) {
+        if (query == null || query.droppers == null) {
             return "";
         }
-        List<Pair<Integer, Integer>> droppers = session.droppers;
+        List<Pair<Integer, Integer>> droppers = query.droppers;
         int start = page * DROPPERS_PER_PAGE;
         if (page < 0 || start >= droppers.size()) {
             return "";
@@ -200,9 +211,9 @@ public class WhoDropsCommand extends Command {
         StringBuilder output = new StringBuilder();
         // 整行都在 i18n 里：中文「#z#掉落于：」不留空格、英文「#z# is dropped by:」要留，
         // 拆成「图标 + 半句」拼的话空格没处放（properties 会把值前导空格吃掉）
-        output.append(I18nUtil.getMessage("WhoDropsCommand.message4", session.itemId))
+        output.append(I18nUtil.getMessage("WhoDropsCommand.message4", query.itemId))
                 .append("  ")
-                .append(I18nUtil.getMessage("WhoDropsCommand.message8", droppers.size()))
+                .append(I18nUtil.getMessage("WhoDropsCommand.message8", start + 1, end, droppers.size()))
                 .append("\r\n\r\n");
 
         for (int i = start; i < end; i++) {
@@ -211,7 +222,9 @@ public class WhoDropsCommand extends Command {
             // 一条 Monster 同时供立绘与 isBoss 用，省一次 LifeFactory 查找
             Monster mob = LifeFactory.getMonster(mobId);
             float rate = (mob != null && mob.isBoss()) ? chr.getBossDropRate() : chr.getDropRate();
-            output.append(mob == null ? MobTextUtil.mobImage(mobId) : MobTextUtil.mobImage(mob))
+            // 序号跨页连续：看得见的最后一个序号就是这一页的实际容量
+            output.append("#e").append(i + 1).append(".#n")
+                    .append(mob == null ? MobTextUtil.mobImage(mobId) : MobTextUtil.mobImage(mob))
                     .append(MobTextUtil.mobName(mobId)).append(" #r")
                     .append(formatChance(dropper.getRight(), rate))
                     .append("#k%\r\n");
@@ -219,18 +232,13 @@ public class WhoDropsCommand extends Command {
         return output.toString();
     }
 
-    /** 关掉对话框时清掉会话，别把整份掉落源挂在内存里等下一次覆盖 */
-    public static void endSession(Character chr) {
-        sessions.remove(chr.getId());
-    }
-
     // ---------------------------------------------------------------------
 
-    private static boolean loadDroppers(Session session, int itemId) {
-        session.itemId = itemId;
+    private static boolean loadDroppers(Query query, int itemId) {
+        query.itemId = itemId;
         // 查询不设 LIMIT：要翻页就得知道总数，而单件物品的 drop_data 行数是几十量级
-        session.droppers = ItemInformationProvider.getInstance().getWhoDropsWithChance(itemId);
-        return !session.droppers.isEmpty();
+        query.droppers = ItemInformationProvider.getInstance().getWhoDropsWithChance(itemId);
+        return !query.droppers.isEmpty();
     }
 
     /** 纯数字按 id 精确查，否则按名字模糊查 */
