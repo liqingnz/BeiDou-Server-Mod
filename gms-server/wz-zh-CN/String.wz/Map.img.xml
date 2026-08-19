@@ -3520,6 +3520,10 @@
       <string name="mapName" value="地狱大公藏身之地"/>
       <string name="streetName" value="迷你地图"/>
     </imgdir>
+    <imgdir name="677000013">
+      <string name="mapName" value="地狱大公入口之地"/>
+      <string name="streetName" value="迷你地图"/>
+    </imgdir>
   </imgdir>
   <imgdir name="etc">
     <imgdir name="674030000">
@@ -13334,6 +13338,26 @@
       <string name="mapName" value="메이플월드 전 지역"/>
       <string name="streetName" value="메이플월드"/>
     </imgdir>
+    <imgdir name="674012000">
+      <string name="mapName" value="蕃茄农场1(等候室)"/>
+      <string name="streetName" value="隐藏街道"/>
+    </imgdir>
+    <imgdir name="674012001">
+      <string name="mapName" value="蕃茄农场2(等候室)"/>
+      <string name="streetName" value="隐藏街道"/>
+    </imgdir>
+    <imgdir name="674012010">
+      <string name="mapName" value="蕃茄农场1-1"/>
+      <string name="streetName" value="隐藏街道"/>
+    </imgdir>
+    <imgdir name="674012011">
+      <string name="mapName" value="蕃茄农场1-2"/>
+      <string name="streetName" value="隐藏街道"/>
+    </imgdir>
+    <imgdir name="674012020">
+      <string name="mapName" value="蕃茄农场2"/>
+      <string name="streetName" value="隐藏街道"/>
+    </imgdir>
   </imgdir>
   <imgdir name="event">
     <imgdir name="683000000">
@@ -18885,6 +18909,74 @@
     <imgdir name="222010403">
       <string name="mapName" value="树妖姥姥栖息地"/>
       <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="209080100">
+      <string name="mapName" value="圣诞组队室"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229020000">
+      <string name="mapName" value="阴森的南瓜田地"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229020100">
+      <string name="mapName" value="阴暗的南瓜田地"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229020200">
+      <string name="mapName" value="阴沉的南瓜田地"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229020300">
+      <string name="mapName" value="孤独的南瓜田地"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229020400">
+      <string name="mapName" value="安静的南瓜田地"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229030000">
+      <string name="mapName" value="第一个房间_1set"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229030100">
+      <string name="mapName" value="第二个房间_1set"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229030200">
+      <string name="mapName" value="第三个房间_1set"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229030300">
+      <string name="mapName" value="管家的屋子"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229030400">
+      <string name="mapName" value="第一个房间_2set"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229030500">
+      <string name="mapName" value="第二个房间_2set"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229030600">
+      <string name="mapName" value="第三个房间_2set"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229030700">
+      <string name="mapName" value="第一个房间_3set"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229030800">
+      <string name="mapName" value="第二个房间_3set"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="229030900">
+      <string name="mapName" value="第三个房间_3set"/>
+      <string name="streetName" value="隐藏地图"/>
+    </imgdir>
+    <imgdir name="749010000">
+      <string name="mapName" value="荒山野岭"/>
+      <string name="streetName" value="童话村"/>
     </imgdir>
   </imgdir>
   <imgdir name="singapore">

@@ -6102,4 +6102,283 @@
   <imgdir name="700003">
     <string name="name" value="腐烂蘑菇王"/>
   </imgdir>
+  <imgdir name="6230203">
+    <string name="name" value="人参坛子"/>
+  </imgdir>
+  <imgdir name="9400206">
+    <string name="name" value="枫之谷果实"/>
+  </imgdir>
+  <imgdir name="9400207">
+    <string name="name" value="火红枫之谷果实"/>
+  </imgdir>
+  <imgdir name="9400208">
+    <string name="name" value="大枫之谷果实"/>
+  </imgdir>
+  <imgdir name="9400407">
+    <string name="name" value="蟾蜍"/>
+  </imgdir>
+  <imgdir name="9400410">
+    <string name="name" value="大石头"/>
+  </imgdir>
+  <imgdir name="9400411">
+    <string name="name" value="绯红卫士"/>
+  </imgdir>
+  <imgdir name="9400412">
+    <string name="name" value="黄金盔甲侍卫"/>
+  </imgdir>
+  <imgdir name="9400413">
+    <string name="name" value="怨灵"/>
+  </imgdir>
+  <imgdir name="9400414">
+    <string name="name" value="火球"/>
+  </imgdir>
+  <imgdir name="9400415">
+    <string name="name" value="精英卫士"/>
+  </imgdir>
+  <imgdir name="9400416">
+    <string name="name" value="鲨鱼"/>
+  </imgdir>
+  <imgdir name="9400417">
+    <string name="name" value="乌贼怪"/>
+  </imgdir>
+  <imgdir name="9400418">
+    <string name="name" value="刺鳍鱼之屋"/>
+  </imgdir>
+  <imgdir name="9400419">
+    <string name="name" value="地狱船长"/>
+  </imgdir>
+  <imgdir name="9400420">
+    <string name="name" value="海之魔女"/>
+  </imgdir>
+  <imgdir name="9400421">
+    <string name="name" value="血焰将军"/>
+  </imgdir>
+  <imgdir name="9400422">
+    <string name="name" value="猎魔人"/>
+  </imgdir>
+  <imgdir name="9400423">
+    <string name="name" value="暗影杀手"/>
+  </imgdir>
+  <imgdir name="9400424">
+    <string name="name" value="绯红卫士"/>
+  </imgdir>
+  <imgdir name="9400425">
+    <string name="name" value="黄金盔甲侍卫"/>
+  </imgdir>
+  <imgdir name="9400426">
+    <string name="name" value="怨灵"/>
+  </imgdir>
+  <imgdir name="9400427">
+    <string name="name" value="火球"/>
+  </imgdir>
+  <imgdir name="9400428">
+    <string name="name" value="精英卫士"/>
+  </imgdir>
+  <imgdir name="9400429">
+    <string name="name" value="鲨鱼"/>
+  </imgdir>
+  <imgdir name="9400430">
+    <string name="name" value="乌贼怪"/>
+  </imgdir>
+  <imgdir name="9400431">
+    <string name="name" value="刺鳍鱼之屋"/>
+  </imgdir>
+  <imgdir name="9400432">
+    <string name="name" value="地狱船长"/>
+  </imgdir>
+  <imgdir name="9400433">
+    <string name="name" value="海之魔女"/>
+  </imgdir>
+  <imgdir name="9400434">
+    <string name="name" value="血焰将军"/>
+  </imgdir>
+  <imgdir name="9400435">
+    <string name="name" value="猎魔人"/>
+  </imgdir>
+  <imgdir name="9400436">
+    <string name="name" value="暗影杀手"/>
+  </imgdir>
+  <imgdir name="9400437">
+    <string name="name" value="地狱船长"/>
+  </imgdir>
+  <imgdir name="9400438">
+    <string name="name" value="海之魔女"/>
+  </imgdir>
+  <imgdir name="9400439">
+    <string name="name" value="血焰将军"/>
+  </imgdir>
+  <imgdir name="9400440">
+    <string name="name" value="猎魔人"/>
+  </imgdir>
+  <imgdir name="9400441">
+    <string name="name" value="暗影杀手"/>
+  </imgdir>
+  <imgdir name="9400442">
+    <string name="name" value="宝箱"/>
+  </imgdir>
+  <imgdir name="9400443">
+    <string name="name" value="刺鳍鱼"/>
+  </imgdir>
+  <imgdir name="9400700">
+    <string name="name" value="超级蕃茄"/>
+  </imgdir>
+  <imgdir name="9400701">
+    <string name="name" value="喝醉的缎带肥肥"/>
+  </imgdir>
+  <imgdir name="9400702">
+    <string name="name" value="喝醉的蓝菇菇"/>
+  </imgdir>
+  <imgdir name="9400703">
+    <string name="name" value="喝醉的火独眼兽"/>
+  </imgdir>
+  <imgdir name="9400705">
+    <string name="name" value="盖福克斯"/>
+  </imgdir>
+  <imgdir name="9400734">
+    <string name="name" value="巨大蕃茄"/>
+  </imgdir>
+  <imgdir name="9400735">
+    <string name="name" value="蜗牛"/>
+  </imgdir>
+  <imgdir name="9400736">
+    <string name="name" value="蜗牛"/>
+  </imgdir>
+  <imgdir name="9400737">
+    <string name="name" value="喝醉的水灵"/>
+  </imgdir>
+  <imgdir name="9400738">
+    <string name="name" value="喝醉的猴子"/>
+  </imgdir>
+  <imgdir name="9410056">
+    <string name="name" value="蜡烛怪物3"/>
+  </imgdir>
+  <imgdir name="9410057">
+    <string name="name" value="超级绿水灵"/>
+  </imgdir>
+  <imgdir name="9410058">
+    <string name="name" value="巴洛古"/>
+  </imgdir>
+  <imgdir name="9410059">
+    <string name="name" value="远古精灵"/>
+  </imgdir>
+  <imgdir name="9410060">
+    <string name="name" value="地狱巴洛古"/>
+  </imgdir>
+  <imgdir name="9410061">
+    <string name="name" value="艾尔侠"/>
+  </imgdir>
+  <imgdir name="9410062">
+    <string name="name" value="格瑞芬多"/>
+  </imgdir>
+  <imgdir name="9410063">
+    <string name="name" value="喷火龙"/>
+  </imgdir>
+  <imgdir name="9410064">
+    <string name="name" value="金勾海贼王"/>
+  </imgdir>
+  <imgdir name="9410065">
+    <string name="name" value="蓝色蘑菇王"/>
+  </imgdir>
+  <imgdir name="9410067">
+    <string name="name" value="纯净雪人"/>
+  </imgdir>
+  <imgdir name="9410068">
+    <string name="name" value="纯净雪人"/>
+  </imgdir>
+  <imgdir name="9410069">
+    <string name="name" value="纯净雪人"/>
+  </imgdir>
+  <imgdir name="9410070">
+    <string name="name" value="第一阶段皮卡啾"/>
+  </imgdir>
+  <imgdir name="9410071">
+    <string name="name" value="第二阶段皮卡啾"/>
+  </imgdir>
+  <imgdir name="9410072">
+    <string name="name" value="第三阶段皮卡啾"/>
+  </imgdir>
+  <imgdir name="9410073">
+    <string name="name" value="第四阶段皮卡啾"/>
+  </imgdir>
+  <imgdir name="9410074">
+    <string name="name" value="第五阶段皮卡啾"/>
+  </imgdir>
+  <imgdir name="9410075">
+    <string name="name" value="4周年蛋糕"/>
+  </imgdir>
+  <imgdir name="9410076">
+    <string name="name" value="第一阶段皮卡啾"/>
+  </imgdir>
+  <imgdir name="9410077">
+    <string name="name" value="第二阶段皮卡啾"/>
+  </imgdir>
+  <imgdir name="9410078">
+    <string name="name" value="第三阶段皮卡啾"/>
+  </imgdir>
+  <imgdir name="9410079">
+    <string name="name" value="第四阶段皮卡啾"/>
+  </imgdir>
+  <imgdir name="9410080">
+    <string name="name" value="第五阶段皮卡啾"/>
+  </imgdir>
+  <imgdir name="9410081">
+    <string name="name" value="4周年蛋糕"/>
+  </imgdir>
+  <imgdir name="9410082">
+    <string name="name" value="游行表演沙铃"/>
+  </imgdir>
+  <imgdir name="9410083">
+    <string name="name" value="游行表演铃鼓"/>
+  </imgdir>
+  <imgdir name="9410084">
+    <string name="name" value="游行表演花喇叭"/>
+  </imgdir>
+  <imgdir name="9410085">
+    <string name="name" value="游行表演鼓手"/>
+  </imgdir>
+  <imgdir name="9410086">
+    <string name="name" value="游行表演休菲凯曼"/>
+  </imgdir>
+  <imgdir name="9410087">
+    <string name="name" value="游行表演菇菇宝贝"/>
+  </imgdir>
+  <imgdir name="9410089">
+    <string name="name" value="鬼娃恰吉"/>
+  </imgdir>
+  <imgdir name="9410090">
+    <string name="name" value="化石龙"/>
+  </imgdir>
+  <imgdir name="9410091">
+    <string name="name" value="化石龙长老"/>
+  </imgdir>
+  <imgdir name="9410092">
+    <string name="name" value="幼年龙"/>
+  </imgdir>
+  <imgdir name="9410093">
+    <string name="name" value="幼龙保护者"/>
+  </imgdir>
+  <imgdir name="9410094">
+    <string name="name" value="暗黑半人马"/>
+  </imgdir>
+  <imgdir name="9410095">
+    <string name="name" value="火焰半人马"/>
+  </imgdir>
+  <imgdir name="9410096">
+    <string name="name" value="寒冰半人马"/>
+  </imgdir>
+  <imgdir name="9410097">
+    <string name="name" value="黑龙"/>
+  </imgdir>
+  <imgdir name="9410098">
+    <string name="name" value="大副凯丁"/>
+  </imgdir>
+  <imgdir name="9410099">
+    <string name="name" value="武林妖僧"/>
+  </imgdir>
+  <imgdir name="9410100">
+    <string name="name" value="武林妖僧分身"/>
+  </imgdir>
+  <imgdir name="9411000">
+    <string name="name" value="吉祥舞狮"/>
+  </imgdir>
 </imgdir>

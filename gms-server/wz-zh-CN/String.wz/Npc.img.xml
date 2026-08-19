@@ -38337,4 +38337,28 @@
     <string name="d0" value="锤炼一下自己吗，小伙子。"/>
     <string name="d1" value="大锤80，小锤40！"/>
   </imgdir>
+  <imgdir name="9120054">
+    <string name="name" value="杰克恩"/>
+  </imgdir>
+  <imgdir name="9120055">
+    <string name="name" value="杰克恩"/>
+  </imgdir>
+  <imgdir name="9120106">
+    <string name="name" value="豆豆交换机"/>
+  </imgdir>
+  <imgdir name="9310101">
+    <string name="name" value="凯瑟琳"/>
+  </imgdir>
+  <imgdir name="9310102">
+    <string name="name" value="龙伯"/>
+  </imgdir>
+  <imgdir name="9900004">
+    <string name="name" value="冒险岛管理员"/>
+  </imgdir>
+  <imgdir name="9900005">
+    <string name="name" value="冒险岛管理员2"/>
+  </imgdir>
+  <imgdir name="9900006">
+    <string name="name" value="冒险岛管理员2"/>
+  </imgdir>
 </imgdir>
