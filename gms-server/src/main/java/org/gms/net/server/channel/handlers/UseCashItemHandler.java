@@ -62,6 +62,7 @@ import org.gms.server.StatEffect;
 import org.gms.server.TimerManager;
 import org.gms.server.maps.AbstractMapObject;
 import org.gms.server.maps.FieldLimit;
+import org.gms.server.maps.TeleportRestriction;
 import org.gms.server.maps.Kite;
 import org.gms.server.maps.Mist;
 import org.gms.server.maps.MapleMap;
@@ -75,6 +76,7 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -138,7 +140,12 @@ public final class UseCashItemHandler extends AbstractPacketHandler {
                 int mapId = p.readInt();
                 if (itemId / 1000 >= 5041 || mapId / 100000000 == player.getMapId() / 100000000) { //check vip or same continent
                     MapleMap targetMap = c.getChannelServer().getMapFactory().getMap(mapId);
-                    if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(mapId))) {
+                    // 任务门后的地图（大雄宝殿一带、时间神殿各段）不许直接传送进去，
+                    // 否则瞬移之石就是 portal 脚本那道门的后门。见 TeleportRestriction
+                    Optional<String> denial = TeleportRestriction.checkTeleport(player, mapId);
+                    if (denial.isPresent()) {
+                        player.dropMessage(1, denial.get());
+                    } else if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(mapId))) {
                         player.forceChangeMap(targetMap, targetMap.getRandomPlayerSpawnpoint());
                         success = true;
                     } else {
@@ -153,7 +160,11 @@ public final class UseCashItemHandler extends AbstractPacketHandler {
 
                 if (victim != null) {
                     MapleMap targetMap = victim.getMap();
-                    if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(targetMap.getId()))) {
+                    // 按角色名传送同样要过任务门，否则找个已在门后的队友就能绕过去
+                    Optional<String> denial = TeleportRestriction.checkTeleport(player, targetMap.getId());
+                    if (denial.isPresent()) {
+                        player.dropMessage(1, denial.get());
+                    } else if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(targetMap.getId()))) {
                         if (!victim.isGM() || victim.gmLevel() <= player.gmLevel()) {   // thanks Yoboes for noticing non-GM's being unreachable through rocks
                             player.forceChangeMap(targetMap, targetMap.findClosestPlayerSpawnpoint(victim.getPosition()));
                             success = true;

@@ -4776,3 +4776,45 @@ LK 的 `handbook/NPC.txt` 里那条给了关键线索：
 连带 `TimerMapCommand` 的 deferred 一并解除：它的两处遍历随之安全。
 LK 那份改法**不采纳**——把循环换成 `map.timerMapPlayers(seconds)`，
 而该方法直接遍历裸 `characters` 字段、连读锁都不取，比原实现更不安全。
+
+---
+
+## 23. 瞬移准入：`TeleportRestriction`（2026-08-19 新增，非 LK 移植项）
+
+### 23.1 为什么 `FieldLimit.CANNOTVIPROCK` 不够
+
+`CANNOTVIPROCK`（`0x40`）来自 Map.wz 的 `info/fieldLimit`，由
+[MapFactory.java:169](../gms-server/src/main/java/org/gms/server/maps/MapFactory.java#L169) 读入。
+它是**对所有人永久生效的硬开关**，表达不了「完成某任务后才放行」。
+而大雄宝殿与时间神殿恰恰是有条件的——门槛原本只挂在 portal 脚本上
+（`mahavira_enter` / `timeQuest`），瞬移之石与家族团聚完全绕开 portal，
+等于给任务门开了后门。
+
+### 23.2 条件表的来源
+
+**不是拍脑袋定的**，是从既有 portal 脚本反推的。改门槛时两边必须同步改：
+
+| 区域 | 脚本 | 条件 |
+|---|---|---|
+| 少林（大雄宝殿一带 6 张图） | `mahavira_enter.js` | 任务 8530「拜山门」 |
+| 时间神殿（31 张图） | `timeQuest.js` | 每段路一个任务，见下 |
+
+`timeQuest.js` 用 `(mapid - 270010000) / 100` 算段号再查任务，
+`TeleportRestriction` 把它展开成显式表。展开时注意地图链是
+**`之路N →(任务门)→ 邂逅N → 之路N+1`**，所以「邂逅N」与「之路N+1」
+同在第 N 道门之后，两者用同一个任务把关——只拦「邂逅」会漏掉「之路N+1」。
+
+### 23.3 接入点
+
+`checkTeleport(chr, mapId)` 一个接口，放行返回 `Optional.empty()`，
+拦下返回已本地化的提示：
+
+- `UseCashItemHandler` 传送石两条路径（按地图传、按角色名传）
+- `FamilyUseHandler` 家族团聚与召唤同学——注意判定对象不同：
+  团聚是自己去对方那边（查发起者 + 目标图），召唤是把对方拉过来（查被召唤者 + 己方图）
+
+`TrockAddMapHandler`（把当前地图记进传送石收藏）**不需要加**：
+登记的前提是人已经在图里，而进图本身要过 portal 那道门；
+真正的拦截点在使用传送石的那一刻，已经覆盖。
+
+GM（`gmLevel > 2`）一律放行，与 `timeQuest.js` 的口径一致。

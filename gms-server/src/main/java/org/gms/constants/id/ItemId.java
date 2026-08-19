@@ -15,6 +15,8 @@ public class ItemId {
     public static final int GOLDEN_MAPLE_LEAF = 4000313;
     public static final int PERFECT_PITCH = 4310000;
     public static final int MAGIC_ROCK = 4006000;
+    /** 时间的碎片。时间神殿「神殿废墟」的通行凭证之一，见 portal 脚本 timeQuest 与 TeleportRestriction。 */
+    public static final int PIECE_OF_TIME = 4032002;
     public static final int GOLDEN_CHICKEN_EFFECT = 4290000;
     public static final int BUMMER_EFFECT = 4290001;
     public static final int ARPQ_SHIELD = 2022269;

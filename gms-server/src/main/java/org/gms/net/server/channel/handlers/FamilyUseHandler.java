@@ -31,6 +31,9 @@ import org.gms.net.server.coordinator.world.InviteCoordinator;
 import org.gms.net.server.coordinator.world.InviteCoordinator.InviteType;
 import org.gms.net.server.world.PartyCharacter;
 import org.gms.server.maps.FieldLimit;
+import org.gms.server.maps.TeleportRestriction;
+
+import java.util.Optional;
 import org.gms.server.maps.MapleMap;
 import org.gms.util.PacketCreator;
 
@@ -62,7 +65,11 @@ public final class FamilyUseHandler extends AbstractPacketHandler {
                     MapleMap ownMap = c.getPlayer().getMap();
                     if (targetMap != null) {
                         if (type == FamilyEntitlement.FAMILY_REUINION) {
-                            if (!FieldLimit.CANNOTMIGRATE.check(ownMap.getFieldLimit()) && !FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit())
+                            // 团聚是自己传到对方所在图，按发起者查目标图的准入
+                            Optional<String> denial = TeleportRestriction.checkTeleport(c.getPlayer(), targetMap.getId());
+                            if (denial.isPresent()) {
+                                c.getPlayer().dropMessage(1, denial.get());
+                            } else if (!FieldLimit.CANNOTMIGRATE.check(ownMap.getFieldLimit()) && !FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit())
                                     && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(targetMap.getId())) && targetMap.getEventInstance() == null) {
 
                                 c.getPlayer().changeMap(victim.getMap(), victim.getMap().getPortal(0));
@@ -71,7 +78,11 @@ public final class FamilyUseHandler extends AbstractPacketHandler {
                                 c.sendPacket(PacketCreator.sendFamilyMessage(75, 0)); // wrong message, but close enough. (client should check this first anyway)
                             }
                         } else {
-                            if (!FieldLimit.CANNOTMIGRATE.check(targetMap.getFieldLimit()) && !FieldLimit.CANNOTVIPROCK.check(ownMap.getFieldLimit())
+                            // 召唤是把对方拉到自己所在图，按被召唤者查己方图的准入
+                            Optional<String> denial = TeleportRestriction.checkTeleport(victim, ownMap.getId());
+                            if (denial.isPresent()) {
+                                c.getPlayer().dropMessage(1, denial.get());
+                            } else if (!FieldLimit.CANNOTMIGRATE.check(targetMap.getFieldLimit()) && !FieldLimit.CANNOTVIPROCK.check(ownMap.getFieldLimit())
                                     && (!ownMap.hasForcedReturn() || MapId.isMapleIsland(ownMap.getId())) && ownMap.getEventInstance() == null) {
 
                                 if (InviteCoordinator.hasInvite(InviteType.FAMILY_SUMMON, victim.getId())) {
