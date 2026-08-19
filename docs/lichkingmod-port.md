@@ -4710,3 +4710,41 @@ LK 的 `TimerMapCommand` 把广播循环换成了 `map.timerMapPlayers(seconds)`
 
 **倾向 A**：一处改完全覆盖，且 `characters` 通常只有几十个元素，拷贝成本可忽略；
 B 的 30 处审查成本与死锁风险都更高。落地前需确认没有调用方依赖「视图会随原集合变化」这一语义。
+
+---
+
+## 22. 待办：留言板 NPC `9800001` 缺 `Npc.wz` 数据（2026-08-19 发现）
+
+### 22.1 症状
+
+留言板功能**服务端已经做完，但这个 NPC 放不出来**——`Npc.wz` 两层都没有它的数据文件：
+
+| 组成 | 状态 |
+|---|---|
+| `MessageBoardService` 等 3 个服务端类 | ✅ 有（批次6 收尾重写为 Spring 版） |
+| `scripts/npc/9800001.js` | ✅ 有 |
+| `scripts-zh-CN/npc/9800001.js` | ✅ 有 |
+| i18n `MessageBoard.message1/message2` | ✅ 有 |
+| `wz/Npc.wz/9800001.img.xml` | ❌ **无** |
+| `wz-zh-CN/Npc.wz/9800001.img.xml` | ❌ **无** |
+
+清单里 `src/server/MessageBoard.java` 与 `scripts/npc/9800001.js` 两行都是 `ported`，
+判定本身没错——那两项确实做完了。缺的是第三块：NPC 自身的 wz 条目。
+没有它，`Npc.wz` 里查不到 9800001，这个 NPC 无法被放置到任何地图上，
+整条功能没有入口。
+
+### 22.2 来源
+
+LK 有 `String.wz/Npc.img` 的名字条目（`9800001 = 留言板`），
+是本轮 §String.wz 孤儿名核查时发现的（BeiDou 无对应 `Npc.wz` 数据的 5 个 NPC 之一）。
+LK 侧是否有 `Npc.wz/9800001.img.xml` 本身需要单独确认。
+
+### 22.3 处置
+
+**NPC 数据文件由用户自行处理**（2026-08-19 决定）。落地时要一并考虑：
+
+1. `wz/Npc.wz/9800001.img.xml` 与 `wz-zh-CN/` 层放哪一层（名字是中文，按 §17 的分层规则走中文层）；
+2. `String.wz/Npc.img` 的名字条目要同步补（当前 BeiDou 中文层没有 9800001 的名字）；
+3. 客户端 `Data/Npc/9800001.img` 需同步，否则客户端渲染不出这个 NPC，
+   映射见 [wz-client-sync-list.md](wz-client-sync-list.md)；
+4. 放置到哪张地图（`Map.wz` 的 `life` 节点）由运营定。
