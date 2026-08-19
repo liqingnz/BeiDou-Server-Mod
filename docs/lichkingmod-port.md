@@ -4756,3 +4756,23 @@ LK 的 `handbook/NPC.txt` 里那条给了关键线索：
 3. 客户端 `Data/Npc/9800001.img` 需同步，否则客户端渲染不出这个 NPC，
    映射见 [wz-client-sync-list.md](wz-client-sync-list.md)；
 4. 放置到哪张地图（`Map.wz` 的 `life` 节点）由运营定。
+
+### 21.4 已落地（2026-08-19）：采用方案 A
+
+`getCharacters()` 改为锁内 `List.copyOf(this.characters)`
+（[MapleMap.java:3331](../gms-server/src/main/java/org/gms/server/maps/MapleMap.java#L3331)）。
+
+落地前核对过的两件事：
+
+1. **无调用方依赖「视图随原集合变化」**——30 个调用点里 25 个是直接 `for` 迭代，
+   另 5 个（`Coconut:132`、`OxQuiz:75`、`MapleMap:4093/4101/4146`）本就用
+   `new ArrayList<>(...)` 再包一层，且都只读不改。没有任何调用点把结果存成字段。
+2. **脚本层零调用**——`scripts/` 与 `scripts-zh-CN/` 里 `getCharacters()` 命中 0 处，
+   不存在 GraalVM 侧依赖旧语义的风险。
+
+那 5 处 `new ArrayList<>(...)` 现在是冗余拷贝，但都不修改列表、开销可忽略，
+且留着能防住将来有人想改列表（`List.copyOf` 返回不可变），本次不动。
+
+连带 `TimerMapCommand` 的 deferred 一并解除：它的两处遍历随之安全。
+LK 那份改法**不采纳**——把循环换成 `map.timerMapPlayers(seconds)`，
+而该方法直接遍历裸 `characters` 字段、连读锁都不取，比原实现更不安全。

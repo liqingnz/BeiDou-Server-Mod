@@ -3328,10 +3328,22 @@ public class MapleMap {
         }
     }
 
+    /**
+     * 返回本图角色的<b>快照副本</b>，不是视图。
+     * <p>
+     * 原实现返回 {@code Collections.unmodifiableCollection(characters)}，
+     * 读锁只保护「包一层」那一瞬间，调用方拿到的是活视图，随后的迭代全在锁外——
+     * 而 {@code characters} 是非并发的 {@link LinkedHashSet}。全部 30 个调用点
+     * 都在这样迭代，只要迭代期间有人进出地图就可能抛 ConcurrentModificationException
+     * 或读到半更新的集合。改成锁内拷贝，一处覆盖所有调用点。
+     * <p>
+     * 副本仍不可变，与原先的 unmodifiable 契约一致；本图角色通常只有几十个，
+     * 拷贝成本可忽略。已核对无调用方依赖「视图随原集合变化」这一语义。
+     */
     public Collection<Character> getCharacters() {
         chrRLock.lock();
         try {
-            return Collections.unmodifiableCollection(this.characters);
+            return List.copyOf(this.characters);
         } finally {
             chrRLock.unlock();
         }
