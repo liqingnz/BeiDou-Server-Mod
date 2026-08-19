@@ -63,7 +63,7 @@ public final class FamilyUseHandler extends AbstractPacketHandler {
                     if (targetMap != null) {
                         if (type == FamilyEntitlement.FAMILY_REUINION) {
                             if (!FieldLimit.CANNOTMIGRATE.check(ownMap.getFieldLimit()) && !FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit())
-                                    && (targetMap.getForcedReturnId() == MapId.NONE || MapId.isMapleIsland(targetMap.getId())) && targetMap.getEventInstance() == null) {
+                                    && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(targetMap.getId())) && targetMap.getEventInstance() == null) {
 
                                 c.getPlayer().changeMap(victim.getMap(), victim.getMap().getPortal(0));
                                 useEntitlement(entry, type);
@@ -72,7 +72,7 @@ public final class FamilyUseHandler extends AbstractPacketHandler {
                             }
                         } else {
                             if (!FieldLimit.CANNOTMIGRATE.check(targetMap.getFieldLimit()) && !FieldLimit.CANNOTVIPROCK.check(ownMap.getFieldLimit())
-                                    && (ownMap.getForcedReturnId() == MapId.NONE || MapId.isMapleIsland(ownMap.getId())) && ownMap.getEventInstance() == null) {
+                                    && (!ownMap.hasForcedReturn() || MapId.isMapleIsland(ownMap.getId())) && ownMap.getEventInstance() == null) {
 
                                 if (InviteCoordinator.hasInvite(InviteType.FAMILY_SUMMON, victim.getId())) {
                                     c.sendPacket(PacketCreator.sendFamilyMessage(74, 0));

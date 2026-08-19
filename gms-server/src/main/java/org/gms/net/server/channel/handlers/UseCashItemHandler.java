@@ -131,14 +131,14 @@ public final class UseCashItemHandler extends AbstractPacketHandler {
 
         if (itemType == 504) { // vip teleport rock//缩地石
             String error1 = I18nUtil.getMessage("UseCashItemHandler.handlePacket.error1");
-            boolean vip = p.readByte() == 1 && itemId / 1000 >= 5041;
+            boolean teleportToPlayer = p.readByte() == 1 && itemId / 1000 >= 5041; //客户端传送模式：0=选保存的地图，1=按角色名（仅高级瞬移之石可用）
             remove(c, position, itemId);
             boolean success = false;
-            if (!vip) {
+            if (!teleportToPlayer) {
                 int mapId = p.readInt();
                 if (itemId / 1000 >= 5041 || mapId / 100000000 == player.getMapId() / 100000000) { //check vip or same continent
                     MapleMap targetMap = c.getChannelServer().getMapFactory().getMap(mapId);
-                    if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (targetMap.getForcedReturnId() == MapId.NONE || MapId.isMapleIsland(mapId))) {
+                    if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(mapId))) {
                         player.forceChangeMap(targetMap, targetMap.getRandomPlayerSpawnpoint());
                         success = true;
                     } else {
@@ -153,7 +153,7 @@ public final class UseCashItemHandler extends AbstractPacketHandler {
 
                 if (victim != null) {
                     MapleMap targetMap = victim.getMap();
-                    if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (targetMap.getForcedReturnId() == MapId.NONE || MapId.isMapleIsland(targetMap.getId()))) {
+                    if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(targetMap.getId()))) {
                         if (!victim.isGM() || victim.gmLevel() <= player.gmLevel()) {   // thanks Yoboes for noticing non-GM's being unreachable through rocks
                             player.forceChangeMap(targetMap, targetMap.findClosestPlayerSpawnpoint(victim.getPosition()));
                             success = true;

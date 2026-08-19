@@ -307,6 +307,14 @@ public class MapleMap {
         return forcedReturnMap;
     }
 
+    /**
+     * 是否为「离开即被强制遣返」的临时地图。部分地图（如新加坡 CBD 540000000）的 forcedReturn 指向自己，
+     * 语义上等同于没有强制返回——存档与换频道两处消费者对自指均为空操作，故此处一并视作无强制返回。
+     */
+    public boolean hasForcedReturn() {
+        return forcedReturnMap != MapId.NONE && forcedReturnMap != mapid;
+    }
+
     public void setForcedReturnMap(int map) {
         this.forcedReturnMap = map;
     }
