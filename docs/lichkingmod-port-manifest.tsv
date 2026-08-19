@@ -1734,10 +1734,10 @@ sql/db_LichKingMod.sql	sql	492	0	ported	批次7 V1000.1.3-.6；fm店9000069/宝�
 sql/db_LichKingMod_patch.sql	sql	765	0	ported	批次7 V1000.1.1-.2；GBK ALTER 全套 rejected，4张建表归批次2/4/8，nxcoupons 1.5倍券随 Java float 化
 sql/db_database.sql	sql	73	73	rejected	纯 latin1→gbk 建表噪音（§8 GBK 终局 rejected）
 sql/db_drops.sql	sql	1	1	already-fixed	仅实验室怪 DELETE 上界 9300154→9300153；BeiDou V1.0.51 该 DELETE 整段被注释，掉落本就保留
-wz/Etc.wz/BlockReason.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/BlockReason.img.xml	wz	0	0	rejected	客户端专用展示数据，服务端一行代码都不读（全 Java 目录 grep 该 img 名零命中），改服务端这份对玩家零效果——玩家看到的文案来自他自己客户端的 Data/Etc/。要改得走客户端 img 补丁，属 docs/wz-client-sync-list.md 的范畴，不是服务端移植项
 wz/Etc.wz/CashPackage.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/CashPackage.img.xml
 wz/Etc.wz/Category.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Etc.wz/ChatBlockReason.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/ChatBlockReason.img.xml	wz	0	0	rejected	客户端专用展示数据，服务端一行代码都不读（全 Java 目录 grep 该 img 名零命中），改服务端这份对玩家零效果——玩家看到的文案来自他自己客户端的 Data/Etc/。要改得走客户端 img 补丁，属 docs/wz-client-sync-list.md 的范畴，不是服务端移植项
 wz/Etc.wz/Commodity.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Etc.wz/Curse.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/Curse.img.xml
 wz/Etc.wz/DeveloperNpc.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/DeveloperNpc.img.xml
@@ -1746,23 +1746,23 @@ wz/Etc.wz/ForbiddenName.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5
 wz/Etc.wz/Halloween.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/Halloween.img.xml
 wz/Etc.wz/ItemMake.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Etc.wz/MakeCharInfo.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Etc.wz/MapNeighbors.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Etc.wz/MedalQuestCategory.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/MapNeighbors.img.xml	wz	0	0	rejected	LK 在最终态把整个文件删了（ac7830b5 树里不存在）。BeiDou 保留且在用——net/server/coordinator/partysearch/PartySearchCoordinator.java:84 读它做组队搜索的邻近地图判定，删掉即失能。语义比对也显示 BeiDou 侧 59793 个节点、LK 侧 0 个
+wz/Etc.wz/MedalQuestCategory.img.xml	wz	0	0	rejected	LK 那份还是韩文原文（직업/일반/도전/이벤트），BeiDou 已是中文（职业/普通/挑战/活动）。客户端专用展示数据，服务端一行代码都不读（全 Java 目录 grep 该 img 名零命中），改服务端这份对玩家零效果——玩家看到的文案来自他自己客户端的 Data/Etc/。要改得走客户端 img 补丁，属 docs/wz-client-sync-list.md 的范畴，不是服务端移植项
 wz/Etc.wz/NPT_exception.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/NPT_exception.img.xml
 wz/Etc.wz/NpcLocation.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/NpcLocation.img.xml
 wz/Etc.wz/OXQuiz.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/OXQuiz.img.xml
-wz/Etc.wz/QuestCategory.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/QuestCategory.img.xml	wz	0	0	rejected	客户端专用展示数据，服务端一行代码都不读（全 Java 目录 grep 该 img 名零命中），改服务端这份对玩家零效果——玩家看到的文案来自他自己客户端的 Data/Etc/。要改得走客户端 img 补丁，属 docs/wz-client-sync-list.md 的范畴，不是服务端移植项
 wz/Etc.wz/RecommendSkill.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/RecommendSkill.img.xml
 wz/Etc.wz/ScanBlock.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/ScanBlock.img.xml
-wz/Etc.wz/ScriptInfo.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/ScriptInfo.img.xml	wz	0	0	rejected	客户端专用展示数据，服务端一行代码都不读（全 Java 目录 grep 该 img 名零命中），改服务端这份对玩家零效果——玩家看到的文案来自他自己客户端的 Data/Etc/。要改得走客户端 img 补丁，属 docs/wz-client-sync-list.md 的范畴，不是服务端移植项
 wz/Etc.wz/Swindle.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/Swindle.img.xml
-wz/Etc.wz/Tips.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Etc.wz/Tips.img.xml	wz	0	0	rejected	客户端专用展示数据，服务端一行代码都不读（全 Java 目录 grep 该 img 名零命中），改服务端这份对玩家零效果——玩家看到的文案来自他自己客户端的 Data/Etc/。要改得走客户端 img 补丁，属 docs/wz-client-sync-list.md 的范畴，不是服务端移植项
 wz/Etc.wz/VegaSpell.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Etc.wz/VegaSpell.img.xml
 wz/Item.wz/Cash/0515.img.xml	wz	0	0	ported	批次7：补 6 张通用美容券道具数据（05159000-05159005）。LK 该文件 diff 显示 1增1213删纯属其把 XML 压成单行，语义比对后 BeiDou 仅缺这 6 条
 wz/Item.wz/Cash/0521.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Cash/0521.img.xml
 wz/Item.wz/Cash/0536.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Cash/0536.img.xml
 wz/Item.wz/Consume/0200.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Consume/0200.img.xml
-wz/Item.wz/Consume/0202.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Item.wz/Consume/0202.img.xml	wz	0	0	already-fixed	语义比对后 LK 零新增，BeiDou 是超集（多 28 个节点，含 3 个 mhpRRate 对 LK 的 2 个）。先前清单里的「LK+2」是按行比对时重复行造成的假差异
 wz/Item.wz/Consume/0204.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Item.wz/Consume/0207.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Item.wz/Consume/0210.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Item.wz/Consume/0210.img.xml
@@ -1782,42 +1782,42 @@ wz/Item.wz/Install/0301.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同�
 wz/Item.wz/Install/0310.img.xml	wz	0	0	ported	dd35605fc 从 LK 补齐（ASM 也没有）。含 3100000/3100001 及 3101000-3101003 共 6 个道具；getSlotMax 在 getItemData 为 null 时返回 0，道具进不了背包，是 37 处发奖调用的唯一前置
 wz/Map.wz/Back/ShanghaiCN.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Back/ShanghaiCN.img.xml
 wz/Map.wz/Effect.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Effect.img.xml
-wz/Map.wz/Map/Map1/102000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map1/105070002.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map2/211000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map2/211040101.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map2/230040420.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map2/240000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map2/240060200.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701000100.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010100.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010200.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010300.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010310.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010320.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010321.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010322.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010323.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010324.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010400.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010500.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/701010600.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702010000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702020000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702030000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702040000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702050000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702060000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702070100.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702070200.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702070300.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702070400.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702080000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/702100000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Map.wz/Map/Map7/741000200.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map1/102000000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map1/105070002.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map2/211000000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map2/211040101.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map2/230040420.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map2/240000000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map2/240060200.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701000000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701000100.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010100.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010200.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010300.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010310.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010320.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010321.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010322.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010323.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010324.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010400.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010500.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/701010600.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702000000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702010000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702020000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702030000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702040000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702050000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702060000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702070100.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702070200.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702070300.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702070400.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702080000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/702100000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
+wz/Map.wz/Map/Map7/741000200.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
 wz/Map.wz/Map/Map7/749040000.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Map/Map7/749040001.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Map/Map7/749040002.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
@@ -1830,7 +1830,7 @@ wz/Map.wz/Map/Map7/749040008.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导�
 wz/Map.wz/Map/Map7/749050500.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Map/Map7/749050501.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Map/Map7/749050502.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
-wz/Map.wz/Map/Map9/910000000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Map/Map9/910000000.img.xml	wz	0	0	rejected	地图几何不能跟客户端脱钩，服务端 Map.wz 必须与玩家实际用的客户端同源。本仓库 Map.wz 来自 ASM，与用户在用的 BeiDou-Client-ASM 同源（见 docs/wz-client-sync-list.md §A1）：本行涉及的 37 个 Map 文件里，31 个与 ASM 装机版（BeiDou-Server-ASM/wz）逐字节相同，另 6 个（211000000/211040101/240000000/240060200/701000100/702070400）带 BeiDou 自己的改动（提交 9babc4184，补反应堆与坐标）。LK 那份是第三种布局，搬进来会让踏脚板/传送点与客户端对不上——玩家掉出地面、门走不通
 wz/Map.wz/Obj/Christmas.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Map.wz/Obj/EnSchoolCN.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/EnSchoolCN.img.xml
 wz/Map.wz/Obj/FishingSystemTW.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
@@ -1861,7 +1861,7 @@ wz/Map.wz/Obj/insideGL.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 
 wz/Map.wz/Obj/insideGS.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/insideGS.img.xml
 wz/Map.wz/Obj/job.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/job.img.xml
 wz/Map.wz/Obj/login.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/login.img.xml
-wz/Map.wz/Obj/masteriaGL3.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Map.wz/Obj/masteriaGL3.img.xml	wz	0	0	noise	语义比对两侧完全一致（去掉 canvas/png 等图像资源后 0 差异），只是 LK 把 XML 压成了单行
 wz/Map.wz/Obj/pachinko.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/pachinko.img.xml
 wz/Map.wz/Obj/shop.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/shop.img.xml
 wz/Map.wz/Obj/shop2.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Map.wz/Obj/shop2.img.xml
@@ -1879,53 +1879,53 @@ wz/Map.wz/Tile/sakuraCastle_outside.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增�
 wz/Map.wz/Tile/snowyLightrock3.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/Tile/thai.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Map.wz/WorldMap/WorldMap016.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
-wz/Mob.wz/5090000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/5090001.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/6090000.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/6090001.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/6090002.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/6090003.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/6090004.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/7090000.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8090000.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8200009.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8200010.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8200011.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8200012.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8220004.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8800000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8800001.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8800002.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8810000.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8810001.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8810003.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8810004.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8810005.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8810006.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8810007.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8810008.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8810009.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8820006.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/8820018.img.xml	wz	0	0	pending	BeiDou 中文层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9420542.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9420543.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9420544.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9420548.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600012.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600013.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600014.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600015.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600016.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600017.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600018.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600019.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600020.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600021.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600022.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600023.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600024.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600025.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Mob.wz/9600026.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Mob.wz/5090000.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/5090001.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/6090000.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/6090001.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/6090002.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/6090003.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/6090004.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/7090000.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/8090000.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/8200009.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8200010.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8200011.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8200012.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8220004.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」） 本文件另有两条 boss 台词同属译法差异，BeiDou 版行文更完整
+wz/Mob.wz/8800000.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8800001.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8800002.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8810000.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8810001.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8810003.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8810004.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8810005.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8810006.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8810007.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8810008.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8810009.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/8820006.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/8820018.img.xml	wz	0	0	noise	纯译法差异：LK 与 BeiDou 两侧都是中文，只是 banMsg（被 boss 踢出地图的提示）措辞不同，且 BeiDou 的译名对得上游戏内 NPC/怪物名（如「里奇」「雪女」「穆宁」），LK 的偏离（如把里奇写成「黑山老妖」）
+wz/Mob.wz/9420542.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/9420543.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分 本文件另改 PADamage/PDDamage/MDDamage 三项 boss 面板，同属调参
+wz/Mob.wz/9420544.img.xml	wz	0	0	rejected	LK 自服的 boss 属性调参，不是补原始数据。三方对照（LK 基线 b0671161 = HeavenMS 原始 / LK 最终 ac7830b5 / BeiDou 生效层）：8200009-12 原始 F2S3、LK 改 F2I3；8800000-02（扎昆）与 8810000~8810009（黑龙各部位）原始 info 下根本没有 elemAttr，LK 凭空加了 F2I3/I2F3/I2H3/F2H3/F3H2/L3I2/F3P2/S3L2；9420542-44 原始 F2I3S1、LK 改 F2I3S2（毒从 IMMUNE 降到 STRONG）。BeiDou 三组全部与 HeavenMS 原始一致。注意 Mob 文件里还有一处 attack 层的 elemAttr（攻击自带属性），与 info 层的抗性表是两回事，比对时按节点路径区分
+wz/Mob.wz/9420548.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值 本文件改的是 PADamage/PDDamage/MADamage/MDDamage 四项 boss 面板
+wz/Mob.wz/9600012.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600013.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600014.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600015.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600016.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600017.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600018.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600019.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600020.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600021.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600022.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600023.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600024.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600025.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
+wz/Mob.wz/9600026.img.xml	wz	0	0	rejected	LK 自服的活动 boss 调参，两侧数据都有效，取哪份是运营口径而非对错。抽样：9600012 经验 850→1450、攻击间隔 1520→400；9600025 等级 81→187、maxHP 8000万→1亿、经验 2400万→1600万，另塞进 elemAttr I3；9600026 maxHP 1500万→2500万并加 boss=1 与 firstAttack=1。BeiDou 保持自己的数值
 wz/Mob.wz/9601105.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Mob.wz/9601116.img.xml	wz	0	0	ported	9e9e9ad34 经 ASM 增量导入补齐（非 LK 来源）
 wz/Morph.wz/1001.img.xml	wz	0	0	already-fixed	逐叶子比对 LK ac7830b5 同名文件（排除 canvas 记法差异与 foothold 编号差异）后零差异；BeiDou 侧 gms-server/wz[-zh-CN]/Morph.wz/1001.img.xml
@@ -2010,11 +2010,11 @@ wz/Skill.wz/112.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件�
 wz/Skill.wz/120.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Skill.wz/121.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Skill.wz/122.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/131.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/131.img.xml	wz	0	0	noise	语义比对两侧完全一致（去掉 canvas/png 等图像资源后 0 差异），只是 LK 把 XML 压成了单行
 wz/Skill.wz/132.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Skill.wz/210.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Skill.wz/211.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
-wz/Skill.wz/2111.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
+wz/Skill.wz/2111.img.xml	wz	0	0	already-fixed	语义比对后 LK 零新增，BeiDou 多 4 个节点，是超集
 wz/Skill.wz/212.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Skill.wz/222.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
 wz/Skill.wz/312.img.xml	wz	0	0	pending	BeiDou 英文基础层已有同名文件，需 diff 判断改动是否已覆盖
