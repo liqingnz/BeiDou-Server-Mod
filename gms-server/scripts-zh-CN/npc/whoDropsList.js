@@ -68,7 +68,8 @@ function showChoices() {
         if (choicePage < totalPages - 1) {
             text += "#L" + NEXT + "#下一页 >>#l\r\n";
         }
-        text += "当前第 " + (choicePage + 1) + " 页，共 " + totalPages + " 页";
+        // 翻页项是 #L 链接，紧跟其后的纯文本会跟它挤在同一行，中间空一行隔开
+        text += "\r\n当前第 " + (choicePage + 1) + " 页，共 " + totalPages + " 页";
     }
     cm.sendNextSelectLevel("WhoDropsPick", text);
 }

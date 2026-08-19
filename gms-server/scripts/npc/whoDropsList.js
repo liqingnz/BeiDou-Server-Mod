@@ -72,7 +72,9 @@ function showChoices() {
         if (choicePage < totalPages - 1) {
             text += "#L" + NEXT + "#Next >>#l\r\n";
         }
-        text += "Page " + (choicePage + 1) + " of " + totalPages;
+        // The paging entries are #L links; plain text right after them shares their line,
+        // so put a blank line in between
+        text += "\r\nPage " + (choicePage + 1) + " of " + totalPages;
     }
     cm.sendNextSelectLevel("WhoDropsPick", text);
 }
