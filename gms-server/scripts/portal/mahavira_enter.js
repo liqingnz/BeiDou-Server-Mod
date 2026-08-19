@@ -21,22 +21,32 @@
 */
 
 /*
- * 大雄宝殿（702100000）准入：需先完成任务 8530「拜山门」。
+ * 大雄宝殿（702100000）准入。
  *
- * 本脚本挂在全部 6 个通往 702100000 的入口上，六个入口的目标 portal 各不相同
- * （h-bottom01 / in00 / out00 / h-top03 / out01），所以落点必须取 portal 自身的
- * 配置，不能像原实现那样写死 warp(702100000, 8)——那样所有人都会从同一个点进去。
+ * 挂在 2 个真入口上：702030000 山腰（portal h-top04）与 702050000 广场（portal out00）。
+ * 寺内那几条通道不挂——人已经在门后了，再拦一道只会把人关在里面。
+ *
+ * 门槛不写在这里，直接问 TeleportRestriction：那张表是瞬移之石、家族传送、@goto
+ * 共用的规则源，门槛与 GM 豁免口径都以它为准。脚本这层只负责展示和落点。
+ *
+ * 落点取 portal 自身配置，不能写死 warp(702100000, 8)——两个入口的目标 portal 不同。
+ * 已知问题：702030000 的 h-top04 配的 tn 是 h-bottom01，而 702100000 并没有这个
+ * portal，走这条路进殿会落到随机出生点。要修得动 wz（补 portal 或改 tn），
+ * 得同步客户端，暂未处理。
  */
-var QUEST_MAHAVIRA = 8530;
+var TeleportRestriction = Java.type("org.gms.server.maps.TeleportRestriction");
 
 function enter(pi) {
-    if (!pi.isQuestCompleted(QUEST_MAHAVIRA)) {
-        pi.playerMessage(5, "You must complete the Mahavira Hall quest before entering.");
+    var portal = pi.getPortal();
+    var targetMapId = portal.getTargetMapId();
+
+    var denial = TeleportRestriction.checkTeleport(pi.getPlayer(), targetMapId);
+    if (denial.isPresent()) {
+        pi.playerMessage(5, denial.get());
         return false;
     }
 
-    var portal = pi.getPortal();
     pi.playPortalSound();
-    pi.warp(portal.getTargetMapId(), portal.getTarget());
+    pi.warp(targetMapId, portal.getTarget());
     return true;
 }

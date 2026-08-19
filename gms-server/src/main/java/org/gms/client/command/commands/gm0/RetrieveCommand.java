@@ -49,12 +49,17 @@ public class RetrieveCommand extends Command {
         Character player = c.getPlayer();
         CommandManager manager = CommandManager.getInstance();
 
-        Integer cost = manager.getItemSoldMeso(player.getId());
+        Integer soldMeso = manager.getItemSoldMeso(player.getId());
         Map<Item, Short> itemList = manager.getItemSoldThroughCommand(player.getId());
-        if (cost == null || itemList == null || itemList.isEmpty()) {
+        if (soldMeso == null || itemList == null || itemList.isEmpty()) {
             player.dropMessage(6, I18nUtil.getMessage("RetrieveCommand.message2"));
             return;
         }
+
+        // 回购价一律夹到非负：负数会让下面的余额检查必过，gainMeso(-cost) 从扣钱变成发钱，
+        // 物品还照退——等于凭空复制金币。台账那头（Shop.sell / @sellinv）已经修过，
+        // 这里再兜一道，是因为发钱这一步的代价太大，不该只靠上游不出错
+        int cost = Math.max(soldMeso, 0);
 
         if (player.getMeso() < cost) {
             player.dropMessage(6, I18nUtil.getMessage("RetrieveCommand.message3", cost));

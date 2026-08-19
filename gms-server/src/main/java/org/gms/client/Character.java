@@ -6002,11 +6002,19 @@ public class Character extends AbstractCharacterObject {
         if (level % 20 == 0) {
             if (GameConfig.getServerBoolean("use_add_slots_by_level")) {
                 if (!isGM()) {
-                    for (byte i = 1; i < 5; i++) {
-                        gainSlots(i, GameConfig.getServerInt("slots_gain_by_level", 4), true);
-                    }
+                    // 必须自己判正：slots_gain_by_level 是后台可热改的运营参数，配成 0 或负数时
+                    // canGainSlots 只看「不超过 96」照样放行，setSlotLimit 会把背包缩回去并
+                    // 删掉超出新上限的物品，紧接着 saveCharToDB 落库——每 20 级删一次，且不可逆
+                    int slotsGain = GameConfig.getServerInt("slots_gain_by_level", 4);
+                    if (slotsGain > 0) {
+                        for (byte i = 1; i < 5; i++) {
+                            gainSlots(i, slotsGain, true);
+                        }
 
-                    this.yellowMessage(I18nUtil.getMessage("Character.levelUp.USE_ADD_SLOTS_BY_LEVEL", level));
+                        this.yellowMessage(I18nUtil.getMessage("Character.levelUp.USE_ADD_SLOTS_BY_LEVEL", level));
+                    } else {
+                        log.warn(I18nUtil.getLogMessage("Character.levelUp.warn1"), slotsGain);
+                    }
                 }
             }
             if (GameConfig.getServerBoolean("use_add_rates_by_level")) { //For the rate upgrade

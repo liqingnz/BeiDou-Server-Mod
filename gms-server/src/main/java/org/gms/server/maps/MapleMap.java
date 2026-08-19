@@ -3357,6 +3357,22 @@ public class MapleMap {
         }
     }
 
+    /**
+     * 本图角色数。只想知道「有没有人 / 有几个人」时用它，别写
+     * {@code getCharacters().size()}——那会为了一个整数拷一份全量快照。
+     * <p>
+     * 与 {@link #countPlayers()} 的区别：那个走 {@code getMapObjectsInRange}，
+     * 要遍历全图所有 MapObject 再筛出玩家并装进 List，比本方法贵得多。
+     */
+    public int getCharacterCount() {
+        chrRLock.lock();
+        try {
+            return this.characters.size();
+        } finally {
+            chrRLock.unlock();
+        }
+    }
+
     public Character getCharacterById(int id) {
         chrRLock.lock();
         try {
@@ -4098,17 +4114,15 @@ public class MapleMap {
     }
 
     public void warpEveryone(int to) {
-        List<Character> players = new ArrayList<>(getCharacters());
-
-        for (Character chr : players) {
+        // getCharacters() 已经是锁内拷好的不可变快照，再包一层 ArrayList 是白拷
+        for (Character chr : getCharacters()) {
             chr.changeMap(to);
         }
     }
 
     public void warpEveryone(int to, int pto) {
-        List<Character> players = new ArrayList<>(getCharacters());
-
-        for (Character chr : players) {
+        // getCharacters() 已经是锁内拷好的不可变快照，再包一层 ArrayList 是白拷
+        for (Character chr : getCharacters()) {
             chr.changeMap(to, pto);
         }
     }
@@ -4151,8 +4165,8 @@ public class MapleMap {
     }
 
     public void warpOutByTeam(int team, int mapid) {
-        List<Character> chars = new ArrayList<>(getCharacters());
-        for (Character chr : chars) {
+        // 同上：快照直接迭代即可
+        for (Character chr : getCharacters()) {
             if (chr != null) {
                 if (chr.getTeam() == team) {
                     chr.changeMap(mapid);

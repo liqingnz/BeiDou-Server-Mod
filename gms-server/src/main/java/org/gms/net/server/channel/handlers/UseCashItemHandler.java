@@ -46,7 +46,6 @@ import org.gms.client.processor.stat.AssignSPProcessor;
 import org.gms.config.GameConfig;
 import org.gms.constants.game.GameConstants;
 import org.gms.constants.id.ItemId;
-import org.gms.constants.id.MapId;
 import org.gms.constants.inventory.ItemConstants;
 import org.gms.net.AbstractPacketHandler;
 import org.gms.net.packet.InPacket;
@@ -61,8 +60,7 @@ import org.gms.server.ShopFactory;
 import org.gms.server.StatEffect;
 import org.gms.server.TimerManager;
 import org.gms.server.maps.AbstractMapObject;
-import org.gms.server.maps.FieldLimit;
-import org.gms.server.maps.TeleportRestriction;
+import org.gms.server.maps.TeleportGuard;
 import org.gms.server.maps.Kite;
 import org.gms.server.maps.Mist;
 import org.gms.server.maps.MapleMap;
@@ -76,7 +74,6 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -140,16 +137,11 @@ public final class UseCashItemHandler extends AbstractPacketHandler {
                 int mapId = p.readInt();
                 if (itemId / 1000 >= 5041 || mapId / 100000000 == player.getMapId() / 100000000) { //check vip or same continent
                     MapleMap targetMap = c.getChannelServer().getMapFactory().getMap(mapId);
-                    // 任务门后的地图（大雄宝殿一带、时间神殿各段）不许直接传送进去，
-                    // 否则瞬移之石就是 portal 脚本那道门的后门。见 TeleportRestriction
-                    Optional<String> denial = TeleportRestriction.checkTeleport(player, mapId);
-                    if (denial.isPresent()) {
-                        player.dropMessage(1, denial.get());
-                    } else if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(mapId))) {
+                    // 守卫整组走 TeleportGuard，别在这里自己拼条件：瞬移之石绕开 portal，
+                    // 任务门（大雄宝殿一带、时间神殿各段）全靠这一道拦
+                    if (!TeleportGuard.denyArrival(player, targetMap, error1)) {
                         player.forceChangeMap(targetMap, targetMap.getRandomPlayerSpawnpoint());
                         success = true;
-                    } else {
-                        player.dropMessage(1, error1);
                     }
                 } else {
                     player.dropMessage(1, I18nUtil.getMessage("UseCashItemHandler.handlePacket.message1"));
@@ -160,19 +152,14 @@ public final class UseCashItemHandler extends AbstractPacketHandler {
 
                 if (victim != null) {
                     MapleMap targetMap = victim.getMap();
-                    // 按角色名传送同样要过任务门，否则找个已在门后的队友就能绕过去
-                    Optional<String> denial = TeleportRestriction.checkTeleport(player, targetMap.getId());
-                    if (denial.isPresent()) {
-                        player.dropMessage(1, denial.get());
-                    } else if (!FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit()) && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(targetMap.getId()))) {
+                    // 按角色名传送同样要过整组守卫，否则找个已在门后的队友就能绕过去
+                    if (!TeleportGuard.denyArrival(player, targetMap, I18nUtil.getMessage("UseCashItemHandler.handlePacket.message2"))) {
                         if (!victim.isGM() || victim.gmLevel() <= player.gmLevel()) {   // thanks Yoboes for noticing non-GM's being unreachable through rocks
                             player.forceChangeMap(targetMap, targetMap.findClosestPlayerSpawnpoint(victim.getPosition()));
                             success = true;
                         } else {
                             player.dropMessage(1, error1);
                         }
-                    } else {
-                        player.dropMessage(1, I18nUtil.getMessage("UseCashItemHandler.handlePacket.message2"));
                     }
                 } else {
                     player.dropMessage(1, I18nUtil.getMessage("UseCashItemHandler.handlePacket.message3"));

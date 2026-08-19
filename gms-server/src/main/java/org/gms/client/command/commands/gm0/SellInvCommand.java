@@ -87,7 +87,9 @@ public class SellInvCommand extends Command {
 
         Map<Item, Short> soldItems = new HashMap<>();
         Inventory inventory = player.getInventory(type);
-        int totalSold = 0;
+        // 用 long 累加：单笔已被 Shop.sell 夹在 [0, Integer.MAX_VALUE]，
+        // 但最多 96 格的和仍可能越过 int，溢出成负数就会让 @retrieve 的回购价变成负的
+        long totalSold = 0;
         // 上限取实际格数而非写死的 96，扩容过的背包才不会漏格
         for (short slot = fromSlot; slot <= inventory.getSlotLimit(); slot++) {
             Item item = inventory.getItem((byte) slot);
@@ -107,10 +109,12 @@ public class SellInvCommand extends Command {
             }
         }
 
+        // 回购价按 int 存：玩家金币本身就封顶在 Integer.MAX_VALUE，夹一下只是防越界
+        int recordedMeso = (int) Math.min(totalSold, Integer.MAX_VALUE);
         player.yellowMessage(I18nUtil.getMessage("SellInvCommand.message4",
-                params[0].toLowerCase(), fromSlot, totalSold));
+                params[0].toLowerCase(), fromSlot, recordedMeso));
 
         CommandManager.getInstance().setItemSoldThroughCommand(player.getId(), soldItems);
-        CommandManager.getInstance().setItemSoldMeso(player.getId(), totalSold);
+        CommandManager.getInstance().setItemSoldMeso(player.getId(), recordedMeso);
     }
 }

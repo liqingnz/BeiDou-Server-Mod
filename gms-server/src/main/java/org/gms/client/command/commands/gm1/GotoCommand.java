@@ -33,6 +33,7 @@ import org.gms.server.maps.MapFactory;
 import org.gms.server.maps.MapleMap;
 import org.gms.server.maps.MiniDungeonInfo;
 import org.gms.server.maps.Portal;
+import org.gms.server.maps.TeleportRestriction;
 import org.gms.util.I18nUtil;
 
 import java.util.*;
@@ -135,17 +136,30 @@ public class GotoCommand extends Command {
             player.dropMessage(1, blocked);
             return false;
         }
-        warpTo(player, mapId);
-        return true;
+        return warpTo(player, mapId);
     }
 
-    private static void warpTo(Character player, int mapId) {
+    /**
+     * @return 是否真的传送了；被任务门拦下时返回 false 并已提示玩家
+     */
+    private static boolean warpTo(Character player, int mapId) {
+        // @goto 同样绕开 portal，任务门要单独过一遍：GOTO_AREAS 里的 cjg（藏经阁七层）
+        // 就在规则表内。这里只查任务门、不套 TeleportGuard 的其余守卫——无视 fieldLimit
+        // 与临时地图正是这条命令存在的意义。checkTeleport 自己豁免 gmLevel > 2，
+        // 真正会被拦下的是 gmLevel == 2 这一档：够格用 @goto <area>，却没到豁免线
+        Optional<String> denial = TeleportRestriction.checkTeleport(player, mapId);
+        if (denial.isPresent()) {
+            player.dropMessage(1, denial.get());
+            return false;
+        }
+
         MapleMap target = player.getClient().getChannelServer().getMapFactory().getMap(mapId);
 
         // expedition issue with this command detected thanks to Masterrulax
         Portal targetPortal = target.getRandomPlayerSpawnpoint();
         player.saveLocationOnWarp();
         player.changeMap(target, targetPortal);
+        return true;
     }
 
     /**

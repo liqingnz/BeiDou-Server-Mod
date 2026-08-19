@@ -34,7 +34,7 @@ public class MapMonitor {
         this.map = map;
         this.portal = map.getPortal(portal);
         this.monitorSchedule = TimerManager.getInstance().register(() -> {
-            if (map.getCharacters().size() < 1) {
+            if (map.getCharacterCount() < 1) {
                 cancelAction();
             }
         }, 5000);

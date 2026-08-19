@@ -28,7 +28,6 @@ import org.gms.server.TimerManager;
 import org.gms.server.maps.MapleMap;
 import org.gms.util.PacketCreator;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -129,9 +128,8 @@ public class Coconut extends Event {
     public void warpOut() {
         setCoconutsHittable(false);
         TimerManager.getInstance().schedule(() -> {
-            List<Character> chars = new ArrayList<>(map.getCharacters());
-
-            for (Character chr : chars) {
+            // getCharacters() 返回的是锁内拷好的不可变快照，直接迭代即可
+            for (Character chr : map.getCharacters()) {
                 if ((getMapleScore() > getStoryScore() && chr.getTeam() == 0) || (getStoryScore() > getMapleScore() && chr.getTeam() == 1)) {
                     chr.changeMap(MapId.EVENT_WINNER);
                 } else {

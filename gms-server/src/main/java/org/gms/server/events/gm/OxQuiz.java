@@ -32,8 +32,6 @@ import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 import org.gms.util.Randomizer;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author FloppyDisk
@@ -72,9 +70,8 @@ public final class OxQuiz {
         map.broadcastMessage(PacketCreator.showOXQuiz(round, question, true));
         TimerManager.getInstance().schedule(() -> {
             map.broadcastMessage(PacketCreator.showOXQuiz(round, question, true));
-            List<Character> chars = new ArrayList<>(map.getCharacters());
-
-            for (Character chr : chars) {
+            // getCharacters() 返回的是锁内拷好的不可变快照，直接迭代即可
+            for (Character chr : map.getCharacters()) {
                 if (chr != null) // make sure they aren't null... maybe something can happen in 12 seconds.
                 {
                     if (!isCorrectAnswer(chr, getOXAnswer(round, question)) && !chr.isGM()) {
@@ -91,7 +88,7 @@ public final class OxQuiz {
                 question++;
             }
             //send question
-            if (map.getCharacters().size() - number <= 2) {
+            if (map.getCharacterCount() - number <= 2) {
                 map.broadcastMessage(PacketCreator.serverNotice(6, I18nUtil.getMessage("OxQuiz.message2")));
                 map.getPortal("join00").setPortalStatus(true);
                 map.setOx(null);

@@ -24,17 +24,13 @@ package org.gms.net.server.channel.handlers;
 import org.gms.client.*;
 import org.gms.client.Character;
 import org.gms.config.GameConfig;
-import org.gms.constants.id.MapId;
 import org.gms.net.AbstractPacketHandler;
 import org.gms.net.packet.InPacket;
 import org.gms.net.server.coordinator.world.InviteCoordinator;
 import org.gms.net.server.coordinator.world.InviteCoordinator.InviteType;
 import org.gms.net.server.world.PartyCharacter;
-import org.gms.server.maps.FieldLimit;
-import org.gms.server.maps.TeleportRestriction;
-
-import java.util.Optional;
 import org.gms.server.maps.MapleMap;
+import org.gms.server.maps.TeleportGuard;
 import org.gms.util.PacketCreator;
 
 import java.util.Objects;
@@ -64,27 +60,21 @@ public final class FamilyUseHandler extends AbstractPacketHandler {
                     MapleMap targetMap = victim.getMap();
                     MapleMap ownMap = c.getPlayer().getMap();
                     if (targetMap != null) {
+                        // 被传送的是谁，守卫就查谁：团聚是发起者自己传到对方那儿，
+                        // 召唤是把对方拉过来。任务门的提示由 TeleportGuard 发给被传送的人——
+                        // 发给召唤者没有意义，他就站在门后的图里，缺任务的是对方。
+                        // 通用拒绝不发文字，仍按本 handler 的惯例回 sendFamilyMessage
                         if (type == FamilyEntitlement.FAMILY_REUINION) {
-                            // 团聚是自己传到对方所在图，按发起者查目标图的准入
-                            Optional<String> denial = TeleportRestriction.checkTeleport(c.getPlayer(), targetMap.getId());
-                            if (denial.isPresent()) {
-                                c.getPlayer().dropMessage(1, denial.get());
-                            } else if (!FieldLimit.CANNOTMIGRATE.check(ownMap.getFieldLimit()) && !FieldLimit.CANNOTVIPROCK.check(targetMap.getFieldLimit())
-                                    && (!targetMap.hasForcedReturn() || MapId.isMapleIsland(targetMap.getId())) && targetMap.getEventInstance() == null) {
-
+                            if (TeleportGuard.denyFamilyTeleport(c.getPlayer(), ownMap, targetMap, null)) {
+                                c.sendPacket(PacketCreator.sendFamilyMessage(75, 0)); // wrong message, but close enough. (client should check this first anyway)
+                            } else {
                                 c.getPlayer().changeMap(victim.getMap(), victim.getMap().getPortal(0));
                                 useEntitlement(entry, type);
-                            } else {
-                                c.sendPacket(PacketCreator.sendFamilyMessage(75, 0)); // wrong message, but close enough. (client should check this first anyway)
                             }
                         } else {
-                            // 召唤是把对方拉到自己所在图，按被召唤者查己方图的准入
-                            Optional<String> denial = TeleportRestriction.checkTeleport(victim, ownMap.getId());
-                            if (denial.isPresent()) {
-                                c.getPlayer().dropMessage(1, denial.get());
-                            } else if (!FieldLimit.CANNOTMIGRATE.check(targetMap.getFieldLimit()) && !FieldLimit.CANNOTVIPROCK.check(ownMap.getFieldLimit())
-                                    && (!ownMap.hasForcedReturn() || MapId.isMapleIsland(ownMap.getId())) && ownMap.getEventInstance() == null) {
-
+                            if (TeleportGuard.denyFamilyTeleport(victim, targetMap, ownMap, null)) {
+                                c.sendPacket(PacketCreator.sendFamilyMessage(75, 0));
+                            } else {
                                 if (InviteCoordinator.hasInvite(InviteType.FAMILY_SUMMON, victim.getId())) {
                                     c.sendPacket(PacketCreator.sendFamilyMessage(74, 0));
                                     return;
@@ -92,8 +82,6 @@ public final class FamilyUseHandler extends AbstractPacketHandler {
                                 InviteCoordinator.createInvite(InviteType.FAMILY_SUMMON, c.getPlayer(), victim, victim.getId(), c.getPlayer().getMap());
                                 victim.sendPacket(PacketCreator.sendFamilySummonRequest(c.getPlayer().getFamily().getName(), c.getPlayer().getName()));
                                 useEntitlement(entry, type);
-                            } else {
-                                c.sendPacket(PacketCreator.sendFamilyMessage(75, 0));
                             }
                         }
                     }

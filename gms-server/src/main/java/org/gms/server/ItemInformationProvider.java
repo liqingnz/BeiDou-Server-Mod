@@ -485,19 +485,27 @@ public class ItemInformationProvider {
         return getItemPriceData(itemId).getRight();
     }
 
+    /**
+     * 一整堆物品的售价，wz 里没有 {@code info/price} 节点时返回 -1（638 个道具属于此列）。
+     * <p>
+     * 乘法一律走 long 再夹到 {@link Integer#MAX_VALUE}：单价与堆叠上限都取自 wz，
+     * 二者相乘可以超出 int（如 4310002 中介币 单价 1000 万 × 堆叠 1000），
+     * 原实现在 int 里乘会翻成负数，调用方的 {@code recvMesos > 0} 判断随之失效。
+     */
     public int getPrice(int itemId, int quantity) {
-        int retPrice = getWholePrice(itemId);
-        if (retPrice == -1) {
+        int wholePrice = getWholePrice(itemId);
+        if (wholePrice == -1) {
             return -1;
         }
 
+        long retPrice;
         if (!ItemConstants.isRechargeable(itemId)) {
-            retPrice *= quantity;
+            retPrice = (long) wholePrice * quantity;
         } else {
-            retPrice += Math.ceil(quantity * getUnitPrice(itemId));
+            retPrice = wholePrice + (long) Math.ceil(quantity * getUnitPrice(itemId));
         }
 
-        return retPrice;
+        return (int) Math.min(retPrice, Integer.MAX_VALUE);
     }
 
     public Pair<Integer, String> getReplaceOnExpire(int itemId) {   // thanks to GabrielSin

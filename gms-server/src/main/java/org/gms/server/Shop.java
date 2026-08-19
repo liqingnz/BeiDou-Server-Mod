@@ -223,11 +223,21 @@ public class Shop {
 
                 ItemInformationProvider ii = ItemInformationProvider.getInstance();
                 int recvMesos = ii.getPrice(item.getItemId(), quantity);
-                if (recvMesos > 0) {
-                    c.getPlayer().gainMeso(recvMesos, false);
+                // wz 没有 price 节点时 getPrice 返回 -1，此时不发钱、也不能把 -1 当成交额报出去：
+                // @sellinv 拿它累加，@retrieve 再拿累加值当回购价，负数会让「扣钱」变成白送金币
+                if (recvMesos <= 0) {
+                    c.sendPacket(PacketCreator.shopTransaction((byte) 0x8));
+                    return 0;
+                }
+                // 金币封顶在 Integer.MAX_VALUE，超出的部分 gainMeso 会静默吞掉。
+                // 返回的必须是实际入账额，否则台账高于实付，@retrieve 会按没到手的钱收回购费
+                long headroom = Integer.MAX_VALUE - (long) c.getPlayer().getMeso();
+                int credited = (int) Math.min(recvMesos, Math.max(headroom, 0));
+                if (credited > 0) {
+                    c.getPlayer().gainMeso(credited, false);
                 }
                 c.sendPacket(PacketCreator.shopTransaction((byte) 0x8));
-                return recvMesos;
+                return credited;
             } else {
                 c.sendPacket(PacketCreator.shopTransaction((byte) 0x5));
                 return 0;

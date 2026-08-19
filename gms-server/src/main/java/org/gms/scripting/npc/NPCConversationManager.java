@@ -575,7 +575,7 @@ public class NPCConversationManager extends AbstractPlayerInteraction {
         for (byte room = 0; room < 5; room++) {
             boolean roomAvailable = true;
             for (byte stage = 0; stage < 5; stage++) {
-                if (!mapManager.getMap(mapid + room + (stage * 100)).getCharacters().isEmpty()) {
+                if (mapManager.getMap(mapid + room + (stage * 100)).getCharacterCount() > 0) {
                     roomAvailable = false;
                     break;
                 }

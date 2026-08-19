@@ -192,24 +192,31 @@ function levelShowDropList(mobId) {
             msgtext += `\r\n\r\n${'-'.repeat(28)}物品掉落列表一览${'-'.repeat(28)}\r\n\r\n`;
             // 遍历 table 对象的键，并设置其值为键名的长度
             Object.keys(table).forEach(key => {table[key] = Math.max(table[key], key.length)});
+            // 掉率倍率要跟 MapleMap.dropFromMonster 对齐：boss 走 bossDropRate，普通怪才走 dropRate。
+            // 两者在多数服务器上并不相等，对 boss 用 dropRate 会让整张明细都是错的
+            let dropRate = mob.isBoss() ? player.getBossDropRate() : player.getDropRate();
+            dropRate *= player.getFamilyDrop();
             let dropitemlist = {};
             dropall.filter(drop => drop.itemId > 0).forEach((drop) => {
                 let itemName = ItemInformationProvider.getInstance().getName(drop.itemId);
                 if (itemName != null) {
-                    let itemChance = (drop.chance / 10000).toFixed(4);
+                    // 先算完再格式化：拿 toFixed 的字符串去乘会得到 0.12000000000000001% 这种浮点噪声
+                    let baseChance = drop.chance / 10000;
+                    let itemChance = baseChance.toFixed(4);
+                    let yourChance = (baseChance * dropRate).toFixed(4);
                     // 更新 table 中对应的键值以记录最大长度
                     table['物品名称'] = Math.max(table['物品名称'], itemName.length);
                     table['基础掉率'] = Math.max(table['基础掉率'], itemChance.length / 2);
-                    table['你的掉率'] = Math.max(table['你的掉率'], itemChance.length / 2);
-                    dropitemlist[drop.itemId] = {name : itemName , chance : itemChance , questid : drop.questid};
+                    table['你的掉率'] = Math.max(table['你的掉率'], yourChance.length / 2);
+                    dropitemlist[drop.itemId] = {name : itemName , chance : itemChance , yourChance : yourChance , questid : drop.questid};
                 }
             });
             // 确保所有值都是偶数
             Object.keys(table).forEach(key => table[key] = Math.ceil(table[key] / 2) * 2);
             msgtext += '#b' + Object.entries(table).map(([key, val]) => `${key.padEnd(val, '\t')}`).join('\t') + '#k\r\n';
-            msgtext += Object.entries(dropitemlist).map(([itemId, { name, chance, questid }]) => {
+            msgtext += Object.entries(dropitemlist).map(([itemId, { name, chance, yourChance, questid }]) => {
                     let msg = `#L${itemId}##v${itemId}#\r\n#b#e${name.padEnd(table['物品名称'] + countAllSymbols(name), '\t')}#k#n\t`;
-                    msg += `${(chance + '%').padEnd(table['基础掉率'], '\t')}\t#d${(chance * player.getDropRate() * player.getFamilyDrop() + '%').padEnd(table['你的掉率'], '\t')}#k\r\n`;
+                    msg += `${(chance + '%').padEnd(table['基础掉率'], '\t')}\t#d${(yourChance + '%').padEnd(table['你的掉率'], '\t')}#k\r\n`;
                     msg += questid > 0 ? '#r[任务道具]#k ' + QuestInfo.getInstance(questid).getName() + '\r\n' : '';
                     msg += '#l';
                     return msg;

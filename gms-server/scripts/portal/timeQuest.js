@@ -22,42 +22,73 @@
 
 /*
  * @author Moogra
+ *
+ * The quest doors of the Temple of Time lanes. Attached to the portals of 270010100-500 /
+ * 270020100-500 / 270030100-500 / 270040000 -- 16 maps in total.
+ *
+ * Routing and gating are kept apart: this script only works out where a door leads, while
+ * TeleportRestriction decides whether it opens. That table is the single rule source shared
+ * with teleport rocks, family teleports and @goto; keeping a second copy here would drift.
+ * The GM bypass (level > 2) lives in the table too, so it is not repeated here.
  */
+var TeleportRestriction = Java.type("org.gms.server.maps.TeleportRestriction");
+
+/**
+ * Where this door leads; -1 when the map is not on a known lane.
+ *
+ * section = (mapid - 270010000) / 100. 1-4 / 101-104 / 201-204 are doors inside a lane and
+ * lead to the next "encounter" map; 5 / 105 / 205 / 300 are lane changes and lead to the
+ * "past" map of the next lane.
+ */
+function destinationOf(mapid, section) {
+    if (section >= 1 && section < 5) {
+        return mapid + 10;
+    }
+    if (section === 5) {
+        return 270020000;   // Chryse
+    }
+    if (section > 100 && section < 105) {
+        return mapid + 10;
+    }
+    if (section === 105) {
+        return 270030000;   // Burnt Past
+    }
+    if (section > 200 && section < 205) {
+        return mapid + 10;
+    }
+    if (section === 205) {
+        return 270040000;   // Forgotten Twilight
+    }
+    if (section === 300) {
+        return 270040100;   // Temple Ruins
+    }
+    return -1;
+}
+
+/** Sent back to the start of the lane when the door will not open */
+function safeLaneOf(section) {
+    if (section > 200) {
+        return 270030000;
+    }
+    if (section > 100) {
+        return 270020000;
+    }
+    return 270010000;
+}
+
 function enter(pi) {
     var mapid = pi.getPlayer().getMapId();
     pi.playPortalSound();
-    var map = (mapid - 270010000) / 100;
-    // GMs (level > 2) pass every door without the quest, but still follow the normal lane
-    // routing below. Do NOT tack "|| isGm" onto the whole condition instead: that makes the
-    // first branch swallow every GM regardless of where they stand, warping them to
-    // mapid + 10 -- a map that does not exist at the lane-end maps (5/105/205/300).
-    var isGm = pi.getPlayer().gmLevel() > 2;
-    //pi.getPlayer().dropMessage(5, map + " " + pi.isQuestCompleted(3534));
-    if (map < 5 && (pi.isQuestCompleted(3500 + map) || isGm)) {
-        pi.warp(mapid + 10, "out00");
-    } else if (map == 5 && (pi.isQuestCompleted(3502 + map) || isGm)) {
-        pi.warp(270020000, "out00");
-    } else if (map > 100 && map < 105 && (pi.isQuestCompleted(3407 + map) || isGm)) {
-        pi.warp(mapid + 10, "out00");
-    } else if (map == 105 && (pi.isQuestCompleted(3514) || isGm)) {
-        pi.warp(270030000, "out00");
-    } else if (map > 200 && map < 205 && (pi.isQuestCompleted(3314 + map) || isGm)) {
-        pi.warp(mapid + 10, "out00");
-    } else if (map == 205 && (pi.isQuestCompleted(3519) || isGm)) {
-        pi.warp(270040000, "out00");
-    } else if (map == 300 && (pi.haveItem(4032002) || pi.isQuestCompleted(3522) || isGm)) {
-        pi.warp(270040100, "out00");
-    } else {
-        if (map > 200) {
-            pi.playerMessage(5, "As the time starts to flow oddly, you are transported back to a safe lane.");
-            pi.warp(270030000, "in00");
-        } else if (map > 100) {
-            pi.playerMessage(5, "As the time starts to flow oddly, you are transported back to a safe lane.");
-            pi.warp(270020000, "in00");
-        } else {
-            pi.playerMessage(5, "As the time starts to flow oddly, you are transported back to a safe lane.");
-            pi.warp(270010000, "in00");
-        }
+
+    var section = Math.floor((mapid - 270010000) / 100);
+    var target = destinationOf(mapid, section);
+
+    if (target !== -1 && !TeleportRestriction.checkTeleport(pi.getPlayer(), target).isPresent()) {
+        pi.warp(target, "out00");
+        return true;
     }
+
+    pi.playerMessage(5, "As the time starts to flow oddly, you are transported back to a safe lane.");
+    pi.warp(safeLaneOf(section), "in00");
     return true;
 }
