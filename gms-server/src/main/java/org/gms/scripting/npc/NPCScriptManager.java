@@ -231,11 +231,16 @@ public class NPCScriptManager extends AbstractScriptManager {
                             dispose(c, true);
                             return;
                         }
-                        if (mode == 0) {
-                            iv.invokeFunction("level" + nextLevelContext.getLastLevel());
-                        } else {
-                            iv.invokeFunction("level" + nextLevelContext.getNextLevel());
+                        String levelName = mode == 0 ? nextLevelContext.getLastLevel() : nextLevelContext.getNextLevel();
+                        if (levelName == null) {
+                            // 这个方向压根没登记回调。典型是 sendLastLevel（只登记「上一步」）：
+                            // 它发的 endBytes 是 01 00，客户端在没有「下一步」的位置画的是「确定」，
+                            // 点了照样发 mode=1，于是这里会去 invoke "levelnull" 抛 NoSuchMethodException。
+                            // sendOkLevel 反过来同理。没登记就是没有下一步，按结束对话处理。
+                            dispose(c, true);
+                            return;
                         }
+                        iv.invokeFunction("level" + levelName);
                     }
                     default -> {
                         log.error("Unsupported level type: {}", nextLevelContext.getLevelType());
