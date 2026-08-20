@@ -26,6 +26,7 @@ import org.gms.client.command.commands.CommandManager;
 import org.gms.client.inventory.Inventory;
 import org.gms.client.inventory.InventoryType;
 import org.gms.client.inventory.Item;
+import org.gms.config.GameConfig;
 import org.gms.server.Shop;
 import org.gms.server.ShopFactory;
 import org.gms.util.I18nUtil;
@@ -109,12 +110,32 @@ public class SellInvCommand extends Command {
             }
         }
 
-        // 回购价按 int 存：玩家金币本身就封顶在 Integer.MAX_VALUE，夹一下只是防越界
-        int recordedMeso = (int) Math.min(totalSold, Integer.MAX_VALUE);
+        // 入账额按 int 存：玩家金币本身就封顶在 Integer.MAX_VALUE，夹一下只是防越界
+        int grossMeso = (int) Math.min(totalSold, Integer.MAX_VALUE);
+        // 手续费按实际入账额收，而不是按物品的名义售价：金币接近上限时 Shop.sell 会少发，
+        // 按名义价收费等于把没到手的那部分也收了
+        int fee = (int) Math.round(grossMeso * getSellFeeRate());
+        // 记进台账的是扣费后的净额，@retrieve 也按这个价买回：
+        // 卖出到手多少、买回就付多少，一卖一买回到原点，不会二次收手续费
+        int recordedMeso = grossMeso - fee;
+        if (fee > 0) {
+            player.gainMeso(-fee, false);
+        }
+
         player.yellowMessage(I18nUtil.getMessage("SellInvCommand.message4",
                 params[0].toLowerCase(), fromSlot, recordedMeso));
 
         CommandManager.getInstance().setItemSoldThroughCommand(player.getId(), soldItems);
         CommandManager.getInstance().setItemSoldMeso(player.getId(), recordedMeso);
+    }
+
+    /**
+     * 出售手续费率，夹在 [0, 1] 内：0 是不收费，0.3 表示卖 100 金币只到手 70。
+     * <p>
+     * 配置行缺失时 {@code getServerFloat} 返回 0，正好等于不收费，所以不需要 fallback 重载。
+     * 夹取是因为后台能填出区间外的值：负数会变成倒贴金币，大于 1 会连玩家原有的金币一起扣。
+     */
+    private static double getSellFeeRate() {
+        return Math.min(Math.max(GameConfig.getServerFloat("sellinv_fee_rate"), 0F), 1F);
     }
 }

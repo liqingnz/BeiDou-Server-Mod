@@ -571,3 +571,33 @@ WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'zh-CN' AND
 INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`)
 SELECT 'en-US', 'game_config', 'slots_gain_by_level', 'Slots added to each of the equip/use/setup/etc inventories on every 20th level when use_add_slots_by_level is on; vanilla is 4. A type is skipped when the gain would push it past 96', NULL
 WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'en-US' AND `lang_code` = 'slots_gain_by_level');
+
+-- ---------------------------------------------------------------------------
+-- [本地新增] insert_game_config_sellinv_fee_rate.sql
+-- ---------------------------------------------------------------------------
+-- @sellinv 批量出售的手续费率，取值 [0, 1]：0 是不收费（与引入本项之前逐位相同），
+-- 0.3 表示卖出总价 100 金币只到手 70。扣掉的部分直接蒸发，是一个纯金币回收口。
+--
+-- 只作用于 @sellinv：费率读在 SellInvCommand 里，没有下沉到 Shop.sell——
+-- 沉下去的话 NPC 商店、自由市场那些走同一个 sell() 的回收价会跟着一起变。
+--
+-- 与 @retrieve 的关系：台账记的是扣费后的净额，买回也按净额收，
+-- 所以「卖了再买回」正好回到原点，不会把手续费收第二遍。
+--
+-- 区间外的值由 SellInvCommand 夹回 [0, 1]：负数会变成卖东西倒贴钱，
+-- 大于 1 会连玩家原有的金币一起扣走，两种都不该因为后台填错就发生。
+--
+-- 注意本节是 WHERE NOT EXISTS，只补缺不改值：库里已经有这行的环境改本文件的 0.3 不会生效，
+-- 要么在 gms-ui 后台改，要么临时把本节换成先 DELETE 再 INSERT。
+
+INSERT INTO `game_config`(`config_type`, `config_sub_type`, `config_clazz`, `config_code`, `config_value`, `config_desc`, `update_time`)
+SELECT 'server', 'Game Mechanics', 'java.lang.Float', 'sellinv_fee_rate', '0.3', 'sellinv_fee_rate', '2026-08-20 12:00:00'
+WHERE NOT EXISTS (SELECT 1 FROM `game_config` WHERE `config_code` = 'sellinv_fee_rate');
+
+INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`)
+SELECT 'zh-CN', 'game_config', 'sellinv_fee_rate', '@sellinv 批量出售的手续费率，取值0~1：0为不收费，0.3表示卖出总价100金币只到手70；只影响该指令，NPC商店的回收价不受影响', NULL
+WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'zh-CN' AND `lang_code` = 'sellinv_fee_rate');
+
+INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`)
+SELECT 'en-US', 'game_config', 'sellinv_fee_rate', 'Selling fee charged by @sellinv, in [0, 1]: 0 is free, 0.3 means a 100-meso sale nets 70. Only this command is affected; NPC shop payouts are unchanged', NULL
+WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'en-US' AND `lang_code` = 'sellinv_fee_rate');
