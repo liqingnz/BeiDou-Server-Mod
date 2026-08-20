@@ -303,20 +303,39 @@ public class ConfigService {
     }
 
     public Collector<GameConfigDO, ?, Map<String, Object>> toMap() {
-        return Collectors.toMap(GameConfigDO::getConfigCode, config -> {
-            if ("java.util.Map".equals(config.getConfigClazz())) {
-                return JSONObject.parseObject(config.getConfigValue(), new TypeReference<Map<Integer, Object>>() {
-                });
-            } else if ("java.lang.Float".equals(config.getConfigClazz()) || "java.lang.Double".equals(config.getConfigClazz())) {
+        return Collectors.toMap(GameConfigDO::getConfigCode, this::parseConfigValue, (v1, v2) -> v1);
+    }
+
+    /**
+     * 把配置值解析成导出用的对象。Collectors.toMap底层用的是HashMap.merge，value为null会直接抛NPE，
+     * 所以这里保证不返回null：空值、解析不出来的值一律退回原始字符串。
+     */
+    private Object parseConfigValue(GameConfigDO config) {
+        String configValue = config.getConfigValue();
+        // 空配置值走parseObject会拿到null，走BigDecimal会抛异常，直接原样导出
+        if (RequireUtil.isEmpty(configValue)) {
+            log.warn(I18nUtil.getLogMessage("ConfigService.parseConfigValue.warn1"), config.getConfigType(),
+                    config.getConfigSubType(), config.getConfigCode());
+            return configValue == null ? "" : configValue;
+        }
+        Object result;
+        if ("java.util.Map".equals(config.getConfigClazz())) {
+            result = JSONObject.parseObject(configValue, new TypeReference<Map<Integer, Object>>() {
+            });
+        } else if ("java.lang.Float".equals(config.getConfigClazz()) || "java.lang.Double".equals(config.getConfigClazz())) {
+            try {
                 // 为避免科学计数，用BigDecimal
-                return new BigDecimal(config.getConfigValue());
-            } else {
-                try {
-                    return JSONObject.parseObject(config.getConfigValue(), Class.forName(config.getConfigClazz()));
-                } catch (Exception e) {
-                    return config.getConfigValue();
-                }
+                result = new BigDecimal(configValue);
+            } catch (NumberFormatException e) {
+                result = null;
             }
-        }, (v1, v2) -> v1);
+        } else {
+            try {
+                result = JSONObject.parseObject(configValue, Class.forName(config.getConfigClazz()));
+            } catch (Exception e) {
+                result = null;
+            }
+        }
+        return result == null ? configValue : result;
     }
 }
