@@ -1290,11 +1290,54 @@ if ((mapid >= 220060000 && mapid <= 220070400) || (mapid >= 270010100 && mapid <
 实际天花板 = 刷怪点数 × mob_spawn_point_capacity（BOSS 点恒为 1）
 ```
 
+##### 实跑复盘（2026-08-21）：倍率为什么「调了没反应」
+
+实测报告"10 个刷怪点的图，倍率算下来该 13 只，实际刷 20 只；把
+`mob_spawnrate_to_player_count` 调到 0.1 又变成 10 只"。查下来倍率链路上压着三层，
+**只有中间一层是配置能控的**：
+
+| 层 | 位置 | 效果 |
+|---|---|---|
+| **地板 = 刷怪点数 N** | `MapFactory.loadLifeRaw` → `MapleMap.addMonsterSpawn` | 地图加载时每个刷怪点**无条件先刷一只**，不过 `getNumShouldSpawn()`。倍率 < 1 时 `numShouldSpawn` 恒为负，无人击杀就永远停在 N |
+| **wz 地图系数** | `getWzMonsterRate()` | `use_wz_map_mob_rate=true` 时额外乘 `Map.wz` 的 `info/mobRate`。实测取值 0.8 / 1.0 / 1.5 / 2.0 / 2.2（个别图 10.0），**Map1 的 882 张图里 354 张 ≥ 2.0** |
+| **天花板 = N × capacity** | `SpawnPoint.spawnCapacity()` | `mob_spawn_point_capacity` 固定 2，`有效倍率 ≥ 2` 之后软上限再高也刷不出来 |
+
+于是两个系数的线性生效区间是 `倍率总和 × 本图 mobRate ≤ 2`：mobRate=1.0 时系数可用到
+2.00，mobRate=2.0 时只到 1.00，mobRate=2.2 时只到 0.91。报告里的 `0.7 + 0.5 = 1.2`
+在 mobRate ≥ 1.67 的图上直接撞天花板，所以看到的是 `2N = 20` 而不是算出来的 24。
+
+**处置：机制不动，改可见性。** 天花板 2N 是「怪只能刷在 wz 原始坐标」的物理后果，
+抬 `mob_spawn_point_capacity` 只会让同一坐标堆更多怪；wz 系数保留（地图密度差异是原版设计）。
+改为让这两层在指令里可见：
+
+- `MapleMap` 新增 `getWzMonsterRate()`（由 private 转 public）、`getEffectiveSpawnRate()`、
+  `getSpawnCountTarget()`、`getSpawnCountCeiling()`；
+- `@rates` 地图系数 ≠ 1 时显示 `配置倍率 × 地图系数 = 有效倍率`，括号里给
+  `（刷怪 实际数/原始刷怪点数）`——实际数已按容量上限截断，倍率乘出来超出的部分刷不出来；
+- `@mobrate` 是 GM 指令，输出摊得更开：有效倍率、配置值、地图系数、刷怪点数、在场怪上限、容量上限。
+
+##### 实跑复盘：`getNumShouldSpawn` 的浮点 off-by-one（已修）
+
+`(int) Math.ceil(倍率 × wz系数 × 刷怪点数)` 直接吃 float 表示误差：`0.3f` 的实际值是
+`0.30000001192`，乘 10 个刷怪点得 `3.0000001192`，`Math.ceil` 给出 **4**。整除的配置
+（0.3 / 0.6 / 0.7 / 1.1…）会稳定多刷一只。抽出 `spawnCountFromRate`，先把乘积抹到千分位
+再取上界。
+
 ##### 已知未验证
 
 只做了 `mvn -q -pl gms-server clean compile`。`V1000.0.9` 的 5 个 `game_config` 键与
-`V1000.0.10` 的 `command_info` 是否生效需启动服务端跑 Flyway。刷怪密度的实际观感、
-`mobRate` 高的活动图会不会有意外、BOSS 重生随机化都没有实跑确认。
+`V1000.0.10` 的 `command_info` 是否生效需启动服务端跑 Flyway。BOSS 重生随机化没有实跑确认。
+
+上面两条实跑复盘的改动同样只过了编译，`@rates` / `@mobrate` 的新输出待游戏内确认。
+另有两处**已定位但有意不修**，留在这里备查：
+
+- `@debug mobsp`（`reportMonsterSpawnPoints`）表头读 `monsterSpawn`、明细遍历 `allMonsterSpawn`，
+  两份数据不是一回事：明细行的「现存」在普通地图上恒为 0，行数在 `mob_respawn_rate > 1` 时也和表头对不上。数点数只能看表头。
+- `spawnRevives` / `spawnMonsterWithEffect` / `spawnFakeMonster` 都计入 `spawnedMonstersOnMap`
+  却不占刷怪点，史莱姆这类分裂怪的图会挤占补怪预算。
+- `mob_respawn_rate > 1` 且 `mobTime == -1` 时，`loadLifeRaw` 会把**同一个 Monster 对象**
+  `spawnMonster` N 次：`addMapObject` 每次分配新 oid 但对象只有一个，留下 N−1 个幽灵 MapObject，
+  且 `spawnedMonstersOnMap` 加 N 次只减 1，该图补怪预算被永久吃掉 N−1 个。当前 `mob_respawn_rate = 1`，未触发。
 
 #### G2 — 阶梯经验 / 倍率 float 化 ✅ 已完成（**一行移植代码都没写**）
 

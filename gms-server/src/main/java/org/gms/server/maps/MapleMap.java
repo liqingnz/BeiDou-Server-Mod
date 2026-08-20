@@ -3830,8 +3830,44 @@ public class MapleMap {
     /**
      * 本图 wz 数据里的刷怪密度系数（Map.wz 的 info/mobRate）。关闭开关时恒为 1，即忽略 wz 的地图差异。
      */
-    private float getWzMonsterRate() {
+    public float getWzMonsterRate() {
         return GameConfig.getServerBoolean("use_wz_map_mob_rate") ? monsterRate : 1.0f;
+    }
+
+    /**
+     * 真正决定在场怪数的倍率：配置倍率再乘本图的 wz 系数。开着 use_wz_map_mob_rate 时两者能差一倍多，
+     * 只看配置值算不出实际效果，所以单独暴露一个给命令展示。
+     */
+    public double getEffectiveSpawnRate() {
+        return getCurrentSpawnRate() * getWzMonsterRate();
+    }
+
+    /** 按有效倍率算出的在场怪数上限，也就是 {@link #respawn()} 每轮想补到的目标值。 */
+    public int getSpawnCountTarget() {
+        return spawnCountFromRate(getEffectiveSpawnRate(), getMonsterSpawnPointCount());
+    }
+
+    /**
+     * 刷怪点容量决定的物理上限：每个点都刷满时的怪物数。倍率再高也刷不过这个数，
+     * {@link #getSpawnCountTarget()} 超出的部分是无效配置。
+     */
+    public int getSpawnCountCeiling() {
+        int capacity = Math.max(1, GameConfig.getServerInt("mob_spawn_point_capacity", 2));
+        int ceiling = 0;
+        synchronized (monsterSpawn) {
+            for (SpawnPoint sp : monsterSpawn) {
+                ceiling += sp.isBoss() ? 1 : capacity;
+            }
+        }
+        return ceiling;
+    }
+
+    /**
+     * float 配置项提升成 double 之后带着表示误差：0.3f 的实际值是 0.30000001192，乘 10 个刷怪点
+     * 得 3.0000001192，直接取上界会凭空多刷一只。刷怪数精确到千分位以下没有意义，先抹掉再取上界。
+     */
+    private static int spawnCountFromRate(double rate, int spawnPointCount) {
+        return (int) Math.ceil(Math.round(rate * spawnPointCount * 1000.0) / 1000.0);
     }
 
     public int getMonsterSpawnPointCount() {
@@ -3854,8 +3890,7 @@ public class MapleMap {
             return (monsterSpawn.size() - spawnedMonstersOnMap.get());
         }
 
-        int maxNumShouldSpawn = (int) Math.ceil(getCurrentSpawnRate() * getWzMonsterRate() * monsterSpawn.size());
-        return maxNumShouldSpawn - spawnedMonstersOnMap.get();
+        return getSpawnCountTarget() - spawnedMonstersOnMap.get();
     }
 
     public void respawn() {

@@ -24,6 +24,7 @@ import org.gms.client.Client;
 import org.gms.client.command.Command;
 import org.gms.config.GameConfig;
 import org.gms.dao.entity.GameConfigDO;
+import org.gms.server.maps.MapleMap;
 import org.gms.util.I18nUtil;
 
 /**
@@ -64,9 +65,14 @@ public class MobRateCommand extends Command {
         player.dropMessage(6, I18nUtil.getMessage("MobRateCommand.message3",
                 GameConfig.getServerFloat("mob_spawn_base_rate"),
                 GameConfig.getServerFloat("mob_spawnrate_to_player_count")));
+        MapleMap map = player.getMap();
         player.dropMessage(6, I18nUtil.getMessage("MobRateCommand.message4",
-                Math.round(player.getMap().getCurrentSpawnRate() * 100) / 100f,
-                player.getMap().getMonsterSpawnPointCount()));
+                Math.round(map.getEffectiveSpawnRate() * 100) / 100f,
+                Math.round(map.getCurrentSpawnRate() * 100) / 100f,
+                Math.round(map.getWzMonsterRate() * 100) / 100f,
+                map.getMonsterSpawnPointCount(),
+                map.getSpawnCountTarget(),
+                map.getSpawnCountCeiling()));
     }
 
     /**

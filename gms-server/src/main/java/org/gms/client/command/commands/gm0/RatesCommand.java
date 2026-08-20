@@ -28,6 +28,7 @@ import org.gms.client.Character;
 import org.gms.client.Client;
 import org.gms.client.command.Command;
 import org.gms.config.GameConfig;
+import org.gms.server.maps.MapleMap;
 import org.gms.util.I18nUtil;
 
 public class RatesCommand extends Command {
@@ -56,10 +57,30 @@ public class RatesCommand extends Command {
         if (GameConfig.getServerBoolean("use_quest_rate")) {
             showMsg_ += I18nUtil.getMessage("RatesCommand.message3") + "#e#b" + c.getWorldServer().getQuestRate() + "x#k#n" + "\r\n";
         }
-        showMsg_ += I18nUtil.getMessage("RatesCommand.message5",
-                Math.round(player.getMap().getCurrentSpawnRate() * 100) / 100f,
-                player.getMap().getMonsterSpawnPointCount()) + "\r\n";
+        showMsg_ += describeSpawnRate(player.getMap());
 
         player.showHint(showMsg_, 300);
+    }
+
+    /**
+     * 刷怪倍率这一段单独拼：配置倍率之外还压着 wz 的地图系数和刷怪点容量上限两层，
+     * 只报配置值的话，玩家看到的倍率和地上的怪数对不上。括号里给的是能落地的怪数，
+     * 已经按容量上限截断过——倍率乘出来超过 `刷怪点数 × mob_spawn_point_capacity` 的部分刷不出来。
+     */
+    private static String describeSpawnRate(MapleMap map) {
+        float wzMobRate = map.getWzMonsterRate();
+        int spawnPoints = map.getMonsterSpawnPointCount();
+        int actualSpawn = Math.min(map.getSpawnCountTarget(), map.getSpawnCountCeiling());
+
+        return (wzMobRate == 1.0f
+                ? I18nUtil.getMessage("RatesCommand.message5",
+                        round2(map.getCurrentSpawnRate()), actualSpawn, spawnPoints)
+                : I18nUtil.getMessage("RatesCommand.message6", round2(map.getCurrentSpawnRate()),
+                        round2(wzMobRate), round2(map.getEffectiveSpawnRate()), actualSpawn, spawnPoints))
+                + "\r\n";
+    }
+
+    private static float round2(double value) {
+        return Math.round(value * 100) / 100f;
     }
 }

@@ -62,6 +62,11 @@ public class SpawnPoint {
         return spawnedMonsters.intValue();
     }
 
+    /** BOSS 点的容量恒为 1，不吃 mob_spawn_point_capacity，算地图容量上限时要单独计 */
+    public boolean isBoss() {
+        return boss;
+    }
+
     public void setDenySpawn(boolean val) {
         denySpawn = val;
     }
