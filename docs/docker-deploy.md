@@ -505,6 +505,9 @@ docker compose -f docker-compose.prod.yml up -d
 
 但如果这次升级带了新的**数据库迁移**，还有 9.5 要看。
 
+⚠️ **国内服务器直连 ghcr.io 拉不动**（不是慢，是不收敛），必须走镜像站，见 **9.9**。
+上面这两条命令只适用于能正常访问 ghcr.io 的网络环境。
+
 代价是服务器上不能直接改 `.js` 脚本或 wz。但那些本来就在 git 里，
 正确流程就该是「改 → 提交 → 重新构建」。
 
@@ -543,6 +546,9 @@ tar czf db-backup-$(date +%F-%H%M).tar.gz docker-db-data/
 ```
 
 Flyway 没有自动回滚。迁移写错了只能从这个包恢复。
+
+⚠️ 这段只停了 app，此时 MySQL 还在跑，物理拷贝 InnoDB 数据目录不保证一致；
+且 `stop` 不带 `-t` 只有 10 秒宽限期，**可能丢在线角色存档**。更稳的写法见 **9.9**。
 
 #### 升级后核对
 
@@ -596,6 +602,114 @@ docker save beidou:v1 | gzip | ssh user@服务器 "gunzip | docker load"
 正式部署走 9.1。
 
 ⚠️ 这条路同样会跑 Flyway 迁移（迁移脚本打在 jar 里），所以 9.5 的备份与核对照样适用。
+
+---
+
+### 9.9 🔴 国内服务器拉 ghcr.io：必须走镜像站
+
+2026-08-20 部署 `e5d0465` 时实测：阿里云华北机器直连 ghcr.io **不是慢，是不收敛**。
+
+#### 实测数据
+
+| 链路 | 速率 |
+|---|---|
+| 服务器 → ghcr.io，docker 自身 3 路 | 25 KB/s |
+| 服务器 → ghcr.io，额外 6 路并发 | +58 KB/s（与上一行相加，说明总带宽没封顶） |
+| 本机 → ghcr.io，单连接 | 113 KB/s |
+| 本机 → ghcr.io，6 路并发 | 805 KB/s |
+| 本机 → 服务器，上传 | 6.1 MB/s |
+| **服务器 → ghcr.nju.edu.cn** | **9.57 MB/s** |
+
+#### 根因是三条叠加
+
+1. **单连接被限速**。服务器每条连接只有约 8 KB/s。
+2. **并发能叠加但效率低**。家宽 6 路能到 805 KB/s（7 倍线性），服务器 6 路只加了 58 KB/s。
+3. **长连接会被 RST，且重试从零开始**。到 GitHub CDN（185.199.x.x）的长时间 TLS 连接会被重置，
+   **containerd 在失败时丢弃半截 ingest**，下次重试整层重下。
+
+第 3 条是致命的。本次要下 107.9 MB（3 层：wz 76.2 MB、jar 32.2 MB、小层 4.7 MB），
+25 KB/s 需要 72 分钟，而 reset 间隔比这短——实测进度从 47% 被清零回 7%。**数学上永远拉不完。**
+
+#### ⚠️ `registry-mirrors` 对 ghcr.io 无效
+
+网上大量文章教你在 `daemon.json` 里配 `registry-mirrors` 加速。
+那个配置**只作用于 Docker Hub**，对 ghcr.io / gcr.io / quay.io 一概不生效。
+ghcr 只能直接改写镜像地址前缀。
+
+同理，`max-concurrent-downloads` 调高只能把总速率从 25 KB/s 推到 ~100 KB/s（按第 2 条推算），
+而且改它要重启 dockerd、连带重启容器、打断当前拉取——省的时间有限，代价却是多一次停机，不划算。
+
+#### 镜像站实测（本仓库，2026-08-20）
+
+| 镜像站 | 结果 |
+|---|---|
+| `ghcr.nju.edu.cn`（南京大学） | ✅ HTTP 200，9.57 MB/s |
+| `ghcr.m.daocloud.io` | ❌ HTTP 401 |
+| `ghcr.1ms.run` | ❌ HTTP 401 |
+| `ghcr.mirror.aliyuncs.com` | ❌ HTTP 404 |
+
+只有南大可用，且是直连的 **380 倍**——76 MB 那层一分钟内整个传完。
+
+#### 做法：改写前缀拉取，再 `docker tag` 打回原名
+
+```bash
+docker pull ghcr.nju.edu.cn/<用户>/<仓库>:<短sha>
+docker tag  ghcr.nju.edu.cn/<用户>/<仓库>:<短sha> ghcr.io/<用户>/<仓库>:latest
+```
+
+打回原名之后 `.env` 里的 `BEIDOU_IMAGE` 不用动，compose 照常按 `ghcr.io/...` 起容器。
+
+⚠️ **钉短 sha，不要用 `latest`**。透传缓存可能还留着旧的 `latest → digest` 映射，
+用 `latest` 有拉到上一版的风险。
+
+#### 校验拉到的确实是 GHCR 那个构建
+
+```bash
+# GHCR 自己报的 digest
+TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:<用户>/<仓库>:pull&service=ghcr.io" \
+        | sed -E 's/.*"token":"([^"]+)".*/\1/')
+curl -sI -H "Accept: application/vnd.oci.image.index.v1+json" -H "Authorization: Bearer $TOKEN" \
+     https://ghcr.io/v2/<用户>/<仓库>/manifests/<短sha> | grep -i docker-content-digest
+```
+
+跟 `docker images --digests` 里那一行比对，一致即可。本次两边都是 `sha256:e680e59c63b3…`。
+加上 containerd 会逐个 blob 校验摘要，走镜像站**没有信任缺口**。
+
+⚠️ 别拿 `docker image inspect --format '{{.Id}}'` 去跟 manifest 里的 `config.digest` 比——
+containerd 存储下 `.Id` 报的是 index 摘要，两者本来就是不同对象，比了会误判成不一致。
+
+#### 服务器上的 `/opt/beidou/upgrade-mirror.sh`
+
+一条命令跑完整套：镜像站拉取（带重试）→ 打回原名 → 停应用 → 停库 → 备份 → 起服。
+
+```bash
+ssh <服务器> 'cd /opt/beidou && setsid nohup sh upgrade-mirror.sh <短sha> > upgrade.log 2>&1 < /dev/null &'
+ssh <服务器> 'tail -f /opt/beidou/upgrade.log'
+```
+
+脚本里有四个刻意的设计，都是这次踩出来的：
+
+- **先拉再停**。拉镜像那段旧服还在跑，不算停机；拉失败时 `set -e` 直接中止，
+  服务原封不动留在旧版本。反过来先停再拉，拉半小时就停机半小时，失败了还得手工收拾。
+- **`docker compose stop -t 120`**。⚠️ compose 文件里没有 `stop_grace_period`，
+  Docker 默认只给 **10 秒**就 SIGKILL。北斗关服要保存所有在线角色，10 秒很可能不够，**会丢存档**。
+- **停 app 之后连 MySQL 一起停再 tar**。第 8 章只停 app 就拷，那时 MySQL 还在跑，
+  物理拷贝 InnoDB 数据目录不保证一致（缓冲池可能还有脏页）。反正都要重启，多停一个容器不花时间。
+- **拉取套重试循环**，并在日志里留「序列完成 / 放弃 / 异常中止」三个收尾标志，便于脚本化判断结束。
+
+⚠️ **必须 `setsid nohup` 脱终端跑，别在 ssh 前台跑**。
+实测这条 ssh 链路会随机 `Connection reset by peer`（这次断了两回），
+前台跑的话断在「停服」和「起服」之间，就是裸奔的停机状态。
+
+#### 本次结果
+
+停机 **81 秒**（停应用 → 启动完成，其中服务端自身启动 33.0 秒），
+Flyway 重跑 4 条 repeatable 迁移、2.75 秒无错。
+
+#### 长期解法
+
+GitHub Actions 加一步同时推到**阿里云 ACR**（同区域内网拉取，不依赖第三方镜像站，流量免费）。
+需要 ACR 实例 + 两个 GH secret。南大这条路够用的话可以先不做。
 
 ---
 
