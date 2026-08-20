@@ -301,7 +301,7 @@ src/net/server/channel/handlers/DistributeSPHandler.java	java	0	0	noise	仅格�
 src/net/server/channel/handlers/DoorHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/DueyHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/EnterCashShopHandler.java	java	20	2	rejected	唯一实质改动是进商城时把投票点数兑换成点券（votePoints * NX_REWARD_PER_VOTE）。整条投票链路已终局否决——UpdateVotePointTask、UpdateVoteCommand、VotePingBackHandler 三行都是 rejected，没有点数来源这段就是死代码。其余是两条提示文案的汉化
-src/net/server/channel/handlers/EnterMTSHandler.java	java	21	6	already-fixed	net/server/channel/handlers/EnterMTSHandler.java:58-61 —— 拍卖行关闭时的替代出口已实现且更好：LK 是硬编码传送到自由市场（910000000）并自带一串等级/职业/地图白名单，BeiDou 改成挂帮助脚本 scripts-zh-CN/MapleLand/help.js（提交 a95441b1b），出口做什么由脚本定而不是写死在处理器里。其余是三条提示文案的汉化
+src/net/server/channel/handlers/EnterMTSHandler.java	java	21	6	already-fixed	net/server/channel/handlers/EnterMTSHandler.java:58-61 —— 拍卖行关闭时的替代出口已实现且更好：LK 是硬编码传送到自由市场（910000000）并自带一串等级/职业/地图白名单，BeiDou 改成挂帮助脚本 scripts-zh-CN/MapleLand/help.js（提交 a95441b1b），出口做什么由脚本定而不是写死在处理器里。其余是三条提示文案的汉化。2026-08-20 复核：出口形式没问题，但 LK 那圈守卫当初没跟着搬——而 use_mts 默认 false 时本处理器第 58 行就早退，它自己的 isAlive/CANNOTMIGRATE/等级五道也一并跑不到，等于零守卫。已在 scripts-zh-CN/MapleLand/help.js 的 denyFreeMarketWarp() 补齐，并多加活动实例与迷你地下城两道（LK 的 FM 分支没有、真拍卖行分支有）
 src/net/server/channel/handlers/FaceExpressionHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/net/server/channel/handlers/FamilyAddHandler.java	java	1	1	ported	net/server/channel/handlers/FamilyAddHandler.java:66 —— LK 的意图（中文提示）照做，但按 CLAUDE.md 第 2 条走 I18nUtil 而非硬编码：新增 FamilyAddHandler.handlePacket.message1，中英两份 message_*.properties 都补齐
 src/net/server/channel/handlers/FamilyPreceptsHandler.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）

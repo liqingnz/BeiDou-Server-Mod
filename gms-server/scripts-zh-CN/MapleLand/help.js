@@ -15,6 +15,10 @@ var SCRIPT_CENTER_GM_LEVEL = 4;
 // 自由市场地图与入口传送门，与 portal/market01.js 保持一致
 var FREE_MARKET_MAP = 910000000;
 var FREE_MARKET_PORTAL = "out00";
+// 传送自由市场的等级线。LK 写的是 level <= 8 拦下，等价于 9 级起
+var FM_WARP_MIN_LEVEL = 9;
+// 3 = GM（等级表见 npc/commands.js）。排查问题常要从奇怪的图里直接回自由市场，给个豁免
+var FM_WARP_GM_BYPASS_LEVEL = 3;
 
 var Title = "\t\t\t\t\t#e欢迎来到#rMapleLand#k帮助中心#n\t\t\t\t\r\n";
 
@@ -80,15 +84,77 @@ function doSelect(selection) {
  * 传送自由：保存来路后送去自由市场，回程由 portal/market00.js 读 FREE_MARKET 记录。
  */
 function warpFreeMarket() {
-    if (cm.getPlayer().getMapId() === FREE_MARKET_MAP) {
-        cm.sendOk("你已经在自由市场了。");
+    if (denyFreeMarketWarp()) {
         cm.dispose();
         return;
     }
-    // 已经在自由市场里再存一次会把来路覆盖成自由市场本身，所以上面那道判断不能省
     cm.getPlayer().saveLocation("FREE_MARKET");
     cm.dispose();
     cm.warp(FREE_MARKET_MAP, FREE_MARKET_PORTAL);
+}
+
+/**
+ * 传送自由市场的守卫：拦下时把原因说给玩家，并返回 true。
+ * <p>
+ * 条件对齐 LK 的 EnterMTSHandler（USE_MTS_TO_FM 那段，见 docs/lichkingmod-port.md）。
+ * 本服把出口从处理器挪进了脚本，当时只搬了出口没搬守卫，而 use_mts 默认为 false，
+ * EnterMTSHandler 一进来就走 openCenterScript 提前返回了，它自己那圈 isAlive /
+ * CANNOTMIGRATE / 等级检查一道都跑不到——所以这些必须在这里补齐。
+ * <p>
+ * 比 LK 多两条：活动实例与迷你地下城。LK 的 FM 分支没有，但它真拍卖行那条路有；
+ * 这两道本来就是防止把副本/活动状态带出去，传自由市场同样会带出去。
+ */
+function denyFreeMarketWarp() {
+    var chr = cm.getPlayer();
+
+    // 这条不进 GM 豁免：人已经在自由市场里，再存一次来路会把来路覆盖成自由市场本身，
+    // 回程就再也走不回去了。LK 把它一起塞进 gmLevel < 3 里，那是它的疏漏
+    if (chr.getMapId() === FREE_MARKET_MAP) {
+        cm.sendOk("你已经在自由市场了。");
+        return true;
+    }
+
+    if (chr.gmLevel() >= FM_WARP_GM_BYPASS_LEVEL) {
+        return false;
+    }
+
+    if (!chr.isAlive()) {
+        cm.sendOk("你已经不省人事了，复活之后再来。");
+        return true;
+    }
+
+    // fieldLimit 带 CANNOTMIGRATE 位的图，换频道、返回卷、进商城都被禁，
+    // 传送自由市场是同一类操作，不该绕过去
+    const FieldLimit = Java.type('org.gms.server.maps.FieldLimit');
+    if (FieldLimit.CANNOTMIGRATE.check(chr.getMap().getFieldLimit())) {
+        cm.sendOk("这张地图不允许传送。");
+        return true;
+    }
+
+    if (chr.getLevel() < FM_WARP_MIN_LEVEL) {
+        cm.sendOk("传送自由市场需要 #b" + FM_WARP_MIN_LEVEL + "#k 级。");
+        return true;
+    }
+
+    // isBeginnerJob 覆盖初心者(0)、骑士团初心者(1000)、阿兰(2000)，
+    // LK 只列了前两个，漏掉阿兰
+    if (chr.isBeginnerJob()) {
+        cm.sendOk("转职之后才能传送自由市场。");
+        return true;
+    }
+
+    if (cm.getEventInstance() != null) {
+        cm.sendOk("活动进行中，无法传送。");
+        return true;
+    }
+
+    const MiniDungeonInfo = Java.type('org.gms.server.maps.MiniDungeonInfo');
+    if (MiniDungeonInfo.isDungeonMap(chr.getMapId())) {
+        cm.sendOk("在迷你地下城里无法传送。");
+        return true;
+    }
+
+    return false;
 }
 
 /**
