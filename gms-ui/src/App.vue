@@ -2,6 +2,7 @@
   <a-config-provider :locale="locale">
     <router-view />
     <global-setting />
+    <re-login-modal />
   </a-config-provider>
 </template>
 
@@ -10,6 +11,7 @@
   import enUS from '@arco-design/web-vue/es/locale/lang/en-us';
   import zhCN from '@arco-design/web-vue/es/locale/lang/zh-cn';
   import GlobalSetting from '@/components/global-setting/index.vue';
+  import ReLoginModal from '@/components/re-login-modal/index.vue';
   import useLocale from '@/hooks/locale';
 
   const { currentLocale } = useLocale();

@@ -39,6 +39,12 @@ export default {
   'message.switch.success': '切换为中文',
   'message.login.success': '欢迎使用',
   'message.logout.success': '登出成功',
+  'message.network.error': '无法连接到服务器',
+  // 会话过期重新登录
+  'relogin.title': '登录已过期',
+  'relogin.tip': '当前登录已过期，重新登录后可以继续留在本页操作。',
+  'relogin.toLoginPage': '返回登录页',
+  'relogin.expired': '登录已过期',
   // 设置
   'settings.language': '语言',
   'settings.switch.toDark': '点击切换为暗黑模式',

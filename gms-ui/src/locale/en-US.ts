@@ -37,6 +37,13 @@ export default {
   'message.switch.success': 'Switch to English',
   'message.login.success': 'Welcome',
   'message.logout.success': 'Logout success',
+  'message.network.error': 'Cannot connect to the server',
+  // session expired
+  'relogin.title': 'Session expired',
+  'relogin.tip':
+    'Your session has expired. Sign in again to stay on this page.',
+  'relogin.toLoginPage': 'Back to login page',
+  'relogin.expired': 'Session expired',
   'settings.language': 'Language',
   'settings.switch.toDark': 'Click to use dark mode',
   'settings.switch.toLight': 'Click to use light mode',

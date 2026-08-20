@@ -1,8 +1,9 @@
 import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Message } from '@arco-design/web-vue';
-import { useUserStore } from '@/store';
-import { getToken } from '@/utils/auth';
+import { getToken, clearToken } from '@/utils/auth';
+import { requireReLogin } from '@/utils/re-login';
+import i18n from '@/locale';
 
 /* eslint-disable no-bitwise */
 function generateUUID() {
@@ -18,6 +19,12 @@ export interface HttpResponse<T = unknown> {
   message: string;
   code: number;
   data: T;
+}
+
+// 会话过期后要重放请求，需要记住原始body，并且标记已经重试过避免死循环
+interface RetryableConfig extends AxiosRequestConfig {
+  rawData?: unknown;
+  retried?: boolean;
 }
 
 if (import.meta.env.VITE_API_BASE_URL) {
@@ -39,9 +46,12 @@ axios.interceptors.request.use(
     }
     const isUpload = config.headers?.['Content-type'] === 'multipart/form-data';
     if (config.data && !isUpload) {
+      // 记下原始body，重新登录后重放请求时要用它重新包信封
+      const retryable = config as RetryableConfig;
+      retryable.rawData = retryable.rawData ?? config.data;
       config.data = {
         requestId: generateUUID(),
-        data: config.data,
+        data: retryable.rawData,
       };
     }
     return config;
@@ -91,11 +101,30 @@ axios.interceptors.response.use(
     }
     return res;
   },
-  (error) => {
+  async (error) => {
     const status = error.response?.status;
+    const config = (error.config || {}) as RetryableConfig;
+    // 会话过期：就地弹出登录窗口，登录成功后重放这次请求，页面留在原处
+    if (status === 401) {
+      const isAuthRequest = config.url?.includes('/auth/');
+      if (!isAuthRequest && !config.retried) {
+        clearToken();
+        const success = await requireReLogin();
+        if (success) {
+          config.retried = true;
+          // 包过信封的请求用原始body重放（拦截器会重新包信封）；
+          // 上传这类没包过的（rawData不存在）保持原data，不能覆盖成undefined
+          if (config.rawData !== undefined) {
+            config.data = config.rawData;
+          }
+          return axios.request(config);
+        }
+      }
+      return Promise.reject(new Error(i18n.global.t('relogin.expired')));
+    }
     let errorMessage;
     if (error.message === 'Network Error') {
-      errorMessage = '无法连接到服务器';
+      errorMessage = i18n.global.t('message.network.error');
     } else {
       errorMessage = error.message || 'Request Error';
     }
@@ -103,14 +132,6 @@ axios.interceptors.response.use(
       content: errorMessage,
       duration: 5 * 1000,
     });
-    if (status === 401) {
-      const userStore = useUserStore();
-
-      userStore.logoutCallBack();
-      // window.location.reload();
-      window.location.href = '/';
-      return Promise.reject(new Error('登录已过期'));
-    }
     return Promise.reject(error);
   }
 );

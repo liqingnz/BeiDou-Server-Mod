@@ -2,6 +2,7 @@ package org.gms.config;
 
 import org.gms.aop.AuthEntryPointJwt;
 import org.gms.aop.AuthTokenFilter;
+import org.gms.aop.SpaRouteMatcher;
 import org.gms.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,11 +28,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SpringSecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPointJwt unauthorizedHandler;
+    private final SpaRouteMatcher spaRouteMatcher;
 
     @Autowired
-    public SpringSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler) {
+    public SpringSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler,
+                                SpaRouteMatcher spaRouteMatcher) {
         this.userDetailsService = userDetailsService;
         this.unauthorizedHandler = unauthorizedHandler;
+        this.spaRouteMatcher = spaRouteMatcher;
     }
 
     @Bean
@@ -71,6 +75,8 @@ public class SpringSecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         // 允许访问前端web
                         .requestMatchers("/", "/static/**", "/index.html", "/assets/**").permitAll()
+                        // 前端路由地址（刷新页面时浏览器直接发起的请求）要交给index.html，不能当成未认证请求拦掉
+                        .requestMatchers(spaRouteMatcher).permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
