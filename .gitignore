@@ -41,3 +41,6 @@ main/resources/static/
 src/main/resources/static/
 .claude/settings.local.json
 CLAUDE.local.md
+
+# 开发工具的每次运行产物（tools/CommodityTidy.java 等），是临时账本不入库
+/tools/out/
