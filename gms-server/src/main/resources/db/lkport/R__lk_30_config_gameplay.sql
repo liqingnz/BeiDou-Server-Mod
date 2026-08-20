@@ -510,31 +510,36 @@ WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'en-US' AND
 -- ---------------------------------------------------------------------------
 -- [V1000.0.20] insert_game_config_quest_hp_pill.sql
 -- ---------------------------------------------------------------------------
--- 批次 6 · G15：完成不可重复任务额外发一颗小血液精华。
+-- 批次 6 · G15：完成不可重复任务额外发一颗小血液精华（2000101，吃掉永久 +10 血上限）。
 --
--- 默认 false，开之前务必先算账：
---   BeiDou 的 wz 里 QuestInfo.img 有 2819 个任务条目，Check.img 里带 interval（可重复）的 528 个，
---   即约 2290 个不可重复任务。一颗小血液精华永久 +10 血上限，全清就是 +22900，
---   而 AbstractCharacterObject 把客户端血上限钳在 30000 —— 等于加点加血彻底失去意义。
---   法师换算是 +4580 血 / +18320 魔。
+-- 【2026-08-20 运营改判：默认开】原先默认 false 有两条理由，第一条已消失：
+--   1. wz 缺物品 —— 已随 2797a46f3 补齐（Item.wz/Consume/0200.img 的 02000100/02000101、
+--      两层 String.wz/Consume.img 的名字与说明；客户端 img 是同一批从 LK 客户端取的）；
+--   2. 平衡 —— 依然成立，开之前按 Check.img 又算了一遍账：不可重复任务 2558 个，
+--      全清 +25,580 血上限，而 AbstractCharacterObject 把客户端血上限钳在 30000；
+--      法师换算约 +5,116 血 / +20,464 魔。
+--   另注意 2000101 早就在 R__lk_40_drops 里挂了 28 个怪的掉落（扎昆 3-5、暗黑龙王 6-8、
+--   粉红豆 15-20，均 100%），药丸本身在这个开关打开前就已经在流通。
 --
 -- 原作者写过「任务 MIN_LEVEL >= 30 且角色等级 > 70 才给」的门槛，但那段代码是注释掉的，
--- 活代码只判了「不可重复」。这里按原样移植，是否收紧留给运营决定。
+-- 活代码只判了「不可重复」。这里仍按原样移植、不加门槛。（那道门槛能把全清收益压到
+-- +11,110，即 lvmin >= 30 的 1111 个任务；真要加得先给 MinLevelRequirement 补 getMinLevel()。）
 --
--- 前置：物品 2000100 / 2000101 不是原版物品，BeiDou 的 wz 里还没有。
--- 补上 Item.wz/Consume/0200.img 与 String.wz/Consume.img 之前，开这个开关只会发出无名道具。
+-- 发放面只有客户端原生的任务完成路径（QuestActionHandler → Quest.complete）；
+-- 脚本走 qm.forceCompleteQuest() → Quest.forceComplete，不发 —— 与 LK 行为一致。
+--
+-- 这条 INSERT 带 WHERE NOT EXISTS，改的是「新库的初始值」，不会覆盖已有库里运营在
+-- gms-ui 改过的值 —— 有意如此，否则后台关不掉，一重启就被这份文件顶回 true。
 
 INSERT INTO `game_config`(`config_type`, `config_sub_type`, `config_clazz`, `config_code`, `config_value`, `config_desc`, `update_time`)
-SELECT 'server', 'Game Mechanics', 'java.lang.Boolean', 'use_quest_hp_pill', 'false', 'use_quest_hp_pill', '2026-08-16 12:00:00'
+SELECT 'server', 'Game Mechanics', 'java.lang.Boolean', 'use_quest_hp_pill', 'true', 'use_quest_hp_pill', '2026-08-16 12:00:00'
 WHERE NOT EXISTS (SELECT 1 FROM `game_config` WHERE `config_code` = 'use_quest_hp_pill');
 
-INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`)
-SELECT 'zh-CN', 'game_config', 'use_quest_hp_pill', '完成不可重复任务时额外发一颗小血液精华（永久+10血上限）；开启前需先补齐物品2000101的wz数据', NULL
-WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'zh-CN' AND `lang_code` = 'use_quest_hp_pill');
-
-INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`)
-SELECT 'en-US', 'game_config', 'use_quest_hp_pill', 'Grant a small HP pill (permanent +10 max HP) on completing a non-repeatable quest; requires the wz data for item 2000101 first', NULL
-WHERE NOT EXISTS (SELECT 1 FROM `lang_resources` WHERE `lang_type` = 'en-US' AND `lang_code` = 'use_quest_hp_pill');
+-- 描述文案原先写着「开启前需先补齐 wz 数据」，前提已解除，用 DELETE + INSERT 强制刷新
+DELETE FROM `lang_resources` WHERE `lang_base` = 'game_config' AND `lang_code` = 'use_quest_hp_pill';
+INSERT INTO `lang_resources`(`lang_type`, `lang_base`, `lang_code`, `lang_value`, `lang_extend`) VALUES
+('zh-CN', 'game_config', 'use_quest_hp_pill', '完成不可重复任务时额外发一颗小血液精华（2000101，吃掉永久+10血上限，法师+2血/+8魔）；2558 个不可重复任务全清=+25,580，而客户端血上限只有 30000', NULL),
+('en-US', 'game_config', 'use_quest_hp_pill', 'Grant a small Blood Essence (2000101, permanent +10 max HP; Magicians +2 HP/+8 MP) on completing a non-repeatable quest. Clearing all 2558 of them is +25,580, against a 30000 client HP cap', NULL);
 
 -- ---------------------------------------------------------------------------
 -- [本地新增] insert_game_config_slots_gain_by_level.sql

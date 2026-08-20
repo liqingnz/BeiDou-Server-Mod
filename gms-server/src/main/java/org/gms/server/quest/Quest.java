@@ -361,13 +361,19 @@ public class Quest {
      * 完成一个<b>不可重复</b>的任务后额外发一颗小血液精华。可重复任务（带 INTERVAL 前置）不给，
      * 否则刷重复任务就能无限堆血上限。
      * <p>
-     * <b>默认关闭，开之前先算账</b>：BeiDou 的 wz 里约有 2290 个不可重复任务，一颗 +10 血上限，
-     * 全清就是 +22900，而客户端血上限只有 30000——等于加点加血彻底失去意义。
-     * 原作者其实写过「任务 MIN_LEVEL ≥ 30 且角色等级 > 70 才给」的门槛，但那段是注释掉的，
-     * 活代码只判了「不可重复」。这里按原样移植，收紧留给运营决定。
+     * <b>默认已开</b>（{@code use_quest_hp_pill}，2026-08-20 起）。开之前算过账：按 Check.img
+     * 数，不可重复任务 2558 个，一颗 +10 血上限，全清就是 +25,580，而
+     * {@link org.gms.client.AbstractCharacterObject} 把客户端血上限钳在 30000——等于加点加血
+     * 彻底失去意义。原作者其实写过「任务 MIN_LEVEL ≥ 30 且角色等级 > 70 才给」的门槛，但那段是
+     * 注释掉的，活代码只判了「不可重复」。这里按原样移植、不加门槛，收紧仍留给运营。
      * <p>
-     * 另外物品 {@link ItemId#HP_PILL_SMALL} <b>不是原版物品</b>，BeiDou 的 wz 里还没有，
-     * 补上 Item.wz/Consume/0200.img 与 String.wz/Consume.img 之前，这里发出去的会是个无名道具。
+     * 只在客户端原生的任务完成路径上发放：{@code QuestActionHandler} → {@link #complete(Character, int, Integer)}。
+     * 脚本的 {@code qm.forceCompleteQuest()} 走 {@link #forceComplete(Character, int)}，<b>不发</b>——LK 也是这样，
+     * 所以带 endscript 的任务线拿不到这颗药丸。
+     * <p>
+     * 物品 {@link ItemId#HP_PILL_SMALL} <b>不是原版物品</b>，是 LK 自造的；已在 {@code 2797a46f3} 补齐 ——
+     * Item.wz/Consume/0200.img.xml 只进了英文基础层（中文层没有这个文件，直接读基础层），
+     * 名字与说明进了两层 String.wz/Consume.img.xml，客户端 img 也是同一批从 LK 客户端取的。
      */
     private void grantHpPill(Character chr) {
         if (!GameConfig.getServerBoolean("use_quest_hp_pill")) {

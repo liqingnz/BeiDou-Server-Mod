@@ -1106,7 +1106,7 @@ BOSS 脚本，也得等 wz 补齐才有意义。
 | **G12** ✅ | 活动召回限制 | `coordinator/world/EventRecallCoordinator`、`PlayerLoggedinHandler`、`gm2/RecallCommand`（批次 1 待定项） | `max_recall_time`、`recall_cooldown` |
 | **G13** ✅ | 雇佣商店存续天数 | `maps/HiredMerchant`、`world/World`（仅存续判定一处） | `merchant_expire_time` |
 | **G14** ✅ | `@analysis` BOSS 伤害占比 | `gm2/BossDmgAnalysisCommand`（批次 1 挪来，权限从 gm0 收到 gm2） | — |
-| **G15** ✅ | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`UseItemHandler`、`client/Character`（公开入口） | `use_quest_hp_pill`（默认关，**且依赖 wz**） |
+| **G15** ✅ | 任务奖励 / HP 药丸 | `quest/MapleQuest`、`UseItemHandler`、`client/Character`（公开入口） | `use_quest_hp_pill`（**默认开**，wz 已补齐） |
 | **G16** ✅ | `client/Character`（钩子汇聚点，**按组拆散**） | `client/Character`、`constants/net/ServerConstants`、`constants/string/CharsetConstants`、`service/{CharacterService, FamilyService}` | — |
 
 批次 4 挪进来的两项仍是 `deferred`，跟 **G4** 一起决策（收工时必须把这两行改掉，
@@ -2263,48 +2263,81 @@ BeiDou 的 `FilePrinter` 已基本废弃（只剩几处注释掉的调用），�
 | `V1000.0.19__insert_command_info_analysis.sql` | 1 条 `command_info` |
 | `message_{zh_CN,en_US}.properties` | `BossDmgAnalysisCommand.message1~6` |
 
-#### G15 — 任务奖励 / HP 药丸 ✅ java 侧完成（**wz 未补，功能尚未生效**）
+#### G15 — 任务奖励 / HP 药丸 ✅ 已完成并生效（2026-08-20 起默认开）
 
-名字看着小，实际是四件互不相干的事，而且撞上一个硬前提。
+名字看着小，实际是四件互不相干的事，而且当时撞上一个硬前提。
 
-##### 🔴 硬前提：两个药丸物品在 BeiDou 的 wz 里不存在
+##### ✅ 硬前提已解除：两个药丸物品已补齐（`2797a46f3`）
 
 `2000100`（血液精华）/ `2000101`（血液精华（小））**是 LK 自己造的物品**，而且就在本次区间内造的：
 
 ```
 git show b0671161:wz/Item.wz/Consume/0200.img.xml → 无 020001xx
 LK 当前                                            → 有 02000100、02000101
-BeiDou wz/ 与 wz-zh-CN/                            → 都没有
+BeiDou wz/ 与 wz-zh-CN/（当时）                    → 都没有
 ```
 
-按「img.xml 放最后」的约定，本组只做 java 侧，**物品补齐前整条链不生效**。
-两个 wz 文件的清单行已记下具体要补什么。另注意 LK 把 `tradeBlock` 写成了
-`<string value="1"/>` 而非原版的 `<int value="1"/>`，补 wz 时要确认 `ItemInformationProvider` 认不认。
+按「img.xml 放最后」的约定，本组当时只做 java 侧。2026-08-18 用户从 LK 客户端把
+`02000100`/`02000101` 两个节点加进 BeiDou 客户端并导出，服务端随 `2797a46f3` **定点合入**
+`wz/Item.wz/Consume/0200.img.xml`（不整文件替换，避免把 70 条共有条目降级成信息更少的
+canvas 记法），名字与说明进了两层 `String.wz/Consume.img.xml`（en 层另写英文）。
+服务端、客户端、`handbook/Use.txt` 三处齐了，整条链生效。
 
-##### balance 量级（决定了默认必须关）
+当时留的悬空问题也一并验掉：LK 把 `tradeBlock` 写成 `<string value="1"/>` 而非原版的
+`<int value="1"/>`，而 [`ItemInformationProvider:1438`](../gms-server/src/main/java/org/gms/server/ItemInformationProvider.java#L1438)
+读它用的是 `DataTool.getIntConvert(path, data, def)` —— 该重载对 `DataType.STRING` 有分支，**认**，不必改 wz。
+
+##### balance 量级（当时决定默认关的理由）
 
 LK 的逻辑是**每完成一个非重复任务白送一颗小药丸**，吃掉永久 +10 最大 HP（法师 +2HP/+8MP）。
 
-BeiDou 的 wz 里 `QuestInfo.img` 有 **2819** 个任务条目，`Check.img` 带 `interval`（可重复）的 **528** 个
-—— 约 **2290 个不可重复任务**：
+2026-08-20 开开关前按 `Check.img` 重数了一遍 —— 真正把关的是 `startReqs` 的 `INTERVAL`，
+所以 `Check.img` 才是对口的口径（当时那组 2819/528 数的是 `QuestInfo.img`）：
+**3177 个条目、619 个可重复、2558 个不可重复**。
 
 | | 全清后永久收益 |
 |---|---|
-| 非法师 | **+22,900 最大 HP** |
-| 法师 | +4,580 HP / +18,320 MP |
+| 非法师 | **+25,580 最大 HP** |
+| 法师 | +5,116 HP / +20,464 MP |
 
 而 [`AbstractCharacterObject:266`](../gms-server/src/main/java/org/gms/client/AbstractCharacterObject.java#L266) 把
 `clientMaxHp` 钳在 **30000**。等于光做任务就能顶满血上限，AP 加血完全失去意义。
 
 LK 自己也犹豫过 —— 门槛是**注释掉的**：`//  && overLevel30 && chr.getLevel() > 70`，
-`overLevel30` 因此是个**永远为 false、从未被读的死变量**。
-**运营决定按 LK 活代码原样移植（不加等级门槛），配置 `use_quest_hp_pill` 默认关。**
+`overLevel30` 因此是个**永远为 false、从未被读的死变量**。真要收紧（任务 `lvmin ≥ 30`
+且角色 > 70），够格的只剩 **1111** 个任务、+11,110，但得先给 `MinLevelRequirement` 补
+`getMinLevel()`（见下面落点表的 D 行）。
+
+##### 2026-08-20 运营改判：默认开、不加门槛
+
+wz 前提解除后，运营把 `use_quest_hp_pill` 的默认值从 `false` 改成 `true`
+（`R__lk_30_config_gameplay.sql` 的 `[V1000.0.20]` 段），仍按 LK 活代码原样、不加等级门槛。两条支撑：
+
+- 药丸**本来就在流通**：`R__lk_40_drops.sql` 给 `2000101` 挂了 28 个怪的掉落，含扎昆 3-5、
+  暗黑龙王 6-8、粉红豆 15-20，`chance` 均为 1000000（100%）。任务奖励是在一条已生效的产出链上叠加，
+  不是从零开口子。
+- 开关是热的：`GameConfig` 每次调用都从内存树取值，gms-ui 改完即时生效、不必重启。
+  文件里那条 `INSERT` 带 `WHERE NOT EXISTS`，**不会**在每次重启时把后台的手工改动顶回 `true`；
+  改动的是新库初始值。两条 `lang_resources` 描述（原文写着「开启前需先补齐 wz 数据」）已过期，
+  改用 `DELETE` + `INSERT` 强制刷新。
+
+##### ⚠️ 发放面只覆盖客户端原生完成路径
+
+`grantHpPill` 挂在 [`Quest.complete`](../gms-server/src/main/java/org/gms/server/quest/Quest.java#L339) 上，
+而 `complete` 全仓库只有一个调用方：`QuestActionHandler:128/130`（客户端任务界面与 NPC 完成任务的封包）。
+脚本侧的 `qm.forceCompleteQuest()` / `completeQuest()` 一律走
+`AbstractPlayerInteraction.completeQuest` → `Quest.forceComplete`，**不发药丸**
+（脚本里 534 处 `forceCompleteQuest(`、169 处 `completeQuest(`），GM 的 `@completequest` 同理。
+**LK 也是这个形状**，故未改；但这意味着带 `endscript` 的任务线拿不到这颗药丸 ——
+按 `Check.img` 数是 **297 个不可重复任务（占 2558 的 11.6%）**。
+
+量级、四条入口的完整链路与推荐补法记在 **§25 待考虑**。
 
 ##### 四件事的落点
 
 | | 内容 | 本次做法 |
 |---|---|---|
-| **A** | `Quest.complete` 完成任务送药丸 | 抽成 `grantHpPill(chr)`，`use_quest_hp_pill` 默认 `false`；可重复任务不给（否则刷重复任务无限堆血上限） |
+| **A** | `Quest.complete` 完成任务送药丸 | 抽成 `grantHpPill(chr)`，`use_quest_hp_pill` **默认 `true`**（2026-08-20 改判，原为 `false`）；可重复任务不给（否则刷重复任务无限堆血上限） |
 | **B** | `UseItemHandler` 吃药丸永久加上限 | 抽成 `applyHpPill(chr, hp, mageHp, mageMp)`；新增 `ItemId.HP_PILL_LARGE/SMALL` 常量 |
 | **C** | `use_debug` 时提示任务开始/完成 | 照运营决定**直接发给玩家**（`dropMessage(5, ...)`），但文案走 i18n |
 | **D** | `MinLevelRequirement.getMinLevel()` | **不搬** —— 它只服务于被注释掉的等级门槛，活代码无调用方；A 既然不做门槛，加了就是死访问器 |
@@ -4953,3 +4986,51 @@ LK 在 `getLootInfo()` 里写过的 `#m<mapId>#` 菜单行**是他们自己注�
 - **`@debuff` 的等级参数**：LK 读 `params[1]` 但无长度校验，BeiDou 至今写死 level 7。
 - **`@buyback`（消耗金币复活）**：唯一一条「BeiDou 整个功能都没有」的——Cosmic 把买活系统
   整块删了。想要的话得当**新功能**立项，不算移植。
+
+---
+
+## 25. 待考虑：任务药丸只覆盖原生完成路径，脚本完成的任务不发（2026-08-20 发现）
+
+`use_quest_hp_pill` 2026-08-20 起默认开（见 §7 批次 6 · G15）。开完才发现覆盖面不是「所有任务」。
+
+### 25.1 两条完成路径，只有一条发药丸
+
+`grantHpPill` 挂在 `Quest.complete` 上，而完成一个任务有四个入口：
+
+| 路径 | 链路 | 发药丸 |
+|---|---|---|
+| 客户端原生完成 | [`QuestActionHandler`](../gms-server/src/main/java/org/gms/net/server/channel/handlers/QuestActionHandler.java#L115) case 2 → `Quest.complete` | ✅ |
+| 脚本完成 | `qm.forceCompleteQuest()` / `cm.forceCompleteQuest(id)` / `completeQuest(id)` → [`AbstractPlayerInteraction.completeQuest`](../gms-server/src/main/java/org/gms/scripting/AbstractPlayerInteraction.java#L542) → `Quest.forceComplete` | ❌ |
+| 活动 | [`EventManager:1235`](../gms-server/src/main/java/org/gms/scripting/event/EventManager.java#L1235) → `Quest.forceComplete` | ❌ |
+| GM 指令 | [`QuestCompleteCommand`](../gms-server/src/main/java/org/gms/client/command/commands/gm3/QuestCompleteCommand.java#L51) → `forceCompleteQuest` → 同脚本路径 | ❌ |
+
+分流点在 `QuestActionHandler` 的 case 2：任务带 `endscript` 前置**且**脚本里真有 `end` 函数时，
+交给 `QuestScriptManager.end`，`Quest.complete` 根本不经过。
+
+### 25.2 量级：约 12% 的不可重复任务拿不到
+
+按 `Check.img` 数：带 `endscript` 的任务 **414** 个，其中不可重复的 **297** 个。
+即 2558 个不可重复任务里 **297 个（11.6%）不发药丸**，其余 2261 个正常发。
+脚本里另有 534 处 `forceCompleteQuest(` 与 169 处 `completeQuest(`（两个语言层合计），
+其中「NPC 对话里直接给不带 endscript 的任务记完成」那些同样绕过。
+
+### 25.3 为什么本轮不动
+
+**LK 也是这个形状**——它同样只改了 `MapleQuest.complete`。而且钩子不能简单往下挪：
+
+- `Quest.complete` 内部**先调 `forceComplete(chr, npc)`** 再 `grantHpPill(chr)`。
+  直接把发放挪进 `forceComplete`，原生路径会**发两颗**。
+- 挂上 `forceComplete` 会顺带打开 GM `@completequest`（刷血上限的最短路径）与
+  `EventManager` 那条活动路径。
+
+### 25.4 真要补的落点
+
+推荐挂在 `AbstractPlayerInteraction.completeQuest(int, int)` —— 脚本与 GM 指令的共同上游，
+且不含 `EventManager` 那条；把 `grantHpPill` 从 `private` 提成包级方法给它调即可，
+`Quest.complete` 那处不动，天然没有重复发放。
+
+需要一并定的两件事：
+
+1. **GM `@completequest` 要不要排除**——它也走这个上游。不排除的话 GM 一条指令就能刷满血上限。
+2. **活动路径要不要跟**（`EventManager.forceCompleteQuest`）。按「药丸是任务奖励」的语义，
+   活动送任务完成不该附带血上限，倾向不跟。

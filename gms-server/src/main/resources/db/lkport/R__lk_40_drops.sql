@@ -168,7 +168,7 @@ INSERT IGNORE INTO `drop_data` (`dropperid`, `itemid`, `minimum_quantity`, `maxi
 -- LK 的最终形态（57717d1e 收紧 → fd27266f/cc8ae387 再调）：
 --   * 祝福/混沌保留百万分之 5 的全服兜底，主要供给走 BOSS 专属掉落；
 --   * PKB（品克缤）额外掉 2–4 个祝福/混沌/5000 点券，带 distinctive 掉落指示；
---   * 250/5000 点券道具、+15 HP 药丸走野外 BOSS 与副本 BOSS 分层；
+--   * 250/5000 点券道具、小血液精华（+10 血上限）走野外 BOSS 与副本 BOSS 分层；
 --   * 六一铅笔、周年帽/蜡烛、龙年勋章等活动物品终止掉落（对 BeiDou 多为无行可删，保留语句以对齐终态）。
 -- 执行顺序依赖：distinctive 列由 V1000.2.1__lk_schema.sql 先建（见本文件第 18 行）。
 
@@ -264,7 +264,7 @@ INSERT IGNORE INTO `drop_data` (`dropperid`, `itemid`, `minimum_quantity`, `maxi
 (8800002, 4310100, 1, 1, 0, 300000),
 (8810018, 4310100, 1, 1, 0, 500000);
 
--- ---------- +15 HP 药丸（血量任务奖励物，distinctive 指示） ----------
+-- ---------- 小血液精华 2000101（吃掉永久 +10 血上限，法师 +2 血/+8 魔；distinctive 指示） ----------
 DELETE FROM `drop_data` WHERE `itemid` = 2000101;
 INSERT IGNORE INTO `drop_data` (`dropperid`, `itemid`, `minimum_quantity`, `maximum_quantity`, `questid`, `chance`, `distinctive`) VALUES
 (4130103, 2000101, 1, 1, 0, 50000, 1),

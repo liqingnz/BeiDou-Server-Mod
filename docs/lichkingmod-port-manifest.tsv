@@ -635,7 +635,7 @@ src/server/partyquest/MonsterCarnival.java	java	0	0	noise	仅格式化/空白改
 src/server/partyquest/MonsterCarnivalParty.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/partyquest/PartyQuest.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/partyquest/Pyramid.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
-src/server/quest/MapleQuest.java	java	24	0	ported	批次6-G15：完成不可重复任务发小血液精华，配置 use_quest_hp_pill 默认关（全清 +22900 血上限，客户端上限只有 30000）；use_debug 任务开始/完成提示走 i18n；LK 死变量 overLevel30 不搬
+src/server/quest/MapleQuest.java	java	24	0	ported	批次6-G15：完成不可重复任务发小血液精华，配置 use_quest_hp_pill 2026-08-20 改判默认开（wz 已补齐；全清 2558 个任务 = +25,580 血上限，客户端上限只有 30000）；只覆盖 QuestActionHandler 的原生完成路径，脚本 forceComplete 不发（同 LK）；use_debug 任务开始/完成提示走 i18n；LK 死变量 overLevel30 不搬
 src/server/quest/MapleQuestActionType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/MapleQuestRequirementType.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
 src/server/quest/actions/BuffAction.java	java	0	0	noise	仅格式化/空白改动（git diff -w 后无差异）
