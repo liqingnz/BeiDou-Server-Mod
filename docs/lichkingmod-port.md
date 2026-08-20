@@ -2801,7 +2801,7 @@ BeiDou 的是原版分布。用户决定**取并集**：保留 BeiDou 原池与�
 
 | 挂起项 | 原因 | 归属 |
 |---|---|---|
-| fm 商店 9000069 整店重建 | BeiDou 基线里 9000069 是 pitch 计价商店，语义完全不同；要配 LK 自由市场 NPC 脚本才有意义 | 第 2 项脚本组 |
+| ~~fm 商店 9000069 整店重建~~ **✅ 2026-08-20 落地** | 原记「pitch 计价语义冲突 + 要配 LK 自由市场 NPC 脚本」。复核后**后半句是错的**：两边都没有 `npc/9000069.js`，开店走 `NPCTalkHandler` 无脚本兜底，且 NPC 9000069（彪鲁 / Inkwell）在 BeiDou 的 `wz/Map.wz/Map/Map9/910000000.img.xml` life[3] 早已摆在自由市场、`shops` 表 `(9000069, 9000069)` 也在 V1.0.56——零 wz 零脚本依赖。前半句成立且更重：那 9 行是全库唯一的绝对音感（4310000）计价店 | 已按 LK 整店重建写入 `R__lk_50_economy.sql`，取 git HEAD 价（3 亿 / 3 亿 / 2000 万 / 500 万 / 10 万）。**代价：绝对音感失去唯一出口**，详见 §26 |
 | 宝藏 PQ 反应堆 6742014 三条调价 | BeiDou reactordrops 无此反应堆（V1.0.65 清理过），UPDATE 无目标 | TreasurePQ 脚本决策时连底行一起补 |
 | nxcoupons 1.5 倍经验/掉落券 | LK 把 `Server.couponRates` 改成 `Map<Integer, Float>` 并手工 ALTER rate 为 float；BeiDou 实体与列均为 int，直接插 1.5 会截断 | Java 尾巴（连 NxcouponsDO / Server.java 一起） |
 | 中国怪掉落（9600008–9600026） | BeiDou V1.7.3 东方神舟每只 21–73 行，远比 LK 6–13 行完整，整段 rejected；唯一遗留：LK 清空 9600026（妖僧分身）掉落防刷，BeiDou 保留 60 行 | YaoSeng 脚本组复核分身是否应掉落 |
@@ -5034,3 +5034,67 @@ LK 在 `getLootInfo()` 里写过的 `#m<mapId>#` 菜单行**是他们自己注�
 1. **GM `@completequest` 要不要排除**——它也走这个上游。不排除的话 GM 一条指令就能刷满血上限。
 2. **活动路径要不要跟**（`EventManager.forceCompleteQuest`）。按「药丸是任务奖励」的语义，
    活动送任务完成不该附带血上限，倾向不跟。
+
+---
+
+## 26. 自由市场黑店 `9000069` 落地 + 绝对音感断头（2026-08-20）
+
+批次 7「第 1 项 sql → Flyway」里挂起的 4 条之一（见该节表格）。用户 2026-08-20 要求补移植，
+连带复核了当初的挂起理由——**理由只对了一半**。
+
+### 26.1 原挂起理由的两句话，一句错一句偏轻
+
+原文（`R__lk_50_economy.sql` 旧注释 + 移植文档表格）：「BeiDou 基线里 9000069 是 pitch
+计价商店，语义完全不同；要配 LK 自由市场 NPC 脚本才有意义」。
+
+| 分句 | 复核 | 证据 |
+|---|---|---|
+| 「要配 LK 自由市场 NPC 脚本才有意义」 | ❌ **不成立** | LK 与 BeiDou **都没有** `npc/9000069.js`。开店走的是 [`NPCTalkHandler`](../gms-server/src/main/java/org/gms/net/server/channel/handlers/NPCTalkHandler.java#L82) 的无脚本兜底：`NPCScriptManager.start()` 返回 false → `npc.hasShop()` → `npc.sendShop(c)`。而 NPC 9000069（`limitedname=buroo`，中文「彪鲁」，英文 Inkwell）在 BeiDou 的 `wz/Map.wz/Map/Map9/910000000.img.xml` `life[3]` 就已摆在自由市场（x=97 y=-332 fh=108），`wz-zh-CN` 无同名文件不覆盖；`shops` 表 `(9000069, 9000069)` 在 V1.0.56。**零 wz、零脚本依赖，改 `shopitems` 即生效** |
+| 「pitch 计价语义冲突」 | ✅ 成立，且比原先记的重 | V1.0.55 给 9000069 配的 9 行（`shopitemid` 6533–6541）是**全库唯一一家** `pitch > 0` 的店（全表扫描确认，其余所有 `pitch` 均为 0），即绝对音感（ETC `4310000`，`ItemId.PERFECT_PITCH`）的唯一消费出口 |
+
+### 26.2 落地内容
+
+写进 [`R__lk_50_economy.sql`](../gms-server/src/main/resources/db/lkport/R__lk_50_economy.sql) 的
+`[V1000.1.6]` 段首，`DELETE` 同 `shopid` 再 `INSERT`，满足 `R__` 幂等纪律：
+
+| itemid | 物品 | 价格 | position |
+|---|---|---|---|
+| 2049100 | 混沌卷轴60% | 300,000,000 | 996 |
+| 2340000 | 祝福卷轴 | 300,000,000 | 999 |
+| 5050000 | 洗能力点卷轴 | 20,000,000 | 1004 |
+| 5041000 | 高级瞬移之石 | 5,000,000 | 1008 |
+| 5090000 | 消息（喇叭） | 100,000 | 1012 |
+
+两个取值口径：
+
+- **价格取 LK git HEAD**。LK 工作区里另有一份未提交的降价（混沌/祝福/洗能力点各 100 万、
+  高级瞬移之石 10 万），按 §1.1「只以 git 历史为准，8 个未提交改动不纳入」不采纳。
+- **`position` 沿用 LK 的 996–1012**。[`Shop.loadFromDB`](../gms-server/src/main/java/org/gms/server/Shop.java#L308)
+  按 `position DESC` 取货，所以列表从「消息」往下排到「混沌卷轴」。
+
+> **物价重叠一处，已对齐**：高级瞬移之石在 `shop 1338` 原价 150 万，比本店 500 万便宜。
+> 但 1338 挂的 NPC 9090000「妙妙」**不站在任何地图上**——`Etc.wz/NpcLocation.img.xml` 记 `-1`，
+> 两层 wz 的 `Map.wz` life 零命中，`plife` 表在迁移里也没有种子数据。它是**便携商店道具**
+> 「包裹商人妙妙」（cash `5450000` / `5451000`，`itemType 545`，见
+> [`UseCashItemHandler`](../gms-server/src/main/java/org/gms/net/server/channel/handlers/UseCashItemHandler.java#L562)）
+> 用一次开一次、用完即消耗；另两条入口 `scripts-zh-CN/npc/9100001.js`（拍卖行招财猫，同样无 wz 摆放）
+> 与 `scripts-zh-CN/BeiDouSpecial/GM商店.js` 都是 GM 侧的 `cm.openShopNPC(1338)`。
+> 所以自由市场这一行 500 万是**玩家唯一的常驻金币购买点**，两处并不直接竞争。
+> 即便如此，2026-08-20 运营仍决定把 `shop 1338` 那行也拉到 500 万（同文件一条限定
+> `shopid = 1338` 的 `UPDATE`），免得同一件道具在两个入口差 3.3 倍。
+> **那条 `UPDATE` 不是 LK 移植内容**——LK 从未动过 shop 1338，是 BeiDou 侧的本地定价决定。
+
+### 26.3 遗留：绝对音感失去唯一出口
+
+整店重建删掉了那 9 行 pitch 计价，而 BeiDou 自己的三个脚本仍在**继续发放**绝对音感：
+
+| 脚本 | 发放方式 |
+|---|---|
+| `scripts-zh-CN/BeiDouSpecial/在线奖励_nextlevel.js` | 在线时长奖励，1–3 个 |
+| `scripts-zh-CN/BeiDouSpecial/道具抽奖.js` | 抽奖池条目 |
+| `scripts-zh-CN/BeiDouSpecial/物品兑换.js` | 兑换产出 |
+
+另有原版 NPC `2131001` / `2131003`（100 个特定 ETC → 1 个绝对音感）也在产出。
+**这是运营侧 2026-08-20 明确拍板接受的取舍，不是漏项。** 将来若要补出口，
+把 V1.0.55 的 `shopitemid` 6533–6541 那 9 行原样挂到另一个 NPC 的 `shopid` 即可
+（`shops` 表加一行 `(新shopid, 新npcid)`，`shopitems` 照抄 `price=0` + 原 `pitch`）。

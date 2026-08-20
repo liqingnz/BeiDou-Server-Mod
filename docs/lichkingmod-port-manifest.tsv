@@ -1730,7 +1730,7 @@ scripts/npc/changePassword.js	script-new	0	0	rejected	批次6收尾终局否决�
 scripts/npc/npcTemplate.js	script-new	0	0	rejected	NPC 脚本模板，BeiDou 已有自己的脚本写法（sendNextLevel/sendSelectLevel 那套），模板不通用
 scripts/npc/testScript.js	script-new	0	0	rejected	作者自用的排版试验稿：status 0 打一段 #i#t#c 混排就 dispose，status 1 之后是从 detected.js 整段复制来的死代码（永远走不到）
 scripts/npc/verifyEmail.js	script-new	0	0	rejected	批次6收尾终局否决：随 VerifyEmailCommand
-sql/db_LichKingMod.sql	sql	492	0	ported	批次7 V1000.1.3-.6；fm店9000069/宝藏PQ 6742014 挂起随脚本组，见批次7节
+sql/db_LichKingMod.sql	sql	492	0	ported	批次7 V1000.1.3-.6；宝藏PQ 6742014 挂起随TreasurePQ脚本组，见批次7节。fm店9000069 2026-08-20 已补移植（整店重建，取git HEAD价）——复核发现原挂起理由「要配LK自由市场NPC脚本」不成立：两边都无npc/9000069.js，走NPCTalkHandler无脚本兜底，NPC已摆在wz/Map9/910000000 life[3]。代价是删掉全库唯一的绝对音感计价店，详见 lichkingmod-port.md §26
 sql/db_LichKingMod_patch.sql	sql	765	0	ported	批次7 V1000.1.1-.2；GBK ALTER 全套 rejected，4张建表归批次2/4/8，nxcoupons 1.5倍券随 Java float 化
 sql/db_database.sql	sql	73	73	rejected	纯 latin1→gbk 建表噪音（§8 GBK 终局 rejected）
 sql/db_drops.sql	sql	1	1	already-fixed	仅实验室怪 DELETE 上界 9300154→9300153；BeiDou V1.0.51 该 DELETE 整段被注释，掉落本就保留
