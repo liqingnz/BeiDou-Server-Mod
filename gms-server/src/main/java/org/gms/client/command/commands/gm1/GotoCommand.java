@@ -44,21 +44,11 @@ public class GotoCommand extends Command {
     {
         setDescription(I18nUtil.getMessage("GotoCommand.message1"));
 
-        List<Entry<String, Integer>> towns = new ArrayList<>(GameConstants.GOTO_TOWNS.entrySet());
-        sortGotoEntries(towns);
-
         try {
             // thanks shavit for noticing goto areas getting loaded from wz needlessly only for the name retrieval
-
-            for (Map.Entry<String, Integer> e : towns) {
-                GOTO_TOWNS_INFO += ("'" + e.getKey() + "' - #b" + (MapFactory.loadPlaceName(e.getValue())) + "#k\r\n");
-            }
-
-            List<Entry<String, Integer>> areas = new ArrayList<>(GameConstants.GOTO_AREAS.entrySet());
-            sortGotoEntries(areas);
-            for (Map.Entry<String, Integer> e : areas) {
-                GOTO_AREAS_INFO += ("'" + e.getKey() + "' - #b" + (MapFactory.loadPlaceName(e.getValue())) + "#k\r\n");
-            }
+            // 赋值而不是追加：这是实例初始化块，写静态字段，命令被实例化两次就会把清单排两遍
+            GOTO_TOWNS_INFO = renderList(GameConstants.GOTO_TOWNS);
+            GOTO_AREAS_INFO = renderList(GameConstants.GOTO_AREAS);
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -70,6 +60,89 @@ public class GotoCommand extends Command {
 
     public static String GOTO_TOWNS_INFO = "";
     public static String GOTO_AREAS_INFO = "";
+
+    /**
+     * 每行排几个目的地。目的地有 70 上下，一行一个会把对话框顶出屏幕——客户端对话框
+     * 高度固定且没有滚动条，装不下的行直接不画。MapleLand/gotoList.js 读的是这个常量，
+     * 两边是同一张清单，口径不该有两份。
+     */
+    public static final int PER_LINE = 2;
+    /** 两列之间的间隔。同样给 gotoList.js 用 */
+    public static final String COLUMN_GAP = "  ";
+    /** 英文名一栏的宽度。最长的 southperry / excavation 占 10，留 1 格分隔 */
+    private static final int KEY_WIDTH = 11;
+    /** 地图名一栏的宽度。不封顶的话第二列会随地图名长短散在各处，对不齐 */
+    private static final int NAME_WIDTH = 12;
+    /** 地图名截断后的省略号。用半角点而不是「…」：英文客户端出包是 US-ASCII，编不出全角 */
+    private static final String ELLIPSIS = "..";
+
+    /**
+     * 排一格：#b英文名#k + 地图名，两段各自补到固定宽度，下一列才对得齐。
+     * 只给英文名上蓝色——地图名跟着上色的话整屏都是蓝的，反而看不出重点。
+     * <p>
+     * 客户端中文字体里半角恰好是全角的一半，所以按「半角 1、全角 2」补空格能对齐。
+     * 一行两格约 48 个半角宽，同一种对话框里 BeiDouSpecial/万能传送.js 实测 51 宽不折行。
+     *
+     * @param padded 是否补右侧空白。一行最后一格不用补，免得留一串行尾空格
+     */
+    public static String formatCell(String key, int mapId, boolean padded) {
+        String name = clip(MapFactory.loadPlaceName(mapId), NAME_WIDTH);
+        // 补白落在 #b...#k 里，颜色对空格没影响
+        String cell = "#b" + padRight(key, KEY_WIDTH) + "#k" + name;
+        // 按地图名的宽度补，不能拿 cell 去量——#b / #k 这些颜色码不占显示宽度
+        return padded ? cell + spaces(NAME_WIDTH - displayWidth(name)) : cell;
+    }
+
+    /** 排一份纯文本清单，每行 {@link #PER_LINE} 个。openNpc 起不来时走这条，排版与选单一致 */
+    private static String renderList(Map<String, Integer> registry) {
+        List<Entry<String, Integer>> entries = new ArrayList<>(registry.entrySet());
+        sortGotoEntries(entries);
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < entries.size(); i++) {
+            Entry<String, Integer> e = entries.get(i);
+            boolean lineEnd = i % PER_LINE == PER_LINE - 1 || i == entries.size() - 1;
+            sb.append(formatCell(e.getKey(), e.getValue(), !lineEnd));
+            sb.append(lineEnd ? "\r\n" : COLUMN_GAP);
+        }
+        return sb.toString();
+    }
+
+    /** 显示宽度：半角算 1、全角算 2 */
+    private static int displayWidth(String text) {
+        int width = 0;
+        for (int i = 0; i < text.length(); i++) {
+            width += text.charAt(i) > 127 ? 2 : 1;
+        }
+        return width;
+    }
+
+    private static String spaces(int width) {
+        return " ".repeat(Math.max(0, width));
+    }
+
+    private static String padRight(String text, int width) {
+        return text + spaces(width - displayWidth(text));
+    }
+
+    /** 截到 width 以内，截过的补 {@link #ELLIPSIS}——不留个记号玩家会以为地图就叫这名字 */
+    private static String clip(String text, int width) {
+        if (displayWidth(text) <= width) {
+            return text;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        int taken = 0;
+        for (int i = 0; i < text.length(); i++) {
+            int charWidth = text.charAt(i) > 127 ? 2 : 1;
+            if (taken + charWidth > width - ELLIPSIS.length()) {
+                break;
+            }
+            sb.append(text.charAt(i));
+            taken += charWidth;
+        }
+        return sb.append(ELLIPSIS).toString();
+    }
 
     private static void sortGotoEntries(List<Entry<String, Integer>> listEntries) {
         listEntries.sort(Entry.comparingByValue());

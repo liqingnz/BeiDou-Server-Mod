@@ -286,6 +286,11 @@ public class MapId {
     public static final int THE_UNKNOWN_TOWER = 200080101;
     public static final int ZENUMIST_HIDDEN_ROOM = 261000011;
     public static final int ALCADNO_HIDDEN_ROOM = 261000021;
+    // 新加坡乌鲁线，地图随 ASM wz 增量导入进来（见 docs/lichkingmod-port.md §11）；
+    // ENTRANCE_TO_KREXEL 同时是 event/KrexelBattle.js 的远征集合点
+    public static final int ULU_ESTATE_2 = 541020200;
+    public static final int ULU_CITY_CENTER = 541020500;
+    public static final int ENTRANCE_TO_KREXEL = 541020700;
 
     // 中文版特有地图。地图数据在 wz-zh-CN 里有，wz（英文基础层）没有对应的 String 条目，
     // 且刷怪与任务脚本尚未移植（属批次 7），现在传送过去基本是空地图

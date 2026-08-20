@@ -138,8 +138,11 @@ public class GameConstants {
         // 中文版特有，同上：地图在但内容未移植
         put("cjg", MapId.SCRIPTURE_PAVILION_7F);
         put("wugong", MapId.WUGONG_PASSAGE);
-        // LK 还有 krex(541020700)、ulu(541020500)、ulu2(541020200)，这三张地图 wz 与
-        // wz-zh-CN 里都不存在，加了只会传送失败，故不列入
+        // 新加坡乌鲁线。当初判「wz 两层都没有这三张图」而不列入，ASM wz 增量导入后前提已
+        // 不成立（同一批把克雷塞尔线解冻的地图），故补上。只有 wz-zh-CN 有 String 条目
+        put("ulu2", MapId.ULU_ESTATE_2);
+        put("ulu", MapId.ULU_CITY_CENTER);
+        put("krex", MapId.ENTRANCE_TO_KREXEL);
     }};
 
     public static final List<String> GAME_SONGS = new ArrayList<>(170) {{

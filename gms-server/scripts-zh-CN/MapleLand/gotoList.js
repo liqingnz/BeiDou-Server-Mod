@@ -10,26 +10,55 @@
  * 传送不在本脚本里做，交回 GotoCommand.warpFromMenu：守卫（死亡 / 活动副本 /
  * 迷你地下城 / CANNOTMIGRATE）与落点（随机出生点）都得跟 @goto <name> 一个口径，
  * 在这儿抄一遍迟早会漂。
+ *
+ * 排版同理：一格长什么样（蓝色英文名 + 地图名、各自补到固定宽度、超长的地图名截断）
+ * 由 GotoCommand.formatCell 说了算，每行几格读 GotoCommand.PER_LINE。本脚本只负责
+ * 分段、排行和套 #L 链接——GotoCommand 起不来时那份纯文本兜底清单要跟这里长得一样。
  */
 var GameConstants = Java.type("org.gms.constants.game.GameConstants");
-var MapFactory = Java.type("org.gms.server.maps.MapFactory");
 var GotoCommand = Java.type("org.gms.client.command.commands.gm1.GotoCommand");
 
-var destinations = [];   // [[mapId, 显示名], ...]，下标即选项序号
+var PER_LINE = GotoCommand.PER_LINE;
+var COLUMN_GAP = GotoCommand.COLUMN_GAP;
+
+var destinations = [];   // [[mapId, 英文名], ...]，下标即选项序号
 
 function start() {
-    destinations = buildDestinations();
+    destinations = [];
+
+    var text = "";
+    var sections = buildSections();
+    for (var i = 0; i < sections.length; i++) {
+        // 两块之间空一行，不然城镇的尾巴和区域的头挨在一起，看不出换了一类
+        if (i > 0) {
+            text += "\r\n";
+        }
+        text += sections[i].title + "\r\n" + renderSection(collect(sections[i].registry));
+    }
+
     if (destinations.length === 0) {
         cm.sendOk("当前没有可用的目的地。");
         cm.dispose();
         return;
     }
+    cm.sendNextSelectLevel("Goto", "想去哪里？\r\n" + text);
+}
 
-    var text = "想去哪里？\r\n#b";
-    for (var i = 0; i < destinations.length; i++) {
-        text += "#L" + i + "#" + destinations[i][1] + "#l\r\n";
+/**
+ * 排一段，顺带把这段的条目按顺序登记进 destinations——选项序号就是登记时的下标。
+ * 城镇与区域分开排（而不是拉平了一起数），免得一行左边是城镇、右边是区域。
+ */
+function renderSection(rows) {
+    var text = "";
+    for (var i = 0; i < rows.length; i++) {
+        var lineEnd = (i % PER_LINE === PER_LINE - 1) || (i === rows.length - 1);
+        // 行末那格不补右侧空白，免得留一串行尾空格
+        text += "#L" + destinations.length + "#" + GotoCommand.formatCell(rows[i][1], rows[i][0], !lineEnd) + "#l";
+        destinations.push(rows[i]);
+        // 段末也得换行：不换的话下一段的标题会接到这一行的尾巴上
+        text += lineEnd ? "\r\n" : COLUMN_GAP;
     }
-    cm.sendNextSelectLevel("Goto", text);
+    return text;
 }
 
 function levelGoto(selection) {
@@ -40,19 +69,22 @@ function levelGoto(selection) {
     cm.dispose();
 }
 
-/**
- * 按 map id 排序，与 GotoCommand.sortGotoEntries 的口径一致（Entry.comparingByValue）。
- * 城镇在前、区域在后；区域仅 GM 可见。
- */
-function buildDestinations() {
-    var list = collect(GameConstants.GOTO_TOWNS, "");
+/** 城镇在前、区域在后；区域仅 GM 可见。两段的排版一致，靠标题区分 */
+function buildSections() {
+    var sections = [{ title: "#r城镇：#k", registry: GameConstants.GOTO_TOWNS }];
     if (cm.getPlayer().isGM()) {
-        list = list.concat(collect(GameConstants.GOTO_AREAS, "#r*#k "));
+        sections.push({ title: "#r区域：#k", registry: GameConstants.GOTO_AREAS });
     }
-    return list;
+    return sections;
 }
 
-function collect(registry, prefix) {
+/**
+ * 取一段的条目并按 map id 排序，与 GotoCommand.sortGotoEntries 的口径一致
+ * （Entry.comparingByValue）。
+ *
+ * @return [[mapId, 英文名], ...]
+ */
+function collect(registry) {
     var rows = [];
     var it = registry.entrySet().iterator();
     while (it.hasNext()) {
@@ -62,17 +94,5 @@ function collect(registry, prefix) {
     rows.sort(function (a, b) {
         return a[0] - b[0];
     });
-
-    var out = [];
-    for (var i = 0; i < rows.length; i++) {
-        var mapId = rows[i][0];
-        // loadPlaceName 内部已吞掉全部异常并回落空串，这里不必再兜一层
-        var placeName = String(MapFactory.loadPlaceName(mapId));
-        var label = prefix + "'" + rows[i][1] + "'";
-        if (placeName !== "") {
-            label += " - " + placeName;
-        }
-        out.push([mapId, label]);
-    }
-    return out;
+    return rows;
 }
