@@ -137,3 +137,34 @@ INSERT INTO `nxcoupons` (`couponid`, `rate`, `activeday`, `starthour`, `endhour`
 DELETE FROM `nxcoupons` WHERE `couponid` = 5360900;
 INSERT INTO `nxcoupons` (`couponid`, `rate`, `activeday`, `starthour`, `endhour`) VALUES
 (5360900, 1.5, 254, 0, 24);
+
+-- ---------------------------------------------------------------------------
+-- [本地] 商店负价差修复 —— 非 LK 移植内容
+-- ---------------------------------------------------------------------------
+-- 2026-08-20 拿 shopitems 全表（4394 行）对照 wz 的 info/price 扫了一遍买价/卖价，
+-- 海星镖 2070000 是唯一一件普通玩家够得到的负价差商品：34 家常规商店一律标价 500，
+-- 卖回 NPC 却得 750。其余 87 条负价差全在 GM 商店（1337 / 9999994 / 9999999）里，
+-- 那三家由 scripts-zh-CN/BeiDouSpecial/GM商店.js 开，入口 npc/9100001.js 有 GM 职业校验，
+-- 另行处理，不在本行范围内。
+--
+-- 750 的来历：飞镖/子弹属充值类，Shop.buy 对这类按 price × quantity 校验金币、
+-- 却只扣一次 price 并直接塞满一整叠（server/Shop.java:105-115）；卖出走
+-- ItemInformationProvider.getPrice() = info/price + ceil(quantity × info/unitPrice)
+-- = 250 + ceil(500 × 1) = 750。买 500 卖 750，每轮净赚 250，可无限循环。
+--
+-- 取 800：只比 750 高 6.7%，比同类充值品里倍率最低的子弹（店价 600 / 卖价 500 ≈ 1.2x）
+-- 还保守（冰菱 ≈ 1.5x、齿轮镖 ≈ 9.6x），刻意只取刚够越过 750 的档位——海星镖是最低级飞镖，
+-- 抬太高会直接压到暗器前期的弹药成本。
+--
+-- 为什么不按「把出售价压到 1」那条思路走：750 完全出自 wz
+-- （wz/Item.wz/Consume/0207.img.xml 的 info/price 与 info/unitPrice），SQL 够不着；
+-- 且 unitPrice 同时是补镖单价（Shop.java:264 算补货费、PacketCreator.java:2416 发给客户端），
+-- 归 0 会让补镖变免费，还要连带打客户端 img 补丁。2026-08-20 决定只动店价。
+--
+-- 【故意不限定 shopid】与上面 5041000 那条相反：那条只该影响一家店；这条要覆盖全部 34 家，
+-- 而且今后任何新店卖海星镖也必须 ≥ 750，否则套利立刻重现。
+UPDATE `shopitems` SET `price` = 800 WHERE `itemid` = 2070000;
+
+-- 【挂起】同批扫描还查出测谎仪 2190000 在 shop 9900001（NPC 昨日小睡，地图 180000000）
+-- 标价 200、卖回 9500，是普通可叠加消耗品，单件净赚 9300，比海星镖严重得多。
+-- 2026-08-20 决定本批只修海星镖，这条单独再议。
