@@ -15,11 +15,19 @@
           :key="topCategory.id"
         >
           <template #title>{{ topCategory.name }}</template>
+          <!-- 二级分类各成体系（同一个 subId 在装备下是帽子、在消耗下是卷轴），
+               一级选「全部」时没有自洽的二级集合，直接铺表格 -->
+          <cash-shop-table
+            v-if="topCategory.id === ALL_CATEGORY_ID"
+            :top-id="ALL_CATEGORY_ID"
+            :sub-id="ALL_CATEGORY_ID"
+          />
           <a-tabs
+            v-else
             lazy-load
             destroy-on-hide
             type="text"
-            :default-active-key="0"
+            :default-active-key="ALL_CATEGORY_ID"
             :active-key="subTab"
             @change="subCategoryChange"
           >
@@ -28,7 +36,10 @@
               :key="subCategory.subId"
             >
               <template #title>{{ subCategory.subName }}</template>
-              <cash-shop-table :top-id="topTab" :sub-id="subTab" />
+              <cash-shop-table
+                :top-id="topCategory.id"
+                :sub-id="subCategory.subId"
+              />
             </a-tab-pane>
           </a-tabs>
         </a-tab-pane>
@@ -40,21 +51,21 @@
 <script lang="ts" setup>
   import CashShopTable from '@/views/game/cashShop/table.vue';
   import { ref } from 'vue';
-  import { getAllCategoryList } from '@/api/cashShop';
+  import { ALL_CATEGORY_ID, getAllCategoryList } from '@/api/cashShop';
   import { categoryState } from '@/store/modules/cashShop/type';
 
   const topCategoryList = ref<categoryState[]>([]);
   const subCategoryList = ref<categoryState[]>([]);
   const allCategoryList = ref<categoryState[]>([]);
   const topTab = ref<string | number>(1);
-  const subTab = ref<string | number>(0);
+  const subTab = ref<string | number>(ALL_CATEGORY_ID);
 
   const topCategoryChange = (tab: string | number) => {
     topTab.value = tab;
     subCategoryList.value = allCategoryList.value.filter((_data) => {
       return _data.id === tab;
     });
-    subTab.value = 0;
+    subTab.value = ALL_CATEGORY_ID;
   };
   const subCategoryChange = (tab: string | number) => {
     subTab.value = tab;

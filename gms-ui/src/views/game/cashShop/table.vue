@@ -30,11 +30,11 @@
         <a-input-number
           v-model="condition.itemId"
           placeholder="物品ID"
-          @keydown.enter="loadData"
+          @keydown.enter="search"
         />
       </a-space>
       <a-space>
-        <a-button @click="loadData">搜索</a-button>
+        <a-button @click="search">搜索</a-button>
         <a-button type="primary" @click="showBatchForm">批量编辑</a-button>
       </a-space>
     </a-space>
@@ -46,13 +46,27 @@
       column-resizable
       :pagination="false"
       :bordered="{ cell: true }"
-      :scroll="{ x: 2000 }"
+      :scroll="{ x: tableScrollX }"
       :row-selection="rowSelection"
     >
       <template #columns>
         <a-table-column
           title="SN"
           data-index="sn"
+          align="center"
+          :width="100"
+        />
+        <a-table-column
+          v-if="showCategory"
+          :title="$t('cashShop.column.category')"
+          data-index="categoryName"
+          align="center"
+          :width="90"
+        />
+        <a-table-column
+          v-if="showSubcategory"
+          :title="$t('cashShop.column.subcategory')"
+          data-index="subcategoryName"
           align="center"
           :width="100"
         />
@@ -163,9 +177,13 @@
       style="margin-top: 20px"
       :total="total"
       :current="condition.pageNo"
+      :page-size="condition.pageSize"
+      :page-size-options="pageSizeOptions"
       show-total
       show-jumper
+      show-page-size
       @change="pageChange"
+      @page-size-change="pageSizeChange"
     />
   </a-card>
   <cash-shop-form ref="cashShopFormRef" @load-data="loadData" />
@@ -201,9 +219,10 @@
 </template>
 
 <script lang="ts" setup>
-  import { reactive, ref } from 'vue';
+  import { computed, reactive, ref } from 'vue';
   import useLoading from '@/hooks/loading';
   import {
+    ALL_CATEGORY_ID,
     batchFormState,
     batchOnSale,
     conditionState,
@@ -222,11 +241,26 @@
   }>();
   const tableData = ref<cashShopState[]>([]);
   const total = ref<number>(0);
+
+  // 「全部」跨分类，行与行分属不同分类，必须把归属显示出来才分得清
+  const showCategory = computed(() => props.topId === ALL_CATEGORY_ID);
+  const showSubcategory = computed(
+    () => showCategory.value || props.subId === ALL_CATEGORY_ID
+  );
+  const tableScrollX = computed(
+    () =>
+      2000 + (showCategory.value ? 90 : 0) + (showSubcategory.value ? 100 : 0)
+  );
+  // 精确到二级分类时每页 10 条与客户端保持一致，「全部」条目太多，默认放大
+  const defaultPageSize = showSubcategory.value ? 50 : 10;
+  const pageSizeOptions = [10, 20, 50, 100];
+
   const condition = ref<conditionState>({
     id: 1,
     subId: 0,
     onSale: 1,
     pageNo: 1,
+    pageSize: defaultPageSize,
     itemId: undefined,
   });
 
@@ -240,6 +274,12 @@
 
   const pageChange = (data: number) => {
     condition.value.pageNo = data;
+    loadData();
+  };
+
+  const pageSizeChange = (data: number) => {
+    condition.value.pageSize = data;
+    condition.value.pageNo = 1;
     loadData();
   };
 
@@ -257,9 +297,15 @@
   condition.value.subId = props.subId as number;
   loadData();
 
+  // 换筛选条件后总条数会变，停在原页码会翻到空页，「全部」有上百页时尤其明显
+  const search = () => {
+    condition.value.pageNo = 1;
+    loadData();
+  };
+
   const changeOnSaleFilter = (data: undefined | 0 | 1) => {
     condition.value.onSale = data;
-    loadData();
+    search();
   };
 
   const cashShopFormRef = ref();

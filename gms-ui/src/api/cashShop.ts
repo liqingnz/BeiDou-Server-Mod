@@ -1,11 +1,15 @@
 import axios from 'axios';
 import { cashShopState } from '@/store/modules/cashShop/type';
 
+// 与后端 CategoryType.ALL 对齐，一级/二级分类取该值表示不限分类
+export const ALL_CATEGORY_ID = -1;
+
 export interface conditionState {
   id: number;
   subId: number;
   onSale?: number;
   pageNo: number;
+  pageSize: number;
   itemId?: number;
 }
 

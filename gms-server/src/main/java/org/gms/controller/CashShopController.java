@@ -26,7 +26,7 @@ public class CashShopController {
     @Operation(summary = "获取商城全部分类")
     @GetMapping("/" + ApiConstant.LATEST + "/getAllCategoryList")
     public ResultBody<List<CashCategory>> getAllCategoryList() {
-        return ResultBody.success(cashShopService.getAllCategoryList());
+        return ResultBody.success(cashShopService.getCategoryListWithAll());
     }
 
     @Tag(name = "/cashShop/" + ApiConstant.LATEST)
