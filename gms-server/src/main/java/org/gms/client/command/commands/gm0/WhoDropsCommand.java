@@ -54,7 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>
  * 所以要翻页；而翻页需要「点了之后还能回到服务端」，
  * {@code npcTalk} 那种一发了之的对话框做不到，必须走 NPC 会话脚本
- * （{@code scripts[-zh-CN]/npc/whoDropsList.js}）。
+ * （{@code scripts[-zh-CN]/MapleLand/whoDropsList.js}）。
  * <p>
  * 顺带解决了按名搜一搜一大把的问题（「智力卷轴」能出头盔／铠甲／披风各一版）：
  * 搜到不止一件时先让玩家挑，只搜到一件就直接翻页看掉落源。
@@ -147,7 +147,7 @@ public class WhoDropsCommand extends Command {
     }
 
     // ---------------------------------------------------------------------
-    // 以下 public static 供 scripts[-zh-CN]/npc/whoDropsList.js 调用
+    // 以下 public static 供 scripts[-zh-CN]/MapleLand/whoDropsList.js 调用
     // ---------------------------------------------------------------------
 
     /** 脚本在 start() 里取走本次查询；取走即从交接台删除。没有则返回 null */

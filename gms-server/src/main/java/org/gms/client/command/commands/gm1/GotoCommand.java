@@ -125,7 +125,7 @@ public class GotoCommand extends Command {
     }
 
     /**
-     * 供 npc/gotoList.js 的选单回调。传送口径（守卫 + 随机出生点）与 @goto &lt;name&gt;
+     * 供 MapleLand/gotoList.js 的选单回调。传送口径（守卫 + 随机出生点）与 @goto &lt;name&gt;
      * 完全一致——选单开着的时候玩家可能已经死了或被关进副本，所以这里必须再查一次。
      *
      * @return 是否真的传送了；被守卫拦下时返回 false 并已提示玩家
@@ -163,7 +163,7 @@ public class GotoCommand extends Command {
     }
 
     /**
-     * 列出可去的地方。走 npc/gotoList.js 的选单，选项点一下直接传送——
+     * 列出可去的地方。走 MapleLand/gotoList.js 的选单，选项点一下直接传送——
      * 原实现只是 npcTalk 一段纯文本，玩家看完还得自己把名字敲对。
      *
      * @param badName 用户敲错的地图名；没带参数时传 null
