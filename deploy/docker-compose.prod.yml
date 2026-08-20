@@ -50,7 +50,13 @@ services:
 
   beidou-db:
     container_name: beidou-db
-    image: mysql:8.4.0
+    # 默认走 Docker Hub。但国内部分机房（实测京东云）连不上
+    # registry-1.docker.io，Docker Hub 整个拉不动；这时在 .env 里设
+    # MYSQL_IMAGE 换源，例如：
+    #   MYSQL_IMAGE=public.ecr.aws/docker/library/mysql:8.4.0
+    # 那是 AWS 的官方镜像站，manifest 摘要与 Docker Hub 原版逐位一致
+    # （sha256:dab7049a…），不是来路不明的第三方代理。
+    image: ${MYSQL_IMAGE:-mysql:8.4.0}
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?请在 .env 中设置 DB_PASSWORD}
