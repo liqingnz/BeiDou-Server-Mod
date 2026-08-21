@@ -45,6 +45,7 @@ import org.gms.server.CashShop;
 import org.gms.server.CashShop.CashItemFactory;
 import org.gms.server.ItemInformationProvider;
 import org.gms.service.NoteService;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 import org.gms.util.Pair;
 
@@ -303,15 +304,25 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                         c.enableCSActions();
                         return;
                     }
-                    if (chr.getInventory(item.getInventoryType()).addItem(item) != -1) {
-                        cs.removeFromInventory(item);
-                        c.sendPacket(PacketCreator.takeFromCashInventory(item));
 
-                        if (item instanceof Equip equip) {
-                            if (equip.getRingId() >= 0) {
-                                Ring ring = Ring.loadFromDb(equip.getRingId());
-                                chr.addPlayerRing(ring);
-                            }
+                    // 先从现金仓库摘掉，再放进背包，放不下就原样放回去。原实现是先 addItem 成功
+                    // 才 removeFromInventory，中间那一段两边同时持有同一个 Item 引用；
+                    // 且 addItem 返回 -1 时整段静默跳过，既不提示也不 enableCSActions，客户端会卡住
+                    cs.removeFromInventory(item);
+                    if (chr.getInventory(item.getInventoryType()).addItem(item) == -1) {
+                        cs.addToInventory(item);
+                        c.sendPacket(PacketCreator.serverNotice(1,
+                                I18nUtil.getMessage("CashOperationHandler.takeFromCashInventory.message1")));
+                        c.enableCSActions();
+                        return;
+                    }
+
+                    c.sendPacket(PacketCreator.takeFromCashInventory(item));
+
+                    if (item instanceof Equip equip) {
+                        if (equip.getRingId() >= 0) {
+                            Ring ring = Ring.loadFromDb(equip.getRingId());
+                            chr.addPlayerRing(ring);
                         }
                     }
                 } else if (action == 0x0E) { // Put into Cash Inventory
@@ -329,12 +340,24 @@ public final class CashOperationHandler extends AbstractPacketHandler {
                     if (item == null) {
                         c.enableCSActions();
                         return;
+                    } else if (!ItemInformationProvider.getInstance().isCash(item.getItemId())) {
+                        // 现金仓库是账号级的，原本没有这道校验：Inventory.findByCashId 只按 Item.cashId 匹配，
+                        // 而 cashId 是从 777000000 起的全局计数器惰性分配的运行时值，且 findByCashId 扫描时
+                        // 会顺手给沿途每件物品都分配一个，探一次整栏 id 就落在一小段连续区间里，可爆破。
+                        // 结果是普通装备（含绑定的任务装备）能塞进现金仓库，再换个同账号角色取出来，
+                        // 等于一条绕过绑定的搬运通道。出口（0x0D）不设限，已经塞进去的还能取回来
+                        chr.getClient().sendPacket(PacketCreator.serverNotice(1,
+                                I18nUtil.getMessage("CashOperationHandler.putIntoCashInventory.message3")));
+                        c.enableCSActions();
+                        return;
                     } else if (c.getPlayer().getPetIndex(item.getPetId()) > -1) {
-                        chr.getClient().sendPacket(PacketCreator.serverNotice(1, "当前正在装备中的宠物无法放入现金仓库。"));
+                        chr.getClient().sendPacket(PacketCreator.serverNotice(1,
+                                I18nUtil.getMessage("CashOperationHandler.putIntoCashInventory.message1")));
                         c.enableCSActions();
                         return;
                     } else if (ItemId.isWeddingRing(item.getItemId()) || ItemId.isWeddingToken(item.getItemId())) {
-                        chr.getClient().sendPacket(PacketCreator.serverNotice(1, "关系类道具无法放入现金仓库。"));
+                        chr.getClient().sendPacket(PacketCreator.serverNotice(1,
+                                I18nUtil.getMessage("CashOperationHandler.putIntoCashInventory.message2")));
                         c.enableCSActions();
                         return;
                     }

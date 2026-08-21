@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -340,8 +342,11 @@ public class GiveService {
         if (!ItemConstants.getInventoryType(submitData.getId()).equals(InventoryType.EQUIP)) {
             throw new BizException(I18nUtil.getExceptionMessage("ONLY_SUPPORT_GIVE_EQUIP"));
         }
+        // 全服发放不能因为某个人装备栏满就整体中止，但也不能一律当成功记账：
+        // 计一下失败人数，收尾单独落一条 warn，运营才知道有人没收到
+        AtomicInteger failed = new AtomicInteger();
         Server.getInstance().getWorlds().forEach(world -> world.getPlayerStorage().getAllCharacters().forEach(chr -> {
-            chr.gainEquip(
+            boolean given = chr.gainEquip(
                     submitData.getId(),
                     submitData.getStr(),
                     submitData.getDex(),
@@ -361,9 +366,16 @@ public class GiveService {
                     submitData.getUpgradeSlot(),
                     submitData.getExpire()
             );
+            if (!given) {
+                failed.incrementAndGet();
+                return;
+            }
             chr.message(withExpireMessage(I18nUtil.getMessage("Give.Equip.All", submitData.getId().toString(), itemName),
                     normalizeExpireMinutes(submitData.getExpire())));
         }));
+        if (failed.get() > 0) {
+            log.warn(I18nUtil.getLogMessage("Give.Equip.All.warn1"), submitData.getId(), itemName, failed.get());
+        }
         log.info(I18nUtil.getLogMessage("Give.Equip.All.info1",
                 submitData.getId(),
                 itemName,
@@ -398,7 +410,7 @@ public class GiveService {
         if (!ItemConstants.getInventoryType(submitData.getId()).equals(InventoryType.EQUIP)) {
             throw new BizException(I18nUtil.getExceptionMessage("ONLY_SUPPORT_GIVE_EQUIP"));
         }
-        chr.gainEquip(
+        boolean given = chr.gainEquip(
                 submitData.getId(),
                 submitData.getStr(),
                 submitData.getDex(),
@@ -418,6 +430,10 @@ public class GiveService {
                 submitData.getUpgradeSlot(),
                 submitData.getExpire()
         );
+        // 发放失败必须回报给后台：原实现无视返回值，装备栏满时照样往下发成功提示和成功日志
+        if (!given) {
+            throw new BizException(I18nUtil.getExceptionMessage("EQUIP_GIVE_FAILED", chr.getName()));
+        }
         chr.message(withExpireMessage(I18nUtil.getMessage("Give.Equip.Chr", submitData.getId().toString(), itemName),
                 normalizeExpireMinutes(submitData.getExpire())));
         log.info(I18nUtil.getLogMessage("Give.Equip.Chr.info1",

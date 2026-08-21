@@ -10010,18 +10010,21 @@ public class Character extends AbstractCharacterObject {
      * @param jump        跳跃
      * @param upgradeSlot 可升级次数
      * @param expireTime  失效时间，-1为不失效 来自 @leevccc 的建议，传值则为分钟
+     * @return 是否真的发到了玩家背包里。调用方必须看这个返回值——原实现装备栏满时只发一条提示就
+     * 继续往下走，最后 addFromDrop 再挡一次，玩家收到两条提示，而后台那头照样记「发放成功」
      */
-    public void gainEquip(int itemId, Short attStr, Short attDex, Short attInt, Short attLuk, Short attHp, Short attMp,
-                          Short pAtk, Short mAtk, Short pDef, Short mDef, Short acc, Short avoid, Short hands, Short speed,
-                          Short jump, Byte upgradeSlot, Long expireTime) {
+    public boolean gainEquip(int itemId, Short attStr, Short attDex, Short attInt, Short attLuk, Short attHp, Short attMp,
+                             Short pAtk, Short mAtk, Short pDef, Short mDef, Short acc, Short avoid, Short hands, Short speed,
+                             Short jump, Byte upgradeSlot, Long expireTime) {
         if (!ItemConstants.getInventoryType(itemId).equals(InventoryType.EQUIP)) {
             message(I18nUtil.getMessage("AbstractPlayerInteraction.gainEquip.message1"));
-            return;
+            return false;
         }
         Equip baseEquip = (Equip) ItemInformationProvider.getInstance().getEquipById(itemId);
         baseEquip.setQuantity((short) 1);
         if (!InventoryManipulator.checkSpace(getClient(), itemId, 1, baseEquip.getOwner())) {
             message(I18nUtil.getMessage("AbstractPlayerInteraction.gainEquip.message2", InventoryType.EQUIP.getName()));
+            return false;
         }
         RequireUtil.requireNotEmptyAndThen(baseEquip, attStr, Equip::setStr);
         RequireUtil.requireNotEmptyAndThen(baseEquip, attDex, Equip::setDex);
@@ -10046,7 +10049,7 @@ public class Character extends AbstractCharacterObject {
                 eq.setExpiration(-1);
             }
         });
-        InventoryManipulator.addFromDrop(getClient(), baseEquip, false);
+        return InventoryManipulator.addFromDrop(getClient(), baseEquip, false);
     }
 
     public void setFamilyBuff(boolean type, float exp, float drop) {

@@ -583,6 +583,12 @@ public class InventoryManipulator {
         Inventory eqpdInv = chr.getInventory(InventoryType.EQUIPPED);
 
         Equip source = (Equip) eqpInv.getItem(src);
+        // 判空必须排在任何一次解引用之前：src 是 ItemMoveHandler 原样透传的封包入参，没有任何校验。
+        // 原来的判空在下面性别校验之后，对空格子发一个穿戴动作就会先在 getGender 这里 NPE
+        if (source == null) {
+            c.sendPacket(PacketCreator.enableActions());
+            return;
+        }
         int itemGender = ItemId.getGender(source.getItemId());
         //控制台参数为true时进行校验判断
         if(GameConfig.getServerBoolean("use_equipment_gender_limit") && itemGender != 2 && itemGender != chr.getGender()) {  //判断装备是否要求角色性别
@@ -597,7 +603,7 @@ public class InventoryManipulator {
             );
             return;
         }
-        if (source == null || !ii.canWearEquipment(chr, source, dst)) {
+        if (!ii.canWearEquipment(chr, source, dst)) {
             c.sendPacket(PacketCreator.enableActions());
             return;
         } else if ((ItemId.isExplorerMount(source.getItemId()) && chr.isCygnus()) ||

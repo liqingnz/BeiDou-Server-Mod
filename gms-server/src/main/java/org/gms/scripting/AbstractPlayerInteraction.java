@@ -1640,11 +1640,16 @@ public class AbstractPlayerInteraction {
                 extendName, extendValue);
     }
 
-    public void gainEquip(Equip equip) {
+    /**
+     * @return 是否真的发到了玩家背包里。原实现装备栏满时只发一条提示就继续往下发，
+     * 调用方（脚本）拿不到成败，容易出现「扣了材料却没拿到装备」
+     */
+    public boolean gainEquip(Equip equip) {
         if (!InventoryManipulator.checkSpace(getClient(), equip.getItemId(), 1, equip.getOwner())) {
             message(I18nUtil.getMessage("AbstractPlayerInteraction.gainEquip.message2", InventoryType.EQUIP.getName()));
+            return false;
         }
-        InventoryManipulator.addFromDrop(getClient(), equip, false);
+        return InventoryManipulator.addFromDrop(getClient(), equip, false);
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////

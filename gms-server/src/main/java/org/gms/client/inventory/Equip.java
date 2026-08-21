@@ -120,6 +120,11 @@ public class Equip extends Item {
         ret.itemExp = itemExp;
         ret.level = level;
         ret.itemLog = new LinkedList<>(itemLog);
+        // ringid 是这枚戒指与 rings 表那行的唯一连线：落库靠它（ItemFactory 的第 23 个字段）、
+        // 穿戴时找配对靠它（InventoryManipulator.equip）、下发客户端的物品唯一 id 也是它
+        // （PacketCreator.addItemInfo）。漏抄的后果是副本一律退回 -1，而背包整理、存仓库、
+        // 交易、乃至每个 ModifyInventory 封包都会走 copy()，连线一旦断掉就随存档写死
+        ret.ringid = ringid;
         ret.setOwner(getOwner());
         ret.setQuantity(getQuantity());
         ret.setExpiration(getExpiration());
