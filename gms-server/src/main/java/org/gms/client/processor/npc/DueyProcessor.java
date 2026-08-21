@@ -42,6 +42,7 @@ import org.gms.server.DueyPackage;
 import org.gms.server.ItemInformationProvider;
 import org.gms.server.Trade;
 import org.gms.util.DatabaseConnection;
+import org.gms.util.I18nUtil;
 import org.gms.util.PacketCreator;
 import org.gms.util.Pair;
 
@@ -145,6 +146,50 @@ public class DueyProcessor {
             deletePackageFromInventoryDB(con, packageId);
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 原子消费一张快递单：以 DELETE 的影响行数作为这件快递的唯一凭据。
+     * <p>
+     * 只有恰好删掉一行，才说明这件快递归本次调用所有，调用方才可以发货。单据行与它的物品行放在
+     * 同一个事务里删，避免单没了、物品行还留在 inventoryitems 里成为孤儿。
+     * <p>
+     * ReceiverId 一并进 WHERE：既是归属校验（原实现只按 packageId 删，改包就能删别人的快递），
+     * 也让「同一件快递被并发领取」交给数据库仲裁——后到的那次影响行数为 0，拿不到凭据就什么都不发。
+     *
+     * @return true 表示本次调用抢到了这件快递
+     * @throws SQLException 数据库出错。<b>不能吞</b>：吞掉就等于「单没删成、货照发」，也就是复制
+     */
+    private static boolean consumePackageFromDB(int packageId, int receiverId) throws SQLException {
+        try (Connection con = DatabaseConnection.getConnection()) {
+            con.setAutoCommit(false);
+            try {
+                int deleted;
+                try (PreparedStatement ps = con.prepareStatement("DELETE FROM dueypackages WHERE PackageId = ? AND ReceiverId = ?")) {
+                    ps.setInt(1, packageId);
+                    ps.setInt(2, receiverId);
+                    deleted = ps.executeUpdate();
+                }
+
+                if (deleted != 1) {
+                    con.rollback();
+                    return false;
+                }
+
+                deletePackageFromInventoryDB(con, packageId);
+                con.commit();
+                return true;
+            } catch (SQLException | RuntimeException e) {
+                con.rollback();
+                throw e;
+            } finally {
+                try {
+                    con.setAutoCommit(true);
+                } catch (SQLException se) {
+                    // 还回连接池前恢复失败就算了，不能让它盖掉真正的异常，也不能改写已提交的结果
+                }
+            }
         }
     }
 
@@ -386,10 +431,31 @@ public class DueyProcessor {
         }
     }
 
+    /**
+     * 客户端「删除」按钮走这里，把快递单连同里面的物品一并丢弃。
+     * <p>
+     * 删除限定在自己的快递上：原实现只按 packageId 删，改一下包里的 id 就能删掉任意玩家的快递。
+     */
     public static void dueyRemovePackage(Client c, int packageid, boolean playerRemove) {
         if (c.tryacquireClient()) {
             try {
-                removePackageFromDB(packageid);
+                Character chr = c.getPlayer();
+                boolean removed;
+                try {
+                    removed = consumePackageFromDB(packageid, chr.getId());
+                } catch (SQLException e) {
+                    log.error(I18nUtil.getLogMessage("DueyProcessor.dueyRemovePackage.error1"), chr.getName(), packageid, e);
+                    c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
+                    return;
+                }
+
+                if (!removed) {
+                    AutobanFactory.PACKET_EDIT.alert(chr, chr.getName() + " tried to packet edit with duey.");
+                    log.warn(I18nUtil.getLogMessage("DueyProcessor.dueyRemovePackage.warn1"), chr.getName(), packageid);
+                    c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
+                    return;
+                }
+
                 c.sendPacket(PacketCreator.removeItemFromDuey(playerRemove, packageid));
             } finally {
                 c.releaseClient();
@@ -397,9 +463,28 @@ public class DueyProcessor {
         }
     }
 
-    // 方法锁，修复复制外挂多人取同一个快递，也使得无法多人同时取快递。更优雅的做法是设置一个packageId锁，考虑快递业务用的不多，暂不如此处理
-    public static synchronized void dueyClaimPackage(Client c, int packageId) {
+    /**
+     * 领取快递。顺序是<b>先删单、后发货</b>。
+     * <p>
+     * 原实现反过来——先 addFromDrop 把东西给出去，再调 dueyRemovePackage 删单，而删单那一步整个包在
+     * {@code if (c.tryacquireClient())} 里（许可只有 7 个，抢不到就是个空操作，不报错也不回滚），
+     * removePackageFromDB 又把 SQLException 吞掉正常返回。两条路都落在同一个状态上：
+     * 货已到手、单还在库——玩家再点一次「取」就再来一份，可无限重复，装备也照复制。
+     * 现在改由 DELETE 的影响行数当发货凭据，抢不到凭据就什么都不发，见 {@link #consumePackageFromDB}。
+     * <p>
+     * 原来的 synchronized 一并去掉：它锁的是整个类，横跨数据库往返把全服领快递串行化，
+     * 却挡不住上面那两种失败——真正的互斥点在数据库的那一行上。这里改用按客户端的
+     * tryacquireClient，抢不到就让玩家重试，方向上是「宁可不发」而不是「宁可多发」。
+     */
+    public static void dueyClaimPackage(Client c, int packageId) {
+        if (!c.tryacquireClient()) {
+            c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
+            return;
+        }
+
         try {
+            Character chr = c.getPlayer();
+
             DueyPackage dp = null;
             try (Connection con = DatabaseConnection.getConnection();
                  PreparedStatement ps = con.prepareStatement("SELECT * FROM dueypackages dp WHERE PackageId = ?")) {
@@ -410,19 +495,23 @@ public class DueyProcessor {
                         dp = getPackageFromDB(rs);
                     }
                 }
+            } catch (SQLException e) {
+                log.error(I18nUtil.getLogMessage("DueyProcessor.dueyClaimPackage.error1"), chr.getName(), packageId, e);
+                c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
+                return;
             }
 
             if (dp == null) {
                 c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
-                log.warn("Chr {} tried to receive package from duey with id {}", c.getPlayer().getName(), packageId);
+                log.warn(I18nUtil.getLogMessage("DueyProcessor.dueyClaimPackage.warn1"), chr.getName(), packageId);
                 return;
             }
 
             // 判断是否本人快递，不是本人那就是改包了
-            if (!Objects.equals(dp.getReceiverId(), c.getPlayer().getId())) {
-                AutobanFactory.PACKET_EDIT.alert(c.getPlayer(), c.getPlayer().getName() + " tried to packet edit with duey.");
+            if (!Objects.equals(dp.getReceiverId(), chr.getId())) {
+                AutobanFactory.PACKET_EDIT.alert(chr, chr.getName() + " tried to packet edit with duey.");
                 c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
-                log.warn("Chr {} tried to receive package from duey with receiverId {}", c.getPlayer().getName(), dp.getReceiverId());
+                log.warn(I18nUtil.getLogMessage("DueyProcessor.dueyClaimPackage.warn2"), chr.getName(), packageId, dp.getReceiverId());
                 return;
             }
 
@@ -431,32 +520,51 @@ public class DueyProcessor {
                 return;
             }
 
-            Item dpItem = dp.getItem();
-            if (dpItem != null) {
-                if (!c.getPlayer().canHoldMeso(dp.getMesos())) {
-                    c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
-                    return;
-                }
-
-                if (!InventoryManipulator.checkSpace(c, dpItem.getItemId(), dpItem.getQuantity(), dpItem.getOwner())) {
-                    int itemid = dpItem.getItemId();
-                    if (ItemInformationProvider.getInstance().isPickupRestricted(itemid) && c.getPlayer().getInventory(ItemConstants.getInventoryType(itemid)).findById(itemid) != null) {
-                        c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_RECEIVER_WITH_UNIQUE.getCode()));
-                    } else {
-                        c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_NO_FREE_SLOTS.getCode()));
-                    }
-
-                    return;
-                } else {
-                    InventoryManipulator.addFromDrop(c, dpItem, false);
-                }
+            // 金币上限校验挪到物品判断之外：原来嵌在 if (dpItem != null) 里，
+            // 只带金币不带物品的快递会跳过校验，超出上限的部分被 gainMeso 静默吃掉
+            if (!chr.canHoldMeso(dp.getMesos())) {
+                c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
+                return;
             }
 
-            c.getPlayer().gainMeso(dp.getMesos(), false);
+            Item dpItem = dp.getItem();
+            if (dpItem != null && !InventoryManipulator.checkSpace(c, dpItem.getItemId(), dpItem.getQuantity(), dpItem.getOwner())) {
+                int itemid = dpItem.getItemId();
+                if (ItemInformationProvider.getInstance().isPickupRestricted(itemid)
+                        && chr.getInventory(ItemConstants.getInventoryType(itemid)).findById(itemid) != null) {
+                    c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_RECEIVER_WITH_UNIQUE.getCode()));
+                } else {
+                    c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_NO_FREE_SLOTS.getCode()));
+                }
+                return;
+            }
 
-            dueyRemovePackage(c, packageId, false);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            // 校验全过，先删单换取发货凭据
+            boolean claimed;
+            try {
+                claimed = consumePackageFromDB(packageId, chr.getId());
+            } catch (SQLException e) {
+                log.error(I18nUtil.getLogMessage("DueyProcessor.dueyClaimPackage.error1"), chr.getName(), packageId, e);
+                c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
+                return;
+            }
+
+            if (!claimed) {     // 这件快递已经被在此之前的某次请求领走了
+                c.sendPacket(PacketCreator.sendDueyMSG(Actions.TOCLIENT_RECV_UNKNOWN_ERROR.getCode()));
+                return;
+            }
+
+            if (dpItem != null && !InventoryManipulator.addFromDrop(c, dpItem, false)) {
+                // 预检通过却仍放不下（校验与发放之间背包被别的线程填满），单据已经删掉退不回去，
+                // 只能落一条 error 供人工补发，物品信息要记全，光记 packageId 事后查不出发的是什么
+                log.error(I18nUtil.getLogMessage("DueyProcessor.dueyClaimPackage.error2"),
+                        chr.getId(), chr.getName(), packageId, dpItem.getItemId(), dpItem.getQuantity());
+            }
+
+            chr.gainMeso(dp.getMesos(), false);
+            c.sendPacket(PacketCreator.removeItemFromDuey(false, packageId));
+        } finally {
+            c.releaseClient();
         }
     }
 
