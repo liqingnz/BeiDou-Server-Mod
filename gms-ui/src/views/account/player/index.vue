@@ -391,21 +391,26 @@
   });
 
   // 有效期在界面上拆成「数值 + 单位」两个控件，提交时统一折算成分钟发给后端
+  // 下拉的 value 就是「1 个单位 = 多少分钟」
+  const MINUTES_PER_MINUTE = 1;
   const MINUTES_PER_HOUR = 60;
   const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR;
   const expireAmount = ref<number | undefined>(undefined);
-  const expireUnit = ref(MINUTES_PER_DAY);
+  const expireUnit = ref(MINUTES_PER_MINUTE);
   const expireUnitOptions = [
-    { value: MINUTES_PER_DAY, label: t('account.player.form.expire.unit.day') },
+    {
+      value: MINUTES_PER_MINUTE,
+      label: t('account.player.form.expire.unit.minute'),
+    },
     {
       value: MINUTES_PER_HOUR,
       label: t('account.player.form.expire.unit.hour'),
     },
-    { value: 1, label: t('account.player.form.expire.unit.minute') },
+    { value: MINUTES_PER_DAY, label: t('account.player.form.expire.unit.day') },
   ];
   const resetExpire = () => {
     expireAmount.value = undefined;
-    expireUnit.value = MINUTES_PER_DAY;
+    expireUnit.value = MINUTES_PER_MINUTE;
   };
 
   const typeFieldNames = { value: 'value', label: 'label' };
