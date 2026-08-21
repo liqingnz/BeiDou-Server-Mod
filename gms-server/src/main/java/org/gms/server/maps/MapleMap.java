@@ -3796,13 +3796,43 @@ public class MapleMap {
     }
 
     /**
+     * 参与刷怪计算的玩家快照：GM（{@code gmLevel > 1}）一律剔除，对刷怪逻辑而言等同于不在本图。
+     * 巡图、调参、蹲点观察都不该把刷怪率带起来，高等级 GM 也不该顶高
+     * {@link #getCurrentSpawnRate()} 里的 maxLevel 把在场的低等级玩家挤出「有效玩家」。
+     */
+    private List<Character> getSpawnRelevantPlayers() {
+        List<Character> players = getAllPlayers();
+        players.removeIf(Character::isGM);
+        return players;
+    }
+
+    /**
+     * 本图是否还有人值得刷怪。{@link #respawn()} 每 2 秒对**所有**已加载地图跑一遍，
+     * 所以这里不复制列表、命中即返回，绝大多数空图连一次比较都不用做。
+     */
+    private boolean hasSpawnRelevantPlayer() {
+        chrRLock.lock();
+        try {
+            for (Character chr : characters) {
+                if (!chr.isGM()) {
+                    return true;
+                }
+            }
+        } finally {
+            chrRLock.unlock();
+        }
+        return false;
+    }
+
+    /**
      * 本图当前的刷怪倍率 = 基础倍率 + 计入人数 × 每人增量。
      * 「有效玩家」指等级不低于本图最高等级玩家 30 级的人，挂机小号不参与拉高刷怪率；
      * 计入人数再按 mob_spawnrate_max_players 封顶，避免人多的图刷怪率无上限增长。
+     * GM 不算人，见 {@link #getSpawnRelevantPlayers()}。
      */
     public double getCurrentSpawnRate() {
         // 取一次快照供两轮遍历共用：characters 由 chrLock 保护，直接迭代会撞上进出地图的写操作
-        List<Character> players = getAllPlayers();
+        List<Character> players = getSpawnRelevantPlayers();
 
         int maxLevel = 0;
         for (Character chr : players) {
@@ -3898,16 +3928,9 @@ public class MapleMap {
             return;
         }
 
-        int numPlayers;
-        chrRLock.lock();
-        try {
-            numPlayers = characters.size();
-
-            if (numPlayers == 0) {
-                return;
-            }
-        } finally {
-            chrRLock.unlock();
+        // 只有 GM 在的图当作空图处理，不补怪
+        if (!hasSpawnRelevantPlayer()) {
+            return;
         }
 
         int numShouldSpawn = getNumShouldSpawn();
