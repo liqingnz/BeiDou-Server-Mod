@@ -832,6 +832,20 @@ ssh <服务器> 'cd /opt/beidou && setsid nohup sh upgrade-mirror.sh <短sha> > 
 ssh <服务器> 'tail -f /opt/beidou/upgrade.log'
 ```
 
+**有玩家在线时拆成两步**，第三个参数控制：
+
+```bash
+# 现在：只拉镜像，线上服务一动不动（拉取不影响运行中的容器）
+ssh <服务器> 'cd /opt/beidou && setsid nohup sh upgrade-mirror.sh <短sha> pull > upgrade.log 2>&1 < /dev/null &'
+
+# 等低峰期：只做上线那半截，镜像已经在本地，几十秒完事
+ssh <服务器> 'cd /opt/beidou && setsid nohup sh upgrade-mirror.sh <短sha> restart > upgrade.log 2>&1 < /dev/null &'
+```
+
+⚠️ `pull` 模式**故意不打 `latest` 标签**。打了的话，之后任何一次
+`docker compose up -d`（哪怕是为别的事）都会静默把服务升上去。留到 `restart` 那步再打，
+「拉了但没上线」这个中间状态才是明确且安全的。
+
 脚本里有四个刻意的设计，都是这次踩出来的：
 
 - **先拉再停**。拉镜像那段旧服还在跑，不算停机；拉失败时 `set -e` 直接中止，
@@ -857,14 +871,21 @@ ssh <服务器> 'tail -f /opt/beidou/upgrade.log'
 ⚠️ **在宿主机上 `ss` 查 7575-7577 也不可信**。容器端口是 DNAT 进去的，
 宿主机的 socket 表里根本看不到那些连接，永远显示 0。
 
-正确做法是**进容器读 `/proc/net/tcp`**（不依赖容器里装没装 `ss`/`netstat`）：
+正确做法是**进容器读 `/proc/net/tcp6`**（不依赖容器里装没装 `ss`/`netstat`）：
 
 ```bash
-ssh <服务器> 'docker exec beidou-server sh -c "cat /proc/net/tcp" | awk "NR>1 {split(\$2,a,\":\"); p=strtonum(\"0x\" a[2]); if ((p==7575||p==7576||p==7577||p==8484) && \$4==\"01\") n++} END {print n+0}"'
+ssh <服务器> 'docker exec beidou-server sh -c "cat /proc/net/tcp6" | awk "NR>1 {split(\$2,a,\":\"); if ((a[2]==\"1D97\"||a[2]==\"1D98\"||a[2]==\"1D99\") && \$4==\"01\") n++} END {print n+0}"'
 ```
 
-`$4=="01"` 是 ESTABLISHED，`0A` 是 LISTEN。查监听状态要连 `/proc/net/tcp6` 一起看——
-Netty 绑的是 IPv6 双栈，监听套接字只出现在 tcp6 里。
+`1D97`/`1D98`/`1D99` 是 7575/7576/7577 的十六进制，`$4=="01"` 是 ESTABLISHED（`0A` 是 LISTEN）。
+
+⚠️ **必须查 `tcp6`，不是 `tcp`**。Netty 绑的是 IPv6 双栈，**监听套接字和已建立的连接
+都只出现在 `/proc/net/tcp6` 里**，IPv4 那张表永远是空的。
+2026-08-21 就因为查了 `/proc/net/tcp` 得到 0，误判成没人在线而重启了服务——
+同一时刻 `tcp6` 里其实有 10 条频道连接。这个坑代价是把在线玩家全踢了。
+
+⚠️ **别用 `strtonum` 做十六进制转换**。它是 gawk 扩展，busybox awk（容器里）和
+mawk（Ubuntu 默认）都没有，行为不可预期。直接拿十六进制字符串比对最稳。
 
 #### 两次实测结果
 

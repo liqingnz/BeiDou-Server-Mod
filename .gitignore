@@ -44,3 +44,6 @@ CLAUDE.local.md
 
 # 开发工具的每次运行产物（tools/CommodityTidy.java 等），是临时账本不入库
 /tools/out/
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
