@@ -13,6 +13,14 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  # 时间戳基准，配合下面的 rewrite-timestamp 把所有层里文件和目录的 mtime 归一化，
+  # 让每层的 digest 只由内容决定。不加的话有两处会让 digest 白白变掉、触发无谓重传：
+  #   1. jarmode extract 新建的 dependencies/lib/ 目录，mtime 是解压时刻；
+  #   2. actions/checkout 出来的 wz/scripts 文件，mtime 是每次检出的时刻。
+  # 平时靠构建缓存命中掩盖着（缓存命中直接复用旧 blob，根本不重打 tar），
+  # 一旦 GHA 缓存被驱逐（10 GB 上限 / 7 天回收）就会暴露成「内容没改却重传 30-65 MB」。
+  # ⚠️ 必须是固定常量。用提交时间或构建时间会让每次提交的所有层 mtime 全变，比不加更糟。
+  SOURCE_DATE_EPOCH: 0
 
 jobs:
   build:
@@ -53,9 +61,15 @@ jobs:
           # 服务器是 arm64 的话改成 linux/arm64，或写成
           # linux/amd64,linux/arm64 出多架构清单（构建时间翻倍）
           platforms: linux/amd64
-          push: true
+          # 等价于 push: true，额外开 rewrite-timestamp（需要 BuildKit ≥ v0.13，
+          # setup-buildx-action 装的版本早已满足）。作用见上面 SOURCE_DATE_EPOCH 的注释。
+          # 副作用：镜像的 created 字段和容器内文件 mtime 都变成 1970，
+          # 所以别再用 docker images 的 CreatedSince 判断线上是哪个构建，改看短 sha 标签。
+          outputs: type=image,push=true,rewrite-timestamp=true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # 跨次构建复用层缓存。wz 那 561 MB 的层只在 wz 真的变了时才重建。
+          # 跨次构建复用层缓存，省的是构建时间（yarn install、mvn dependency:resolve）。
+          # 传输量不再依赖它：有了上面的 rewrite-timestamp，即便缓存被驱逐、
+          # 各层重新打包，内容没变的层 digest 也不变，服务器照样不用重下。
           cache-from: type=gha
           cache-to: type=gha,mode=max

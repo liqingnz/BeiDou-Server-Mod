@@ -452,19 +452,131 @@ IDEA 改代码 → git push master
 
 ### 9.2 层顺序是最关键的设计
 
-Docker 层缓存以层为单位失效：某层变了，它**之后**的所有层全部重建重传。
-本项目各成分的变化频率极不均衡：
+Docker 层缓存以层为单位失效：某层变了，它**之后**的所有层都要重新执行。
+而且**一条 `COPY` 产出的层包含它拷进去的全部内容**——里面改一个字节，
+整层就要重建重传，没有文件级增量。
 
-| 内容 | 体积 | 变化频率 |
+本项目各成分的变化频率极不均衡。2026-08-21 实测（压缩后即传输量 / 落盘后）：
+
+| 层 | 压缩后 | 落盘后 | 变化频率 |
+|---|---|---|---|
+| `wz/` | 30.7 MB | 685 MB | 几乎永不变 |
+| `wz-zh-CN/` | 4.5 MB | 38.7 MB | 汉化时才动 |
+| `scripts/` | 0.6 MB | 10.0 MB | 偶尔改 |
+| `scripts-zh-CN/` | 1.0 MB | 12.3 MB | 偶尔改 |
+| jar 拆出的 `lib/`（101 个依赖） | ~65 MB | 109 MB | 只在改 pom 时 |
+| jar 拆出的 `BeiDou.jar`（本项目代码 + 前端） | ~5 MB | 5.3 MB | 每次改代码 |
+
+所以 `Dockerfile` 里 **COPY 顺序按变化频率从低到高排**，应用那层必须放最后。
+日常迭代只有约 5 MB 需要重传 —— 这是用镜像仓库而非 `docker save` 的最大收益
+（后者每次都是全量约 900 MB）。**改这个文件时别打乱顺序。**
+
+⚠️ 注意最后两行：jar 是**拆成两层**的，不是一个整的 `BeiDou.jar`。
+早期版本确实是整个 fat jar 一层、压缩后 72.6 MB，每次改代码全量重传，
+拆分的来龙去脉见 9.2.1。
+
+#### 9.2.1 拆分层 jar：把每次部署的 72.6 MB 固定成本降到 5 MB
+
+上面的分层只解决了 wz 那一侧。**jar 那一层曾经是每次改代码都要全量重传的固定成本**，
+而它里面绝大部分是压根没变的第三方依赖。2026-08-20 实测 fat jar 的构成：
+
+| 内容 | 大小 | 文件数 | 变化频率 |
+|---|---|---|---|
+| `BOOT-INF/lib/`（第三方依赖） | 108.0 MB | 102 | 只在改 pom 时 |
+| `BOOT-INF/classes/`（本项目代码 + 前端 dist） | 12.7 MB | 1843 | 每次改代码 |
+| `org/`（spring-boot-loader） | 0.4 MB | — | 几乎不变 |
+
+119 MB 的 fat jar 压缩后 72.6 MB（能压下来是因为 Spring Boot 的 fat jar 内部嵌套 jar
+是 STORED 不压缩存放的，为了能内存映射）。其中 108 MB 的依赖每次都在陪跑。
+
+**Spring Boot 的分层 jar 正是为此设计的，而且 pom 不用改**：`BOOT-INF/layers.idx`
+从 Spring Boot 2.4 起默认就会生成。做法是在 `Dockerfile` 里加一个 extractor 阶段，
+把 jar 按这个索引拆开，再分别 `COPY` 成独立的层。
+
+##### ⚠️ 不要加 `--launcher`
+
+`jarmode=tools ... extract --layers` 有两种产出布局，选错会平白引入启动链变更风险：
+
+| | 加 `--launcher` | **不加（推荐）** |
 |---|---|---|
-| `wz/` | 561 MB | 几乎永不变 |
-| `wz-zh-CN/` | 34 MB | 汉化时才动 |
-| `scripts/` + `scripts-zh-CN/` | 9 MB | 偶尔改 |
-| `BeiDou.jar` | 113 MB | 每次改 Java 代码都变 |
+| 产出 | `BOOT-INF/` + `META-INF/` + `org/` 散文件 | `application/BeiDou.jar` + `dependencies/lib/` |
+| 启动方式 | 必须改成 `org.springframework.boot.loader.launch.JarLauncher` | **`java -jar` 原样不变** |
+| classpath | 靠当前工作目录 | 靠 jar 自身位置（MANIFEST 的 `Class-Path`） |
+| 额外风险 | 包名在 Boot 3.2 挪过位置；`JAVA_OPTS` 里若有 `-cp` 会冲突 | 无 |
 
-所以 `Dockerfile` 里 **jar 必须 COPY 在最后**。日常迭代只有 113 MB 的层需要
-重新构建和传输，561 MB 的 wz 层原封不动 —— 这是用镜像仓库而非 `docker save`
-的最大收益（后者每次都是全量约 900 MB）。改这个文件时别打乱顺序。
+不加 `--launcher` 时提取出来的 `BeiDou.jar`，MANIFEST 是：
+
+```
+Main-Class: org.gms.ServerApplication
+Class-Path: lib/spring-boot-3.2.3.jar lib/jakarta.annotation-api-2.1.1.jar ...
+```
+
+`Class-Path` 相对 jar 自身位置解析，所以只要 `BeiDou.jar` 和 `lib/` 落在同一层目录
+（都 COPY 到 `/opt/server/`），启动命令一个字都不用改。收益完全相同，风险却少一大截。
+这也是 Spring Boot 3.3 文档推荐的默认展开方式。
+
+##### 另外两个坑
+
+⚠️ **`--destination` 不能指向 jar 所在目录**：目标目录非空会直接报
+`already exists and is not empty` 让构建失败。所以 jar 放 `/build`、拆到 `/extract`。
+
+⚠️ **`spring-boot-loader/` 和 `snapshot-dependencies/` 在本项目是空的，但必须照拷**。
+哪天真加了 SNAPSHOT 依赖，漏掉那层就是运行时缺 jar，而且要到启动才炸。
+
+#### 9.2.2 时间戳归一化：让层 digest 只由内容决定
+
+拆完分层还有一个隐藏问题：**「依赖层只在改 pom 时才重传」这句话，
+在没有时间戳归一化时并不成立**。
+
+BuildKit 打层 tar 时，条目顺序确定、uid/gid 固定、mode 来自源文件，这些都稳定；
+唯一的变量是 **mtime，它原样写进 tar**。而本项目有两处 mtime 会无谓地变：
+
+| 位置 | mtime 来自 | 实测 |
+|---|---|---|
+| `dependencies/lib/` **这个目录** | 解压时刻 | 2026-08-21 16:13 |
+| `lib/` 里那 101 个 jar 文件 | 上游发布时间（内容推导，稳定） | 如 commons-lang3 是 2023-05-20 |
+| `wz/`、`scripts/` 等源文件 | `actions/checkout` 的检出时刻 | 每次构建都不同 |
+
+注意第一行：**依赖文件全都是稳的，唯独 `lib/` 这个目录条目不稳**——
+一个目录条目就足以让整层 65 MB 的 digest 变掉。
+
+平时看不出来，是因为**构建缓存命中时根本不重打 tar**，直接复用上次那个 blob。
+`COPY` 的缓存键是对源文件做内容校验和、不含 mtime，所以内容没变就命中。
+但一旦 GHA 缓存被驱逐（10 GB 上限 / 7 天回收），COPY 真正重跑，
+新鲜的 mtime 就进了 tar，于是出现「内容一个字节没改，却重传 30-65 MB」。
+
+解法是让 BuildKit 把所有层里的时间戳改写成一个固定值：
+
+```yaml
+env:
+  SOURCE_DATE_EPOCH: 0          # ⚠️ 必须是常量，绝不能用提交时间或构建时间
+
+      - uses: docker/build-push-action@v6
+        with:
+          outputs: type=image,push=true,rewrite-timestamp=true   # 取代 push: true
+```
+
+需要 BuildKit ≥ v0.13（`setup-buildx-action` 装的版本早已满足）。
+加上之后每层 digest 纯粹由内容决定，wz 层也一并免疫缓存驱逐。
+
+⚠️ **`SOURCE_DATE_EPOCH` 用提交时间会比不加更糟**——那样每次提交所有层的 mtime 全变，
+每次都是全量重传。必须钉死成常量。
+
+⚠️ **副作用**：镜像的 `created` 字段和容器内文件 mtime 都变成 1970。
+所以**别再用 `docker images` 的 `CreatedSince` 判断线上跑的是哪个构建**，改看短 sha 标签。
+（前端静态资源不受影响：它们在 jar 里面，`Last-Modified` 取自 jar 条目而非文件系统。）
+
+#### 9.2.3 怎么验证分层真的省了
+
+**层数不是验收标准**——层数只证明拆开了，证明不了省流量。真正的标准是 digest：
+
+1. **日常有效性**：连续推两次只改 Java 代码的构建，`docker manifest inspect` 对比两个
+   短 sha 标签的层清单，**预期只有 application 层的 digest 不同**，依赖层一致。
+2. **缓存灾难恢复**：同一个提交，用全新的 cache scope（或干脆禁用缓存）构建两次，
+   确认依赖层 digest 仍然相同。这一档才真正验证 9.2.2 的归一化生效了。
+
+另外，层数可能是 14 而不是 15：`snapshot-dependencies` 是空目录，
+BuildKit 对空 `COPY` 可能不产出层。看到 14 不要误判为失败。
 
 ### 9.3 首次部署
 
