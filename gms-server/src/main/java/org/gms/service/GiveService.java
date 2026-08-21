@@ -24,11 +24,15 @@ import org.springframework.stereotype.Service;
 
 
 import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 
 @Service
 @Slf4j
 public class GiveService {
+    private static final long MINUTES_PER_HOUR = 60L;
+    private static final long MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR;
+
     @Autowired
     CharacterService characterService;
 
@@ -59,7 +63,7 @@ public class GiveService {
                 giveExpAllOnlineChr(submitData.getQuantity());
                 break;
             case 5: // item
-                giveItemAllOnlineChr(submitData.getId(), Short.parseShort(submitData.getQuantity().toString()));
+                giveItemAllOnlineChr(submitData);
                 break;
             case 6: // equip
                 giveEquipAllOnlineChr(submitData);
@@ -110,7 +114,7 @@ public class GiveService {
                 giveExpChr(chr, submitData.getQuantity());
                 break;
             case 5: // item
-                giveItemChr(chr, submitData.getId(), Short.parseShort(submitData.getQuantity().toString()));
+                giveItemChr(chr, submitData);
                 break;
             case 6: // equip
                 giveEquipChr(chr, submitData);
@@ -189,9 +193,11 @@ public class GiveService {
         log.info(I18nUtil.getLogMessage("Give.Exp.Chr.info1", chr.getId(), chr.getName(), quantity));
     }
 
-    private void giveItemAllOnlineChr(int itemId, short quantity) {
+    private void giveItemAllOnlineChr(GiveResourceReqDTO submitData) {
         ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
+        final int itemId = submitData.getId();
+        final short quantity = Short.parseShort(submitData.getQuantity().toString());
         String itemName = ii.getName(itemId);
         if (itemName == null) {
             throw new BizException(I18nUtil.getExceptionMessage("ITEM_NOT_FOUND"));
@@ -200,40 +206,34 @@ public class GiveService {
             throw new BizException(I18nUtil.getExceptionMessage("ONLY_SUPPORT_GIVE_ITEM"));
         }
 
-        boolean isPet = ItemConstants.isPet(itemId);
-
-        long expiration;
-        int petId;
-        if (isPet) {
-            long days = Math.max(1, quantity);
-            expiration = System.currentTimeMillis() + DAYS.toMillis(days);
-            petId = Pet.createPet(itemId);
-        } else {
-            expiration = 0;
-            petId = 0;
-        }
+        final boolean isPet = ItemConstants.isPet(itemId);
+        final Long expireMinutes = normalizeExpireMinutes(submitData.getExpire());
 
         Server.getInstance().getWorlds().forEach(world -> world.getPlayerStorage().getAllCharacters().forEach(chr -> {
             if (isPet) {
-                InventoryManipulator.addById(chr.getClient(), itemId, quantity, null, petId, expiration);
-                chr.message(I18nUtil.getMessage("Give.Pet.All", quantity, itemName));
+                // petId 必须每人单独生成，否则所有人的宠物指向 pets 表同一行
+                InventoryManipulator.addById(chr.getClient(), itemId, quantity, null, Pet.createPet(itemId),
+                        petExpiration(expireMinutes, quantity));
+                chr.message(withExpireMessage(I18nUtil.getMessage("Give.Pet.All", quantity, itemName), expireMinutes));
             } else {
-                InventoryManipulator.addById(chr.getClient(), itemId, quantity, null, -1, (short) 0, -1);
-                chr.message(I18nUtil.getMessage("Give.Item.All", quantity, itemName));
+                giveNormalItem(chr, itemId, quantity, expireMinutes);
+                chr.message(withExpireMessage(I18nUtil.getMessage("Give.Item.All", quantity, itemName), expireMinutes));
             }
         }));
 
         if (isPet) {
-            log.info(I18nUtil.getLogMessage("Give.Pet.All.info1", quantity, itemId, itemName));
+            log.info(withExpireLog(I18nUtil.getLogMessage("Give.Pet.All.info1", quantity, itemId, itemName), expireMinutes));
         } else {
-            log.info(I18nUtil.getLogMessage("Give.Item.All.info1", quantity, itemId, itemName));
+            log.info(withExpireLog(I18nUtil.getLogMessage("Give.Item.All.info1", quantity, itemId, itemName), expireMinutes));
         }
 
     }
 
-    private void giveItemChr(Character chr, int itemId, short quantity) {
+    private void giveItemChr(Character chr, GiveResourceReqDTO submitData) {
         ItemInformationProvider ii = ItemInformationProvider.getInstance();
 
+        int itemId = submitData.getId();
+        short quantity = Short.parseShort(submitData.getQuantity().toString());
         String itemName = ii.getName(itemId);
         if (itemName == null) {
             throw new BizException(I18nUtil.getExceptionMessage("ITEM_NOT_FOUND"));
@@ -243,28 +243,91 @@ public class GiveService {
         }
 
         boolean isPet = ItemConstants.isPet(itemId);
+        Long expireMinutes = normalizeExpireMinutes(submitData.getExpire());
 
-        long expiration = 0;
-        int petId = 0;
         if (isPet) {
-            long days = Math.max(1, quantity);
-            expiration = System.currentTimeMillis() + DAYS.toMillis(days);
-            petId = Pet.createPet(itemId);
+            InventoryManipulator.addById(chr.getClient(), itemId, quantity, null, Pet.createPet(itemId),
+                    petExpiration(expireMinutes, quantity));
+            chr.message(withExpireMessage(I18nUtil.getMessage("Give.Pet.Chr", quantity, itemName), expireMinutes));
+        } else {
+            giveNormalItem(chr, itemId, quantity, expireMinutes);
+            chr.message(withExpireMessage(I18nUtil.getMessage("Give.Item.Chr", quantity, itemName), expireMinutes));
         }
 
         if (isPet) {
-            InventoryManipulator.addById(chr.getClient(), itemId, quantity, null, petId, expiration);
-            chr.message(I18nUtil.getMessage("Give.Pet.Chr", quantity, itemName));
+            log.info(withExpireLog(I18nUtil.getLogMessage("Give.Pet.Chr.info1", chr.getId(), chr.getName(), quantity, itemId, itemName), expireMinutes));
         } else {
+            log.info(withExpireLog(I18nUtil.getLogMessage("Give.Item.Chr.info1", chr.getId(), chr.getName(), quantity, itemId, itemName), expireMinutes));
+        }
+    }
+
+    /**
+     * 发放非宠物道具。带有效期时必须新开格子，否则背包里已有的同 ID 永久堆叠会被一起打上有效期。
+     */
+    private void giveNormalItem(Character chr, int itemId, short quantity, Long expireMinutes) {
+        if (expireMinutes == null) {
             InventoryManipulator.addById(chr.getClient(), itemId, quantity, null, -1, (short) 0, -1);
-            chr.message(I18nUtil.getMessage("Give.Item.Chr", quantity, itemName));
-        }
-
-        if (isPet) {
-            log.info(I18nUtil.getLogMessage("Give.Pet.Chr.info1", chr.getId(), chr.getName(), quantity, itemId, itemName));
         } else {
-            log.info(I18nUtil.getLogMessage("Give.Item.Chr.info1", chr.getId(), chr.getName(), quantity, itemId, itemName));
+            InventoryManipulator.addByIdNoStack(chr.getClient(), itemId, quantity, toExpirationTime(expireMinutes));
         }
+    }
+
+    /**
+     * 宠物到期时间：显式填了有效期就以有效期为准，否则沿用「数量即天数」的历史约定。
+     */
+    private long petExpiration(Long expireMinutes, short quantity) {
+        if (expireMinutes != null) {
+            return toExpirationTime(expireMinutes);
+        }
+        return System.currentTimeMillis() + DAYS.toMillis(Math.max(1, quantity));
+    }
+
+    /**
+     * 前端有效期以分钟为单位，留空或非正数视为永久。
+     *
+     * @return 有效分钟数，永久时返回 null
+     */
+    private Long normalizeExpireMinutes(Long expireMinutes) {
+        return expireMinutes == null || expireMinutes <= 0 ? null : expireMinutes;
+    }
+
+    private long toExpirationTime(long expireMinutes) {
+        return System.currentTimeMillis() + MINUTES.toMillis(expireMinutes);
+    }
+
+    /**
+     * 自定义装备日志里的有效期分钟数。转字符串既能避免千分符，也让「永久」统一记成 -1 而不是 null。
+     */
+    private String expireLogValue(Long expireMinutes) {
+        Long minutes = normalizeExpireMinutes(expireMinutes);
+        return minutes == null ? "-1" : String.valueOf(minutes);
+    }
+
+    /**
+     * 给发放提示补上有效期说明，永久时原样返回。分钟数先折算成最大的整单位（天/小时/分钟）再展示。
+     */
+    private String withExpireMessage(String message, Long expireMinutes) {
+        if (expireMinutes == null) {
+            return message;
+        }
+        String duration;
+        if (expireMinutes % MINUTES_PER_DAY == 0) {
+            duration = I18nUtil.getMessage("Give.Expire.Day", expireMinutes / MINUTES_PER_DAY);
+        } else if (expireMinutes % MINUTES_PER_HOUR == 0) {
+            duration = I18nUtil.getMessage("Give.Expire.Hour", expireMinutes / MINUTES_PER_HOUR);
+        } else {
+            duration = I18nUtil.getMessage("Give.Expire.Minute", expireMinutes);
+        }
+        return I18nUtil.getMessage("Give.Expire.Wrap", message, duration);
+    }
+
+    /**
+     * 给发放日志补上有效期说明，永久时原样返回。日志统一用分钟，便于排查。
+     */
+    private String withExpireLog(String logMessage, Long expireMinutes) {
+        // 转字符串再传，避免 MessageFormat 给分钟数加上千分符
+        return expireMinutes == null ? logMessage
+                : I18nUtil.getLogMessage("Give.Expire.Wrap.info1", logMessage, String.valueOf(expireMinutes));
     }
 
     private void giveEquipAllOnlineChr(GiveResourceReqDTO submitData) {
@@ -298,7 +361,8 @@ public class GiveService {
                     submitData.getUpgradeSlot(),
                     submitData.getExpire()
             );
-            chr.message(I18nUtil.getMessage("Give.Equip.All", submitData.getId().toString(), itemName));
+            chr.message(withExpireMessage(I18nUtil.getMessage("Give.Equip.All", submitData.getId().toString(), itemName),
+                    normalizeExpireMinutes(submitData.getExpire())));
         }));
         log.info(I18nUtil.getLogMessage("Give.Equip.All.info1",
                 submitData.getId(),
@@ -319,7 +383,7 @@ public class GiveService {
                 submitData.getSpeed(),
                 submitData.getJump(),
                 submitData.getUpgradeSlot(),
-                submitData.getExpire()
+                expireLogValue(submitData.getExpire())
         ));
     }
 
@@ -354,7 +418,8 @@ public class GiveService {
                 submitData.getUpgradeSlot(),
                 submitData.getExpire()
         );
-        chr.message(I18nUtil.getMessage("Give.Equip.Chr", submitData.getId().toString(), itemName));
+        chr.message(withExpireMessage(I18nUtil.getMessage("Give.Equip.Chr", submitData.getId().toString(), itemName),
+                normalizeExpireMinutes(submitData.getExpire())));
         log.info(I18nUtil.getLogMessage("Give.Equip.Chr.info1",
                 submitData.getId(),
                 itemName,
@@ -374,7 +439,7 @@ public class GiveService {
                 submitData.getSpeed(),
                 submitData.getJump(),
                 submitData.getUpgradeSlot(),
-                submitData.getExpire(),
+                expireLogValue(submitData.getExpire()),
                 chr.getId(),
                 chr.getName()
         ));

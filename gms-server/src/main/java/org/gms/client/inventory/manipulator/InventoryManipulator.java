@@ -83,6 +83,52 @@ public class InventoryManipulator {
         }
     }
 
+    /**
+     * 强制占用新格子添加物品，不与背包中已有的同 ID 堆叠合并。
+     * 带有效期的物品必须走这里：addById 的合并分支会把新的有效期覆盖到玩家原有的永久堆叠上。
+     *
+     * @param expiration 到期时间戳（毫秒），-1 表示永久
+     */
+    public static boolean addByIdNoStack(Client c, int itemId, short quantity, long expiration) {
+        Character chr = c.getPlayer();
+        InventoryType type = ItemConstants.getInventoryType(itemId);
+
+        Inventory inv = chr.getInventory(type);
+        inv.lockInventory();
+        try {
+            return addByIdNoStackInternal(c, chr, inv, itemId, quantity, expiration);
+        } finally {
+            inv.unlockInventory();
+        }
+    }
+
+    private static boolean addByIdNoStackInternal(Client c, Character chr, Inventory inv, int itemId, short quantity, long expiration) {
+        short slotMax = ItemInformationProvider.getInstance().getSlotMax(c, itemId);
+        short remaining = quantity;
+        while (remaining > 0) {
+            short newQ = (short) Math.min(remaining, slotMax);
+            if (newQ == 0) {
+                c.sendPacket(PacketCreator.enableActions());
+                return false;
+            }
+            remaining -= newQ;
+
+            Item nItem = new Item(itemId, (short) 0, newQ);
+            nItem.setExpiration(expiration);
+            short newSlot = inv.addItem(nItem);
+            if (newSlot == -1) {
+                c.sendPacket(PacketCreator.getInventoryFull());
+                c.sendPacket(PacketCreator.getShowInventoryFull());
+                return false;
+            }
+            c.sendPacket(PacketCreator.modifyInventory(true, Collections.singletonList(new ModifyInventory(0, nItem))));
+            if (InventoryManipulator.isSandboxItem(nItem)) {
+                chr.setHasSandboxItem();
+            }
+        }
+        return true;
+    }
+
     private static boolean addByIdInternal(Client c, Character chr, InventoryType type, Inventory inv, int itemId, short quantity, String owner, int petid, short flag, long expiration) {
         ItemInformationProvider ii = ItemInformationProvider.getInstance();
         if (!type.equals(InventoryType.EQUIP)) {

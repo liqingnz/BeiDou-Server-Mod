@@ -305,13 +305,22 @@
           <a-input-number v-model="formData.upgradeSlot" />
         </a-form-item>
         <a-form-item
-          v-if="formData.type === 6"
+          v-if="formData.type === 5 || formData.type === 6"
           :label="$t('account.player.form.expire')"
+          :extra="$t('account.player.form.expire.tip')"
         >
-          <a-input-number
-            v-model="formData.expire"
-            :placeholder="$t('account.player.form.expire.placeholder')"
-          />
+          <a-space>
+            <a-input-number
+              v-model="expireAmount"
+              :min="0"
+              :placeholder="$t('account.player.form.expire.placeholder')"
+            />
+            <a-select
+              v-model="expireUnit"
+              :options="expireUnitOptions"
+              style="width: 90px"
+            />
+          </a-space>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -381,6 +390,24 @@
     expire: undefined,
   });
 
+  // 有效期在界面上拆成「数值 + 单位」两个控件，提交时统一折算成分钟发给后端
+  const MINUTES_PER_HOUR = 60;
+  const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR;
+  const expireAmount = ref<number | undefined>(undefined);
+  const expireUnit = ref(MINUTES_PER_DAY);
+  const expireUnitOptions = [
+    { value: MINUTES_PER_DAY, label: t('account.player.form.expire.unit.day') },
+    {
+      value: MINUTES_PER_HOUR,
+      label: t('account.player.form.expire.unit.hour'),
+    },
+    { value: 1, label: t('account.player.form.expire.unit.minute') },
+  ];
+  const resetExpire = () => {
+    expireAmount.value = undefined;
+    expireUnit.value = MINUTES_PER_DAY;
+  };
+
   const typeFieldNames = { value: 'value', label: 'label' };
   const typeOptions = ref([{ value: 0, label: t('account.player.nxCredit') }]);
 
@@ -442,6 +469,7 @@
     formData.value.playerId = 0;
     formData.value.player = undefined;
     formData.value.type = 5;
+    resetExpire();
     giveFormVisible.value = true;
   };
 
@@ -490,13 +518,20 @@
       upgradeSlot: undefined,
       expire: undefined,
     };
+    resetExpire();
     giveFormVisible.value = true;
   };
 
   const submitClick = async () => {
     setLoading(true);
     try {
-      await givePlayerSrc(formData.value);
+      await givePlayerSrc({
+        ...formData.value,
+        // 留空 / 0 表示永久有效
+        expire: expireAmount.value
+          ? expireAmount.value * expireUnit.value
+          : undefined,
+      });
       Message.success(t('message.success'));
     } catch {
       // 错误提示由 axios 响应拦截器统一弹出，此处只保证弹窗不关闭
@@ -554,7 +589,7 @@
       formData.value.speed = data.speed;
       formData.value.jump = data.jump;
       formData.value.upgradeSlot = data.upgradeSlot;
-      formData.value.expire = data.expire;
+      // 装备模板的 expire 恒为 -1（永久），回填只会让「有效期」框显示 -1，不回填
     } finally {
       setLoading(false);
     }

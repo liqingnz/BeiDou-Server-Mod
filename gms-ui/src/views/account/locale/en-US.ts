@@ -127,7 +127,12 @@ export default {
   'account.player.form.jump': 'Jump',
   'account.player.form.upgradeSlot': 'Upgrade Slot',
   'account.player.form.expire': 'Expire',
-  'account.player.form.expire.placeholder': 'minute',
+  'account.player.form.expire.placeholder': 'Permanent if empty',
+  'account.player.form.expire.tip':
+    'Leave empty or 0 for permanent; it is removed from the inventory once it expires.',
+  'account.player.form.expire.unit.minute': 'Minute',
+  'account.player.form.expire.unit.hour': 'Hour',
+  'account.player.form.expire.unit.day': 'Day',
   'account.player.form.rate.required': 'The rate cannot be empty.',
   'account.player.form.rate.type': 'The rate must be an integer.',
 

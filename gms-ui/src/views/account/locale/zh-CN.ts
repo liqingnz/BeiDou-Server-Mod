@@ -124,7 +124,12 @@ export default {
   'account.player.form.jump': '跳跃',
   'account.player.form.upgradeSlot': '升级次数',
   'account.player.form.expire': '有效期',
-  'account.player.form.expire.placeholder': '单位分钟',
+  'account.player.form.expire.placeholder': '留空为永久',
+  'account.player.form.expire.tip':
+    '留空或填 0 表示永久有效；到期后自动从背包消失',
+  'account.player.form.expire.unit.minute': '分钟',
+  'account.player.form.expire.unit.hour': '小时',
+  'account.player.form.expire.unit.day': '天',
   'account.player.form.rate.required': '倍率不能为空',
   'account.player.form.rate.type': '倍率只能是正整数',
 
