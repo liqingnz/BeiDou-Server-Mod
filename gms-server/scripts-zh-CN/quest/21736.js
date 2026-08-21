@@ -33,8 +33,9 @@ function start(mode, type, selection) {
             status++;
         } else {
             status--;
-        
-        if(status == 0) {
+        }
+
+        if (status == 0) {
             qm.sendNext("好久不见了，英雄。这段时间等级上升很快嘛？看来你确实很拼命地在修炼啊。很勤奋。有点英雄的架势了。利琳也会为你开心的吧？");
         } else if(status == 1) {
             qm.sendNextPrev("对了，现在不是说这些的时候。我觉得光在金银岛搜集情报似乎情报面太窄，为了拓宽情报面，我已经开始在奥西利亚大陆开展搜索。一开始就选择了天空之城，没想到那里果然有问题。");
