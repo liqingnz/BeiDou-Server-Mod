@@ -574,9 +574,42 @@ env:
    短 sha 标签的层清单，**预期只有 application 层的 digest 不同**，依赖层一致。
 2. **缓存灾难恢复**：同一个提交，用全新的 cache scope（或干脆禁用缓存）构建两次，
    确认依赖层 digest 仍然相同。这一档才真正验证 9.2.2 的归一化生效了。
+   ——**这一档当时没做**：若归一化失效，后果只是偶尔多下约 100 MB（走镜像站约 11 秒），
+   为此专门造两次构建不划算。留到自然出现缓存驱逐时再观察即可。
 
-另外，层数可能是 14 而不是 15：`snapshot-dependencies` 是空目录，
-BuildKit 对空 `COPY` 可能不产出层。看到 14 不要误判为失败。
+##### 首次分层构建的实测结果（2026-08-21，`e5d0465` → `74b9774`）
+
+层数 **12 → 15**，jar 那一层拆开的效果：
+
+| | 旧构建 | 新构建 |
+|---|---|---|
+| 整个 fat jar | 72.63 MB | — |
+| dependencies（`lib/` 101 个 jar） | — | **67.67 MB** |
+| spring-boot-loader / snapshot-dependencies | — | 0 MB ×2 |
+| application（`BeiDou.jar`） | — | **4.81 MB** |
+
+**日常改代码的传输量 72.63 MB → 4.81 MB，15 倍。**
+
+三个当时才搞清楚的点：
+
+- **一次性代价是 109 MB，不是原先估的 180 MB**。`rewrite-timestamp` **只改写本次构建
+  产生的层，不动从基础镜像继承来的层**，所以 alpine + apk + JDK 那三层共 70.5 MB
+  digest 原样保留、直接复用。
+- **两个空层的 digest 完全相同**（`spring-boot-loader` 和 `snapshot-dependencies` 都是空的），
+  在仓库里去重成同一个 blob，零成本。所以层数是 15 不是 14——BuildKit 对空 `COPY`
+  照常产层。
+- **`SOURCE_DATE_EPOCH` 生效的直接证据**：镜像 config 的 `created` 字段变成
+  `1970-01-01T00:00:00Z`（旧构建是真实时间）。想确认归一化有没有开，查这个字段最快。
+
+容器内最终布局（`java -jar` 靠 MANIFEST 的 `Class-Path` 找到 `lib/`，启动链正常）：
+
+```
+/opt/server/
+├── BeiDou.jar          ← application 层
+├── lib/                ← dependencies 层，101 个 jar
+├── wz/  wz-zh-CN/  scripts/  scripts-zh-CN/
+└── logs/
+```
 
 ### 9.3 首次部署
 
@@ -813,10 +846,35 @@ ssh <服务器> 'tail -f /opt/beidou/upgrade.log'
 实测这条 ssh 链路会随机 `Connection reset by peer`（这次断了两回），
 前台跑的话断在「停服」和「起服」之间，就是裸奔的停机状态。
 
-#### 本次结果
+#### 升级前：怎么确认真的没人在线
 
-停机 **81 秒**（停应用 → 启动完成，其中服务端自身启动 33.0 秒），
-Flyway 重跑 4 条 repeatable 迁移、2.75 秒无错。
+两个看起来能用、其实都不可信的办法：
+
+⚠️ **查 `accounts.loggedin > 0` 不可信**。这个标记在异常断开时不会被清，会一直留着。
+2026-08-21 那次实测有 7 条 `loggedin > 0`，实际在线人数是 **0**。
+（副作用：这些账号下次登录可能被判「已在线」而进不来，需要手工 UPDATE 清掉。）
+
+⚠️ **在宿主机上 `ss` 查 7575-7577 也不可信**。容器端口是 DNAT 进去的，
+宿主机的 socket 表里根本看不到那些连接，永远显示 0。
+
+正确做法是**进容器读 `/proc/net/tcp`**（不依赖容器里装没装 `ss`/`netstat`）：
+
+```bash
+ssh <服务器> 'docker exec beidou-server sh -c "cat /proc/net/tcp" | awk "NR>1 {split(\$2,a,\":\"); p=strtonum(\"0x\" a[2]); if ((p==7575||p==7576||p==7577||p==8484) && \$4==\"01\") n++} END {print n+0}"'
+```
+
+`$4=="01"` 是 ESTABLISHED，`0A` 是 LISTEN。查监听状态要连 `/proc/net/tcp6` 一起看——
+Netty 绑的是 IPv6 双栈，监听套接字只出现在 tcp6 里。
+
+#### 两次实测结果
+
+| 日期 | 版本 | 拉取 | 停机 | 备注 |
+|---|---|---|---|---|
+| 2026-08-20 | `e5d0465` | 109 MB | **81 秒** | 首次走镜像站，Flyway 重跑 4 条 repeatable |
+| 2026-08-21 | `74b9774` | 109 MB / 52 秒 | **79 秒** | 切分层 jar 布局，Flyway 重跑 1 条 |
+
+停机的构成基本固定：停应用存档约 8 秒 + 停库和备份约 14 秒 + 服务端启动 30-33 秒。
+**拉镜像那段不算在内**（先拉后停，旧服还在跑）。
 
 #### 长期解法
 
