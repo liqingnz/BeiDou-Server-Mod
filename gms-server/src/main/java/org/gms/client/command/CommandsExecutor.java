@@ -255,6 +255,7 @@ public class CommandsExecutor {
         addCommand("heal", 2, HealCommand.class);
         addCommand("item", 2, ItemCommand.class);
         addCommand("drop", 2, ItemDropCommand.class);
+        addCommand("dropto", 2, ItemDropToCommand.class);
         addCommand("level", 2, LevelCommand.class);
         addCommand("levelpro", 2, LevelProCommand.class);
         addCommand("setslot", 2, SetSlotCommand.class);

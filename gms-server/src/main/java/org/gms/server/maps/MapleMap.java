@@ -1080,6 +1080,12 @@ public class MapleMap {
                     continue;
                 }
 
+                // 独享掉落不参与组队所有权转移：否则组队变动时下面那轮 updateMapItemObject
+                // 会把只该给一个人看的物品补发给全体队员
+                if (mdrop.getExclusiveOwnerId() > 0) {
+                    continue;
+                }
+
                 if (mdrop.getOwnerIdLocked() == charid) {
                     mdrop.setPartyOwnerIdLocked(partyid);
 
@@ -1155,7 +1161,7 @@ public class MapleMap {
         spawnAndAddRangedMapObject(mdrop, c -> {
             Character chr1 = c.getPlayer();
 
-            if (chr1.needQuestItem(questid, idrop.getItemId())) {
+            if (mdrop.isVisibleTo(chr1)) {
                 mdrop.lockItem();
                 try {
                     c.sendPacket(PacketCreator.dropItemFromMapObject(chr1, mdrop, dropper.getPosition(), dropPos, (byte) 1));
@@ -2223,6 +2229,70 @@ public class MapleMap {
 
         instantiateItemDrop(mdrop);
         activateItemReactors(mdrop, owner.getClient());
+    }
+
+    /**
+     * 生成一个「独享掉落」：只有 {@code owner} 能看见，也只有他能拾取。
+     *
+     * <p>与 {@link #spawnItemDrop} 的两处关键区别：
+     * <ol>
+     *   <li>不调 {@code broadcastItemDropMessage}——那个 4 参重载是<b>全图</b>广播，
+     *       会把掉落发给地图上每一个人，独享掉落必须绕开；</li>
+     *   <li>{@code spawnAndAddRangedMapObject} 的逐客户端回调里按
+     *       {@link MapItem#isVisibleTo(Character)} 决定发不发包，与任务道具走同一条过滤路径。</li>
+     * </ol>
+     * 玩家事后进入视野时的补发由 {@link MapItem#sendSpawnData} 处理，判据同样是 isVisibleTo。
+     *
+     * <p>不触发 {@link #activateItemReactors}：让一件只有 A 看得见的物品去点燃全图可见的
+     * 反应堆，对其他人是凭空触发，语义上说不通。
+     *
+     * @param dropper 掉落动画的起点对象（怪物、反应堆或角色本人）
+     * @param owner   独享者，同时也是掉落物的 owner
+     * @return 生成的掉落物；地图禁止掉落（FieldLimit.DROP_LIMIT）时返回 null
+     */
+    public final MapItem spawnExclusiveItemDrop(final MapObject dropper, final Character owner, final Item item, Point pos) {
+        if (FieldLimit.DROP_LIMIT.check(this.getFieldLimit())) {
+            this.disappearingItemDrop(dropper, owner, item, pos);
+            return null;
+        }
+
+        final Point droppos = calcDropPos(pos, pos);
+        final MapItem mdrop = new MapItem(item, droppos, dropper, owner, owner.getClient(), (byte) 0, false);
+        mdrop.setExclusiveOwnerId(owner.getId());
+        mdrop.setDropTime(Server.getInstance().getCurrentTime());
+
+        spawnAndAddRangedMapObject(mdrop, c -> {
+            if (!mdrop.isVisibleTo(c.getPlayer())) {
+                return;
+            }
+
+            mdrop.lockItem();
+            try {
+                c.sendPacket(PacketCreator.dropItemFromMapObject(c.getPlayer(), mdrop, dropper.getPosition(), droppos, (byte) 1));
+            } finally {
+                mdrop.unlockItem();
+            }
+        }, null);
+
+        instantiateItemDrop(mdrop);
+        return mdrop;
+    }
+
+    /**
+     * {@link #spawnExclusiveItemDrop(MapObject, Character, Item, Point)} 的便捷重载：
+     * 直接给物品 id，装备自动走 randomizeStats 随机属性。供脚本与指令调用。
+     */
+    public final MapItem spawnExclusiveItemDrop(final MapObject dropper, final Character owner, final int itemId, final short quantity, Point pos) {
+        ItemInformationProvider ii = ItemInformationProvider.getInstance();
+
+        Item drop;
+        if (ItemConstants.getInventoryType(itemId) == InventoryType.EQUIP) {
+            drop = ii.randomizeStats((Equip) ii.getEquipById(itemId));
+        } else {
+            drop = new Item(itemId, (short) 0, quantity);
+        }
+
+        return spawnExclusiveItemDrop(dropper, owner, drop, pos);
     }
 
     public final void spawnItemDropList(List<Integer> list, final MapObject dropper, final Character owner, Point pos) {

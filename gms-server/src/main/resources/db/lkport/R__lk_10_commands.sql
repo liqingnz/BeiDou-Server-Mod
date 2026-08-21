@@ -167,3 +167,18 @@ INSERT INTO `command_info`(`syntax`, `level`, `enabled`, `clazz`, `default_level
     ('whodrops',      0, 1, 'WhoDropsCommand',      0),
     ('droptable',     0, 1, 'DropTableCommand',     0),
     ('whatdropsfrom', 0, 1, 'WhatDropsFromCommand', 0);
+
+-- ---------------------------------------------------------------------------
+-- @dropto 定向独享掉落
+-- ---------------------------------------------------------------------------
+-- !dropto <角色名或角色id> <物品id> [数量] [有效期分钟数]
+--
+-- !drop 的定向版：物品掉在目标角色自己脚下（不限地图/频道），且只有他一个人
+-- 看得见、也只有他能捡——同图其他玩家屏幕上什么都没有。
+-- 实现见 MapleMap.spawnExclusiveItemDrop / MapItem.exclusiveOwnerId：地面掉落
+-- 本来就是逐客户端单独发包的，独享掉落只是把「发不发」的判据从任务道具换成角色 id。
+--
+-- 与 drop 同级 gm2。default_level 必须与 java 类所在的包一致（gm2）。
+INSERT INTO `command_info`(`syntax`, `level`, `enabled`, `clazz`, `default_level`)
+SELECT 'dropto', 2, 1, 'ItemDropToCommand', 2
+WHERE NOT EXISTS (SELECT 1 FROM `command_info` WHERE `syntax` = 'dropto');

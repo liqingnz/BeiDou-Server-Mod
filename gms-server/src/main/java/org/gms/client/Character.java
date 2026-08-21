@@ -2096,7 +2096,9 @@ public class Character extends AbstractCharacterObject {
                         return;
                     }
 
-                    if (!this.needQuestItem(mapitem.getQuest(), mapitem.getItemId())) {
+                    // 与 spawn 侧同一判据：看不见的东西就捡不到。服务端只是不发 spawn 包，
+                    // oid 本身没隐藏，外挂遍历 oid 照样能发拾取请求，这里是第二道闸
+                    if (!mapitem.isVisibleTo(this)) {
                         sendPacket(PacketCreator.showItemUnavailable());
                         enableActions();
                         return;

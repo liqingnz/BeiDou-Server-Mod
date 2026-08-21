@@ -36,6 +36,15 @@ public class MapItem extends AbstractMapObject {
     protected Item item;
     protected MapObject dropper;
     protected int character_ownerid, party_ownerid, meso, questid = -1;
+    /**
+     * 独享掉落的角色 id。&gt;0 时本掉落只对该角色可见、也只有他能拾取，
+     * 且不随 {@link #hasExpiredOwnershipTime()} 转为 FFA。-1 表示普通掉落。
+     * <p>
+     * 与 {@code questid} 是同一套「逐客户端过滤」机制的两个判据，合并在
+     * {@link #isVisibleTo(Character)} 里：服务端本来就是对每个在场玩家单独
+     * 发 DROP_ITEM_FROM_MAPOBJECT 的，不发包即不可见。
+     */
+    protected int exclusiveOwnerId = -1;
     protected byte type;
     protected boolean pickedUp = false, playerDrop, partyDrop;
     protected long dropTime;
@@ -87,6 +96,25 @@ public class MapItem extends AbstractMapObject {
 
     public final int getQuest() {
         return questid;
+    }
+
+    public final int getExclusiveOwnerId() {
+        return exclusiveOwnerId;
+    }
+
+    public final void setExclusiveOwnerId(int chrId) {
+        this.exclusiveOwnerId = chrId;
+    }
+
+    /**
+     * 本掉落对 {@code chr} 是否可见——合并「独享掉落」与既有的「任务道具」两道过滤。
+     * 所有决定发不发 spawn 包的地方都该走这里，不要再直接调 {@code needQuestItem}。
+     */
+    public final boolean isVisibleTo(Character chr) {
+        if (exclusiveOwnerId > 0 && exclusiveOwnerId != chr.getId()) {
+            return false;
+        }
+        return chr.needQuestItem(questid, getItemId());
     }
 
     public final int getItemId() {
@@ -158,6 +186,9 @@ public class MapItem extends AbstractMapObject {
     }
 
     public final boolean isFFADrop() {
+        if (exclusiveOwnerId > 0) {   // 独享掉落永不转 FFA，否则 15 秒后别人虽看不见但能猜 oid 捡走
+            return false;
+        }
         return type == 2 || type == 3 || hasExpiredOwnershipTime();
     }
 
@@ -175,6 +206,11 @@ public class MapItem extends AbstractMapObject {
      * 会出现字段撕裂。所有调用方已调整为先加锁再调用。
      */
     public final boolean canBePickedBy(Character chr) {
+        // 独享掉落的判定必须排在最前：character_ownerid <= 0 那条会无条件放行
+        if (exclusiveOwnerId > 0) {
+            return chr.getId() == exclusiveOwnerId;
+        }
+
         if (character_ownerid <= 0 || isFFADrop()) {
             return true;
         }
@@ -247,7 +283,7 @@ public class MapItem extends AbstractMapObject {
     public void sendSpawnData(final Client client) {
         Character chr = client.getPlayer();
 
-        if (chr.needQuestItem(questid, getItemId())) {
+        if (isVisibleTo(chr)) {
             this.lockItem();
             try {
                 client.sendPacket(PacketCreator.dropItemFromMapObject(chr, this, null, getPosition(), (byte) 2));
