@@ -39,7 +39,7 @@ function action(mode, type, selection) {
                 if (status == 0) {
                     cm.sendNext("这太成功了！现在，对于这条路，我相信我们需要每个冒险家职业的人才能通过。");
                 } else if (status == 1) {
-                    cm.sendNext("他们需要运用他们的技能在被称为"Sigils"的东西上。一旦这五个都完成了，我们就可以继续前进。");
+                    cm.sendNext("他们需要运用他们的技能在被称为\"Sigils\"的东西上。一旦这五个都完成了，我们就可以继续前进。");
                     cm.dispose();
                 }
                 break;

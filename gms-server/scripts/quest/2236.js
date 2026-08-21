@@ -34,9 +34,9 @@ function end(mode, type, selection) {
 			qm.forceCompleteQuest();
 		}
 		else {
-			if(qm.haveItem(4032263))｛
+			if(qm.haveItem(4032263)) {
 			  qm.gainItem(4032263, -6);
-			｝
+			}
 			qm.gainItem(4032263, 6);
 
 			qm.sendOk("Oh, not good. I still sense bad omens coming from the interior. Here, take these charms and seal them at the Shaman Rocks. We are counting on you.");

@@ -72,11 +72,7 @@ function action(mode, type, selection) {
             if (selection == 0) {
                 cm.sendStyle("Pick one?", skin);
             } else if (selection == 1 || selection == 5) {
-                for each(var i
-            in
-                selection == 1 ? hair : fhair
-            )
-                pushIfItemExists(hairnew, i);
+                (selection == 1 ? hair : fhair).forEach(i => pushIfItemExists(hairnew, i));
                 cm.sendStyle("Pick one?", hairnew);
             } else if (selection == 2) {
                 var baseHair = parseInt(cm.getPlayer().getHair() / 10) * 10;
@@ -85,11 +81,7 @@ function action(mode, type, selection) {
                 }
                 cm.sendStyle("Pick one?", haircolor);
             } else if (selection == 3 || selection == 6) {
-                for each(var j
-            in
-                selection == 3 ? face : fface
-            )
-                pushIfItemExists(facenew, j);
+                (selection == 3 ? face : fface).forEach(j => pushIfItemExists(facenew, j));
                 cm.sendStyle("Pick one?", facenew);
             } else if (selection == 4) {
                 var baseFace = parseInt(cm.getPlayer().getFace() / 1000) * 1000 + parseInt(cm.getPlayer().getFace() % 100);

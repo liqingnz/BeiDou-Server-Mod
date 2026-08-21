@@ -37,6 +37,7 @@ function start(mode, type, selection) {
             status++;
         } else {
             status--;
+        }
         if (status == 0)
             qm.sendNext("什么？奈哈特派你来的？啊，你一定是个新手。欢迎，欢迎。我叫基库，我的工作是训练和塑造像你这样的孩子成为真正的骑士. 额... 你为什么那样看着我。。。啊，你以前一定没见过皮尤.");
         else if (status == 1)
